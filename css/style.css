@@ -34,9 +34,10 @@ body {
     background: var(--bg);
     color: var(--ink);
     font-family: var(--font-sans);
-    font-weight: 300;
+    font-weight: 400;
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
 }
 
