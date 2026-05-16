@@ -3,8 +3,8 @@
     --bg-soft: #131110;
     --bg-elevated: #1a1816;
     --ink: #f5f1e8;
-    --ink-soft: #b8b0a0;
-    --ink-muted: #6b6358;
+    --ink-soft: #c4bdb0;
+    --ink-muted: #8c8478;
     --gold: #c9a875;
     --gold-bright: #e6c891;
     --gold-deep: #8a6f42;
@@ -125,7 +125,7 @@ svg {
     align-items: center;
     justify-content: flex-end;
     gap: clamp(18px, 2.4vw, 34px);
-    color: var(--ink-soft);
+    color: var(--ink);
     font-size: 13px;
     letter-spacing: 0.16em;
 }
@@ -481,7 +481,7 @@ svg {
 
 .project-card__body p:last-child {
     font-family: var(--font-sans);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--ink-muted);
     letter-spacing: 0.04em;
     line-height: 1.6;
@@ -818,22 +818,21 @@ svg {
     letter-spacing: 0.06em;
 }
 
+/* 全局正文描述：统一字体、字号、行高 */
 .placeholder-card p,
 .project-panel p,
 .project-panel li,
 .diagnosis-form p,
 .diagnosis-result p,
-.diagnosis-report-section li {
-    font-size: 15px;
-    color: var(--ink);
-    line-height: 1.85;
-}
-
 .diagnosis-report-section li,
+.platform-card__text,
+.subpage-lead,
 .legal-content p,
 .legal-content li {
+    font-family: var(--font-sans);
+    font-size: 15px;
     color: var(--ink-soft);
-    line-height: 2;
+    line-height: 1.9;
 }
 
 .diagnosis-console {
