@@ -10,9 +10,9 @@
     --gold-deep: #8a6f42;
     --line: rgba(201, 168, 117, 0.18);
     --line-soft: rgba(201, 168, 117, 0.08);
-    --font-serif-cn: "Noto Serif SC", "Songti SC", "Source Han Serif SC", serif;
+    --font-serif-cn: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", serif;
     --font-serif-en: "Cormorant Garamond", Georgia, serif;
-    --font-sans: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
     --pad-x: clamp(20px, 5vw, 80px);
     --section-y: clamp(84px, 10vw, 132px);
 }
