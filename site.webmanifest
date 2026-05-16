@@ -1,0 +1,16 @@
+{
+  "name": "FrameSpark 帧火花",
+  "short_name": "帧火花",
+  "description": "帧火花 FrameSpark，以故事为起点，连接创作、制作与长期运营。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0908",
+  "theme_color": "#0a0908",
+  "icons": [
+    {
+      "src": "/assets/brand/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}
