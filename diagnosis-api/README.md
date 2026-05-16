@@ -9,10 +9,10 @@
 - 文本解析
 - 基础字数守门
 - mock 诊断报告
+- DeepSeek / OpenAI 兼容 AI 调用模块骨架
 
 暂不实现：
 
-- 真实 AI API 调用
 - 登录
 - 历史报告
 - Word / PDF 下载
@@ -26,6 +26,17 @@ cd diagnosis-api
 npm install
 cp .env.example .env
 npm run dev
+```
+
+如果 `.env` 中没有 `DEEPSEEK_API_KEY`，系统会自动返回 mock 报告。
+
+如果要启用真实 AI 诊断，在 `.env` 中填写：
+
+```env
+DEEPSEEK_API_KEY=你的 DeepSeek API Key
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+AI_TIMEOUT_MS=90000
 ```
 
 健康检查：
@@ -77,3 +88,4 @@ materialType: simple | full
 - 第一版使用内存上传，不把原始文件落盘。
 - 后续接入 DeepSeek / OpenAI 兼容接口时，API Key 只能放在后端环境变量中。
 - 不允许在静态官网前端暴露 AI API Key。
+- `.env` 不提交到 GitHub。

@@ -71,7 +71,7 @@
         var stats = data.stats || {};
         result.innerHTML = [
             '<div class="diagnosis-result__head">',
-            '<p class="subpage-kicker">MOCK REPORT</p>',
+            '<p class="subpage-kicker">' + escapeHtml(data.mode === 'ai' ? 'AI REPORT' : 'MOCK REPORT') + '</p>',
             '<h2>基础诊断报告</h2>',
             '<p>' + escapeHtml(report.summary || '已生成报告。') + '</p>',
             '</div>',

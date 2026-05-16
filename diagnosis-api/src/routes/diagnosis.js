@@ -3,6 +3,7 @@ import multer from 'multer';
 import { config } from '../config.js';
 import { parseUploadedFile } from '../services/fileParser.js';
 import { validateScriptText } from '../services/guard.js';
+import { generateDiagnosisReport, hasAiProvider } from '../services/aiClient.js';
 import { buildMockDiagnosisReport } from '../services/mockDiagnosis.js';
 import { ApiError } from '../utils/errors.js';
 
@@ -25,16 +26,20 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     const materialType = normalizeMaterialType(req.body.materialType);
     const parsed = await parseUploadedFile(req.file);
     const guard = validateScriptText(parsed.text, materialType);
-    const report = buildMockDiagnosisReport({
+    const payload = {
       text: parsed.text,
       materialType,
       stats: guard.stats,
       source: parsed.source
-    });
+    };
+    const mode = hasAiProvider() ? 'ai' : 'mock';
+    const report = mode === 'ai'
+      ? await generateDiagnosisReport(payload)
+      : buildMockDiagnosisReport(payload);
 
     res.json({
       ok: true,
-      mode: 'mock',
+      mode,
       materialType,
       source: parsed.source,
       stats: guard.stats,

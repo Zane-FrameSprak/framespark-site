@@ -192,13 +192,14 @@ materialType: simple | full
 - 完成基础字数守门。
 - 完成 mock 诊断报告。
 - 完成 `diagnosis/index.html` 本地 MVP 上传测试页，可在页面里选择文件并展示 mock 报告。
+- 完成 DeepSeek / OpenAI 兼容 AI 调用模块骨架：无 `DEEPSEEK_API_KEY` 时回退 mock，有 key 时走真实 AI。
 
 下一步：
 
-1. 确认真实 AI 服务提供方和模型名。
-2. 新增真实 AI 调用模块，替换 `mockDiagnosis.js`。
-3. 设计第一版基础诊断 prompt。
-4. 再把官网 `diagnosis/` 入口页改成真实上传页。
+1. 在本机 `diagnosis-api/.env` 填入 `DEEPSEEK_API_KEY`。
+2. 用真实 AI 跑一次 `.txt` / `.docx` 诊断。
+3. 根据返回质量调整第一版基础诊断 prompt。
+4. 再决定是否增加 PDF 解析、用户声明和下载能力。
 
 ## AI 分工建议
 
