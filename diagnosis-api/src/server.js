@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import { config } from './config.js';
 import { diagnosisRouter } from './routes/diagnosis.js';
+import { hasAiProvider } from './services/aiClient.js';
 import { ApiError } from './utils/errors.js';
 
 const app = express();
@@ -13,7 +14,7 @@ app.get('/health', (req, res) => {
   res.json({
     ok: true,
     service: 'framespark-diagnosis-api',
-    mode: 'mock',
+    mode: hasAiProvider() ? 'ai' : 'mock',
     timestamp: new Date().toISOString()
   });
 });
