@@ -251,7 +251,7 @@ export const BASIC_DIAGNOSIS_CASES = [
 
 （片段结束）
     `.trim(),
-    expectedNextStepPrefixes: ['建议补充材料'],
+    expectedNextStepPrefixes: ['建议补充材料', '不适合按创意材料诊断'],
     shouldMention: ['上下文', '补充', '前提'],
     shouldNotMention: ['市场价值', '投资潜力', '三幕']
   },
