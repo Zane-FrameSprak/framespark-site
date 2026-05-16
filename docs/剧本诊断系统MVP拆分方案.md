@@ -191,6 +191,7 @@ materialType: simple | full
 - 支持 `.txt` / `.docx` 内存上传解析。
 - 完成基础字数守门。
 - 完成 mock 诊断报告。
+- 完成 `diagnosis/index.html` 本地 MVP 上传测试页，可在页面里选择文件并展示 mock 报告。
 
 下一步：
 

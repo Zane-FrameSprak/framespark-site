@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自研剧本诊断系统 | FrameSpark 帧火花</title>
-    <meta name="description" content="帧火花自研剧本诊断系统开发中，未来将为编剧与创作者提供清晰、具体、可执行的剧本诊断报告。">
+    <meta name="description" content="帧火花自研剧本诊断系统 MVP 测试页，支持本地上传文本材料并生成 mock 诊断报告。">
     <meta name="theme-color" content="#0a0908">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,23 +43,51 @@
             <div class="subpage-hero__inner">
                 <p class="subpage-kicker">SCRIPT DIAGNOSIS</p>
                 <h1>自研剧本诊断系统</h1>
-                <p class="subpage-lead">面向编剧与创作者的 AI 剧本诊断工具。当前处于开发中，正式开放前将继续完善上传流程、报告结构、隐私保护与文件删除机制。</p>
+                <p class="subpage-lead">面向编剧与创作者的 AI 剧本诊断工具。当前为本地 MVP 测试版，先验证上传、解析、基础守门和报告展示闭环。</p>
                 <a class="back-link" href="../index.html#platforms">BACK TO HOME</a>
             </div>
         </section>
 
         <section class="subpage-section">
-            <div class="subpage-section__inner placeholder-grid">
-                <article class="placeholder-card">
-                    <h2>当前状态</h2>
-                    <p>开发中。官网先保留入口，正式功能上线前不会开放上传。</p>
-                </article>
-                <article class="placeholder-card">
-                    <h2>后续预留</h2>
-                    <p>账号登录、文件上传、AI 诊断、报告保存、Word/PDF 下载、用户授权与隐私协议。</p>
-                </article>
+            <div class="subpage-section__inner diagnosis-console">
+                <form class="diagnosis-form" id="diagnosisForm">
+                    <div class="diagnosis-form__head">
+                        <p class="subpage-kicker">MVP TEST</p>
+                        <h2>上传剧本材料</h2>
+                        <p>当前仅用于本地测试，支持 `.txt` / `.docx`。报告为 mock 版本，不代表真实 AI 诊断结果。</p>
+                    </div>
+
+                    <label class="diagnosis-field">
+                        <span>材料类型</span>
+                        <select name="materialType" id="materialType">
+                            <option value="simple">简单材料</option>
+                            <option value="full">完整剧本</option>
+                        </select>
+                    </label>
+
+                    <label class="diagnosis-upload" for="diagnosisFile">
+                        <span class="diagnosis-upload__label">选择文件</span>
+                        <strong id="diagnosisFileName">未选择文件</strong>
+                        <small>支持 .txt / .docx，当前本地上限 10MB</small>
+                        <input id="diagnosisFile" name="file" type="file" accept=".txt,.docx">
+                    </label>
+
+                    <div class="diagnosis-actions">
+                        <button class="diagnosis-submit" type="submit">开始测试诊断</button>
+                        <p id="diagnosisStatus" role="status">请先启动本地 API：`cd diagnosis-api && npm start`</p>
+                    </div>
+                </form>
+
+                <aside class="diagnosis-result" id="diagnosisResult" aria-live="polite">
+                    <div class="diagnosis-result__empty">
+                        <p class="subpage-kicker">REPORT</p>
+                        <h2>等待上传</h2>
+                        <p>完成上传后，这里会显示基础诊断报告结构。</p>
+                    </div>
+                </aside>
             </div>
         </section>
     </main>
+    <script src="app.js"></script>
 </body>
 </html>
