@@ -196,10 +196,12 @@ materialType: simple | full
 
 下一步：
 
-1. 在本机 `diagnosis-api/.env` 填入 `DEEPSEEK_API_KEY`。
-2. 用真实 AI 跑一次 `.txt` / `.docx` 诊断。
-3. 根据返回质量调整第一版基础诊断 prompt。
-4. 再决定是否增加 PDF 解析、用户声明和下载能力。
+1. 在 DeepSeek 充值前，先打磨 `diagnosis-api/src/prompts/basicDiagnosis.js` 的第一版基础诊断 prompt。
+2. 保持报告 JSON 结构稳定，避免前端展示反复返工。
+3. 充值后，在本机 `diagnosis-api/.env` 填入 `DEEPSEEK_API_KEY`。
+4. 用真实 AI 跑一次 `.txt` / `.docx` 诊断。
+5. 根据返回质量继续调整 prompt。
+6. 再决定是否增加 PDF 解析、用户声明和下载能力。
 
 ## AI 分工建议
 
