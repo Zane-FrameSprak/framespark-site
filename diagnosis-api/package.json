@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/routes/diagnosis.js && node --check src/services/aiClient.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/mockDiagnosis.js && node --check src/prompts/basicDiagnosis.js && node --check src/utils/errors.js"
+    "check": "node --check src/server.js && node --check src/routes/diagnosis.js && node --check src/services/aiClient.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/mockDiagnosis.js && node --check src/prompts/basicDiagnosis.js && node --check src/utils/errors.js",
+    "test": "node scripts/test-basic-diagnosis.js",
+    "test:prompt": "node scripts/test-basic-diagnosis.js --no-ai"
   },
   "dependencies": {
     "cors": "^2.8.5",

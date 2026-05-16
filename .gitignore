@@ -26,3 +26,6 @@ out/
 .env
 .env.*
 !.env.example
+
+# Test result logs (auto-generated, not committed)
+test-results/
