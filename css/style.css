@@ -114,7 +114,7 @@ svg {
 
 .brand__en {
     margin-top: 5px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 10px;
     color: var(--gold);
     letter-spacing: 0.32em;
@@ -464,7 +464,7 @@ svg {
 
 .project-card__status {
     margin-bottom: 12px;
-    font-family: var(--font-serif-cn);
+    font-family: var(--font-sans);
     font-size: 13px;
     color: var(--gold);
     letter-spacing: 0.12em;
