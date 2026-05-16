@@ -236,7 +236,7 @@ svg {
 
 .eyebrow {
     margin-bottom: 34px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 12px;
     color: var(--gold);
     letter-spacing: 0.42em;
@@ -279,7 +279,7 @@ svg {
 
 .section-head__num,
 .section-head__en {
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 12px;
     color: var(--gold);
     letter-spacing: 0.32em;
@@ -567,7 +567,7 @@ svg {
 
 .platform-card__num {
     margin-bottom: 18px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 14px;
     color: var(--gold);
     letter-spacing: 0.34em;
@@ -605,7 +605,7 @@ svg {
 
 .platform-card__en {
     margin-top: 16px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 12px;
     color: var(--gold);
     letter-spacing: 0.32em;
@@ -650,7 +650,7 @@ svg {
 .ecosystem-grid span {
     display: block;
     margin-bottom: 26px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 12px;
     color: var(--gold);
     letter-spacing: 0.3em;
@@ -697,7 +697,7 @@ svg {
 
 .principle__cite {
     margin-top: 28px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 13px;
     color: var(--ink-muted);
     letter-spacing: 0.28em;
@@ -727,7 +727,7 @@ svg {
 
 .footer__en {
     margin-top: 4px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 10px;
     color: var(--gold);
     letter-spacing: 0.3em;
@@ -738,7 +738,7 @@ svg {
     flex-direction: column;
     gap: 8px;
     text-align: center;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     color: var(--gold);
     letter-spacing: 0.06em;
 }
@@ -770,7 +770,7 @@ svg {
 
 .subpage-kicker {
     margin-bottom: 28px;
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     color: var(--gold);
     font-size: 12px;
     letter-spacing: 0.36em;
@@ -878,7 +878,7 @@ svg {
 .diagnosis-field span,
 .diagnosis-upload__label {
     color: var(--gold);
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 12px;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -1012,7 +1012,7 @@ svg {
 .diagnosis-stats dt {
     margin-bottom: 8px;
     color: var(--gold);
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.24em;
 }
@@ -1121,7 +1121,7 @@ svg {
 .project-meta dt {
     margin-bottom: 10px;
     color: var(--gold);
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -1186,7 +1186,7 @@ svg {
     display: inline-flex;
     margin-top: 34px;
     color: var(--gold);
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 12px;
     letter-spacing: 0.26em;
 }
@@ -1205,7 +1205,7 @@ svg {
     border: 1px solid var(--line);
     background: rgba(10, 9, 8, 0.72);
     color: var(--gold);
-    font-family: var(--font-serif-en);
+    font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.24em;
     writing-mode: vertical-rl;
