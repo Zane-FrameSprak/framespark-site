@@ -250,6 +250,7 @@
     var autoSpeed = 28;
     var rampStartTime = null;
     var rampDuration = 500;
+    var wheelResumeTimer = null;
 
     function getProjectStep() {
         if (!reel) return 0;
@@ -298,6 +299,27 @@
             autoPausedUntil = 0;
             rampStartTime = window.performance.now();
         }, 2000);
+    }
+
+    function handleProjectWheel(event) {
+        if (!marquee || !reel) return;
+
+        var wheelDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+        if (!wheelDelta) return;
+
+        event.preventDefault();
+        autoPausedUntil = Infinity;
+        offset = normalizeOffset(offset - wheelDelta * 0.85);
+        renderProjects();
+
+        if (wheelResumeTimer) {
+            window.clearTimeout(wheelResumeTimer);
+        }
+
+        wheelResumeTimer = window.setTimeout(function () {
+            autoPausedUntil = 0;
+            rampStartTime = window.performance.now();
+        }, 900);
     }
 
     function moveProjects(direction) {
@@ -381,6 +403,7 @@
 
         renderProjects();
         window.requestAnimationFrame(tickProjects);
+        stage.addEventListener('wheel', handleProjectWheel, { passive: false });
     }
 
     window.addEventListener('resize', function () {

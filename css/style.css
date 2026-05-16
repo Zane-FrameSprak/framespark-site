@@ -974,6 +974,36 @@ svg {
     letter-spacing: 0.26em;
 }
 
+.home-shortcut {
+    position: fixed;
+    left: clamp(18px, 3vw, 42px);
+    top: 50%;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    min-height: 118px;
+    padding: 14px 10px;
+    border: 1px solid var(--line);
+    background: rgba(10, 9, 8, 0.72);
+    color: var(--gold);
+    font-family: var(--font-serif-en);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    writing-mode: vertical-rl;
+    transform: translateY(-50%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.home-shortcut:hover {
+    border-color: rgba(201, 168, 117, 0.58);
+    background: rgba(19, 17, 16, 0.9);
+    color: var(--gold-bright);
+}
+
 .fade-in {
     opacity: 0;
     transform: translateY(28px);
@@ -1068,6 +1098,20 @@ svg {
 
     .project-panel--wide {
         grid-column: auto;
+    }
+
+    .home-shortcut {
+        position: static;
+        min-width: 0;
+        min-height: 0;
+        margin: 22px var(--pad-x) 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        writing-mode: horizontal-tb;
+        transform: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 }
 
