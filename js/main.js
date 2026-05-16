@@ -413,11 +413,11 @@
 
     if (prevButton && nextButton) {
         prevButton.addEventListener('click', function () {
-            moveProjects(-1);
+            moveProjects(1);
         });
 
         nextButton.addEventListener('click', function () {
-            moveProjects(1);
+            moveProjects(-1);
         });
     }
 })();

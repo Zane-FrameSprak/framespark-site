@@ -377,7 +377,7 @@ svg {
 }
 
 .project-marquee__control--prev span {
-    border-left: 10px solid currentColor;
+    border-right: 10px solid currentColor;
 }
 
 .project-marquee__control--next {
@@ -389,7 +389,7 @@ svg {
 }
 
 .project-marquee__control--next span {
-    border-right: 10px solid currentColor;
+    border-left: 10px solid currentColor;
 }
 
 .project-reel {
