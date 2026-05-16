@@ -822,6 +822,12 @@ svg {
 .project-panel li,
 .diagnosis-form p,
 .diagnosis-result p,
+.diagnosis-report-section li {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.85;
+}
+
 .diagnosis-report-section li,
 .legal-content p,
 .legal-content li {
@@ -1012,7 +1018,7 @@ svg {
 }
 
 .diagnosis-stats dd {
-    color: var(--ink-soft);
+    color: var(--ink);
     font-size: 14px;
 }
 
