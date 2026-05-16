@@ -18,6 +18,7 @@
         }
         if (isClone) {
             article.setAttribute('aria-hidden', 'true');
+            article.tabIndex = -1;
         }
 
         var poster = document.createElement('div');

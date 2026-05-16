@@ -8,28 +8,28 @@
                 title: '《恭喜你，中奖了！》',
                 duration: '时长 12-15min',
                 cover: '',
-                href: ''
+                href: 'projects/gongxi.html'
             },
             {
                 type: '网络电影',
                 title: '《上市前夜》',
                 duration: '时长 105-120min · 悬疑IP系列首作',
                 cover: '',
-                href: ''
+                href: 'projects/listing-eve.html'
             },
             {
                 type: '院线电影',
                 title: '《Chorolove》',
                 duration: '时长 120-150min',
                 cover: '',
-                href: ''
+                href: 'projects/chorolove.html'
             },
             {
                 type: '流媒体剧集',
                 title: '《当科技过于发达》',
                 duration: '时长不等 · 单集 15-60min',
                 cover: '',
-                href: ''
+                href: 'projects/too-advanced.html'
             }
         ],
 
