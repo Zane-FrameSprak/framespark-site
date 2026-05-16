@@ -1,62 +1,39 @@
-const DURATION_LABELS = {
-  short: '短片（30分钟以内）',
-  mid: '网络电影（60–90分钟）',
-  feature: '长片（90分钟以上）',
-  episode: '剧集单集'
+const MATERIAL_LABELS = {
+  short:   '短片剧本',
+  feature: '长片剧本（含网络电影）',
+  other:   '大纲 / 梗概 / 其他创意材料'
 };
 
-const DURATION_GUIDANCE = {
+const MATERIAL_GUIDANCE = {
   short: [
-    '这是短片剧本（30分钟以内）。短片的评判标准与长片不同：',
+    '这是短片剧本。短片的评判标准与长片不同，请严格遵守：',
     '- 一个核心概念撑全片是正确的，不需要多线叙事',
     '- 人物弧线可以是截面而非完整弧，有变化或有暗示即可',
     '- 留白、克制、模糊结局是短片的常见手法，不是缺陷',
-    '- 重点评估：概念是否成立、视觉语言是否清晰、结尾是否有力',
-    '- 不要用长片标准要求人物弧完整或情节线索全部解决'
-  ].join('\n'),
-  mid: [
-    '这是网络电影剧本（60–90分钟）。评判重点：',
-    '- 类型完成度权重高，观众对类型有明确期待',
-    '- 节奏要快，前十分钟必须建立冲突',
-    '- 人物动机需清晰，但不需要长片级别的复杂弧线',
-    '- 结局需要有明确交代，开放式结局需谨慎'
+    '- 重点评估：核心概念是否成立、视觉语言是否清晰、结尾是否有力',
+    '- 不要用长片标准要求人物弧完整或所有情节线索全部解决',
+    '- 请尽量引用剧本内具体情节、角色名或场景作为依据'
   ].join('\n'),
   feature: [
-    '这是长片剧本（90分钟以上）。评判重点：',
+    '这是长片剧本（含网络电影）。评判重点：',
     '- 三幕结构是否完整，转折点是否清晰',
-    '- 主角人物弧需要有明显变化',
-    '- 主题与情节需要有机结合',
-    '- 支线与主线的比例是否合理'
+    '- 主角人物弧是否有明显变化',
+    '- 主题与情节是否有机结合',
+    '- 类型完成度是否达到观众期待',
+    '- 请尽量引用剧本内具体情节、角色名或场景作为依据'
   ].join('\n'),
-  episode: [
-    '这是剧集单集剧本。评判重点：',
-    '- 单集内部是否有独立的小冲突和解决',
-    '- 结尾是否有足够强的钩子推动观众看下一集',
-    '- 人物关系的推进是否有效',
-    '- 不要求单集完全解决所有问题'
-  ].join('\n')
+  other: [
+    '当前材料为大纲、梗概或创意材料，字数有限。',
+    '请据此调整诊断深度：不强求对白质量或场面描写，',
+    '重点评估故事骨架和核心冲突是否成立。',
+    '若某个维度因材料不足而无法判断，请直接说明，不要猜测。'
+  ].join('')
 };
 
-export function buildBasicDiagnosisMessages({ text, materialType, scriptDuration, stats, source }) {
-  const isSimple = materialType !== 'full';
-  const durationKey = scriptDuration || 'feature';
-
-  const materialLabel = isSimple
-    ? '简单材料（大纲 / 梗概 / 故事创意）'
-    : `完整剧本 · ${DURATION_LABELS[durationKey] || ''}`;
-
-  // 根据材料类型和时长调整诊断侧重
-  const materialGuidance = isSimple
-    ? [
-        '当前材料为简单材料（大纲或梗概），字数有限。',
-        '请据此调整诊断深度：不强求对白质量或场面描写，',
-        '重点评估故事骨架和核心冲突是否成立。',
-        '若某个维度因材料不足而无法判断，请直接说明，不要猜测。'
-      ].join('')
-    : [
-        '当前材料为完整剧本，请尽量在诊断中引用剧本内具体情节、角色名或场景，避免只做笼统描述。\n',
-        DURATION_GUIDANCE[durationKey] || DURATION_GUIDANCE.feature
-      ].join('');
+export function buildBasicDiagnosisMessages({ text, materialType, stats, source }) {
+  const type = ['short', 'feature', 'other'].includes(materialType) ? materialType : 'other';
+  const materialLabel = MATERIAL_LABELS[type];
+  const materialGuidance = MATERIAL_GUIDANCE[type];
 
   return [
     {

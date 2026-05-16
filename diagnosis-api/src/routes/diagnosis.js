@@ -24,13 +24,11 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     }
 
     const materialType = normalizeMaterialType(req.body.materialType);
-    const scriptDuration = normalizeScriptDuration(req.body.scriptDuration, materialType);
     const parsed = await parseUploadedFile(req.file);
     const guard = validateScriptText(parsed.text, materialType);
     const payload = {
       text: parsed.text,
       materialType,
-      scriptDuration,
       stats: guard.stats,
       source: parsed.source
     };
@@ -43,7 +41,6 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       ok: true,
       mode,
       materialType,
-      scriptDuration,
       source: parsed.source,
       stats: guard.stats,
       report
@@ -54,17 +51,6 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
 });
 
 function normalizeMaterialType(value) {
-  if (value === 'full' || value === 'simple') {
-    return value;
-  }
-
-  return 'simple';
-}
-
-function normalizeScriptDuration(value, materialType) {
-  // 简单材料不需要时长字段
-  if (materialType !== 'full') return null;
-
-  const valid = ['short', 'mid', 'feature', 'episode'];
-  return valid.includes(value) ? value : 'feature';
+  const valid = ['short', 'feature', 'other'];
+  return valid.includes(value) ? value : 'other';
 }

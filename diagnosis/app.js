@@ -8,17 +8,7 @@
     var fileName = document.getElementById('diagnosisFileName');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
-    var materialTypeSelect = document.getElementById('materialType');
-    var durationField = document.getElementById('durationField');
-
     if (!form || !fileInput || !fileName || !status || !result) return;
-
-    // 选完整剧本时显示时长选项，选简单材料时隐藏
-    if (materialTypeSelect && durationField) {
-        materialTypeSelect.addEventListener('change', function () {
-            durationField.style.display = materialTypeSelect.value === 'full' ? '' : 'none';
-        });
-    }
 
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
@@ -85,8 +75,7 @@
             '<p>' + escapeHtml(report.summary || '已生成报告。') + '</p>',
             '</div>',
             '<dl class="diagnosis-stats">',
-            '<div><dt>材料类型</dt><dd>' + escapeHtml(data.materialType === 'full' ? '完整剧本' : '简单材料') + '</dd></div>',
-            data.scriptDuration ? '<div><dt>预计时长</dt><dd>' + escapeHtml(formatDuration(data.scriptDuration)) + '</dd></div>' : '',
+            '<div><dt>材料类型</dt><dd>' + escapeHtml(formatMaterialType(data.materialType)) + '</dd></div>',
             '<div><dt>字数</dt><dd>' + escapeHtml(String(stats.charCount || 0)) + '</dd></div>',
             '<div><dt>行数</dt><dd>' + escapeHtml(String(stats.lineCount || 0)) + '</dd></div>',
             '</dl>',
@@ -124,12 +113,11 @@
         ].join('');
     }
 
-    function formatDuration(value) {
+    function formatMaterialType(value) {
         var map = {
-            short: '短片（30分钟以内）',
-            mid: '网络电影（60–90分钟）',
-            feature: '长片（90分钟以上）',
-            episode: '剧集单集'
+            short: '短片剧本',
+            feature: '长片剧本（含网络电影）',
+            other: '大纲 / 梗概 / 其他创意材料'
         };
         return map[value] || value;
     }
