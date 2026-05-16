@@ -23,6 +23,8 @@ framespark/
 ├─ js/
 │  ├─ site-data.js
 │  └─ main.js
+├─ diagnosis-api/
+│  └─ src/
 ├─ projects/
 │  └─ template.html
 ├─ diagnosis/
@@ -84,6 +86,7 @@ docs/内容维护说明.md
 - 首页主体已完成。
 - 项目展示已改为数据驱动跑马灯。
 - 剧本诊断系统、人才平台、法律页面已有占位入口。
+- 剧本诊断系统 MVP 后端骨架已建立，当前支持 `.txt` / `.docx` 上传解析和 mock 报告。
 - SEO、favicon、manifest、robots、sitemap 已补齐。
 - GitHub Pages 自动部署流程已补齐。
 

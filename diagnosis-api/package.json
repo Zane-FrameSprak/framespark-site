@@ -1,0 +1,18 @@
+{
+  "name": "framespark-diagnosis-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/routes/diagnosis.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/mockDiagnosis.js && node --check src/utils/errors.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mammoth": "^1.9.0",
+    "multer": "^2.1.1"
+  }
+}
