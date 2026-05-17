@@ -266,6 +266,36 @@ const PARSER_CASES = [
         throw new Error('不合规前缀应触发警告');
       }
     }
+  },
+  {
+    name: '进阶短片 nextStep 前缀：需要结构性重写',
+    run() {
+      const raw = { summary: '好', core: '强', strengths: [], problems: [], suggestions: [], nextStep: '需要结构性重写：核心表达与执行路径严重脱节。' };
+      const report = normalizeReport(raw, 'short');
+      if (report._warnings?.some(w => w.includes('前缀'))) {
+        throw new Error('进阶短片前缀不应触发 warning');
+      }
+    }
+  },
+  {
+    name: '进阶长片 nextStep 前缀：可进入下一阶段评估',
+    run() {
+      const raw = { summary: '好', core: '强', strengths: [], problems: [], suggestions: [], nextStep: '可进入下一阶段评估：主线清晰且结构推进有效。' };
+      const report = normalizeReport(raw, 'feature');
+      if (report._warnings?.some(w => w.includes('前缀'))) {
+        throw new Error('进阶长片前缀不应触发 warning');
+      }
+    }
+  },
+  {
+    name: '进阶其他材料 nextStep 前缀：需要重新开发',
+    run() {
+      const raw = { summary: '好', core: '强', strengths: [], problems: [], suggestions: [], nextStep: '需要重新开发：前提、人物和冲突之间存在根本性断裂。' };
+      const report = normalizeReport(raw, 'other');
+      if (report._warnings?.some(w => w.includes('前缀'))) {
+        throw new Error('进阶其他材料前缀不应触发 warning');
+      }
+    }
   }
 ];
 

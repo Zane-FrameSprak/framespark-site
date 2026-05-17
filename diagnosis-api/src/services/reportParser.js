@@ -3,11 +3,27 @@ import { ApiError } from '../utils/errors.js';
 const REQUIRED_FIELDS = ['summary', 'core', 'strengths', 'problems', 'suggestions', 'nextStep'];
 const ARRAY_FIELDS = ['strengths', 'problems', 'suggestions'];
 
-const ALLOWED_PREFIXES = {
+const BASIC_PREFIXES = {
   short:   ['建议继续打磨', '需要大改', '可进入进阶诊断'],
   feature: ['建议继续打磨', '需要大改', '可进入进阶诊断', '不适合按长片诊断'],
   other:   ['建议补充材料', '需要大改', '建议继续打磨', '可进入进阶诊断', '不适合按创意材料诊断']
 };
+
+const ADVANCED_PREFIXES = [
+  '建议继续打磨',
+  '需要结构性重写',
+  '可进入下一阶段评估',
+  '暂不适合继续深化',
+  '需要重新开发',
+  '建议补充材料'
+];
+
+const ALLOWED_PREFIXES = Object.fromEntries(
+  Object.entries(BASIC_PREFIXES).map(([materialType, prefixes]) => [
+    materialType,
+    [...new Set([...prefixes, ...ADVANCED_PREFIXES])]
+  ])
+);
 
 // Three-strategy JSON extraction
 export function extractJson(content) {
