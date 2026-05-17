@@ -6,6 +6,7 @@ import { validateScriptText } from '../services/guard.js';
 import { hasAiProvider } from '../services/aiClient.js';
 import { runDiagnosisPipeline } from '../services/diagnosisPipeline.js';
 import { buildMockDiagnosisReport } from '../services/mockDiagnosis.js';
+import { logDiagnosisResult } from '../services/diagnosisLogger.js';
 import { ApiError } from '../utils/errors.js';
 
 const upload = multer({
@@ -46,6 +47,14 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
         finalReport: mockReport
       };
     }
+
+    await logDiagnosisResult({
+      mode,
+      materialType,
+      parsed,
+      stats: guard.stats,
+      result
+    });
 
     res.json({
       ok: true,

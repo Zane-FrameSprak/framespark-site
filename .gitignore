@@ -11,6 +11,7 @@ desktop.ini
 
 # Logs and temporary files
 *.log
+diagnosis-api/logs/
 tmp/
 temp/
 .cache/
