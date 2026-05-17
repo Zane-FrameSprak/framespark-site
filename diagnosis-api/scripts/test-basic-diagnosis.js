@@ -47,6 +47,7 @@ const { BASIC_DIAGNOSIS_CASES } = await import('../tests/fixtures/basic-diagnosi
 // ── 加载诊断模块 ────────────────────────────────────────────
 const { buildBasicDiagnosisMessages } = await import('../src/prompts/basicDiagnosis.js');
 const { generateDiagnosisReport, hasAiProvider } = await import('../src/services/aiClient.js');
+const { extractJson, normalizeReport } = await import('../src/services/reportParser.js');
 
 const aiAvailable = !NO_AI && hasAiProvider();
 
@@ -209,6 +210,83 @@ async function runCase(testCase, index, total) {
   return result;
 }
 
+// ── Phase 0: 解析容错单元测试 ────────────────────────────────
+const PARSER_CASES = [
+  {
+    name: 'JSON 外包说明文字',
+    run() {
+      const raw = extractJson('以下是诊断结果：{"summary":"好","core":"强","strengths":[],"problems":[],"suggestions":[],"nextStep":"建议继续打磨"}');
+      if (raw.summary !== '好') throw new Error('summary 解析错误');
+    }
+  },
+  {
+    name: '多 JSON 块取第一个',
+    run() {
+      const raw = extractJson('{"summary":"第一","core":"A","strengths":[],"problems":[],"suggestions":[],"nextStep":"建议继续打磨"} 说明 {"summary":"第二","core":"B","strengths":[],"problems":[],"suggestions":[],"nextStep":"需要大改"}');
+      if (raw.summary !== '第一') throw new Error('应取第一个 JSON 块，实际取到：' + raw.summary);
+    }
+  },
+  {
+    name: '数组含空字符串过滤为 []',
+    run() {
+      const raw = { summary: '好', core: '强', strengths: [''], problems: [''], suggestions: [''], nextStep: '建议继续打磨' };
+      const report = normalizeReport(raw, 'short');
+      if (report.strengths.length !== 0) throw new Error('空字符串数组应过滤为 []');
+    }
+  },
+  {
+    name: 'JSON 被 ```json 包裹',
+    run() {
+      const raw = extractJson('```json\n{"summary":"好","core":"强","strengths":[],"problems":[],"suggestions":[],"nextStep":"建议继续打磨"}\n```');
+      if (raw.core !== '强') throw new Error('core 解析错误');
+    }
+  },
+  {
+    name: 'problems 返回字符串而非数组',
+    run() {
+      const raw = { summary: '好', core: '强', strengths: [], problems: '有一个问题', suggestions: [], nextStep: '建议继续打磨' };
+      const report = normalizeReport(raw, 'short');
+      if (!Array.isArray(report.problems) || report.problems[0] !== '有一个问题') throw new Error('problems 未强制转为数组');
+    }
+  },
+  {
+    name: '缺失 strengths 字段',
+    run() {
+      const raw = { summary: '好', core: '强', problems: [], suggestions: [], nextStep: '建议继续打磨' };
+      const report = normalizeReport(raw, 'short');
+      if (!Array.isArray(report.strengths)) throw new Error('strengths 缺失时应填充空数组');
+    }
+  },
+  {
+    name: 'nextStep 前缀不合规（短片）',
+    run() {
+      const raw = { summary: '好', core: '强', strengths: [], problems: [], suggestions: [], nextStep: '市场潜力巨大，建议投资' };
+      const report = normalizeReport(raw, 'short');
+      if (!report._warnings || !report._warnings.some(w => w.includes('前缀'))) {
+        throw new Error('不合规前缀应触发警告');
+      }
+    }
+  }
+];
+
+async function runParserTests() {
+  console.log(`\n${c.bold}Phase 0：解析容错单元测试${c.reset}`);
+  console.log('─'.repeat(52));
+  let passed = 0;
+  for (const tc of PARSER_CASES) {
+    try {
+      tc.run();
+      console.log(`${ok} ${tc.name}`);
+      passed++;
+    } catch (err) {
+      console.log(`${fail} ${tc.name}：${err.message}`);
+    }
+  }
+  console.log(`─`.repeat(52));
+  console.log(`解析测试：${passed}/${PARSER_CASES.length} 通过\n`);
+  return passed === PARSER_CASES.length;
+}
+
 // ── 主流程 ───────────────────────────────────────────────────
 async function main() {
   const total = BASIC_DIAGNOSIS_CASES.length;
@@ -217,6 +295,8 @@ async function main() {
   console.log(`\n${c.bold}帧火花基础诊断稳定性测试${c.reset}`);
   console.log(`用例总数：${total}  AI 调用：${NO_AI ? '关闭（--no-ai）' : aiAvailable ? '开启' : '未配置（跳过）'}`);
   console.log('─'.repeat(52));
+
+  const parserOk = await runParserTests();
 
   const results = [];
 
@@ -269,7 +349,7 @@ async function main() {
   }
 
   // 有失败则以非零退出码退出
-  if (promptFailed.length > 0 || aiFailed.length > 0) {
+  if (!parserOk || promptFailed.length > 0 || aiFailed.length > 0) {
     process.exit(1);
   }
 }

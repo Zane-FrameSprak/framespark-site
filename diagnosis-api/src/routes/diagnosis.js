@@ -3,7 +3,8 @@ import multer from 'multer';
 import { config } from '../config.js';
 import { parseUploadedFile } from '../services/fileParser.js';
 import { validateScriptText } from '../services/guard.js';
-import { generateDiagnosisReport, hasAiProvider } from '../services/aiClient.js';
+import { hasAiProvider } from '../services/aiClient.js';
+import { runDiagnosisPipeline } from '../services/diagnosisPipeline.js';
 import { buildMockDiagnosisReport } from '../services/mockDiagnosis.js';
 import { ApiError } from '../utils/errors.js';
 
@@ -32,18 +33,30 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       stats: guard.stats,
       source: parsed.source
     };
+
     const mode = hasAiProvider() ? 'ai' : 'mock';
-    const report = mode === 'ai'
-      ? await generateDiagnosisReport(payload)
-      : buildMockDiagnosisReport(payload);
+    let result;
+    if (mode === 'ai') {
+      result = await runDiagnosisPipeline(payload);
+    } else {
+      const mockReport = buildMockDiagnosisReport(payload);
+      result = {
+        internalStage: 'mock',
+        basicReport: mockReport,
+        finalReport: mockReport
+      };
+    }
 
     res.json({
       ok: true,
       mode,
+      internalStage: result.internalStage,
       materialType,
       source: parsed.source,
       stats: guard.stats,
-      report
+      basicReport: result.basicReport,
+      finalReport: result.finalReport,
+      report: result.finalReport  // backward compat for existing frontend
     });
   } catch (err) {
     next(err);
