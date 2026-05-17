@@ -43,7 +43,7 @@
             }
 
             renderReport(data);
-            setStatus('mock 诊断报告已生成。', 'success');
+            setStatus('诊断报告已生成，请查看右侧结果。', 'success');
         } catch (err) {
             renderError(err.message);
             setStatus(err.message, 'error');
@@ -57,7 +57,7 @@
         if (!button) return;
 
         button.disabled = isLoading;
-        button.textContent = isLoading ? '诊断中...' : '开始测试诊断';
+        button.textContent = isLoading ? '诊断中...' : '开始诊断';
     }
 
     function setStatus(message, type) {
@@ -66,20 +66,26 @@
     }
 
     function renderReport(data) {
-        var report = data.report || {};
+        var report = data.finalReport || {};
         var stats = data.stats || {};
+        if (!data.finalReport) {
+            renderError('未收到诊断报告，请稍后再试。');
+            return;
+        }
+
         result.innerHTML = [
             '<div class="diagnosis-result__head">',
-            '<p class="subpage-kicker">' + escapeHtml(data.mode === 'ai' ? 'AI REPORT' : 'MOCK REPORT') + '</p>',
-            '<h2>基础诊断报告</h2>',
-            '<p>' + escapeHtml(report.summary || '已生成报告。') + '</p>',
+            '<p class="subpage-kicker">DIAGNOSIS REPORT</p>',
+            '<h2>帧火花剧本诊断报告</h2>',
+            '<p>系统已根据材料完整度生成当前适合的诊断报告。</p>',
             '</div>',
             '<dl class="diagnosis-stats">',
+            '<div><dt>诊断类型</dt><dd>' + escapeHtml(formatDiagnosisType(data.internalStage)) + '</dd></div>',
             '<div><dt>材料类型</dt><dd>' + escapeHtml(formatMaterialType(data.materialType)) + '</dd></div>',
             '<div><dt>字数</dt><dd>' + escapeHtml(String(stats.charCount || 0)) + '</dd></div>',
-            '<div><dt>行数</dt><dd>' + escapeHtml(String(stats.lineCount || 0)) + '</dd></div>',
             '</dl>',
-            renderSection('故事核心', [report.core]),
+            renderSection('一句话结论', [report.summary]),
+            renderSection('核心判断', [report.core]),
             renderSection('主要亮点', report.strengths),
             renderSection('主要问题', report.problems),
             renderSection('修改建议', report.suggestions),
@@ -116,10 +122,18 @@
     function formatMaterialType(value) {
         var map = {
             short: '短片剧本',
-            feature: '长片剧本（含网络电影）',
-            other: '大纲 / 梗概 / 其他创意材料'
+            feature: '长片剧本',
+            other: '创意材料'
         };
         return map[value] || value;
+    }
+
+    function formatDiagnosisType(value) {
+        var map = {
+            basic: '故事基础诊断',
+            advanced: '剧本深化诊断'
+        };
+        return map[value] || '故事基础诊断';
     }
 
     function escapeHtml(value) {
