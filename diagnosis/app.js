@@ -8,6 +8,7 @@
     var fileName = document.getElementById('diagnosisFileName');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
+    var currentReportMarkdown = '';
     if (!form || !fileInput || !fileName || !status || !result) return;
 
     fileInput.addEventListener('change', function () {
@@ -72,6 +73,9 @@
             renderError('未收到诊断报告，请稍后再试。');
             return;
         }
+        var diagnosisType = formatDiagnosisType(data.internalStage);
+        var materialType = formatMaterialType(data.materialType);
+        currentReportMarkdown = buildReportMarkdown(report, diagnosisType, materialType);
 
         result.innerHTML = [
             '<div class="diagnosis-result__head">',
@@ -79,9 +83,13 @@
             '<h2>帧火花剧本诊断报告</h2>',
             '<p>系统已根据材料完整度生成当前适合的诊断报告。</p>',
             '</div>',
+            '<div class="diagnosis-report-actions">',
+            '<button type="button" data-report-action="copy">复制报告</button>',
+            '<button type="button" data-report-action="download">导出 Markdown</button>',
+            '</div>',
             '<dl class="diagnosis-stats">',
-            '<div><dt>诊断类型</dt><dd>' + escapeHtml(formatDiagnosisType(data.internalStage)) + '</dd></div>',
-            '<div><dt>材料类型</dt><dd>' + escapeHtml(formatMaterialType(data.materialType)) + '</dd></div>',
+            '<div><dt>诊断类型</dt><dd>' + escapeHtml(diagnosisType) + '</dd></div>',
+            '<div><dt>材料类型</dt><dd>' + escapeHtml(materialType) + '</dd></div>',
             '<div><dt>字数</dt><dd>' + escapeHtml(String(stats.charCount || 0)) + '</dd></div>',
             '</dl>',
             renderSection('一句话结论', [report.summary]),
@@ -94,6 +102,7 @@
     }
 
     function renderError(message) {
+        currentReportMarkdown = '';
         result.innerHTML = [
             '<div class="diagnosis-result__empty diagnosis-result__empty--error">',
             '<p class="subpage-kicker">ERROR</p>',
@@ -101,6 +110,91 @@
             '<p>' + escapeHtml(message || '诊断失败，请稍后再试。') + '</p>',
             '</div>'
         ].join('');
+    }
+
+    result.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-report-action]');
+        if (!button || !currentReportMarkdown) return;
+
+        if (button.dataset.reportAction === 'copy') {
+            copyReport();
+        } else if (button.dataset.reportAction === 'download') {
+            downloadMarkdown();
+        }
+    });
+
+    async function copyReport() {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(currentReportMarkdown);
+            } else {
+                fallbackCopyText(currentReportMarkdown);
+            }
+            setStatus('报告已复制。', 'success');
+        } catch (err) {
+            setStatus('复制失败，请手动选择报告内容。', 'error');
+        }
+    }
+
+    function fallbackCopyText(text) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.inset = '-9999px auto auto -9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+    }
+
+    function downloadMarkdown() {
+        var blob = new Blob([currentReportMarkdown], { type: 'text/markdown;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'framespark-diagnosis-report.md';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    function buildReportMarkdown(report, diagnosisType, materialType) {
+        var lines = [
+            '# 帧火花剧本诊断报告',
+            '',
+            '诊断类型：' + diagnosisType,
+            '材料类型：' + materialType,
+            ''
+        ];
+
+        addTextSection(lines, '一句话结论', report.summary);
+        addTextSection(lines, '核心判断', report.core);
+        addListSection(lines, '主要亮点', report.strengths);
+        addListSection(lines, '主要问题', report.problems);
+        addListSection(lines, '修改建议', report.suggestions);
+        addTextSection(lines, '下一步判断', report.nextStep);
+
+        return lines.join('\n').trim() + '\n';
+    }
+
+    function addTextSection(lines, title, value) {
+        var text = String(value || '').trim();
+        if (!text) return;
+        lines.push('## ' + title, text, '');
+    }
+
+    function addListSection(lines, title, items) {
+        var safeItems = (items || []).map(function (item) {
+            return String(item || '').trim();
+        }).filter(Boolean);
+        if (!safeItems.length) return;
+        lines.push('## ' + title);
+        safeItems.forEach(function (item) {
+            lines.push('- ' + item);
+        });
+        lines.push('');
     }
 
     function renderSection(title, items) {
