@@ -28,7 +28,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
 
     const userSelectedType = normalizeMaterialType(req.body.materialType);
     const parsed = await parseUploadedFile(req.file);
-    const materialRouting = routeMaterial({
+    const materialRouting = await routeMaterial({
       userSelectedType,
       text: parsed.text,
       originalFileName: parsed.source?.filename

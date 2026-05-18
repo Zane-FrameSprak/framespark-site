@@ -1,3 +1,5 @@
+import { classifyMaterialForm } from './aiClient.js';
+
 const VALID_USER_TYPES = new Set(['short', 'feature', 'other']);
 const FORM_TYPES = new Set([
   'full_script',
@@ -10,21 +12,87 @@ const FORM_TYPES = new Set([
   'unknown',
   'reject'
 ]);
+const CLEAR_LOCAL_FORMS = new Set(['reject', 'full_script', 'worldbuilding', 'character_bio']);
 
-export function routeMaterial({ userSelectedType, text, originalFileName = '' }) {
+export async function routeMaterial({ userSelectedType, text, originalFileName = '', classifier = classifyMaterialForm }) {
   const normalizedUserType = normalizeUserSelectedType(userSelectedType);
   const targetFormat = detectTargetFormat(normalizedUserType, text, originalFileName);
-  const analysis = analyzeMaterialForm(text);
-  const materialForm = FORM_TYPES.has(analysis.materialForm) ? analysis.materialForm : 'unknown';
-  const effectiveDiagnosisType = getEffectiveDiagnosisType(materialForm, targetFormat);
+  const localAnalysis = detectMaterialFormByRules(text);
+
+  if (!shouldUseAiClassification({ localAnalysis, text, userSelectedType: normalizedUserType, targetFormat })) {
+    return buildRoutingResult({
+      userSelectedType: normalizedUserType,
+      targetFormat,
+      materialForm: localAnalysis.materialForm,
+      reason: localAnalysis.reason,
+      localAnalysis,
+      classificationSource: 'local',
+      classificationReason: localAnalysis.reason
+    });
+  }
+
+  try {
+    const aiAnalysis = await classifier({
+      text,
+      userSelectedType: normalizedUserType,
+      targetFormat,
+      localMaterialForm: localAnalysis.materialForm
+    });
+    const aiMaterialForm = normalizeMaterialForm(aiAnalysis?.materialForm);
+    if (!aiMaterialForm) {
+      throw new Error('AI materialForm is invalid.');
+    }
+
+    return buildRoutingResult({
+      userSelectedType: normalizedUserType,
+      targetFormat,
+      materialForm: aiMaterialForm,
+      reason: String(aiAnalysis.reason || '').trim() || localAnalysis.reason,
+      localAnalysis,
+      aiMaterialForm,
+      classificationSource: 'ai',
+      classificationReason: String(aiAnalysis.reason || '').trim() || 'AI 完成材料形态识别。'
+    });
+  } catch (err) {
+    return buildRoutingResult({
+      userSelectedType: normalizedUserType,
+      targetFormat,
+      materialForm: localAnalysis.materialForm,
+      reason: localAnalysis.reason,
+      localAnalysis,
+      aiError: err,
+      classificationSource: 'fallback',
+      classificationReason: `轻量 AI 分类失败，已回退本地规则：${err.message}`
+    });
+  }
+}
+
+function buildRoutingResult({
+  userSelectedType,
+  targetFormat,
+  materialForm,
+  reason,
+  localAnalysis,
+  aiMaterialForm = null,
+  aiError = null,
+  classificationSource,
+  classificationReason
+}) {
+  const normalizedForm = normalizeMaterialForm(materialForm) || 'unknown';
+  const effectiveDiagnosisType = getEffectiveDiagnosisType(normalizedForm, targetFormat);
 
   return {
-    userSelectedType: normalizedUserType,
+    userSelectedType,
     targetFormat,
-    materialForm,
+    materialForm: normalizedForm,
     effectiveDiagnosisType,
-    reason: analysis.reason,
-    notice: buildNotice({ normalizedUserType, targetFormat, materialForm, effectiveDiagnosisType })
+    reason,
+    notice: buildNotice({ normalizedUserType: userSelectedType, targetFormat, materialForm: normalizedForm, effectiveDiagnosisType }),
+    classificationSource,
+    localMaterialForm: localAnalysis.materialForm,
+    aiMaterialForm,
+    classificationReason,
+    ...(aiError ? { classificationError: aiError.message } : {})
   };
 }
 
@@ -42,7 +110,7 @@ function detectTargetFormat(userSelectedType, text, originalFileName) {
   return 'unknown';
 }
 
-function analyzeMaterialForm(text) {
+export function detectMaterialFormByRules(text) {
   const normalized = normalizeText(text);
   const compact = normalized.replace(/\s/g, '');
   const charCount = compact.length;
@@ -123,6 +191,41 @@ function analyzeMaterialForm(text) {
   }
 
   return { materialForm: 'reject', reason: '文本缺少影视故事、人物、场景、设定或创意材料信号，无法进入诊断。' };
+}
+
+function shouldUseAiClassification({ localAnalysis, text, userSelectedType, targetFormat }) {
+  if (CLEAR_LOCAL_FORMS.has(localAnalysis.materialForm)) return false;
+
+  const charCount = String(text || '').replace(/\s/g, '').length;
+  if (localAnalysis.materialForm === 'unknown') return true;
+
+  if (charCount >= 80 && charCount <= 800) {
+    if (['synopsis', 'outline', 'fragment', 'concept', 'unknown'].includes(localAnalysis.materialForm)) {
+      return true;
+    }
+  }
+
+  if (
+    userSelectedType === 'feature' &&
+    targetFormat === 'feature' &&
+    ['synopsis', 'outline', 'fragment', 'unknown'].includes(localAnalysis.materialForm)
+  ) {
+    return true;
+  }
+
+  if (
+    userSelectedType === 'short' &&
+    targetFormat === 'short' &&
+    ['concept', 'synopsis', 'fragment', 'unknown'].includes(localAnalysis.materialForm)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function normalizeMaterialForm(value) {
+  return FORM_TYPES.has(value) ? value : '';
 }
 
 function getEffectiveDiagnosisType(materialForm, targetFormat) {

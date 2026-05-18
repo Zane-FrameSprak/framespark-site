@@ -205,7 +205,11 @@ function normalizeMaterialRouting(materialRouting, materialType) {
       materialForm: 'unknown',
       effectiveDiagnosisType: materialType,
       reason: '',
-      notice: ''
+      notice: '',
+      classificationSource: 'local',
+      localMaterialForm: 'unknown',
+      aiMaterialForm: null,
+      classificationReason: ''
     };
   }
 
@@ -215,6 +219,10 @@ function normalizeMaterialRouting(materialRouting, materialType) {
     materialForm: materialRouting.materialForm || 'unknown',
     effectiveDiagnosisType: materialRouting.effectiveDiagnosisType || materialType || 'other',
     reason: materialRouting.reason || '',
-    notice: materialRouting.notice || ''
+    notice: materialRouting.notice || '',
+    classificationSource: materialRouting.classificationSource || 'local',
+    localMaterialForm: materialRouting.localMaterialForm || materialRouting.materialForm || 'unknown',
+    aiMaterialForm: materialRouting.aiMaterialForm || null,
+    classificationReason: materialRouting.classificationReason || materialRouting.reason || ''
   };
 }

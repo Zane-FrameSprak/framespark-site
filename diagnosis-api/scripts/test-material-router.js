@@ -1,7 +1,7 @@
 /**
  * 第零层材料形态路由测试
  *
- * 不调用 AI，不写入日志，只验证本地 materialRouter + guard。
+ * 不调用真实 AI，不写入日志，只验证 materialRouter + guard。
  */
 
 import { routeMaterial } from '../src/services/materialRouter.js';
@@ -112,7 +112,7 @@ const cases = [
     name: 'short + 完整短片剧本',
     userSelectedType: 'short',
     text: shortFullScript,
-    expect: { materialForm: 'full_script', effectiveDiagnosisType: 'short', targetFormat: 'short', guardPass: true }
+    expect: { materialForm: 'full_script', effectiveDiagnosisType: 'short', targetFormat: 'short', guardPass: true, classificationSource: 'local' }
   },
   {
     name: 'feature + 完整长片材料',
@@ -132,7 +132,7 @@ const cases = [
 制度规则：底层人群大量出售童年记忆换取生活费，富裕阶层购买痛苦记忆作为情感消费。政府用公益名义收集重大灾难幸存者记忆，形成新的档案权力。
 
 组织设定：留痕公司、地下剪辑师、记忆清洁员和失忆者互助会构成主要力量。当前尚未确定具体主角和故事线。`,
-    expect: { materialForm: 'worldbuilding', effectiveDiagnosisType: 'other', targetFormat: 'unknown', guardPass: true }
+    expect: { materialForm: 'worldbuilding', effectiveDiagnosisType: 'other', targetFormat: 'unknown', guardPass: true, classificationSource: 'local' }
   },
   {
     name: '片段文本',
@@ -165,14 +165,14 @@ const cases = [
 工作经历：负责产品需求文档、竞品分析和项目排期
 项目经验：电商后台管理系统、会员积分系统
 自我评价：沟通能力强，执行力强，熟悉产品说明、用户调研和数据分析。`,
-    expect: { materialForm: 'reject', effectiveDiagnosisType: 'reject', targetFormat: 'feature', guardPass: false, errorCode: 'MATERIAL_REJECTED' }
+    expect: { materialForm: 'reject', effectiveDiagnosisType: 'reject', targetFormat: 'feature', guardPass: false, errorCode: 'MATERIAL_REJECTED', classificationSource: 'local' }
   }
 ];
 
 let failed = 0;
 
 for (const testCase of cases) {
-  const routing = routeMaterial({
+  const routing = await routeMaterial({
     userSelectedType: testCase.userSelectedType,
     text: testCase.text,
     originalFileName: `${testCase.name}.txt`
@@ -183,6 +183,9 @@ for (const testCase of cases) {
     if (routing[field] !== testCase.expect[field]) {
       errors.push(`${field} expected ${testCase.expect[field]}, got ${routing[field]}`);
     }
+  }
+  if (testCase.expect.classificationSource && routing.classificationSource !== testCase.expect.classificationSource) {
+    errors.push(`classificationSource expected ${testCase.expect.classificationSource}, got ${routing.classificationSource}`);
   }
 
   const guardResult = runGuard(testCase.text, routing);
@@ -206,12 +209,116 @@ for (const testCase of cases) {
   }
 }
 
+const aiCases = [
+  {
+    name: 'AI 合法返回 materialForm 采用 AI 结果',
+    userSelectedType: 'feature',
+    text: `长片梗概：《回声档案》
+
+主角是一名声音修复师，她接到一盘二十年前的事故录音。录音里有父亲失踪前最后一句话，也有一个被当年调查忽略的爆炸声。她起初只想修复声音交给委托人，却发现每一段杂音都能对应到旧案现场的一个细节。
+
+随着她重新走访当年的工厂、医院和幸存者，她发现父亲并不是事故受害者，而是知道真相后主动消失的人。最终，她必须决定公开录音，让母亲多年维持的平静被打破，还是继续让旧案留在沉默里。结尾，她在公开听证会上播放修复后的完整录音。`,
+    classifier: async () => ({
+      materialForm: 'synopsis',
+      reason: '文本概括完整故事走向，属于梗概。'
+    }),
+    expect: {
+      materialForm: 'synopsis',
+      aiMaterialForm: 'synopsis',
+      classificationSource: 'ai',
+      effectiveDiagnosisType: 'other',
+      targetFormat: 'feature'
+    }
+  }
+];
+
+for (const testCase of aiCases) {
+  const routing = await routeMaterial({
+    userSelectedType: testCase.userSelectedType,
+    text: testCase.text,
+    originalFileName: `${testCase.name}.txt`,
+    classifier: testCase.classifier
+  });
+  const errors = [];
+
+  for (const field of ['materialForm', 'aiMaterialForm', 'classificationSource', 'effectiveDiagnosisType', 'targetFormat']) {
+    if (routing[field] !== testCase.expect[field]) {
+      errors.push(`${field} expected ${testCase.expect[field]}, got ${routing[field]}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    failed += 1;
+    console.log(`${fail} ${c.bold}${testCase.name}${c.reset}`);
+    for (const error of errors) console.log(`   ${c.red}${error}${c.reset}`);
+    console.log(`   ${c.gray}${JSON.stringify(routing)}${c.reset}`);
+  } else {
+    console.log(
+      `${ok} ${c.bold}${testCase.name}${c.reset} ` +
+      `${c.gray}form=${routing.materialForm} ai=${routing.aiMaterialForm} source=${routing.classificationSource}${c.reset}`
+    );
+  }
+}
+
+const fallbackCases = [
+  {
+    name: 'AI 返回非法 materialForm 回退本地规则',
+    userSelectedType: 'short',
+    text: '如果一个外卖员每送出一份订单，就会失去一段关于家人的记忆，他必须在最后一单和保留母亲临终声音之间做选择。这是一个关于劳动、亲情和记忆交换的短片概念，核心矛盾是他越努力工作，越接近彻底忘记自己为什么工作。',
+    classifier: async () => ({ materialForm: 'bad_form', reason: '非法枚举。' }),
+    expect: { materialForm: 'concept', classificationSource: 'fallback', requireEffectiveDiagnosisType: true }
+  },
+  {
+    name: 'AI 调用失败回退本地规则',
+    userSelectedType: 'short',
+    text: '如果一名保安每天夜里都在同一部坏掉的电梯里听见不同住户的秘密，他必须判断这些声音是求救、幻听，还是整栋楼正在隐藏一场事故。这是一个短片故事概念，暂时只有前提和人物处境。',
+    classifier: async () => {
+      throw new Error('mock classifier failed');
+    },
+    expect: { materialForm: 'concept', effectiveDiagnosisType: 'other', classificationSource: 'fallback' }
+  }
+];
+
+for (const testCase of fallbackCases) {
+  const routing = await routeMaterial({
+    userSelectedType: testCase.userSelectedType,
+    text: testCase.text,
+    originalFileName: `${testCase.name}.txt`,
+    classifier: testCase.classifier
+  });
+  const errors = [];
+
+  for (const field of ['materialForm', 'effectiveDiagnosisType', 'classificationSource']) {
+    if (field === 'effectiveDiagnosisType' && testCase.expect.requireEffectiveDiagnosisType) {
+      if (!routing.effectiveDiagnosisType) {
+        errors.push('effectiveDiagnosisType expected non-empty value');
+      }
+      continue;
+    }
+    if (routing[field] !== testCase.expect[field]) {
+      errors.push(`${field} expected ${testCase.expect[field]}, got ${routing[field]}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    failed += 1;
+    console.log(`${fail} ${c.bold}${testCase.name}${c.reset}`);
+    for (const error of errors) console.log(`   ${c.red}${error}${c.reset}`);
+    console.log(`   ${c.gray}${JSON.stringify(routing)}${c.reset}`);
+  } else {
+    console.log(
+      `${ok} ${c.bold}${testCase.name}${c.reset} ` +
+      `${c.gray}form=${routing.materialForm} effective=${routing.effectiveDiagnosisType} source=${routing.classificationSource}${c.reset}`
+    );
+  }
+}
+
 if (failed > 0) {
-  console.log(`\n${fail} materialRouter 测试失败：${failed}/${cases.length}\n`);
+  console.log(`\n${fail} materialRouter 测试失败：${failed}/${cases.length + aiCases.length + fallbackCases.length}\n`);
   process.exit(1);
 }
 
-console.log(`\n${ok} materialRouter 测试通过：${cases.length}/${cases.length}\n`);
+console.log(`\n${ok} materialRouter 测试通过：${cases.length + aiCases.length + fallbackCases.length}/${cases.length + aiCases.length + fallbackCases.length}\n`);
 
 function runGuard(text, routing) {
   try {
