@@ -3,6 +3,7 @@ import multer from 'multer';
 import { config } from '../config.js';
 import { parseUploadedFile } from '../services/fileParser.js';
 import { validateScriptText } from '../services/guard.js';
+import { routeMaterial } from '../services/materialRouter.js';
 import { hasAiProvider } from '../services/aiClient.js';
 import { runDiagnosisPipeline } from '../services/diagnosisPipeline.js';
 import { buildMockDiagnosisReport } from '../services/mockDiagnosis.js';
@@ -25,12 +26,27 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       throw new ApiError(400, 'FILE_REQUIRED', '请先上传剧本或故事材料。');
     }
 
-    const materialType = normalizeMaterialType(req.body.materialType);
+    const userSelectedType = normalizeMaterialType(req.body.materialType);
     const parsed = await parseUploadedFile(req.file);
-    const guard = validateScriptText(parsed.text, materialType);
+    const materialRouting = routeMaterial({
+      userSelectedType,
+      text: parsed.text,
+      originalFileName: parsed.source?.filename
+    });
+
+    if (materialRouting.effectiveDiagnosisType === 'reject') {
+      throw new ApiError(400, 'MATERIAL_REJECTED', materialRouting.reason);
+    }
+
+    const guard = validateScriptText(parsed.text, materialRouting);
+    const materialType = materialRouting.effectiveDiagnosisType;
     const payload = {
       text: parsed.text,
       materialType,
+      userSelectedType,
+      targetFormat: materialRouting.targetFormat,
+      materialForm: materialRouting.materialForm,
+      materialRouting,
       stats: guard.stats,
       source: parsed.source
     };
@@ -51,6 +67,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     await logDiagnosisResult({
       mode,
       materialType,
+      materialRouting,
       parsed,
       stats: guard.stats,
       result
@@ -61,6 +78,11 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       mode,
       internalStage: result.internalStage,
       materialType,
+      userSelectedType,
+      targetFormat: materialRouting.targetFormat,
+      materialForm: materialRouting.materialForm,
+      effectiveDiagnosisType: materialRouting.effectiveDiagnosisType,
+      materialRouting,
       source: parsed.source,
       stats: guard.stats,
       basicReport: result.basicReport,

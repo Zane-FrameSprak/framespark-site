@@ -4,6 +4,12 @@ const MATERIAL_LABELS = {
   other:   '大纲 / 梗概 / 其他创意材料'
 };
 
+const TARGET_FORMAT_LABELS = {
+  short:   '短片',
+  feature: '长片 / 网络电影',
+  unknown: '未明确'
+};
+
 // ─── 系统指令（短片）───────────────────────────────────────────
 const SYSTEM_SHORT = [
   '你是帧火花剧本诊断系统的诊断引擎，专注中文短片剧本的基础诊断。',
@@ -74,6 +80,7 @@ const SYSTEM_OTHER = [
   '',
   '【输出原则】',
   '- 按材料实际形态调整诊断深度：不以完整剧本标准要求大纲或梗概，不以故事标准要求人物小传或世界观设定',
+  '- 如果提供了目标作品方向 targetFormat，应结合该方向给出建议，但仍按当前材料形态诊断',
   '- 不评价对白质量、场面描写、格式规范或三幕结构完整性',
   '- 某个维度因材料不足无法判断时，直接说明，不猜测、不补全',
   '- 有依据：尽量引用材料中具体人物、事件或情境',
@@ -300,8 +307,11 @@ const OUTPUT_FORMAT_OTHER = [
 const OUTPUT_FORMAT = { short: OUTPUT_FORMAT_SHORT, feature: OUTPUT_FORMAT_FEATURE, other: OUTPUT_FORMAT_OTHER };
 
 // ─── 主函数 ────────────────────────────────────────────────────
-export function buildBasicDiagnosisMessages({ text, materialType, stats, source }) {
+export function buildBasicDiagnosisMessages({ text, materialType, targetFormat, stats, source }) {
   const type = ['short', 'feature', 'other'].includes(materialType) ? materialType : 'other';
+  const targetLine = type === 'other' && targetFormat
+    ? [`目标作品方向：${TARGET_FORMAT_LABELS[targetFormat] || targetFormat}`]
+    : [];
 
   return [
     {
@@ -312,6 +322,7 @@ export function buildBasicDiagnosisMessages({ text, materialType, stats, source 
       role: 'user',
       content: [
         `材料类型：${MATERIAL_LABELS[type]}`,
+        ...targetLine,
         `文本字数：约 ${stats.charCount} 字`,
         MATERIAL_GUIDANCE[type],
         '',

@@ -15,9 +15,9 @@ const REVIEW_QUEUES = {
 };
 const REVIEW_DIRS = ['high-potential', 'boundary', 'warning', 'error'];
 
-export async function logDiagnosisResult({ mode, materialType, parsed, stats, result }) {
+export async function logDiagnosisResult({ mode, materialType, materialRouting, parsed, stats, result }) {
   try {
-    const entry = buildLogEntry({ mode, materialType, parsed, stats, result });
+    const entry = buildLogEntry({ mode, materialType, materialRouting, parsed, stats, result });
     const logPath = await writeLogEntry(entry);
     await updateIndex(entry, logPath);
     await writeReviewSummaries(entry, logPath);
@@ -28,7 +28,7 @@ export async function logDiagnosisResult({ mode, materialType, parsed, stats, re
   }
 }
 
-function buildLogEntry({ mode, materialType, parsed, stats, result }) {
+function buildLogEntry({ mode, materialType, materialRouting, parsed, stats, result }) {
   const createdAt = new Date().toISOString();
   const id = makeId(createdAt);
   const basicReport = result.basicReport || null;
@@ -49,6 +49,7 @@ function buildLogEntry({ mode, materialType, parsed, stats, result }) {
     id,
     createdAt,
     materialType,
+    materialRouting: normalizeMaterialRouting(materialRouting, materialType),
     originalFileName: parsed.source?.filename || '',
     charCount: stats.charCount || 0,
     internalStage: result.internalStage,
@@ -194,4 +195,26 @@ function getReviewReason(tag) {
     warning: '诊断报告包含 parser 或格式 warning。'
   };
   return reasons[tag] || REVIEW_QUEUES[tag] || tag;
+}
+
+function normalizeMaterialRouting(materialRouting, materialType) {
+  if (!materialRouting || typeof materialRouting !== 'object') {
+    return {
+      userSelectedType: materialType,
+      targetFormat: materialType === 'short' || materialType === 'feature' ? materialType : 'unknown',
+      materialForm: 'unknown',
+      effectiveDiagnosisType: materialType,
+      reason: '',
+      notice: ''
+    };
+  }
+
+  return {
+    userSelectedType: materialRouting.userSelectedType || 'other',
+    targetFormat: materialRouting.targetFormat || 'unknown',
+    materialForm: materialRouting.materialForm || 'unknown',
+    effectiveDiagnosisType: materialRouting.effectiveDiagnosisType || materialType || 'other',
+    reason: materialRouting.reason || '',
+    notice: materialRouting.notice || ''
+  };
 }

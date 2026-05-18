@@ -74,14 +74,15 @@
             return;
         }
         var diagnosisType = formatDiagnosisType(data.internalStage);
-        var materialType = formatMaterialType(data.materialType);
-        currentReportMarkdown = buildReportMarkdown(report, diagnosisType, materialType);
+        var materialInfo = buildMaterialInfo(data);
+        currentReportMarkdown = buildReportMarkdown(report, diagnosisType, materialInfo);
 
         result.innerHTML = [
             '<div class="diagnosis-result__head">',
             '<p class="subpage-kicker">DIAGNOSIS REPORT</p>',
             '<h2>帧火花剧本诊断报告</h2>',
             '<p>系统已根据材料完整度生成当前适合的诊断报告。</p>',
+            materialInfo.notice ? '<p>' + escapeHtml(materialInfo.notice) + '</p>' : '',
             '</div>',
             '<div class="diagnosis-report-actions">',
             '<button type="button" data-report-action="copy">复制报告</button>',
@@ -89,7 +90,7 @@
             '</div>',
             '<dl class="diagnosis-stats">',
             '<div><dt>诊断类型</dt><dd>' + escapeHtml(diagnosisType) + '</dd></div>',
-            '<div><dt>材料类型</dt><dd>' + escapeHtml(materialType) + '</dd></div>',
+            renderMaterialStats(materialInfo),
             '<div><dt>字数</dt><dd>' + escapeHtml(String(stats.charCount || 0)) + '</dd></div>',
             '</dl>',
             renderSection('一句话结论', [report.summary]),
@@ -160,14 +161,20 @@
         URL.revokeObjectURL(url);
     }
 
-    function buildReportMarkdown(report, diagnosisType, materialType) {
+    function buildReportMarkdown(report, diagnosisType, materialInfo) {
         var lines = [
             '# 帧火花剧本诊断报告',
             '',
             '诊断类型：' + diagnosisType,
-            '材料类型：' + materialType,
+            materialInfo.hasRouting ? '目标方向：' + materialInfo.targetFormat : '材料类型：' + materialInfo.legacyMaterialType,
+            materialInfo.hasRouting ? '材料形态：' + materialInfo.materialForm : '',
+            materialInfo.hasRouting ? '诊断方式：' + materialInfo.diagnosisMethod : '',
+            materialInfo.notice ? '材料识别：' + materialInfo.notice : '',
             ''
-        ];
+        ].filter(function (line) {
+            return line !== '';
+        });
+        lines.push('');
 
         addTextSection(lines, '一句话结论', report.summary);
         addTextSection(lines, '核心判断', report.core);
@@ -213,6 +220,37 @@
         ].join('');
     }
 
+    function renderMaterialStats(materialInfo) {
+        if (!materialInfo.hasRouting) {
+            return '<div><dt>材料类型</dt><dd>' + escapeHtml(materialInfo.legacyMaterialType) + '</dd></div>';
+        }
+
+        return [
+            '<div><dt>目标方向</dt><dd>' + escapeHtml(materialInfo.targetFormat) + '</dd></div>',
+            '<div><dt>材料形态</dt><dd>' + escapeHtml(materialInfo.materialForm) + '</dd></div>',
+            '<div><dt>诊断方式</dt><dd>' + escapeHtml(materialInfo.diagnosisMethod) + '</dd></div>'
+        ].join('');
+    }
+
+    function buildMaterialInfo(data) {
+        var routing = data.materialRouting;
+        if (!routing) {
+            return {
+                hasRouting: false,
+                legacyMaterialType: formatMaterialType(data.materialType),
+                notice: ''
+            };
+        }
+
+        return {
+            hasRouting: true,
+            targetFormat: formatTargetFormat(routing.targetFormat),
+            materialForm: formatMaterialForm(routing.materialForm),
+            diagnosisMethod: formatDiagnosisMethod(routing.effectiveDiagnosisType || data.materialType),
+            notice: formatRoutingNotice(routing)
+        };
+    }
+
     function formatMaterialType(value) {
         var map = {
             short: '短片剧本',
@@ -220,6 +258,52 @@
             other: '创意材料'
         };
         return map[value] || value;
+    }
+
+    function formatTargetFormat(value) {
+        var map = {
+            short: '短片',
+            feature: '长片',
+            unknown: '未确定'
+        };
+        return map[value] || '未确定';
+    }
+
+    function formatMaterialForm(value) {
+        var map = {
+            full_script: '完整剧本',
+            outline: '大纲',
+            synopsis: '梗概',
+            concept: '故事概念',
+            character_bio: '人物小传',
+            worldbuilding: '世界观设定',
+            fragment: '片段文本',
+            unknown: '未确定'
+        };
+        return map[value] || '未确定';
+    }
+
+    function formatDiagnosisMethod(value) {
+        var map = {
+            short: '短片剧本诊断',
+            feature: '长片剧本诊断',
+            other: '创意材料诊断'
+        };
+        return map[value] || '创意材料诊断';
+    }
+
+    function formatRoutingNotice(routing) {
+        if (!routing.notice) return '';
+
+        var target = formatTargetFormat(routing.targetFormat);
+        var form = formatMaterialForm(routing.materialForm);
+        var method = formatDiagnosisMethod(routing.effectiveDiagnosisType);
+
+        if (routing.effectiveDiagnosisType === 'other' && routing.materialForm !== 'unknown') {
+            return '你上传的内容更接近' + target + '方向的' + form + '，本次将按' + method.replace('诊断', '') + '进行诊断。';
+        }
+
+        return '系统已根据材料形态选择当前适合的诊断方式。';
     }
 
     function formatDiagnosisType(value) {
