@@ -2,6 +2,7 @@
     'use strict';
 
     var API_URL = 'http://127.0.0.1:8787/api/diagnosis';
+    var FEEDBACK_URL = 'http://127.0.0.1:8787/api/diagnosis-feedback';
 
     var form = document.getElementById('diagnosisForm');
     var fileInput = document.getElementById('diagnosisFile');
@@ -12,9 +13,17 @@
     var materialTypeDialog = document.getElementById('materialTypeDialog');
     var materialTypeConfirmButton = document.getElementById('materialTypeConfirmButton');
     var materialTypeCancelButton = document.getElementById('materialTypeCancelButton');
+    var feedbackDialog = document.getElementById('feedbackDialog');
+    var feedbackSubmitButton = document.getElementById('feedbackSubmitButton');
+    var feedbackCancelButton = document.getElementById('feedbackCancelButton');
+    var feedbackCommentInput = document.getElementById('feedbackComment');
+    var feedbackAreasContainer = document.getElementById('feedbackAreas');
+    var feedbackError = document.getElementById('feedbackError');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
     var currentReportMarkdown = '';
+    var currentDiagnosisData = null;
+
     if (!form || !fileInput || !fileName || !textInput || !uploadBox || !pasteBox || !materialTypeDialog || !materialTypeConfirmButton || !materialTypeCancelButton || !status || !result) return;
 
     fileInput.addEventListener('change', function () {
@@ -53,6 +62,20 @@
             hideMaterialTypeDialog();
         }
     });
+
+    if (feedbackDialog) {
+        feedbackDialog.addEventListener('click', function (event) {
+            if (event.target === feedbackDialog) {
+                hideFeedbackDialog();
+            }
+        });
+    }
+    if (feedbackCancelButton) {
+        feedbackCancelButton.addEventListener('click', hideFeedbackDialog);
+    }
+    if (feedbackSubmitButton) {
+        feedbackSubmitButton.addEventListener('click', submitFeedback);
+    }
 
     form.elements.materialType.value = '';
     syncInputMode();
@@ -98,9 +121,11 @@
                 throw new Error(data && data.error && data.error.message ? data.error.message : '诊断失败，请稍后再试。');
             }
 
+            currentDiagnosisData = data;
             renderReport(data);
             setStatus('诊断报告已生成，请查看右侧结果。', 'success');
         } catch (err) {
+            currentDiagnosisData = null;
             renderError(err.message);
             setStatus(err.message, 'error');
         } finally {
@@ -152,6 +177,102 @@
         return checked ? checked.value : '';
     }
 
+    function showFeedbackDialog() {
+        if (!feedbackDialog) return;
+        resetFeedbackForm();
+        feedbackDialog.hidden = false;
+        setFeedbackError('', '');
+    }
+
+    function hideFeedbackDialog() {
+        if (!feedbackDialog) return;
+        feedbackDialog.hidden = true;
+    }
+
+    function resetFeedbackForm() {
+        if (feedbackAreasContainer) {
+            feedbackAreasContainer.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+                input.checked = false;
+            });
+        }
+        if (feedbackCommentInput) feedbackCommentInput.value = '';
+        if (feedbackSubmitButton) {
+            feedbackSubmitButton.disabled = false;
+            feedbackSubmitButton.textContent = '提交反馈';
+        }
+    }
+
+    function setFeedbackError(message, type) {
+        if (!feedbackError) return;
+        feedbackError.textContent = message || '';
+        feedbackError.dataset.state = type || '';
+    }
+
+    function getSelectedFeedbackAreas() {
+        if (!feedbackAreasContainer) return [];
+        var nodes = feedbackAreasContainer.querySelectorAll('input[type="checkbox"]:checked');
+        return Array.prototype.map.call(nodes, function (n) { return n.value; });
+    }
+
+    async function submitFeedback() {
+        if (!currentDiagnosisData) {
+            setFeedbackError('当前没有可反馈的诊断结果。', 'error');
+            return;
+        }
+        var areas = getSelectedFeedbackAreas();
+        var comment = feedbackCommentInput ? feedbackCommentInput.value.trim() : '';
+        if (areas.length === 0 && !comment) {
+            setFeedbackError('请至少勾选一项或填写补充说明。', 'error');
+            return;
+        }
+
+        var routing = currentDiagnosisData.materialRouting || null;
+        var finalReport = currentDiagnosisData.finalReport || {};
+        var payload = {
+            diagnosisId: currentDiagnosisData.diagnosisId || '',
+            feedbackType: 'understanding_wrong',
+            areas: areas,
+            comment: comment,
+            materialRouting: routing ? {
+                userSelectedType: routing.userSelectedType,
+                targetFormat: routing.targetFormat,
+                materialForm: routing.materialForm,
+                effectiveDiagnosisType: routing.effectiveDiagnosisType,
+                classificationSource: routing.classificationSource,
+                notice: routing.notice
+            } : null,
+            reportSummary: String(finalReport.summary || '').slice(0, 600),
+            reportNextStep: String(finalReport.nextStep || '').slice(0, 400)
+        };
+
+        if (feedbackSubmitButton) {
+            feedbackSubmitButton.disabled = true;
+            feedbackSubmitButton.textContent = '提交中...';
+        }
+        setFeedbackError('', '');
+
+        try {
+            var response = await fetch(FEEDBACK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            var data = await response.json().catch(function () { return null; });
+            if (!response.ok || !data || !data.ok) {
+                var msg = data && data.error && data.error.message ? data.error.message : '反馈提交失败，请稍后再试。';
+                throw new Error(msg);
+            }
+            showReportFeedback('已收到反馈，谢谢。', 'success');
+            hideFeedbackDialog();
+        } catch (err) {
+            setFeedbackError(err.message || '反馈提交失败，请稍后再试。', 'error');
+            if (feedbackSubmitButton) {
+                feedbackSubmitButton.disabled = false;
+                feedbackSubmitButton.textContent = '提交反馈';
+            }
+        }
+    }
+
     function renderReport(data) {
         var report = data.finalReport || {};
         var stats = data.stats || {};
@@ -159,27 +280,21 @@
             renderError('未收到诊断报告，请稍后再试。');
             return;
         }
-        var diagnosisType = formatDiagnosisType(data.internalStage);
         var materialInfo = buildMaterialInfo(data);
-        currentReportMarkdown = buildReportMarkdown(report, diagnosisType, materialInfo);
+        currentReportMarkdown = buildReportMarkdown(report, materialInfo, stats);
 
         result.innerHTML = [
             '<div class="diagnosis-result__head">',
             '<p class="subpage-kicker">DIAGNOSIS REPORT</p>',
-            '<h2>帧火花剧本诊断报告</h2>',
-            '<p>系统已根据材料完整度生成当前适合的诊断报告。</p>',
-            materialInfo.notice ? '<p>' + escapeHtml(materialInfo.notice) + '</p>' : '',
+            '<h2>帧火花故事开发诊断报告</h2>',
+            '<p>系统已根据材料形态生成当前适合的诊断报告。</p>',
             '</div>',
+            renderUnderstandingZone(materialInfo, stats),
             '<div class="diagnosis-report-actions">',
             '<button type="button" data-report-action="copy">复制报告</button>',
             '<button type="button" data-report-action="download">导出 Markdown</button>',
             '<span class="diagnosis-report-feedback" id="diagnosisReportFeedback" aria-live="polite"></span>',
             '</div>',
-            '<dl class="diagnosis-stats">',
-            '<div><dt>诊断类型</dt><dd>' + escapeHtml(diagnosisType) + '</dd></div>',
-            renderMaterialStats(materialInfo),
-            '<div><dt>字数</dt><dd>' + escapeHtml(String(stats.charCount || 0)) + '</dd></div>',
-            '</dl>',
             renderSection('一句话结论', [report.summary]),
             renderSection('核心判断', [report.core]),
             renderSection('主要亮点', report.strengths),
@@ -189,8 +304,39 @@
         ].join('');
     }
 
+    function renderUnderstandingZone(materialInfo, stats) {
+        var rows = [
+            ['你选择的目标方向', materialInfo.targetFormat],
+            ['系统识别的材料形态', materialInfo.materialForm],
+            ['本次诊断方式', materialInfo.diagnosisMethod],
+            ['材料识别说明', materialInfo.notice || '系统已根据材料形态选择当前适合的诊断方式。']
+        ];
+
+        var rowsHtml = rows.map(function (row) {
+            return '<div><dt>' + escapeHtml(row[0]) + '</dt><dd>' + escapeHtml(String(row[1] || '—')) + '</dd></div>';
+        }).join('');
+
+        return [
+            '<section class="diagnosis-understanding" aria-label="系统理解">',
+            '<header class="diagnosis-understanding__head">',
+            '<p class="subpage-kicker">SYSTEM UNDERSTANDING</p>',
+            '<h3>系统理解</h3>',
+            '<p>以下是系统对你本次提交材料的理解。如果你认为理解有误，可以反馈给我们用于改进诊断系统。</p>',
+            '</header>',
+            '<dl class="diagnosis-understanding__list">',
+            rowsHtml,
+            '</dl>',
+            '<p class="diagnosis-understanding__meta">字数：' + escapeHtml(String(stats.charCount || 0)) + '</p>',
+            '<div class="diagnosis-understanding__actions">',
+            '<button type="button" data-action="open-feedback">理解有误</button>',
+            '</div>',
+            '</section>'
+        ].join('');
+    }
+
     function renderError(message) {
         currentReportMarkdown = '';
+        currentDiagnosisData = null;
         result.innerHTML = [
             '<div class="diagnosis-result__empty diagnosis-result__empty--error">',
             '<p class="subpage-kicker">ERROR</p>',
@@ -201,6 +347,11 @@
     }
 
     result.addEventListener('click', function (event) {
+        var actionButton = event.target.closest('[data-action="open-feedback"]');
+        if (actionButton) {
+            showFeedbackDialog();
+            return;
+        }
         var button = event.target.closest('[data-report-action]');
         if (!button || !currentReportMarkdown) return;
 
@@ -236,7 +387,7 @@
         showReportFeedback.timer = window.setTimeout(function () {
             feedback.textContent = '';
             feedback.dataset.state = '';
-        }, 2400);
+        }, 2800);
     }
 
     function fallbackCopyText(text) {
@@ -263,20 +414,19 @@
         URL.revokeObjectURL(url);
     }
 
-    function buildReportMarkdown(report, diagnosisType, materialInfo) {
+    function buildReportMarkdown(report, materialInfo, stats) {
         var lines = [
-            '# 帧火花剧本诊断报告',
+            '# 帧火花故事开发诊断报告',
             '',
-            '诊断类型：' + diagnosisType,
-            materialInfo.hasRouting ? '目标方向：' + materialInfo.targetFormat : '材料类型：' + materialInfo.legacyMaterialType,
-            materialInfo.hasRouting ? '材料形态：' + materialInfo.materialForm : '',
-            materialInfo.hasRouting ? '诊断方式：' + materialInfo.diagnosisMethod : '',
-            materialInfo.notice ? '材料识别：' + materialInfo.notice : '',
+            '## 系统理解',
+            '',
+            '- 目标方向：' + materialInfo.targetFormat,
+            '- 材料形态：' + materialInfo.materialForm,
+            '- 诊断方式：' + materialInfo.diagnosisMethod,
+            '- 材料识别说明：' + (materialInfo.notice || '系统已根据材料形态选择当前适合的诊断方式。'),
+            '- 字数：' + String(stats.charCount || 0),
             ''
-        ].filter(function (line) {
-            return line !== '';
-        });
-        lines.push('');
+        ];
 
         addTextSection(lines, '一句话结论', report.summary);
         addTextSection(lines, '核心判断', report.core);
@@ -322,30 +472,18 @@
         ].join('');
     }
 
-    function renderMaterialStats(materialInfo) {
-        if (!materialInfo.hasRouting) {
-            return '<div><dt>材料类型</dt><dd>' + escapeHtml(materialInfo.legacyMaterialType) + '</dd></div>';
-        }
-
-        return [
-            '<div><dt>目标方向</dt><dd>' + escapeHtml(materialInfo.targetFormat) + '</dd></div>',
-            '<div><dt>材料形态</dt><dd>' + escapeHtml(materialInfo.materialForm) + '</dd></div>',
-            '<div><dt>诊断方式</dt><dd>' + escapeHtml(materialInfo.diagnosisMethod) + '</dd></div>'
-        ].join('');
-    }
-
     function buildMaterialInfo(data) {
         var routing = data.materialRouting;
         if (!routing) {
             return {
-                hasRouting: false,
-                legacyMaterialType: formatMaterialType(data.materialType),
+                targetFormat: formatTargetFormat((data.userSelectedType === 'short' || data.userSelectedType === 'feature') ? data.userSelectedType : 'unknown'),
+                materialForm: formatMaterialForm('unknown'),
+                diagnosisMethod: formatDiagnosisMethod(data.materialType),
                 notice: ''
             };
         }
 
         return {
-            hasRouting: true,
             targetFormat: formatTargetFormat(routing.targetFormat),
             materialForm: formatMaterialForm(routing.materialForm),
             diagnosisMethod: formatDiagnosisMethod(routing.effectiveDiagnosisType || data.materialType),
@@ -353,22 +491,13 @@
         };
     }
 
-    function formatMaterialType(value) {
-        var map = {
-            short: '短片剧本',
-            feature: '长片剧本',
-            other: '创意材料'
-        };
-        return map[value] || value;
-    }
-
     function formatTargetFormat(value) {
         var map = {
             short: '短片',
             feature: '长片',
-            unknown: '未确定'
+            unknown: '未明确'
         };
-        return map[value] || '未确定';
+        return map[value] || '未明确';
     }
 
     function formatMaterialForm(value) {
@@ -380,9 +509,9 @@
             character_bio: '人物小传',
             worldbuilding: '世界观设定',
             fragment: '片段文本',
-            unknown: '未确定'
+            unknown: '未明确形态的创意材料'
         };
-        return map[value] || '未确定';
+        return map[value] || '未明确形态的创意材料';
     }
 
     function formatDiagnosisMethod(value) {
@@ -395,25 +524,9 @@
     }
 
     function formatRoutingNotice(routing) {
-        if (!routing.notice) return '';
-
-        var target = formatTargetFormat(routing.targetFormat);
-        var form = formatMaterialForm(routing.materialForm);
-        var method = formatDiagnosisMethod(routing.effectiveDiagnosisType);
-
-        if (routing.effectiveDiagnosisType === 'other' && routing.materialForm !== 'unknown') {
-            return '你上传的内容更接近' + target + '方向的' + form + '，本次将按' + method.replace('诊断', '') + '进行诊断。';
-        }
-
+        if (!routing) return '';
+        if (routing.notice) return routing.notice;
         return '系统已根据材料形态选择当前适合的诊断方式。';
-    }
-
-    function formatDiagnosisType(value) {
-        var map = {
-            basic: '故事基础诊断',
-            advanced: '剧本深化诊断'
-        };
-        return map[value] || '故事基础诊断';
     }
 
     function escapeHtml(value) {

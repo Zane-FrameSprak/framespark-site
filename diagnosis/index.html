@@ -120,6 +120,31 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="diagnosis-modal diagnosis-modal--feedback" id="feedbackDialog" role="dialog" aria-modal="true" aria-labelledby="feedbackDialogTitle" hidden>
+                        <div class="diagnosis-modal__panel diagnosis-modal__panel--feedback">
+                            <h3 id="feedbackDialogTitle">反馈系统理解问题</h3>
+                            <p>请选择你认为系统理解不准确的地方。反馈会用于改进诊断系统，不会重新生成本次报告。</p>
+                            <div class="diagnosis-modal__options diagnosis-modal__options--checkbox" id="feedbackAreas">
+                                <label><input type="checkbox" name="feedbackArea" value="target_format_wrong"><span>目标方向不对</span></label>
+                                <label><input type="checkbox" name="feedbackArea" value="material_form_wrong"><span>材料形态不对</span></label>
+                                <label><input type="checkbox" name="feedbackArea" value="diagnosis_method_wrong"><span>诊断方式不对</span></label>
+                                <label><input type="checkbox" name="feedbackArea" value="core_understanding_wrong"><span>核心内容理解不准</span></label>
+                                <label><input type="checkbox" name="feedbackArea" value="problems_wrong"><span>报告问题不准</span></label>
+                                <label><input type="checkbox" name="feedbackArea" value="nextstep_wrong"><span>下一步判断不合理</span></label>
+                                <label><input type="checkbox" name="feedbackArea" value="other"><span>其他</span></label>
+                            </div>
+                            <label class="diagnosis-modal__textarea">
+                                <span>补充说明（选填）</span>
+                                <textarea id="feedbackComment" name="feedbackComment" placeholder="如有更具体的问题，可以在这里说明。"></textarea>
+                            </label>
+                            <p class="diagnosis-modal__hint" id="feedbackError" data-state="" aria-live="polite"></p>
+                            <div class="diagnosis-modal__actions">
+                                <button type="button" id="feedbackSubmitButton">提交反馈</button>
+                                <button type="button" id="feedbackCancelButton">取消</button>
+                            </div>
+                        </div>
+                    </div>
                 </form>
 
                 <aside class="diagnosis-result" id="diagnosisResult" aria-live="polite">
@@ -132,6 +157,6 @@
             </div>
         </section>
     </main>
-    <script src="app.js?v=20260519-target-required"></script>
+    <script src="app.js?v=20260519-understanding-feedback"></script>
 </body>
 </html>

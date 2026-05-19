@@ -1195,6 +1195,153 @@ svg {
     color: #e3a28f;
 }
 
+.diagnosis-understanding {
+    margin: 26px 0 28px;
+    padding: 24px;
+    border: 1px solid rgba(201, 168, 117, 0.22);
+    background:
+        linear-gradient(145deg, rgba(201, 168, 117, 0.08), transparent 46%),
+        rgba(10, 9, 8, 0.34);
+}
+
+.diagnosis-understanding__head {
+    margin-bottom: 18px;
+}
+
+.diagnosis-understanding__head h3 {
+    margin-bottom: 8px;
+    font-family: var(--font-serif-cn);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+}
+
+.diagnosis-understanding__head p {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.diagnosis-understanding__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+}
+
+.diagnosis-understanding__list div {
+    min-height: 82px;
+    padding: 15px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: rgba(10, 9, 8, 0.28);
+}
+
+.diagnosis-understanding__list dt {
+    margin-bottom: 8px;
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+}
+
+.diagnosis-understanding__list dd {
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.diagnosis-understanding__meta {
+    margin-top: 12px;
+    color: var(--ink-muted);
+    font-size: 13px;
+}
+
+.diagnosis-understanding__actions {
+    margin-top: 16px;
+}
+
+.diagnosis-understanding__actions button {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid rgba(201, 168, 117, 0.34);
+    background: transparent;
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.diagnosis-understanding__actions button:hover {
+    border-color: var(--gold);
+    background: rgba(201, 168, 117, 0.12);
+    color: var(--gold-bright);
+}
+
+.diagnosis-modal--feedback {
+    align-items: start;
+    overflow-y: auto;
+}
+
+.diagnosis-modal__panel--feedback {
+    width: min(100%, 560px);
+    margin: auto 0;
+}
+
+.diagnosis-modal__options--checkbox label {
+    align-items: flex-start;
+    min-height: 42px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+}
+
+.diagnosis-modal__textarea {
+    display: grid;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.diagnosis-modal__textarea span {
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+}
+
+.diagnosis-modal__textarea textarea {
+    width: 100%;
+    min-height: 118px;
+    resize: vertical;
+    padding: 14px;
+    border: 1px solid rgba(201, 168, 117, 0.28);
+    border-radius: 0;
+    background: rgba(10, 9, 8, 0.42);
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.8;
+}
+
+.diagnosis-modal__textarea textarea::placeholder {
+    color: var(--ink-muted);
+}
+
+.diagnosis-modal__hint {
+    min-height: 22px;
+    margin: 12px 0 0;
+    color: var(--ink-muted);
+    font-size: 13px;
+}
+
+.diagnosis-modal__hint[data-state="error"] {
+    color: #e3a28f;
+}
+
+.diagnosis-modal__hint[data-state="success"] {
+    color: var(--gold-bright);
+}
+
 .diagnosis-stats {
     margin: 30px 0;
     display: grid;
@@ -1506,6 +1653,10 @@ svg {
         grid-template-columns: 1fr;
     }
 
+    .diagnosis-understanding__list {
+        grid-template-columns: 1fr;
+    }
+
     .project-detail__hero-inner {
         grid-template-columns: 1fr;
     }
@@ -1621,6 +1772,22 @@ svg {
 
     .diagnosis-stats {
         grid-template-columns: 1fr;
+    }
+
+    .diagnosis-understanding {
+        padding: 18px;
+    }
+
+    .diagnosis-modal {
+        padding: 16px;
+    }
+
+    .diagnosis-modal__panel {
+        padding: 22px;
+    }
+
+    .diagnosis-modal__actions {
+        flex-direction: column;
     }
 
     .sleeping-flame {
