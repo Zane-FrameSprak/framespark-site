@@ -19,10 +19,13 @@
     var feedbackCommentInput = document.getElementById('feedbackComment');
     var feedbackAreasContainer = document.getElementById('feedbackAreas');
     var feedbackError = document.getElementById('feedbackError');
+    var progressBox = document.getElementById('diagnosisProgress');
+    var progressSteps = document.getElementById('diagnosisProgressSteps');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
     var currentReportMarkdown = '';
     var currentDiagnosisData = null;
+    var progressTimers = [];
 
     if (!form || !fileInput || !fileName || !textInput || !uploadBox || !pasteBox || !materialTypeDialog || !materialTypeConfirmButton || !materialTypeCancelButton || !status || !result) return;
 
@@ -108,7 +111,8 @@
             formData.append('text', pastedText);
         }
         setLoading(true);
-        setStatus(inputMode === 'file_upload' ? '正在上传并解析材料...' : '正在提交并解析文本...', 'loading');
+        startProgress();
+        setStatus(inputMode === 'file_upload' ? '正在上传并处理材料...' : '正在提交并处理文本...', 'loading');
 
         try {
             var response = await fetch(API_URL, {
@@ -121,10 +125,12 @@
                 throw new Error(data && data.error && data.error.message ? data.error.message : '诊断失败，请稍后再试。');
             }
 
+            completeProgress();
             currentDiagnosisData = data;
             renderReport(data);
-            setStatus('诊断报告已生成，请查看右侧结果。', 'success');
+            setStatus('诊断完成，请查看右侧结果。', 'success');
         } catch (err) {
+            failProgress();
             currentDiagnosisData = null;
             renderError(err.message);
             setStatus(err.message, 'error');
@@ -139,6 +145,69 @@
 
         button.disabled = isLoading;
         button.textContent = isLoading ? '诊断中...' : '开始诊断';
+    }
+
+    function clearProgressTimers() {
+        progressTimers.forEach(function (id) { window.clearTimeout(id); });
+        progressTimers = [];
+    }
+
+    function resetProgressSteps() {
+        if (!progressSteps) return;
+        var items = progressSteps.querySelectorAll('li');
+        items.forEach(function (li) { li.dataset.state = 'pending'; });
+    }
+
+    function setProgressStep(stepIndex, state) {
+        if (!progressSteps) return;
+        var items = progressSteps.querySelectorAll('li');
+        items.forEach(function (li, idx) {
+            var current = idx + 1;
+            if (current < stepIndex) {
+                li.dataset.state = 'done';
+            } else if (current === stepIndex) {
+                li.dataset.state = state || 'active';
+            } else if (state === 'all-done') {
+                li.dataset.state = 'done';
+            }
+        });
+    }
+
+    function startProgress() {
+        if (!progressBox) return;
+        clearProgressTimers();
+        resetProgressSteps();
+        progressBox.hidden = false;
+        progressBox.dataset.state = 'running';
+        setProgressStep(1, 'active');
+        progressTimers.push(window.setTimeout(function () { setProgressStep(2, 'active'); }, 600));
+        progressTimers.push(window.setTimeout(function () { setProgressStep(3, 'active'); }, 1800));
+        progressTimers.push(window.setTimeout(function () { setProgressStep(4, 'active'); }, 4200));
+    }
+
+    function completeProgress() {
+        if (!progressBox) return;
+        clearProgressTimers();
+        setProgressStep(5, 'active');
+        // Briefly show step 5 then mark all done and hide
+        progressTimers.push(window.setTimeout(function () {
+            setProgressStep(99, 'all-done');
+            progressBox.dataset.state = 'success';
+        }, 250));
+        progressTimers.push(window.setTimeout(function () {
+            progressBox.hidden = true;
+            progressBox.dataset.state = '';
+        }, 1500));
+    }
+
+    function failProgress() {
+        if (!progressBox) return;
+        clearProgressTimers();
+        progressBox.dataset.state = 'error';
+        progressTimers.push(window.setTimeout(function () {
+            progressBox.hidden = true;
+            progressBox.dataset.state = '';
+        }, 2400));
     }
 
     function setStatus(message, type) {

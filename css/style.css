@@ -1195,6 +1195,87 @@ svg {
     color: #e3a28f;
 }
 
+.diagnosis-progress {
+    margin-top: 24px;
+    padding: 22px;
+    border: 1px solid rgba(201, 168, 117, 0.2);
+    background: rgba(10, 9, 8, 0.34);
+}
+
+.diagnosis-progress[hidden] {
+    display: none;
+}
+
+.diagnosis-progress__head {
+    margin-bottom: 18px;
+}
+
+.diagnosis-progress__head h3 {
+    margin-bottom: 8px;
+    font-family: var(--font-serif-cn);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+}
+
+.diagnosis-progress__head p:last-child {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.diagnosis-progress__steps {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+}
+
+.diagnosis-progress__steps li {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--ink-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.diagnosis-progress__marker {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    color: var(--gold);
+    font-size: 11px;
+    line-height: 1;
+}
+
+.diagnosis-progress__steps li[data-state="active"] {
+    color: var(--ink);
+}
+
+.diagnosis-progress__steps li[data-state="active"] .diagnosis-progress__marker {
+    border-color: rgba(201, 168, 117, 0.72);
+    background: rgba(201, 168, 117, 0.12);
+    color: var(--gold-bright);
+}
+
+.diagnosis-progress__steps li[data-state="done"] {
+    color: var(--ink-soft);
+}
+
+.diagnosis-progress__steps li[data-state="done"] .diagnosis-progress__marker {
+    border-color: rgba(201, 168, 117, 0.52);
+    background: var(--gold);
+    color: var(--bg);
+}
+
+.diagnosis-progress[data-state="error"] {
+    border-color: rgba(227, 162, 143, 0.32);
+}
+
 .diagnosis-understanding {
     margin: 26px 0 28px;
     padding: 24px;
@@ -1774,6 +1855,7 @@ svg {
         grid-template-columns: 1fr;
     }
 
+    .diagnosis-progress,
     .diagnosis-understanding {
         padding: 18px;
     }

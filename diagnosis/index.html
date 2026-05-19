@@ -96,6 +96,21 @@
                         <p id="diagnosisStatus" role="status">请选择材料并开始诊断。</p>
                     </div>
 
+                    <section class="diagnosis-progress" id="diagnosisProgress" aria-live="polite" hidden>
+                        <header class="diagnosis-progress__head">
+                            <p class="subpage-kicker">PROCESSING</p>
+                            <h3>诊断进行中</h3>
+                            <p>系统会根据材料形态自动选择诊断深度，处理时间会因材料长度不同而变化。</p>
+                        </header>
+                        <ol class="diagnosis-progress__steps" id="diagnosisProgressSteps">
+                            <li data-step="1"><span class="diagnosis-progress__marker">1</span><span class="diagnosis-progress__label">正在接收材料</span></li>
+                            <li data-step="2"><span class="diagnosis-progress__marker">2</span><span class="diagnosis-progress__label">正在解析文本内容</span></li>
+                            <li data-step="3"><span class="diagnosis-progress__marker">3</span><span class="diagnosis-progress__label">正在识别材料阶段</span></li>
+                            <li data-step="4"><span class="diagnosis-progress__marker">4</span><span class="diagnosis-progress__label">正在生成故事开发诊断</span></li>
+                            <li data-step="5"><span class="diagnosis-progress__marker">5</span><span class="diagnosis-progress__label">正在整理诊断报告</span></li>
+                        </ol>
+                    </section>
+
                     <div class="diagnosis-modal" id="materialTypeDialog" role="dialog" aria-modal="true" aria-labelledby="materialTypeDialogTitle" hidden>
                         <div class="diagnosis-modal__panel">
                             <h3 id="materialTypeDialogTitle">请选择目标方向</h3>
