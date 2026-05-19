@@ -36,20 +36,20 @@
         platforms: [
             {
                 number: '01',
-                status: '开发中',
+                status: 'MVP 已开放',
                 title: '故事开发诊断系统',
                 freeLabel: '免费',
                 english: 'FRAMESPARK STORY DEVELOPMENT DIAGNOSIS',
-                description: '面向编剧与创作者的 AI 故事开发诊断工具。系统会根据材料阶段生成清晰、具体、可执行的诊断报告。',
+                description: '面向创作者的故事开发诊断工具',
                 href: 'diagnosis/'
             },
             {
                 number: '02',
                 status: '开发中',
-                title: '帧火花人才平台',
+                title: '项目人才生态平台',
                 freeLabel: '',
-                english: 'FRAMESPARK TALENT',
-                description: '连接影视雇佣方与从业者的专业网络。以双边档案、合作记录与可信度体系为基础，为行业合作沉淀更清晰的信用记录。',
+                english: 'FRAMESPARK PROJECT & TALENT',
+                description: '连接项目与人才的影视创作者生态',
                 href: 'talent/'
             }
         ],
