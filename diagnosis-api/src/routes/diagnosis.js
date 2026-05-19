@@ -62,7 +62,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       };
     }
 
-    await logDiagnosisResult({
+    const logEntry = await logDiagnosisResult({
       mode,
       materialType,
       materialRouting,
@@ -75,6 +75,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     res.json({
       ok: true,
       mode,
+      diagnosisId: logEntry?.id || null,
       internalStage: result.internalStage,
       materialType,
       userSelectedType,

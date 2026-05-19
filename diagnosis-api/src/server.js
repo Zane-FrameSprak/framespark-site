@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import { config } from './config.js';
 import { diagnosisRouter } from './routes/diagnosis.js';
+import { feedbackRouter } from './routes/feedback.js';
 import { hasAiProvider } from './services/aiClient.js';
 import { ApiError } from './utils/errors.js';
 
@@ -20,6 +21,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/diagnosis', diagnosisRouter);
+app.use('/api/diagnosis-feedback', feedbackRouter);
 
 app.use((req, res) => {
   res.status(404).json({
