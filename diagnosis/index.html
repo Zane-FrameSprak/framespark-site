@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自研剧本诊断系统 | FrameSpark 帧火花</title>
-    <meta name="description" content="帧火花自研剧本诊断系统，支持上传文本材料并生成剧本诊断报告。">
+    <title>故事开发诊断系统 | FrameSpark 帧火花</title>
+    <meta name="description" content="帧火花故事开发诊断系统，支持提交故事材料并生成故事开发诊断报告。">
     <meta name="theme-color" content="#0a0908">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,22 +39,22 @@
     </header>
 
     <main class="subpage-main">
-        <section class="subpage-hero">
+        <section class="subpage-hero diagnosis-hero">
             <div class="subpage-hero__inner">
-                <p class="subpage-kicker">SCRIPT DIAGNOSIS</p>
-                <h1>自研剧本诊断系统</h1>
-                <p class="subpage-lead">面向编剧与创作者的 AI 剧本诊断工具。系统会根据材料完整度生成当前适合的诊断报告。</p>
+                <p class="subpage-kicker">STORY DEVELOPMENT DIAGNOSIS</p>
+                <h1>故事开发诊断系统</h1>
+                <p class="subpage-lead">面向编剧与创作者的 AI 故事开发诊断工具。系统会根据材料阶段生成当前适合的诊断报告。</p>
                 <a class="back-link" href="../index.html#platforms">BACK TO HOME</a>
             </div>
         </section>
 
-        <section class="subpage-section">
+        <section class="subpage-section diagnosis-section">
             <div class="subpage-section__inner diagnosis-console">
                 <form class="diagnosis-form" id="diagnosisForm">
                     <div class="diagnosis-form__head">
-                        <p class="subpage-kicker">SCRIPT DIAGNOSIS</p>
-                        <h2>上传剧本材料</h2>
-                        <p>系统将根据材料完整度生成当前适合的诊断报告。支持 TXT / DOCX，文件大小不超过 10MB。</p>
+                        <p class="subpage-kicker">STORY DEVELOPMENT DIAGNOSIS</p>
+                        <h2>提交故事材料</h2>
+                        <p>系统将根据材料阶段生成当前适合的诊断报告。支持 TXT / DOCX，文件大小不超过 10MB。</p>
                     </div>
 
                     <label class="diagnosis-field">
@@ -67,29 +67,21 @@
                         </select>
                     </label>
 
-                    <fieldset class="diagnosis-mode" aria-label="提交方式">
-                        <legend>提交方式</legend>
-                        <label>
-                            <input type="radio" name="inputMode" value="file_upload" checked>
-                            <span>上传文件</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="inputMode" value="pasted_text">
-                            <span>粘贴文本</span>
-                        </label>
-                    </fieldset>
-
-                    <label class="diagnosis-upload" for="diagnosisFile" id="diagnosisUploadBox">
-                        <span class="diagnosis-upload__label">选择文件</span>
-                        <strong id="diagnosisFileName">未选择文件</strong>
-                        <small>支持 TXT / DOCX，文件大小不超过 10MB</small>
-                        <input id="diagnosisFile" name="file" type="file" accept=".txt,.docx">
-                    </label>
-
-                    <label class="diagnosis-paste" id="diagnosisPasteBox" hidden>
-                        <span>粘贴文本</span>
-                        <textarea id="diagnosisText" name="text" placeholder="请粘贴你的剧本、梗概、大纲、人物小传、世界观设定或片段文本"></textarea>
-                    </label>
+                    <section class="diagnosis-material" aria-labelledby="diagnosisMaterialTitle">
+                        <div class="diagnosis-material__head">
+                            <span id="diagnosisMaterialTitle">故事材料</span>
+                            <p>可直接粘贴文本，也可上传 TXT / DOCX 文件。系统会根据材料阶段选择适合的诊断方式。</p>
+                        </div>
+                        <textarea id="diagnosisText" name="text" placeholder="可粘贴故事概念、梗概、大纲、人物小传、世界观设定、片段文本或完整剧本。"></textarea>
+                        <div class="diagnosis-material__upload">
+                            <label class="diagnosis-file-button" for="diagnosisFile">
+                                上传 TXT / DOCX
+                                <input id="diagnosisFile" name="file" type="file" accept=".txt,.docx">
+                            </label>
+                            <span id="diagnosisFileName">未选择文件</span>
+                            <small>不超过 10MB。已选择文件时，将优先使用上传文件。</small>
+                        </div>
+                    </section>
 
                     <div class="diagnosis-actions">
                         <button class="diagnosis-submit" type="submit">开始诊断</button>
@@ -97,18 +89,12 @@
                     </div>
 
                     <section class="diagnosis-progress" id="diagnosisProgress" aria-live="polite" hidden>
-                        <header class="diagnosis-progress__head">
-                            <p class="subpage-kicker">PROCESSING</p>
+                        <span class="diagnosis-progress__pulse" aria-hidden="true"></span>
+                        <div class="diagnosis-progress__copy">
+                            <p class="diagnosis-progress__eyebrow" id="diagnosisProgressCurrent">正在接收材料</p>
                             <h3>诊断进行中</h3>
-                            <p>系统会根据材料形态自动选择诊断深度，处理时间会因材料长度不同而变化。</p>
-                        </header>
-                        <ol class="diagnosis-progress__steps" id="diagnosisProgressSteps">
-                            <li data-step="1"><span class="diagnosis-progress__marker">1</span><span class="diagnosis-progress__label">正在接收材料</span></li>
-                            <li data-step="2"><span class="diagnosis-progress__marker">2</span><span class="diagnosis-progress__label">正在解析文本内容</span></li>
-                            <li data-step="3"><span class="diagnosis-progress__marker">3</span><span class="diagnosis-progress__label">正在识别材料阶段</span></li>
-                            <li data-step="4"><span class="diagnosis-progress__marker">4</span><span class="diagnosis-progress__label">正在生成故事开发诊断</span></li>
-                            <li data-step="5"><span class="diagnosis-progress__marker">5</span><span class="diagnosis-progress__label">正在整理诊断报告</span></li>
-                        </ol>
+                            <p id="diagnosisProgressDetail">系统正在识别材料阶段并生成适合当前材料的诊断报告，请稍候。</p>
+                        </div>
                     </section>
 
                     <div class="diagnosis-modal" id="materialTypeDialog" role="dialog" aria-modal="true" aria-labelledby="materialTypeDialogTitle" hidden>

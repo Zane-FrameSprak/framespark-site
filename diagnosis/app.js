@@ -8,8 +8,6 @@
     var fileInput = document.getElementById('diagnosisFile');
     var fileName = document.getElementById('diagnosisFileName');
     var textInput = document.getElementById('diagnosisText');
-    var uploadBox = document.getElementById('diagnosisUploadBox');
-    var pasteBox = document.getElementById('diagnosisPasteBox');
     var materialTypeDialog = document.getElementById('materialTypeDialog');
     var materialTypeConfirmButton = document.getElementById('materialTypeConfirmButton');
     var materialTypeCancelButton = document.getElementById('materialTypeCancelButton');
@@ -20,29 +18,34 @@
     var feedbackAreasContainer = document.getElementById('feedbackAreas');
     var feedbackError = document.getElementById('feedbackError');
     var progressBox = document.getElementById('diagnosisProgress');
-    var progressSteps = document.getElementById('diagnosisProgressSteps');
+    var progressCurrent = document.getElementById('diagnosisProgressCurrent');
+    var progressDetail = document.getElementById('diagnosisProgressDetail');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
     var currentReportMarkdown = '';
     var currentDiagnosisData = null;
     var progressTimers = [];
+    var progressMessages = [
+        '正在接收材料……',
+        '正在解析文本内容……',
+        '正在识别材料阶段……',
+        '正在生成故事开发诊断……',
+        '正在整理诊断报告……'
+    ];
 
-    if (!form || !fileInput || !fileName || !textInput || !uploadBox || !pasteBox || !materialTypeDialog || !materialTypeConfirmButton || !materialTypeCancelButton || !status || !result) return;
+    if (!form || !fileInput || !fileName || !textInput || !materialTypeDialog || !materialTypeConfirmButton || !materialTypeCancelButton || !status || !result) return;
 
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
         fileName.textContent = file ? file.name : '未选择文件';
+        if (file) {
+            setStatus('已选择文件，将优先使用上传文件。', '');
+        }
     });
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
         submitDiagnosis();
-    });
-
-    form.addEventListener('change', function (event) {
-        if (event.target && event.target.name === 'inputMode') {
-            syncInputMode();
-        }
     });
 
     materialTypeConfirmButton.addEventListener('click', function () {
@@ -81,24 +84,19 @@
     }
 
     form.elements.materialType.value = '';
-    syncInputMode();
 
     async function submitDiagnosis() {
-        var inputMode = getInputMode();
         var materialType = form.elements.materialType.value;
         var file = fileInput.files && fileInput.files[0];
         var pastedText = textInput.value.trim();
+        var inputMode = file ? 'file_upload' : 'pasted_text';
 
+        if (!file && !pastedText) {
+            setStatus('请粘贴文本或上传 TXT / DOCX 文件。', 'error');
+            return;
+        }
         if (!materialType) {
             showMaterialTypeDialog();
-            return;
-        }
-        if (inputMode === 'file_upload' && !file) {
-            setStatus('请先选择一个 .txt 或 .docx 文件。', 'error');
-            return;
-        }
-        if (inputMode === 'pasted_text' && !pastedText) {
-            setStatus('请先粘贴需要诊断的文本。', 'error');
             return;
         }
 
@@ -111,8 +109,8 @@
             formData.append('text', pastedText);
         }
         setLoading(true);
-        startProgress();
-        setStatus(inputMode === 'file_upload' ? '正在上传并处理材料...' : '正在提交并处理文本...', 'loading');
+        startProgress(inputMode);
+        setStatus('', 'loading');
 
         try {
             var response = await fetch(API_URL, {
@@ -152,81 +150,53 @@
         progressTimers = [];
     }
 
-    function resetProgressSteps() {
-        if (!progressSteps) return;
-        var items = progressSteps.querySelectorAll('li');
-        items.forEach(function (li) { li.dataset.state = 'pending'; });
+    function setProgressMessage(index) {
+        if (!progressCurrent) return;
+        progressCurrent.textContent = progressMessages[index] || progressMessages[0];
     }
 
-    function setProgressStep(stepIndex, state) {
-        if (!progressSteps) return;
-        var items = progressSteps.querySelectorAll('li');
-        items.forEach(function (li, idx) {
-            var current = idx + 1;
-            if (current < stepIndex) {
-                li.dataset.state = 'done';
-            } else if (current === stepIndex) {
-                li.dataset.state = state || 'active';
-            } else if (state === 'all-done') {
-                li.dataset.state = 'done';
-            }
-        });
-    }
-
-    function startProgress() {
+    function startProgress(inputMode) {
         if (!progressBox) return;
         clearProgressTimers();
-        resetProgressSteps();
         progressBox.hidden = false;
         progressBox.dataset.state = 'running';
-        setProgressStep(1, 'active');
-        progressTimers.push(window.setTimeout(function () { setProgressStep(2, 'active'); }, 600));
-        progressTimers.push(window.setTimeout(function () { setProgressStep(3, 'active'); }, 1800));
-        progressTimers.push(window.setTimeout(function () { setProgressStep(4, 'active'); }, 4200));
+        if (progressCurrent) {
+            progressCurrent.textContent = inputMode === 'file_upload' ? '正在上传并处理文件……' : '正在提交并处理文本……';
+        }
+        if (progressDetail) {
+            progressDetail.textContent = '系统正在识别材料阶段并生成适合当前材料的诊断报告，请稍候。';
+        }
+        progressTimers.push(window.setTimeout(function () { setProgressMessage(inputMode === 'file_upload' ? 0 : 1); }, 700));
+        progressTimers.push(window.setTimeout(function () { setProgressMessage(2); }, 1800));
+        progressTimers.push(window.setTimeout(function () { setProgressMessage(3); }, 4200));
+        progressTimers.push(window.setTimeout(function () { setProgressMessage(4); }, 7600));
     }
 
     function completeProgress() {
         if (!progressBox) return;
         clearProgressTimers();
-        setProgressStep(5, 'active');
-        // Briefly show step 5 then mark all done and hide
-        progressTimers.push(window.setTimeout(function () {
-            setProgressStep(99, 'all-done');
-            progressBox.dataset.state = 'success';
-        }, 250));
+        setProgressMessage(4);
+        if (progressDetail) {
+            progressDetail.textContent = '诊断完成，请查看报告。';
+        }
+        progressBox.dataset.state = 'success';
         progressTimers.push(window.setTimeout(function () {
             progressBox.hidden = true;
             progressBox.dataset.state = '';
-        }, 1500));
+        }, 900));
     }
 
     function failProgress() {
         if (!progressBox) return;
         clearProgressTimers();
         progressBox.dataset.state = 'error';
-        progressTimers.push(window.setTimeout(function () {
-            progressBox.hidden = true;
-            progressBox.dataset.state = '';
-        }, 2400));
+        if (progressCurrent) progressCurrent.textContent = '诊断未完成';
+        if (progressDetail) progressDetail.textContent = '请根据页面提示检查材料后重试。';
     }
 
     function setStatus(message, type) {
         status.textContent = message;
         status.dataset.state = type || '';
-    }
-
-    function getInputMode() {
-        var checked = form.querySelector('input[name="inputMode"]:checked');
-        return checked && checked.value === 'pasted_text' ? 'pasted_text' : 'file_upload';
-    }
-
-    function syncInputMode() {
-        var isPastedText = getInputMode() === 'pasted_text';
-        uploadBox.hidden = isPastedText;
-        pasteBox.hidden = !isPastedText;
-        fileInput.disabled = isPastedText;
-        textInput.disabled = !isPastedText;
-        setStatus(isPastedText ? '请粘贴文本并开始诊断。' : '请选择材料并开始诊断。', '');
     }
 
     function showMaterialTypeDialog() {
@@ -375,14 +345,15 @@
 
     function renderUnderstandingZone(materialInfo, stats) {
         var rows = [
-            ['你选择的目标方向', materialInfo.targetFormat],
-            ['系统识别的材料形态', materialInfo.materialForm],
-            ['本次诊断方式', materialInfo.diagnosisMethod],
-            ['材料识别说明', materialInfo.notice || '系统已根据材料形态选择当前适合的诊断方式。']
+            ['目标方向', materialInfo.targetFormat],
+            ['材料形态', materialInfo.materialForm],
+            ['诊断方式', materialInfo.diagnosisMethod],
+            ['字数', String(stats.charCount || 0)]
         ];
+        var notice = materialInfo.notice || '系统已根据材料形态选择当前适合的诊断方式。';
 
         var rowsHtml = rows.map(function (row) {
-            return '<div><dt>' + escapeHtml(row[0]) + '</dt><dd>' + escapeHtml(String(row[1] || '—')) + '</dd></div>';
+            return '<div><span>' + escapeHtml(row[0]) + '</span><strong>' + escapeHtml(String(row[1] || '—')) + '</strong></div>';
         }).join('');
 
         return [
@@ -390,17 +361,32 @@
             '<header class="diagnosis-understanding__head">',
             '<p class="subpage-kicker">SYSTEM UNDERSTANDING</p>',
             '<h3>系统理解</h3>',
-            '<p>以下是系统对你本次提交材料的理解。如果你认为理解有误，可以反馈给我们用于改进诊断系统。</p>',
             '</header>',
-            '<dl class="diagnosis-understanding__list">',
+            '<p class="diagnosis-understanding__intro">以下是系统对你本次提交材料的理解。若有误，可反馈用于改进。</p>',
+            '<div class="diagnosis-understanding__grid">',
             rowsHtml,
-            '</dl>',
-            '<p class="diagnosis-understanding__meta">字数：' + escapeHtml(String(stats.charCount || 0)) + '</p>',
-            '<div class="diagnosis-understanding__actions">',
-            '<button type="button" data-action="open-feedback">理解有误</button>',
+            '</div>',
+            '<p class="diagnosis-understanding__notice"><span>材料识别说明</span>' + escapeHtml(notice) + '</p>',
+            '<div class="diagnosis-understanding__feedback">',
+            '<p>系统理解是否准确？</p>',
+            '<div class="diagnosis-understanding__feedback-actions">',
+            '<button type="button" data-action="confirm-understanding">准确</button>',
+            '<button type="button" data-action="open-feedback">有误</button>',
+            '</div>',
+            '<span id="diagnosisUnderstandingFeedback" aria-live="polite"></span>',
             '</div>',
             '</section>'
         ].join('');
+    }
+
+    function setUnderstandingFeedback(message) {
+        var node = document.getElementById('diagnosisUnderstandingFeedback');
+        if (!node) return;
+        node.textContent = message || '';
+        window.clearTimeout(setUnderstandingFeedback.timer);
+        setUnderstandingFeedback.timer = window.setTimeout(function () {
+            node.textContent = '';
+        }, 2200);
     }
 
     function renderError(message) {
@@ -416,9 +402,14 @@
     }
 
     result.addEventListener('click', function (event) {
-        var actionButton = event.target.closest('[data-action="open-feedback"]');
-        if (actionButton) {
+        var openFeedbackButton = event.target.closest('[data-action="open-feedback"]');
+        if (openFeedbackButton) {
             showFeedbackDialog();
+            return;
+        }
+        var confirmButton = event.target.closest('[data-action="confirm-understanding"]');
+        if (confirmButton) {
+            setUnderstandingFeedback('感谢确认。');
             return;
         }
         var button = event.target.closest('[data-report-action]');
@@ -552,11 +543,16 @@
             };
         }
 
+        var targetFormat = routing.targetFormat;
+        if (targetFormat === 'unknown' && routing.userSelectedType === 'other') {
+            targetFormat = 'other';
+        }
+
         return {
-            targetFormat: formatTargetFormat(routing.targetFormat),
+            targetFormat: formatTargetFormat(targetFormat),
             materialForm: formatMaterialForm(routing.materialForm),
             diagnosisMethod: formatDiagnosisMethod(routing.effectiveDiagnosisType || data.materialType),
-            notice: formatRoutingNotice(routing)
+            notice: formatUserVisibleEnums(formatRoutingNotice(routing))
         };
     }
 
@@ -564,6 +560,7 @@
         var map = {
             short: '短片',
             feature: '长片',
+            other: '其他 / 不确定',
             unknown: '未明确'
         };
         return map[value] || '未明确';
@@ -596,6 +593,27 @@
         if (!routing) return '';
         if (routing.notice) return routing.notice;
         return '系统已根据材料形态选择当前适合的诊断方式。';
+    }
+
+    function formatUserVisibleEnums(value) {
+        var text = String(value || '');
+        var enumMap = {
+            character_bio: '人物小传',
+            worldbuilding: '世界观设定',
+            full_script: '完整剧本',
+            synopsis: '梗概',
+            concept: '故事概念',
+            outline: '大纲',
+            fragment: '片段文本',
+            feature: '长片',
+            short: '短片',
+            other: '其他 / 不确定',
+            unknown: '未明确形态的创意材料'
+        };
+        Object.keys(enumMap).forEach(function (key) {
+            text = text.replace(new RegExp('\\b' + key + '\\b', 'g'), enumMap[key]);
+        });
+        return text;
     }
 
     function escapeHtml(value) {
