@@ -42,16 +42,22 @@ export async function routeMaterial({ userSelectedType, text, originalFileName =
     if (!aiMaterialForm) {
       throw new Error('AI materialForm is invalid.');
     }
+    const guardedAiAnalysis = guardAiMaterialForm({
+      text,
+      aiMaterialForm,
+      aiReason: String(aiAnalysis.reason || '').trim(),
+      localAnalysis
+    });
 
     return buildRoutingResult({
       userSelectedType: normalizedUserType,
       targetFormat,
-      materialForm: aiMaterialForm,
-      reason: String(aiAnalysis.reason || '').trim() || localAnalysis.reason,
+      materialForm: guardedAiAnalysis.materialForm,
+      reason: guardedAiAnalysis.reason,
       localAnalysis,
       aiMaterialForm,
-      classificationSource: 'ai',
-      classificationReason: String(aiAnalysis.reason || '').trim() || 'AI 完成材料形态识别。'
+      classificationSource: guardedAiAnalysis.classificationSource,
+      classificationReason: guardedAiAnalysis.classificationReason
     });
   } catch (err) {
     return buildRoutingResult({
@@ -65,6 +71,46 @@ export async function routeMaterial({ userSelectedType, text, originalFileName =
       classificationReason: `轻量 AI 分类失败，已回退本地规则：${err.message}`
     });
   }
+}
+
+function guardAiMaterialForm({ text, aiMaterialForm, aiReason, localAnalysis }) {
+  const normalized = normalizeText(text);
+  const charCount = normalized.replace(/\s/g, '').length;
+  const hasShortPremise = isShortStoryPremise(normalized.slice(0, 5000), charCount);
+
+  if (aiMaterialForm === 'synopsis' && charCount < 300) {
+    if (localAnalysis.materialForm === 'concept') {
+      return {
+        materialForm: 'concept',
+        reason: localAnalysis.reason,
+        classificationSource: 'guarded_ai',
+        classificationReason: `AI 返回 synopsis，但文本少于 300 字且本地已识别为 concept，已按短概念边界保留 concept。AI 理由：${aiReason || '未提供'}`
+      };
+    }
+
+    if (localAnalysis.materialForm === 'unknown' && hasShortPremise) {
+      return {
+        materialForm: 'concept',
+        reason: '文本少于 300 字，但已具备人物/主体、处境/设定、压力/冲突/代价或事件方向等最小故事前提，按概念处理。',
+        classificationSource: 'guarded_ai',
+        classificationReason: `AI 返回 synopsis，但文本少于 300 字且具备短概念前提信号，已降级为 concept。AI 理由：${aiReason || '未提供'}`
+      };
+    }
+
+    return {
+      materialForm: localAnalysis.materialForm,
+      reason: localAnalysis.reason,
+      classificationSource: 'guarded_ai',
+      classificationReason: `AI 返回 synopsis，但文本少于 300 字，已回退本地 ${localAnalysis.materialForm}，由 guard 继续判断准入。AI 理由：${aiReason || '未提供'}`
+    };
+  }
+
+  return {
+    materialForm: aiMaterialForm,
+    reason: aiReason || localAnalysis.reason,
+    classificationSource: 'ai',
+    classificationReason: aiReason || 'AI 完成材料形态识别。'
+  };
 }
 
 function buildRoutingResult({

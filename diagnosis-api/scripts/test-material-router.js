@@ -258,7 +258,9 @@ const aiCases = [
 
 主角是一名声音修复师，她接到一盘二十年前的事故录音。录音里有父亲失踪前最后一句话，也有一个被当年调查忽略的爆炸声。她起初只想修复声音交给委托人，却发现每一段杂音都能对应到旧案现场的一个细节。
 
-随着她重新走访当年的工厂、医院和幸存者，她发现父亲并不是事故受害者，而是知道真相后主动消失的人。最终，她必须决定公开录音，让母亲多年维持的平静被打破，还是继续让旧案留在沉默里。结尾，她在公开听证会上播放修复后的完整录音。`,
+随着她重新走访当年的工厂、医院和幸存者，她发现父亲并不是事故受害者，而是知道真相后主动消失的人。旧同事提醒她，当年的事故牵涉多方利益，任何公开都会让母亲多年维持的平静被打破。她一度放弃调查，却在母亲保存的旧信里发现父亲留下的第二盘录音。
+
+中段以后，她必须在家庭安全和公开真相之间选择。对立力量开始销毁证据，委托人也承认自己最初只是想确认父亲是否背叛家庭。最终，她在公开听证会上播放修复后的完整录音，让旧案重新进入调查，也第一次理解父亲当年为什么选择沉默。结尾，她回到录音棚，删除了为企业宣传片修饰事故噪音的项目文件。`,
     classifier: async () => ({
       materialForm: 'synopsis',
       reason: '文本概括完整故事走向，属于梗概。'
@@ -269,6 +271,40 @@ const aiCases = [
       classificationSource: 'ai',
       effectiveDiagnosisType: 'other',
       targetFormat: 'feature'
+    }
+  },
+  {
+    name: '本地 concept + AI 返回 synopsis 时保留 concept',
+    userSelectedType: 'short',
+    text: `拆迁区最后一夜，卖烤冷面的老周遇到一个离家出走的女孩。女孩说，只要他帮她躲过来找人的父亲，她就告诉他一个关于老街的秘密。老周知道，帮她会错过搬家货车，也可能被误解；不帮她，女孩会被带走。天亮前，女孩消失了，只在摊车上留下一幅画。老周推着空车驶向新城区。`,
+    classifier: async () => ({
+      materialForm: 'synopsis',
+      reason: '文本概括了完整故事走向，属于梗概。'
+    }),
+    expect: {
+      materialForm: 'concept',
+      aiMaterialForm: 'synopsis',
+      classificationSource: 'guarded_ai',
+      effectiveDiagnosisType: 'other',
+      targetFormat: 'short',
+      guardPass: true
+    }
+  },
+  {
+    name: '本地 unknown + AI 返回 synopsis + 短前提时转 concept',
+    userSelectedType: 'short',
+    text: `退休售票员老赵守着即将关闭的旧车站，遇到一个坚持等末班车的孩子。孩子说母亲会从那班车下来，但车站记录显示线路三年前已经停运。老赵可以关门离开，也可以陪他等到天亮。天亮时，孩子不见了，候车椅上多了一张过期车票。`,
+    classifier: async () => ({
+      materialForm: 'synopsis',
+      reason: '文本有开端发展和结尾，属于梗概。'
+    }),
+    expect: {
+      materialForm: 'concept',
+      aiMaterialForm: 'synopsis',
+      classificationSource: 'guarded_ai',
+      effectiveDiagnosisType: 'other',
+      targetFormat: 'short',
+      guardPass: true
     }
   }
 ];
@@ -285,6 +321,12 @@ for (const testCase of aiCases) {
   for (const field of ['materialForm', 'aiMaterialForm', 'classificationSource', 'effectiveDiagnosisType', 'targetFormat']) {
     if (routing[field] !== testCase.expect[field]) {
       errors.push(`${field} expected ${testCase.expect[field]}, got ${routing[field]}`);
+    }
+  }
+  if ('guardPass' in testCase.expect) {
+    const guardResult = runGuard(testCase.text, routing);
+    if (guardResult.passed !== testCase.expect.guardPass) {
+      errors.push(`guardPass expected ${testCase.expect.guardPass}, got ${guardResult.passed}`);
     }
   }
 
