@@ -81,6 +81,10 @@ const featureFullScript = `
 周岚：我不知道。但这次他们必须回答。
 `.repeat(3);
 
+const noAiClassifier = async () => {
+  throw new Error('mock classifier disabled for local material-router test');
+};
+
 const cases = [
   {
     name: 'feature + 长片梗概',
@@ -107,6 +111,12 @@ const cases = [
     userSelectedType: 'short',
     text: '如果一个人每天醒来都忘记昨天，会怎样？',
     expect: { materialForm: 'concept', effectiveDiagnosisType: 'other', targetFormat: 'short', guardPass: false, errorCode: 'FILE_TOO_SHORT' }
+  },
+  {
+    name: 'short + 极短故事前提（最后的烤冷面）',
+    userSelectedType: 'short',
+    text: `拆迁区最后一夜，卖烤冷面的老周遇到一个离家出走的女孩。女孩说，只要他帮她躲过来找人的父亲，她就告诉他一个关于老街的秘密。老周知道，帮她会错过搬家货车，也可能被误解；不帮她，女孩会被带走。天亮前，女孩消失了，只在摊车上留下一幅画。老周推着空车驶向新城区。`,
+    expect: { materialForm: 'concept', effectiveDiagnosisType: 'other', targetFormat: 'short', guardPass: true }
   },
   {
     name: 'short + 完整短片剧本',
@@ -156,6 +166,36 @@ const cases = [
     expect: { materialForm: 'fragment', effectiveDiagnosisType: 'other', targetFormat: 'short', guardPass: true }
   },
   {
+    name: 'short + 局部剧本片段（天台上的宇航员）',
+    userSelectedType: 'short',
+    text: `1. 外 景 天台 夜
+城市的霓虹在远处闪。阿澈穿着旧宇航服坐在水箱旁，头盔放在脚边。
+小满推开铁门，手里拿着一只坏掉的录音笔。
+小满：你又在这里。
+阿澈：这里离月亮近一点。
+小满：你明天就要搬走了。
+阿澈：所以今晚要完成发射。
+小满把录音笔递给他。
+小满：这是你妈留下的。
+阿澈没有接。
+阿澈：她说过，宇航员不能回头。
+小满：她还说过，你不是宇航员。
+风吹动塑料旗。楼下传来搬家公司关门的声音。
+阿澈终于按下录音笔，里面只有一段很长的杂音，像海浪。
+小满：你听见了吗？
+阿澈：听见了。
+小满：是什么？
+阿澈抬头看月亮。
+阿澈：倒计时。
+他戴上头盔，站到天台边缘。小满抓住他的袖子，没有说话。
+远处烟花响起，录音笔里的杂音被盖过去。
+小满慢慢松开手，把那只录音笔放进他的口袋。
+小满：明天你还会来吗？
+阿澈：宇航员不会回答地面问题。
+铁门被风吹得来回撞。两个人都没有再往前一步，只是站在天台边，看着烟花一点点熄灭。`,
+    expect: { materialForm: 'fragment', effectiveDiagnosisType: 'other', targetFormat: 'short', guardPass: true }
+  },
+  {
     name: '无关简历材料',
     userSelectedType: 'feature',
     text: `个人简历
@@ -175,7 +215,8 @@ for (const testCase of cases) {
   const routing = await routeMaterial({
     userSelectedType: testCase.userSelectedType,
     text: testCase.text,
-    originalFileName: `${testCase.name}.txt`
+    originalFileName: `${testCase.name}.txt`,
+    classifier: noAiClassifier
   });
   const errors = [];
 

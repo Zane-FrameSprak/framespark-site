@@ -132,8 +132,8 @@ export function detectMaterialFormByRules(text) {
   const dialogueCount = countDialogueLines(lines);
   const hasScriptFormat = scriptScore >= 4 || sceneCount >= 2 || dialogueCount >= 6;
 
-  if (hasScriptFormat && (sceneCount >= 3 || dialogueCount >= 12 || charCount >= 3000)) {
-    return { materialForm: 'full_script', reason: '文本包含明显剧本格式和多个连续场景，按完整剧本材料处理。' };
+  if (hasScriptFormat && isLikelyFullScript({ text: firstPart, sceneCount, dialogueCount, charCount })) {
+    return { materialForm: 'full_script', reason: '文本包含明显剧本格式，并呈现多场推进、故事阶段或结尾方向，按完整剧本材料处理。' };
   }
   if (hasScriptFormat) {
     return { materialForm: 'fragment', reason: '文本包含剧本格式或对白场景，但只呈现局部段落，未显示完整故事走向。' };
@@ -169,7 +169,7 @@ export function detectMaterialFormByRules(text) {
     return { materialForm: 'character_bio', reason: '文本主要围绕人物背景、性格、经历和关系展开，按人物小传处理。' };
   }
 
-  if (isConcept(firstPart, charCount)) {
+  if (isConcept(firstPart, charCount) || isShortStoryPremise(firstPart, charCount)) {
     return { materialForm: 'concept', reason: '文本更接近一句话点子或高概念前提，尚未形成完整故事材料。' };
   }
 
@@ -182,7 +182,7 @@ export function detectMaterialFormByRules(text) {
   ]);
   const hasBeginningAndEnd = /(开场|一开始|故事开始|起初|最初)/.test(firstPart) &&
     /(最终|结尾|最后|结果|走向|选择|真相)/.test(firstPart);
-  if (synopsisScore >= 4 || (charCount >= 300 && hasBeginningAndEnd)) {
+  if (charCount >= 300 && (synopsisScore >= 4 || hasBeginningAndEnd)) {
     return { materialForm: 'synopsis', reason: '文本以概括方式呈现人物、冲突和故事走向，按梗概处理。' };
   }
 
@@ -295,13 +295,32 @@ function getScriptFormatScore(lines, text) {
 }
 
 function countSceneHeadings(lines) {
-  const scenePattern = /^(\d+[.、\s])?((内|外|内\/外|外\/内)[\s，,、-]*(日|夜|晨|晚|黄昏|清晨)?|场景|第[一二三四五六七八九十\d]+场|INT\.|EXT\.)/i;
+  const scenePattern = /^(\d+[.、]?\s*)?(((内|外)(\s*景)?|内\/外|外\/内)|场景|第[一二三四五六七八九十\d]+场|INT\.|EXT\.)/i;
   return lines.filter(line => scenePattern.test(line)).length;
 }
 
 function countDialogueLines(lines) {
   const dialoguePattern = /^([\u4e00-\u9fa5A-Za-z0-9·]{1,12})(（[^）]{0,16}）)?[：:]/;
   return lines.filter(line => dialoguePattern.test(line) && !/^(标题|类型|主题|人物|背景|设定|规则|目标|阻碍|核心|简介|梗概|大纲)[：:]/.test(line)).length;
+}
+
+function isLikelyFullScript({ text, sceneCount, dialogueCount, charCount }) {
+  const storyStageScore = countMatches(text, [
+    /开场|一开始|故事开始|起初|最初/g,
+    /随后|之后|接着|与此同时|直到|转折|危机|中段/g,
+    /最终|结尾|最后|结果|真相|决定|选择/g
+  ]);
+  const hasBeginningSignal = /(开场|一开始|故事开始|起初|最初|第[一1]场|1[.、\s])/.test(text);
+  const hasEndingSignal = /(最终|结尾|最后|结果|真相|决定|选择|离开|消失|留下|走向|上船|重启|公开|天色.*亮|雨停)/.test(text);
+  const hasSubstantialSceneChain = sceneCount >= 5 && charCount >= 1800;
+  const hasMultipleScenesAndEnding = sceneCount >= 3 && hasEndingSignal;
+  const hasStoryStages = sceneCount >= 3 && storyStageScore >= 2;
+  const hasLongStoryChain = charCount >= 3000 && sceneCount >= 4 && (storyStageScore >= 1 || dialogueCount >= 12);
+
+  return (hasBeginningSignal && hasMultipleScenesAndEnding) ||
+    hasStoryStages ||
+    hasSubstantialSceneChain ||
+    hasLongStoryChain;
 }
 
 function countMatches(text, patterns) {
@@ -316,6 +335,20 @@ function isConcept(text, charCount) {
     return true;
   }
   return /一句话概念|故事概念|核心概念|创意点子|高概念/.test(text) && charCount <= 600;
+}
+
+function isShortStoryPremise(text, charCount) {
+  if (charCount < 80 || charCount > 300) return false;
+
+  const signalChecks = [
+    /(主角|主人公|男孩|女孩|老人|年轻人|外卖员|保安|父亲|母亲|[一-龥]{1,4}(是一名|是个|在|发现|遇到|必须|不得不))/,
+    /(处境|设定|拆迁|最后一夜|城市|老家|医院|学校|餐馆|天台|如果|假如|当.+时|在.+(中|里|时))/,
+    /(冲突|压力|代价|阻碍|危机|必须|不得不|否则|但|却|会错过|被误解|被带走|选择)/,
+    /(最终|最后|结尾|结果|方向|消失|留下|走向|驶向|决定|选择)/
+  ];
+  const signalCount = signalChecks.reduce((total, pattern) => total + (pattern.test(text) ? 1 : 0), 0);
+
+  return signalCount >= 3;
 }
 
 function looksLikeCreativeMaterial(text) {
