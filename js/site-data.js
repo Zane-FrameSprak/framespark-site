@@ -37,10 +37,10 @@
             {
                 number: '01',
                 status: '开发中',
-                title: '自研剧本诊断系统',
+                title: '故事开发诊断系统',
                 freeLabel: '免费',
-                english: 'FRAMESPARK SCRIPT DIAGNOSIS',
-                description: '面向编剧与创作者的 AI 剧本诊断工具。系统将基于行业经验与文本分析，生成清晰、具体、可执行的诊断报告。',
+                english: 'FRAMESPARK STORY DEVELOPMENT DIAGNOSIS',
+                description: '面向编剧与创作者的 AI 故事开发诊断工具。系统会根据材料阶段生成清晰、具体、可执行的诊断报告。',
                 href: 'diagnosis/'
             },
             {
@@ -77,7 +77,7 @@
             },
             {
                 number: '05',
-                title: '剧本诊断',
+                title: '故事开发诊断',
                 description: '评估 · 报告 · 数据反馈'
             },
             {
