@@ -19,7 +19,7 @@ const CALL_DELAY_MS = 800;
 
 const REQUIRED_FIELDS = ['summary', 'core', 'strengths', 'problems', 'suggestions', 'nextStep'];
 const ARRAY_FIELDS = ['strengths', 'problems', 'suggestions'];
-const ALLOWED_PREFIXES = ['建议补充材料', '建议继续打磨', '需要重新开发', '可进入下一阶段评估', '暂不适合继续深化'];
+const ALLOWED_PREFIXES = ['建议补充材料', '建议继续打磨', '需要结构性重写', '可进入下一阶段评估', '暂不适合继续深化'];
 // 其他创意材料进阶允许简要提示风险信号，但以下绝对禁止出现
 const FORBIDDEN_TERMS = ['没有市场', '拍不出来', '没人投资', '不适合投递'];
 
