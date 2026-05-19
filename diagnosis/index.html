@@ -58,11 +58,12 @@
                     </div>
 
                     <label class="diagnosis-field">
-                        <span>材料类型</span>
+                        <span>目标方向</span>
                         <select name="materialType" id="materialType">
-                            <option value="short">短片剧本</option>
-                            <option value="feature">长片剧本（含网络电影）</option>
-                            <option value="other">大纲 / 梗概 / 其他创意材料</option>
+                            <option value="">请选择目标方向</option>
+                            <option value="short">短片方向</option>
+                            <option value="feature">长片方向</option>
+                            <option value="other">其他 / 不确定</option>
                         </select>
                     </label>
 
@@ -94,6 +95,31 @@
                         <button class="diagnosis-submit" type="submit">开始诊断</button>
                         <p id="diagnosisStatus" role="status">请选择材料并开始诊断。</p>
                     </div>
+
+                    <div class="diagnosis-modal" id="materialTypeDialog" role="dialog" aria-modal="true" aria-labelledby="materialTypeDialogTitle" hidden>
+                        <div class="diagnosis-modal__panel">
+                            <h3 id="materialTypeDialogTitle">请选择目标方向</h3>
+                            <p>你选择的是作品目标方向。系统会参考你的选择，并根据材料实际形态自动选择诊断方式。</p>
+                            <div class="diagnosis-modal__options">
+                                <label>
+                                    <input type="radio" name="materialTypeConfirm" value="short">
+                                    <span>短片方向</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="materialTypeConfirm" value="feature">
+                                    <span>长片方向</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="materialTypeConfirm" value="other">
+                                    <span>其他 / 不确定</span>
+                                </label>
+                            </div>
+                            <div class="diagnosis-modal__actions">
+                                <button type="button" id="materialTypeConfirmButton">确认并开始诊断</button>
+                                <button type="button" id="materialTypeCancelButton">取消</button>
+                            </div>
+                        </div>
+                    </div>
                 </form>
 
                 <aside class="diagnosis-result" id="diagnosisResult" aria-live="polite">
@@ -106,6 +132,6 @@
             </div>
         </section>
     </main>
-    <script src="app.js?v=20260517-export"></script>
+    <script src="app.js?v=20260519-target-required"></script>
 </body>
 </html>

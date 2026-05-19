@@ -9,10 +9,13 @@
     var textInput = document.getElementById('diagnosisText');
     var uploadBox = document.getElementById('diagnosisUploadBox');
     var pasteBox = document.getElementById('diagnosisPasteBox');
+    var materialTypeDialog = document.getElementById('materialTypeDialog');
+    var materialTypeConfirmButton = document.getElementById('materialTypeConfirmButton');
+    var materialTypeCancelButton = document.getElementById('materialTypeCancelButton');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
     var currentReportMarkdown = '';
-    if (!form || !fileInput || !fileName || !textInput || !uploadBox || !pasteBox || !status || !result) return;
+    if (!form || !fileInput || !fileName || !textInput || !uploadBox || !pasteBox || !materialTypeDialog || !materialTypeConfirmButton || !materialTypeCancelButton || !status || !result) return;
 
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
@@ -30,13 +33,40 @@
         }
     });
 
+    materialTypeConfirmButton.addEventListener('click', function () {
+        var selected = getDialogMaterialType();
+        if (!selected) {
+            setStatus('请先选择目标方向。', 'error');
+            return;
+        }
+        form.elements.materialType.value = selected;
+        hideMaterialTypeDialog();
+        submitDiagnosis();
+    });
+
+    materialTypeCancelButton.addEventListener('click', function () {
+        hideMaterialTypeDialog();
+    });
+
+    materialTypeDialog.addEventListener('click', function (event) {
+        if (event.target === materialTypeDialog) {
+            hideMaterialTypeDialog();
+        }
+    });
+
+    form.elements.materialType.value = '';
     syncInputMode();
 
     async function submitDiagnosis() {
         var inputMode = getInputMode();
+        var materialType = form.elements.materialType.value;
         var file = fileInput.files && fileInput.files[0];
         var pastedText = textInput.value.trim();
 
+        if (!materialType) {
+            showMaterialTypeDialog();
+            return;
+        }
         if (inputMode === 'file_upload' && !file) {
             setStatus('请先选择一个 .txt 或 .docx 文件。', 'error');
             return;
@@ -47,7 +77,7 @@
         }
 
         var formData = new FormData();
-        formData.append('materialType', form.elements.materialType.value);
+        formData.append('materialType', materialType);
         formData.append('inputMode', inputMode);
         if (inputMode === 'file_upload') {
             formData.append('file', file);
@@ -103,6 +133,23 @@
         fileInput.disabled = isPastedText;
         textInput.disabled = !isPastedText;
         setStatus(isPastedText ? '请粘贴文本并开始诊断。' : '请选择材料并开始诊断。', '');
+    }
+
+    function showMaterialTypeDialog() {
+        var current = form.elements.materialType.value;
+        var dialogOption = materialTypeDialog.querySelector('input[name="materialTypeConfirm"][value="' + current + '"]');
+        if (dialogOption) dialogOption.checked = true;
+        materialTypeDialog.hidden = false;
+        setStatus('请先选择目标方向。', 'error');
+    }
+
+    function hideMaterialTypeDialog() {
+        materialTypeDialog.hidden = true;
+    }
+
+    function getDialogMaterialType() {
+        var checked = materialTypeDialog.querySelector('input[name="materialTypeConfirm"]:checked');
+        return checked ? checked.value : '';
     }
 
     function renderReport(data) {
