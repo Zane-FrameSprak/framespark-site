@@ -15,9 +15,9 @@ const REVIEW_QUEUES = {
 };
 const REVIEW_DIRS = ['high-potential', 'boundary', 'warning', 'error'];
 
-export async function logDiagnosisResult({ mode, materialType, materialRouting, parsed, stats, result }) {
+export async function logDiagnosisResult({ mode, materialType, materialRouting, inputMode, parsed, stats, result }) {
   try {
-    const entry = buildLogEntry({ mode, materialType, materialRouting, parsed, stats, result });
+    const entry = buildLogEntry({ mode, materialType, materialRouting, inputMode, parsed, stats, result });
     const logPath = await writeLogEntry(entry);
     await updateIndex(entry, logPath);
     await writeReviewSummaries(entry, logPath);
@@ -28,7 +28,7 @@ export async function logDiagnosisResult({ mode, materialType, materialRouting, 
   }
 }
 
-function buildLogEntry({ mode, materialType, materialRouting, parsed, stats, result }) {
+function buildLogEntry({ mode, materialType, materialRouting, inputMode, parsed, stats, result }) {
   const createdAt = new Date().toISOString();
   const id = makeId(createdAt);
   const basicReport = result.basicReport || null;
@@ -49,6 +49,7 @@ function buildLogEntry({ mode, materialType, materialRouting, parsed, stats, res
     id,
     createdAt,
     materialType,
+    inputMode: normalizeInputMode(inputMode),
     materialRouting: normalizeMaterialRouting(materialRouting, materialType),
     originalFileName: parsed.source?.filename || '',
     charCount: stats.charCount || 0,
@@ -65,6 +66,10 @@ function buildLogEntry({ mode, materialType, materialRouting, parsed, stats, res
     basicReportSummary: summarizeReport(basicReport),
     advancedReportSummary: advancedReport ? summarizeReport(advancedReport) : null
   };
+}
+
+function normalizeInputMode(inputMode) {
+  return inputMode === 'pasted_text' ? 'pasted_text' : 'file_upload';
 }
 
 async function writeLogEntry(entry) {

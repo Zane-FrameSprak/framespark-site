@@ -22,12 +22,9 @@ export const diagnosisRouter = express.Router();
 
 diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
   try {
-    if (!req.file) {
-      throw new ApiError(400, 'FILE_REQUIRED', '请先上传剧本或故事材料。');
-    }
-
     const userSelectedType = normalizeMaterialType(req.body.materialType);
-    const parsed = await parseUploadedFile(req.file);
+    const input = await resolveDiagnosisInput(req);
+    const { parsed, inputMode } = input;
     const materialRouting = await routeMaterial({
       userSelectedType,
       text: parsed.text,
@@ -47,6 +44,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       targetFormat: materialRouting.targetFormat,
       materialForm: materialRouting.materialForm,
       materialRouting,
+      inputMode,
       stats: guard.stats,
       source: parsed.source
     };
@@ -68,6 +66,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       mode,
       materialType,
       materialRouting,
+      inputMode,
       parsed,
       stats: guard.stats,
       result
@@ -82,6 +81,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       targetFormat: materialRouting.targetFormat,
       materialForm: materialRouting.materialForm,
       effectiveDiagnosisType: materialRouting.effectiveDiagnosisType,
+      inputMode,
       materialRouting,
       source: parsed.source,
       stats: guard.stats,
@@ -97,4 +97,42 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
 function normalizeMaterialType(value) {
   const valid = ['short', 'feature', 'other'];
   return valid.includes(value) ? value : 'other';
+}
+
+export async function resolveDiagnosisInput(req) {
+  if (req.file) {
+    return {
+      inputMode: 'file_upload',
+      parsed: await parseUploadedFile(req.file)
+    };
+  }
+
+  const text = normalizePastedText(req.body?.text);
+  if (text) {
+    return {
+      inputMode: 'pasted_text',
+      parsed: {
+        source: {
+          filename: 'pasted-text',
+          type: 'pasted_text'
+        },
+        text
+      }
+    };
+  }
+
+  const requestedMode = req.body?.inputMode === 'pasted_text' ? 'pasted_text' : 'file_upload';
+  if (requestedMode === 'pasted_text') {
+    throw new ApiError(400, 'TEXT_REQUIRED', '请先粘贴需要诊断的文本。');
+  }
+  throw new ApiError(400, 'MATERIAL_REQUIRED', '请上传 TXT / DOCX 文件，或直接粘贴需要诊断的文本。');
+}
+
+function normalizePastedText(text) {
+  return String(text || '')
+    .replace(/\u0000/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .trim();
 }

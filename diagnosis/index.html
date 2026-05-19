@@ -66,11 +66,28 @@
                         </select>
                     </label>
 
-                    <label class="diagnosis-upload" for="diagnosisFile">
+                    <fieldset class="diagnosis-mode" aria-label="提交方式">
+                        <legend>提交方式</legend>
+                        <label>
+                            <input type="radio" name="inputMode" value="file_upload" checked>
+                            <span>上传文件</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="inputMode" value="pasted_text">
+                            <span>粘贴文本</span>
+                        </label>
+                    </fieldset>
+
+                    <label class="diagnosis-upload" for="diagnosisFile" id="diagnosisUploadBox">
                         <span class="diagnosis-upload__label">选择文件</span>
                         <strong id="diagnosisFileName">未选择文件</strong>
                         <small>支持 TXT / DOCX，文件大小不超过 10MB</small>
                         <input id="diagnosisFile" name="file" type="file" accept=".txt,.docx">
+                    </label>
+
+                    <label class="diagnosis-paste" id="diagnosisPasteBox" hidden>
+                        <span>粘贴文本</span>
+                        <textarea id="diagnosisText" name="text" placeholder="请粘贴你的剧本、梗概、大纲、人物小传、世界观设定或片段文本"></textarea>
                     </label>
 
                     <div class="diagnosis-actions">

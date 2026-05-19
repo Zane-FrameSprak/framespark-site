@@ -6,10 +6,13 @@
     var form = document.getElementById('diagnosisForm');
     var fileInput = document.getElementById('diagnosisFile');
     var fileName = document.getElementById('diagnosisFileName');
+    var textInput = document.getElementById('diagnosisText');
+    var uploadBox = document.getElementById('diagnosisUploadBox');
+    var pasteBox = document.getElementById('diagnosisPasteBox');
     var status = document.getElementById('diagnosisStatus');
     var result = document.getElementById('diagnosisResult');
     var currentReportMarkdown = '';
-    if (!form || !fileInput || !fileName || !status || !result) return;
+    if (!form || !fileInput || !fileName || !textInput || !uploadBox || !pasteBox || !status || !result) return;
 
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
@@ -21,16 +24,38 @@
         submitDiagnosis();
     });
 
+    form.addEventListener('change', function (event) {
+        if (event.target && event.target.name === 'inputMode') {
+            syncInputMode();
+        }
+    });
+
+    syncInputMode();
+
     async function submitDiagnosis() {
+        var inputMode = getInputMode();
         var file = fileInput.files && fileInput.files[0];
-        if (!file) {
+        var pastedText = textInput.value.trim();
+
+        if (inputMode === 'file_upload' && !file) {
             setStatus('请先选择一个 .txt 或 .docx 文件。', 'error');
             return;
         }
+        if (inputMode === 'pasted_text' && !pastedText) {
+            setStatus('请先粘贴需要诊断的文本。', 'error');
+            return;
+        }
 
-        var formData = new FormData(form);
+        var formData = new FormData();
+        formData.append('materialType', form.elements.materialType.value);
+        formData.append('inputMode', inputMode);
+        if (inputMode === 'file_upload') {
+            formData.append('file', file);
+        } else {
+            formData.append('text', pastedText);
+        }
         setLoading(true);
-        setStatus('正在上传并解析材料...', 'loading');
+        setStatus(inputMode === 'file_upload' ? '正在上传并解析材料...' : '正在提交并解析文本...', 'loading');
 
         try {
             var response = await fetch(API_URL, {
@@ -64,6 +89,20 @@
     function setStatus(message, type) {
         status.textContent = message;
         status.dataset.state = type || '';
+    }
+
+    function getInputMode() {
+        var checked = form.querySelector('input[name="inputMode"]:checked');
+        return checked && checked.value === 'pasted_text' ? 'pasted_text' : 'file_upload';
+    }
+
+    function syncInputMode() {
+        var isPastedText = getInputMode() === 'pasted_text';
+        uploadBox.hidden = isPastedText;
+        pasteBox.hidden = !isPastedText;
+        fileInput.disabled = isPastedText;
+        textInput.disabled = !isPastedText;
+        setStatus(isPastedText ? '请粘贴文本并开始诊断。' : '请选择材料并开始诊断。', '');
     }
 
     function renderReport(data) {

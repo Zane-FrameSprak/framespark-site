@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/routes/diagnosis.js && node --check src/services/aiClient.js && node --check src/services/diagnosisPipeline.js && node --check src/services/reportParser.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/materialRouter.js && node --check src/services/mockDiagnosis.js && node --check src/services/diagnosisLogger.js && node --check src/prompts/basicDiagnosis.js && node --check src/prompts/advancedShortDiagnosis.js && node --check src/prompts/advancedFeatureDiagnosis.js && node --check src/prompts/advancedOtherDiagnosis.js && node --check src/utils/errors.js && node --check scripts/list-diagnosis-logs.js && node --check scripts/test-material-router.js",
+    "check": "node --check src/server.js && node --check src/routes/diagnosis.js && node --check src/services/aiClient.js && node --check src/services/diagnosisPipeline.js && node --check src/services/reportParser.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/materialRouter.js && node --check src/services/mockDiagnosis.js && node --check src/services/diagnosisLogger.js && node --check src/prompts/basicDiagnosis.js && node --check src/prompts/advancedShortDiagnosis.js && node --check src/prompts/advancedFeatureDiagnosis.js && node --check src/prompts/advancedOtherDiagnosis.js && node --check src/utils/errors.js && node --check scripts/list-diagnosis-logs.js && node --check scripts/test-material-router.js && node --check scripts/test-diagnosis-inputs.js",
     "test": "node scripts/test-basic-diagnosis.js",
     "test:prompt": "node scripts/test-basic-diagnosis.js --no-ai",
     "test:adv-short": "node scripts/test-advanced-short-diagnosis.js",
@@ -18,6 +18,7 @@
     "test:e2e": "node scripts/test-e2e-pipeline.js",
     "test:e2e:dry": "node scripts/test-e2e-pipeline.js --dry-run",
     "test:material-router": "node scripts/test-material-router.js",
+    "test:diagnosis-inputs": "node scripts/test-diagnosis-inputs.js",
     "logs:diagnosis": "node scripts/list-diagnosis-logs.js"
   },
   "dependencies": {

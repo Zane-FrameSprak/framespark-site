@@ -895,6 +895,46 @@ svg {
     font: inherit;
 }
 
+.diagnosis-mode {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.diagnosis-mode legend {
+    grid-column: 1 / -1;
+    margin-bottom: 2px;
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+}
+
+.diagnosis-mode label {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    background: rgba(10, 9, 8, 0.36);
+    color: var(--ink-muted);
+    cursor: pointer;
+}
+
+.diagnosis-mode input {
+    accent-color: var(--gold);
+}
+
+.diagnosis-mode label:has(input:checked) {
+    border-color: rgba(201, 168, 117, 0.62);
+    color: var(--ink);
+}
+
 .diagnosis-upload {
     min-height: 190px;
     padding: 26px;
@@ -934,6 +974,40 @@ svg {
     block-size: 1px;
     opacity: 0;
     pointer-events: none;
+}
+
+.diagnosis-paste {
+    display: grid;
+    gap: 10px;
+}
+
+.diagnosis-paste[hidden] {
+    display: none;
+}
+
+.diagnosis-paste span {
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+}
+
+.diagnosis-paste textarea {
+    width: 100%;
+    min-height: 260px;
+    resize: vertical;
+    padding: 16px;
+    border: 1px solid rgba(201, 168, 117, 0.32);
+    border-radius: 0;
+    background: rgba(10, 9, 8, 0.42);
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.8;
+}
+
+.diagnosis-paste textarea::placeholder {
+    color: var(--ink-muted);
 }
 
 .diagnosis-actions {
