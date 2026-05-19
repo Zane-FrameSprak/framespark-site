@@ -1178,6 +1178,23 @@ svg {
     color: var(--gold-bright);
 }
 
+.diagnosis-report-feedback {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--ink-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.diagnosis-report-feedback[data-state="success"] {
+    color: var(--gold-bright);
+}
+
+.diagnosis-report-feedback[data-state="error"] {
+    color: #e3a28f;
+}
+
 .diagnosis-stats {
     margin: 30px 0;
     display: grid;

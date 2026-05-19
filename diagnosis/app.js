@@ -173,6 +173,7 @@
             '<div class="diagnosis-report-actions">',
             '<button type="button" data-report-action="copy">复制报告</button>',
             '<button type="button" data-report-action="download">导出 Markdown</button>',
+            '<span class="diagnosis-report-feedback" id="diagnosisReportFeedback" aria-live="polite"></span>',
             '</div>',
             '<dl class="diagnosis-stats">',
             '<div><dt>诊断类型</dt><dd>' + escapeHtml(diagnosisType) + '</dd></div>',
@@ -218,9 +219,24 @@
                 fallbackCopyText(currentReportMarkdown);
             }
             setStatus('报告已复制。', 'success');
+            showReportFeedback('报告已复制。', 'success');
         } catch (err) {
             setStatus('复制失败，请手动选择报告内容。', 'error');
+            showReportFeedback('复制失败，请手动选择报告内容。', 'error');
         }
+    }
+
+    function showReportFeedback(message, type) {
+        var feedback = document.getElementById('diagnosisReportFeedback');
+        if (!feedback) return;
+
+        feedback.textContent = message;
+        feedback.dataset.state = type || '';
+        window.clearTimeout(showReportFeedback.timer);
+        showReportFeedback.timer = window.setTimeout(function () {
+            feedback.textContent = '';
+            feedback.dataset.state = '';
+        }, 2400);
     }
 
     function fallbackCopyText(text) {
