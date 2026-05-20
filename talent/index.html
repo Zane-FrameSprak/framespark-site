@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>帧火花人才平台 | FrameSpark 帧火花</title>
-    <meta name="description" content="帧火花人才平台开发中，未来将连接影视雇佣方与从业者，沉淀更清晰的合作记录与信用体系。">
+    <title>项目人才生态平台 | FrameSpark 帧火花</title>
+    <meta name="description" content="帧火花项目人才生态平台开发中，未来将围绕人才档案、作品记录、合作经历、档期状态与联系请求逐步开放。">
     <meta name="theme-color" content="#0a0908">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,27 +39,101 @@
     </header>
 
     <main class="subpage-main">
-        <section class="subpage-hero">
-            <div class="subpage-hero__inner">
-                <p class="subpage-kicker">FRAMESPARK TALENT</p>
-                <h1>帧火花人才平台</h1>
-                <p class="subpage-lead">连接影视雇佣方与从业者的专业网络。当前处于开发中，后续将围绕双边档案、匹配、信用记录与实时动态档期逐步开放。</p>
-                <a class="back-link" href="../index.html#platforms">BACK TO HOME</a>
+        <section class="subpage-hero talent-coming">
+            <div class="subpage-hero__inner talent-coming__inner">
+                <div class="talent-coming__copy">
+                    <p class="subpage-kicker">FRAMESPARK TALENT NETWORK</p>
+                    <span class="talent-coming__status">平台开发中</span>
+                    <h1>项目人才生态平台</h1>
+                    <p class="talent-coming__subtitle">为影视创作者建立的人才档案网络</p>
+                    <p class="subpage-lead">一个为影视创作者建立的人才档案网络。FrameSpark 希望让创作者被看见，也让寻找合作的人更容易找到合适的人。</p>
+                    <p class="talent-coming__note">平台目前仍在开发中，未来将围绕人才档案、作品记录、合作经历、档期状态与联系请求逐步开放。</p>
+                    <div class="talent-coming__links" aria-label="相关入口">
+                        <a class="talent-coming__link talent-coming__link--secondary" href="../index.html#platforms">返回首页</a>
+                        <a class="talent-coming__link talent-coming__link--primary" href="../diagnosis/">查看故事开发诊断系统</a>
+                    </div>
+                </div>
+
+                <form class="talent-notify" id="talentNotifyForm">
+                    <div class="talent-notify__head">
+                        <span>加入早期通知</span>
+                        <p>留下邮箱即可。平台开放时，我们会第一时间通知你。</p>
+                    </div>
+
+                    <label class="talent-notify__field">
+                        <span>邮箱</span>
+                        <input type="email" name="email" autocomplete="email" placeholder="your@email.com" required>
+                    </label>
+
+                    <fieldset class="talent-notify__roles">
+                        <legend>身份类型（可选）</legend>
+                        <label>
+                            <input type="radio" name="role" value="creator">
+                            <span>创作者</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="role" value="producer">
+                            <span>制作方</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="role" value="other">
+                            <span>其他</span>
+                        </label>
+                    </fieldset>
+
+                    <button type="submit">上线后通知我</button>
+                    <p class="talent-notify__message" id="talentNotifyMessage" aria-live="polite"></p>
+                </form>
             </div>
         </section>
 
         <section class="subpage-section">
-            <div class="subpage-section__inner placeholder-grid">
-                <article class="placeholder-card">
-                    <h2>当前状态</h2>
-                    <p>开发中。官网先保留入口，小程序与平台功能后续分阶段上线。</p>
-                </article>
-                <article class="placeholder-card">
-                    <h2>后续预留</h2>
-                    <p>用户档案、作品经历、项目需求、联系方式授权、背书记录、动态档期。</p>
-                </article>
+            <div class="subpage-section__inner talent-ecosystem">
+                <div class="talent-ecosystem__intro">
+                    <p>这是 FrameSpark 正在建设的长期基础设施之一。你也可以返回首页，了解故事开发诊断系统与 FrameSpark 开发中的原创项目。</p>
+                </div>
+
+                <div class="talent-ecosystem__cards">
+                    <article class="talent-ecosystem__card">
+                        <span>01</span>
+                        <h2>人才档案</h2>
+                        <p>沉淀创作者的身份、方向、专长与可合作状态，让合适的人更容易被看见。</p>
+                    </article>
+                    <article class="talent-ecosystem__card">
+                        <span>02</span>
+                        <h2>作品记录</h2>
+                        <p>记录作品经历与具体贡献，让创作者在不同项目中的角色更清楚。</p>
+                    </article>
+                    <article class="talent-ecosystem__card">
+                        <span>03</span>
+                        <h2>合作联系</h2>
+                        <p>未来将提供轻量联系请求与合作经历记录，帮助合适的人与合适的合作机会建立连接。</p>
+                    </article>
+                </div>
             </div>
         </section>
     </main>
+
+    <script>
+        (function () {
+            var form = document.getElementById('talentNotifyForm');
+            var message = document.getElementById('talentNotifyMessage');
+
+            if (!form || !message) {
+                return;
+            }
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                if (!form.reportValidity()) {
+                    return;
+                }
+
+                message.textContent = '已收到你的邮箱。平台开放时，我们会第一时间通知你。';
+                form.reset();
+            });
+        })();
+    </script>
 </body>
 </html>
