@@ -125,6 +125,41 @@ const cases = [
     expect: { materialForm: 'full_script', effectiveDiagnosisType: 'short', targetFormat: 'short', guardPass: true, classificationSource: 'local' }
   },
   {
+    name: 'short + 完整短片剧本包含合同关键词',
+    userSelectedType: 'short',
+    text: `
+《恭喜你，中奖了！》
+
+故事梗概
+应届毕业生林宇每次失去工作，都能点击一封匿名邮件让时间倒流，回到上一次签合同的时刻，代价是反应变慢、注意力下降和记忆损伤。在经过四轮不同的骗局之后，林宇终于签下一份找不出问题的合同。入职当天，公司人去楼空。回到出租屋，邮件声再次响起。
+
+1. 内 景 薪程科技 HR 办公室 日
+HR张姐把绩效表拍在桌上。红笔写着「KPI完成率42%，扣绩效5640元」。
+林宇：我这个月加班十五天，绩效怎么扣这么多？
+张姐：绩效考核的是结果，跟时长没关系。
+她把辞退通知和一份合同解除协议推到林宇面前。
+
+2. 内 景 出租屋 夜
+林宇盯着电脑屏幕，匿名邮件弹出：恭喜你，中奖了。是否回到签合同那天？
+林宇：如果回去，我能避开这个坑吗？
+他点击确认。房间里的灯闪了一下，合同纸页像被风翻动。
+
+3. 内 景 创梦传媒 会议室 日
+新的老板递来另一份协议，承诺高薪、奖金和项目分红。
+老板：签了合同，明天就上班。
+林宇看见付款方式和违约责任写得很小。他犹豫，但还是签字。
+
+4. 外 景 写字楼楼下 夜
+林宇被保安赶出来，手机里又收到匿名邮件。每一次重来，他都更迟钝，记忆也少了一块。
+林宇：我只是想找一份正常工作。
+
+5. 内 景 空公司 日
+林宇终于签下一份没有明显问题的合同。入职当天，公司人去楼空。
+他回到出租屋，邮件声再次响起。屏幕上写着：恭喜你，中奖了。
+`.repeat(2),
+    expect: { materialForm: 'full_script', effectiveDiagnosisType: 'short', targetFormat: 'short', guardPass: true, classificationSource: 'local' }
+  },
+  {
     name: 'feature + 完整长片材料',
     userSelectedType: 'feature',
     text: featureFullScript,

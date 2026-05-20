@@ -169,14 +169,16 @@ export function detectMaterialFormByRules(text) {
   if (isLowSignalText(compact)) {
     return { materialForm: 'reject', reason: '文本存在明显重复或无意义字符，无法形成有效诊断。' };
   }
-  if (isClearlyUnrelated(firstPart)) {
-    return { materialForm: 'reject', reason: '文本更接近简历、合同、论文、产品说明或聊天记录，不适合按影视创意材料诊断。' };
-  }
 
   const scriptScore = getScriptFormatScore(lines, normalized);
   const sceneCount = countSceneHeadings(lines);
   const dialogueCount = countDialogueLines(lines);
   const hasScriptFormat = scriptScore >= 4 || sceneCount >= 2 || dialogueCount >= 6;
+  const hasCreativeMaterialSignal = hasScriptFormat || looksLikeCreativeMaterial(firstPart);
+
+  if (isClearlyUnrelated(firstPart) && !hasCreativeMaterialSignal) {
+    return { materialForm: 'reject', reason: '文本更接近简历、合同、论文、产品说明或聊天记录，不适合按影视创意材料诊断。' };
+  }
 
   if (hasScriptFormat && isLikelyFullScript({ text: firstPart, sceneCount, dialogueCount, charCount })) {
     return { materialForm: 'full_script', reason: '文本包含明显剧本格式，并呈现多场推进、故事阶段或结尾方向，按完整剧本材料处理。' };
@@ -347,7 +349,7 @@ function countSceneHeadings(lines) {
 
 function countDialogueLines(lines) {
   const dialoguePattern = /^([\u4e00-\u9fa5A-Za-z0-9·]{1,12})(（[^）]{0,16}）)?[：:]/;
-  return lines.filter(line => dialoguePattern.test(line) && !/^(标题|类型|主题|人物|背景|设定|规则|目标|阻碍|核心|简介|梗概|大纲)[：:]/.test(line)).length;
+  return lines.filter(line => dialoguePattern.test(line) && !/^(标题|类型|主题|人物|背景|设定|规则|目标|阻碍|核心|简介|梗概|大纲|姓名|求职意向|教育经历|工作经历|项目经验|自我评价)[：:]/.test(line)).length;
 }
 
 function isLikelyFullScript({ text, sceneCount, dialogueCount, charCount }) {
