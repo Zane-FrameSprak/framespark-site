@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from '../config.js';
+import { diagnosisVersions } from '../config/diagnosisVersion.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,9 +63,17 @@ function buildLogEntry({ mode, materialType, materialRouting, inputMode, parsed,
     warnings,
     tags,
     model: mode === 'ai' ? config.deepseekModel : null,
+    versions: buildVersions(mode),
     finalReport,
     basicReportSummary: summarizeReport(basicReport),
     advancedReportSummary: advancedReport ? summarizeReport(advancedReport) : null
+  };
+}
+
+function buildVersions(mode) {
+  return {
+    ...diagnosisVersions,
+    modelId: mode === 'ai' ? config.deepseekModel : 'mock'
   };
 }
 
