@@ -161,6 +161,34 @@ code {
   background: var(--panel-soft);
 }
 
+.quick-run-note {
+  padding: 16px;
+  border: 1px solid rgba(204, 172, 112, 0.14);
+  background: rgba(201, 168, 117, 0.05);
+  margin-bottom: 14px;
+}
+
+.quick-run-note h2 {
+  margin-bottom: 8px;
+}
+
+.run-manager {
+  border: 1px solid rgba(204, 172, 112, 0.18);
+  background: var(--panel-soft);
+}
+
+.run-manager > summary {
+  padding: 14px 16px;
+  color: var(--gold-bright);
+  cursor: pointer;
+}
+
+.run-manager__content {
+  display: grid;
+  gap: 14px;
+  padding: 0 16px 16px;
+}
+
 .advanced-box {
   border: 1px solid rgba(204, 172, 112, 0.14);
   background: rgba(0, 0, 0, 0.12);

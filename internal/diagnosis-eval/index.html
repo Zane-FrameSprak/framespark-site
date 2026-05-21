@@ -11,48 +11,59 @@
     <section class="eval-hero">
       <p class="kicker">INTERNAL TOOL · LOCAL DEV ONLY</p>
       <h1>FrameSpark 内部诊断评测工作台</h1>
-      <p>用于本地快速整理故事开发诊断系统的测试样本。默认流程只有三步：选择 / 创建批次、拖入文件或粘贴文本、保存为样本。</p>
+      <p>用于本地快速整理故事开发诊断系统的测试样本。打开页面后可直接拖入文件或粘贴文本；系统会自动归入今日快速测试批次。需要分组复盘时，可手动创建测试批次。</p>
       <p class="eval-warning">本页面不调用 AI，不调用 <code>/api/diagnosis</code>，不生成正式诊断报告。</p>
     </section>
 
     <section class="eval-grid">
       <aside class="panel">
-        <header class="panel__head">
-          <h2>测试批次</h2>
-          <button type="button" id="refreshRuns">刷新</button>
-        </header>
-        <div id="runList" class="run-list" aria-live="polite"></div>
+        <section class="quick-run-note">
+          <p class="kicker">QUICK RUN</p>
+          <h2>今日快速测试</h2>
+          <p class="meta">无需先建批次。直接上传或粘贴时，系统会自动准备今日 quick 批次。</p>
+        </section>
 
-        <form id="createRunForm" class="stack">
-          <h3>新建批次</h3>
-          <label>
-            批次名称（可选）
-            <input name="name" placeholder="short-concept-test">
-          </label>
-          <fieldset>
-            <legend>是否属于同一个故事 / 项目</legend>
-            <label><input type="radio" name="sameStory" value="false" checked> 否</label>
-            <label><input type="radio" name="sameStory" value="true"> 是</label>
-          </fieldset>
-          <details class="advanced-box">
-            <summary>高级设置</summary>
-            <div class="advanced-box__content">
+        <details class="run-manager">
+          <summary>更换 / 新建测试批次</summary>
+          <div class="run-manager__content">
+            <header class="panel__head">
+              <h2>测试批次</h2>
+              <button type="button" id="refreshRuns">刷新</button>
+            </header>
+            <div id="runList" class="run-list" aria-live="polite"></div>
+
+            <form id="createRunForm" class="stack">
+              <h3>新建批次</h3>
               <label>
-                故事 / 项目名称（可选）
-                <input name="storyName">
+                批次名称（可选）
+                <input name="name" placeholder="short-concept-test">
               </label>
-              <label>
-                文件关系说明（可选）
-                <input name="storyRelation" placeholder="概念 + 梗概 + 人物小传">
-              </label>
-              <label>
-                本轮测试目的 / 备注
-                <textarea name="notes" rows="3"></textarea>
-              </label>
-            </div>
-          </details>
-          <button type="submit" class="primary">创建批次</button>
-        </form>
+              <fieldset>
+                <legend>是否属于同一个故事 / 项目</legend>
+                <label><input type="radio" name="sameStory" value="false" checked> 否</label>
+                <label><input type="radio" name="sameStory" value="true"> 是</label>
+              </fieldset>
+              <details class="advanced-box">
+                <summary>高级设置</summary>
+                <div class="advanced-box__content">
+                  <label>
+                    故事 / 项目名称（可选）
+                    <input name="storyName">
+                  </label>
+                  <label>
+                    文件关系说明（可选）
+                    <input name="storyRelation" placeholder="概念 + 梗概 + 人物小传">
+                  </label>
+                  <label>
+                    本轮测试目的 / 备注
+                    <textarea name="notes" rows="3"></textarea>
+                  </label>
+                </div>
+              </details>
+              <button type="submit" class="primary">创建批次</button>
+            </form>
+          </div>
+        </details>
       </aside>
 
       <section class="panel panel--main">

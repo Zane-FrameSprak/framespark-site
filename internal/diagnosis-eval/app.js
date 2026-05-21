@@ -43,14 +43,20 @@
     sameStoryForm.addEventListener('submit', confirmSameStory);
     sameStoryForm.addEventListener('change', updateSameStoryDialog);
     renderPendingFiles();
-    loadRuns();
+    loadRuns({ ensureQuickRun: true });
   }
 
-  async function loadRuns() {
+  async function loadRuns(options) {
+    var settings = options || {};
     setState('读取批次...');
     try {
       var data = await requestJson(API_BASE);
-      renderRuns(data.runs || []);
+      var runs = data.runs || [];
+      renderRuns(runs);
+      if (settings.ensureQuickRun && !currentRun) {
+        await ensureTodayQuickRun(runs);
+        return;
+      }
       setState('');
     } catch (err) {
       setState('dev API 不可用，请确认 ENABLE_DEV_TOOLS=true');
@@ -118,10 +124,8 @@
 
   async function savePastedSample(event) {
     event.preventDefault();
-    if (!currentRun) {
-      setState('请先选择或创建测试批次。');
-      return;
-    }
+    await ensureCurrentRun();
+    if (!currentRun) return;
 
     var form = new FormData(pasteSampleForm);
     var sample = {
@@ -185,10 +189,8 @@
   }
 
   async function savePendingFiles() {
-    if (!currentRun) {
-      setState('请先选择或创建测试批次。');
-      return;
-    }
+    await ensureCurrentRun();
+    if (!currentRun) return;
     if (!pendingFiles.length) {
       setState('请先选择 TXT / DOCX / PDF 文件。');
       return;
@@ -275,11 +277,11 @@
 
   function renderCurrentRun() {
     if (!currentRun) {
-      currentRunTitle.textContent = '请选择或创建测试批次';
+      currentRunTitle.textContent = '正在准备今日快速测试批次';
       sampleList.innerHTML = '';
       return;
     }
-    currentRunTitle.textContent = currentRun.runId;
+    currentRunTitle.textContent = formatRunTitle(currentRun);
     var samples = currentRun.samples || [];
     if (!samples.length) {
       sampleList.innerHTML = '<p class="meta">当前批次还没有样本。</p>';
@@ -305,6 +307,71 @@
         '</article>'
       ].join('');
     }).join('');
+  }
+
+  async function ensureCurrentRun() {
+    if (currentRun) return currentRun;
+    setState('正在准备今日快速测试批次...');
+    try {
+      var data = await requestJson(API_BASE);
+      await ensureTodayQuickRun(data.runs || []);
+      return currentRun;
+    } catch (err) {
+      setState(err.message || '无法准备测试批次。');
+      return null;
+    }
+  }
+
+  async function ensureTodayQuickRun(runs) {
+    var quickRun = findTodayQuickRun(runs);
+    if (quickRun) {
+      await selectRun(quickRun.runId);
+      setState('已进入今日快速测试批次。');
+      return currentRun;
+    }
+
+    setState('正在创建今日快速测试批次...');
+    var data = await requestJson(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'quick-001',
+        sameStory: false,
+        notes: '自动创建的今日快速测试批次。'
+      })
+    });
+    currentRun = data.run;
+    renderCurrentRun();
+    await loadRuns();
+    setState('今日快速测试批次已准备好。');
+    return currentRun;
+  }
+
+  function findTodayQuickRun(runs) {
+    var today = getTodayText();
+    var pattern = new RegExp('^' + today + '-quick-\\d{3}(?:-\\d{3})?$');
+    return (runs || []).find(function (run) {
+      return pattern.test(run.runId);
+    }) || null;
+  }
+
+  function formatRunTitle(run) {
+    if (isTodayQuickRun(run && run.runId)) {
+      return '当前批次：今日快速测试';
+    }
+    return '当前批次：' + run.runId;
+  }
+
+  function isTodayQuickRun(runId) {
+    return new RegExp('^' + getTodayText() + '-quick-\\d{3}(?:-\\d{3})?$').test(String(runId || ''));
+  }
+
+  function getTodayText() {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var day = String(now.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
   }
 
   function getBatchDefaults() {
