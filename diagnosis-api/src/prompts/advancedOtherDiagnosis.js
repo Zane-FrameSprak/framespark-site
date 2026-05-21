@@ -156,9 +156,10 @@ const OUTPUT_FORMAT_ADVANCED_OTHER = [
 ].join('\n');
 
 // ─── 主函数 ────────────────────────────────────────────────────
-export function buildAdvancedOtherDiagnosisMessages({ text, targetFormat, materialForm, stats, source }) {
+export function buildAdvancedOtherDiagnosisMessages({ text, targetFormat, materialForm, stats, source, basicSummary, basicCore, basicNextStep }) {
   const targetLine = targetFormat ? [`目标作品方向：${TARGET_FORMAT_LABELS[targetFormat] || targetFormat}`] : [];
   const materialFormLine = materialForm ? [`第零层识别材料形态：${MATERIAL_FORM_LABELS[materialForm] || materialForm}`] : [];
+  const basicContext = buildBasicDiagnosisContext({ basicSummary, basicCore, basicNextStep });
 
   return [
     {
@@ -172,6 +173,7 @@ export function buildAdvancedOtherDiagnosisMessages({ text, targetFormat, materi
         ...targetLine,
         ...materialFormLine,
         `文本字数：约 ${stats.charCount} 字`,
+        ...basicContext,
         MATERIAL_GUIDANCE_ADVANCED_OTHER,
         '',
         OUTPUT_FORMAT_ADVANCED_OTHER,
@@ -180,5 +182,21 @@ export function buildAdvancedOtherDiagnosisMessages({ text, targetFormat, materi
         text
       ].join('\n')
     }
+  ];
+}
+
+function buildBasicDiagnosisContext({ basicSummary, basicCore, basicNextStep }) {
+  const lines = [];
+  if (basicSummary) lines.push(`- 一句话结论：${basicSummary}`);
+  if (basicCore) lines.push(`- 核心判断：${basicCore}`);
+  if (basicNextStep) lines.push(`- 下一步判断：${basicNextStep}`);
+  if (lines.length === 0) return [];
+
+  return [
+    '',
+    '基础诊断摘要：',
+    ...lines,
+    '进阶诊断应基于基础诊断的核心判断继续深化，不要重复基础诊断的表层结论。如果基础诊断只是勉强允许进入进阶，应在进阶报告中保持审慎，不要因为进入进阶就默认材料成熟。',
+    ''
   ];
 }

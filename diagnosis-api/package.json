@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/middleware/rateLimit.js && node --check src/routes/diagnosis.js && node --check src/services/aiClient.js && node --check src/services/diagnosisPipeline.js && node --check src/services/reportParser.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/materialRouter.js && node --check src/services/mockDiagnosis.js && node --check src/services/diagnosisLogger.js && node --check src/prompts/basicDiagnosis.js && node --check src/prompts/advancedShortDiagnosis.js && node --check src/prompts/advancedFeatureDiagnosis.js && node --check src/prompts/advancedOtherDiagnosis.js && node --check src/utils/errors.js && node --check scripts/list-diagnosis-logs.js && node --check scripts/test-material-router.js && node --check scripts/test-diagnosis-inputs.js && node --check scripts/test-rate-limit.js",
+    "check": "node --check src/server.js && node --check src/middleware/rateLimit.js && node --check src/routes/diagnosis.js && node --check src/services/aiClient.js && node --check src/services/diagnosisPipeline.js && node --check src/services/reportParser.js && node --check src/services/fileParser.js && node --check src/services/guard.js && node --check src/services/materialRouter.js && node --check src/services/mockDiagnosis.js && node --check src/services/diagnosisLogger.js && node --check src/prompts/basicDiagnosis.js && node --check src/prompts/advancedShortDiagnosis.js && node --check src/prompts/advancedFeatureDiagnosis.js && node --check src/prompts/advancedOtherDiagnosis.js && node --check src/utils/errors.js && node --check scripts/list-diagnosis-logs.js && node --check scripts/test-material-router.js && node --check scripts/test-diagnosis-inputs.js && node --check scripts/test-rate-limit.js && node --check scripts/test-advanced-context.js",
     "test": "node scripts/test-basic-diagnosis.js",
     "test:prompt": "node scripts/test-basic-diagnosis.js --no-ai",
     "test:adv-short": "node scripts/test-advanced-short-diagnosis.js",
@@ -20,6 +20,7 @@
     "test:material-router": "node scripts/test-material-router.js",
     "test:diagnosis-inputs": "node scripts/test-diagnosis-inputs.js",
     "test:rate-limit": "node scripts/test-rate-limit.js",
+    "test:advanced-context": "node scripts/test-advanced-context.js",
     "logs:diagnosis": "node scripts/list-diagnosis-logs.js"
   },
   "dependencies": {

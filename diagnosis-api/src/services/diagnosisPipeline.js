@@ -21,10 +21,19 @@ export async function runDiagnosisPipeline(payload) {
     };
   }
 
-  const advancedReport = await generateAdvancedReport(payload);
+  const advancedReport = await generateAdvancedReport(buildAdvancedPayload(payload, basicReport));
   return {
     internalStage: 'advanced',
     basicReport,
     finalReport: advancedReport
+  };
+}
+
+export function buildAdvancedPayload(payload, basicReport) {
+  return {
+    ...payload,
+    basicSummary: basicReport?.summary || '',
+    basicCore: basicReport?.core || '',
+    basicNextStep: basicReport?.nextStep || ''
   };
 }
