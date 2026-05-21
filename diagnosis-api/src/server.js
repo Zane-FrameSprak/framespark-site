@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { config } from './config.js';
+import { createDailyRateLimit } from './middleware/rateLimit.js';
 import { diagnosisRouter } from './routes/diagnosis.js';
 import { feedbackRouter } from './routes/feedback.js';
 import { hasAiProvider } from './services/aiClient.js';
@@ -20,8 +21,24 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/diagnosis', diagnosisRouter);
-app.use('/api/diagnosis-feedback', feedbackRouter);
+app.use(
+  '/api/diagnosis',
+  createDailyRateLimit({
+    limit: config.rateLimits.diagnosisDailyLimit,
+    errorCode: 'RATE_LIMIT_EXCEEDED',
+    message: '今日诊断次数已达上限，请明天再试。'
+  }),
+  diagnosisRouter
+);
+app.use(
+  '/api/diagnosis-feedback',
+  createDailyRateLimit({
+    limit: config.rateLimits.feedbackDailyLimit,
+    errorCode: 'FEEDBACK_RATE_LIMIT_EXCEEDED',
+    message: '今日反馈提交次数已达上限，请稍后再试。'
+  }),
+  feedbackRouter
+);
 
 app.use((req, res) => {
   res.status(404).json({
