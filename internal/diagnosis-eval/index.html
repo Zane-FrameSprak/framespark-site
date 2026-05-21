@@ -113,10 +113,11 @@
         </section>
 
         <section class="stack">
-          <h3>批量上传 TXT / DOCX</h3>
+          <h3>批量上传 TXT / DOCX / PDF</h3>
           <div id="dropZone" class="drop-zone">
-            <p>拖拽多个 TXT / DOCX 文件到这里，或点击选择文件。</p>
-            <input id="fileInput" type="file" multiple accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <p>拖拽多个 TXT / DOCX / PDF 文件到这里，或点击选择文件。</p>
+            <p class="meta">PDF 仅支持可复制文字的文本型 PDF，不支持扫描版 PDF / 图片版 PDF。</p>
+            <input id="fileInput" type="file" multiple accept=".txt,.docx,.pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf">
           </div>
           <div id="pendingFiles" class="pending-files"></div>
           <button type="button" id="saveFiles" class="primary">保存上传文件为样本</button>

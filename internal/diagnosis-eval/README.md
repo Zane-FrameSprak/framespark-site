@@ -86,14 +86,15 @@ samples-index.json
 samples.md
 ```
 
-## 5. 批量上传 TXT / DOCX
+## 5. 批量上传 TXT / DOCX / PDF
 
-“批量上传 TXT / DOCX”区域支持：
+“批量上传 TXT / DOCX / PDF”区域支持：
 
 - 拖拽多个文件
 - 点击选择多个文件
-- 支持 `.txt` / `.docx`
-- 不支持 PDF
+- 支持 `.txt` / `.docx` / `.pdf`
+- PDF 仅支持可复制文字的文本型 PDF
+- 不支持扫描版 PDF / 图片版 PDF，不做 OCR
 
 每个文件会保存为一个样本。
 
@@ -129,7 +130,7 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 
 - `run-meta.json`：批次信息，包含 `sameStory`、`storyName`、`storyRelation`、`notes`
 - `samples/`：样本文本
-- `samples-index.json`：样本元数据和相对路径，不保存完整正文
+- `samples-index.json`：样本元数据和相对路径，不保存完整正文；PDF 样本会记录 `fileType: "pdf"` 和 `extractedTextLength`
 - `samples.md`：便于人工阅读的样本索引
 - `results/`：第一版不写入，留给后续诊断结果归档
 - `review-notes.md`：人工复盘记录

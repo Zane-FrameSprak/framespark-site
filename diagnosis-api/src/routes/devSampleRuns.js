@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { config } from '../config.js';
-import { parseUploadedFile } from '../services/fileParser.js';
+import { parseDevUploadedFile } from '../services/devFileParser.js';
 import {
   appendSamples,
   createSampleRun,
@@ -59,9 +59,12 @@ devSampleRunsRouter.patch('/:runId', async (req, res, next) => {
 
 devSampleRunsRouter.post('/:runId/samples', upload.array('files', 50), async (req, res, next) => {
   try {
-    const samples = await resolveSamples(req);
+    const { samples, errors } = await resolveSamples(req);
+    if (samples.length === 0) {
+      throw new ApiError(400, 'NO_VALID_SAMPLES', errors[0]?.message || '没有可保存的有效样本。');
+    }
     const result = await appendSamples(req.params.runId, samples);
-    res.status(201).json({ ok: true, ...result });
+    res.status(201).json({ ok: true, ...result, errors });
   } catch (err) {
     next(err);
   }
@@ -70,25 +73,43 @@ devSampleRunsRouter.post('/:runId/samples', upload.array('files', 50), async (re
 async function resolveSamples(req) {
   if (Array.isArray(req.files) && req.files.length > 0) {
     const metadata = parseMetadata(req.body?.metadata);
-    return Promise.all(req.files.map(async (file, index) => {
-      const parsed = await parseUploadedFile(file);
-      const item = metadata[index] || {};
-      return {
-        ...item,
-        name: item.name || stripExtension(file.originalname || `sample-${index + 1}`),
-        sourceType: 'uploaded-file',
-        originalFileName: file.originalname || '',
-        text: parsed.text
-      };
-    }));
+    const samples = [];
+    const errors = [];
+    for (let index = 0; index < req.files.length; index += 1) {
+      const file = req.files[index];
+      try {
+        const parsed = await parseDevUploadedFile(file);
+        const item = metadata[index] || {};
+        samples.push({
+          ...item,
+          name: item.name || stripExtension(file.originalname || `sample-${index + 1}`),
+          sourceType: 'uploaded-file',
+          originalFileName: file.originalname || '',
+          fileType: parsed.source.type,
+          extractedTextLength: parsed.source.extractedTextLength,
+          text: parsed.text
+        });
+      } catch (err) {
+        errors.push({
+          originalFileName: file.originalname || '',
+          code: err.code || 'FILE_PARSE_FAILED',
+          message: err.message || '文件解析失败。'
+        });
+      }
+    }
+    return { samples, errors };
   }
 
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   if (Array.isArray(body.samples)) {
-    return body.samples.map(item => ({
-      ...item,
-      sourceType: item?.sourceType || 'pasted-text'
-    }));
+    return {
+      samples: body.samples.map(item => ({
+        ...item,
+        sourceType: item?.sourceType || 'pasted-text',
+        fileType: item?.fileType || 'pasted_text'
+      })),
+      errors: []
+    };
   }
 
   throw new ApiError(400, 'SAMPLES_REQUIRED', '请提供需要保存的测试样本。');

@@ -9,6 +9,7 @@ import {
   listSampleRuns,
   readSampleRun
 } from '../src/services/sampleRunStore.js';
+import { parseDevUploadedFile } from '../src/services/devFileParser.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,6 +70,46 @@ try {
   assert.match(await fs.readFile(path.join(sampleRoot, run.runId, 'samples.md'), 'utf8'), /sample-001/);
   assert.match(await fs.readFile(path.join(sampleRoot, run.runId, 'run-meta.json'), 'utf8'), /"sameStory": true/);
 
+  const txtParsed = await parseDevUploadedFile({
+    originalname: 'sample.txt',
+    mimetype: 'text/plain',
+    buffer: Buffer.from('TXT 原有行为测试。')
+  });
+  assert.equal(txtParsed.source.type, 'txt');
+  assert.equal(txtParsed.text, 'TXT 原有行为测试。');
+
+  const pdfParsed = await parseDevUploadedFile({
+    originalname: 'feature-script.pdf',
+    mimetype: 'application/pdf',
+    buffer: buildTextPdf('FrameSpark text PDF sample for internal diagnosis eval testing.')
+  });
+  assert.equal(pdfParsed.source.type, 'pdf');
+  assert.match(pdfParsed.text, /FrameSpark text PDF sample/);
+
+  const pdfSaved = await appendSamples(run.runId, [{
+    sampleId: 'pdf-001',
+    name: 'PDF 样本',
+    sourceType: 'uploaded-file',
+    originalFileName: 'feature-script.pdf',
+    fileType: pdfParsed.source.type,
+    extractedTextLength: pdfParsed.source.extractedTextLength,
+    text: pdfParsed.text
+  }], { root: sampleRoot });
+  const pdfRecord = pdfSaved.samples.find(item => item.sampleId === 'pdf-001');
+  assert.equal(pdfRecord.fileType, 'pdf');
+  assert.equal(pdfRecord.originalFileName, 'feature-script.pdf');
+  assert.equal(pdfRecord.extractedTextLength, pdfParsed.source.extractedTextLength);
+  assert.equal(pdfRecord.samplePath, pdfRecord.textPath);
+
+  await assert.rejects(
+    () => parseDevUploadedFile({
+      originalname: 'scanned.pdf',
+      mimetype: 'application/pdf',
+      buffer: buildTextPdf('')
+    }),
+    /暂不支持 OCR/
+  );
+
   const runs = await listSampleRuns({ root: sampleRoot });
   assert.equal(runs.length, 2);
 
@@ -94,4 +135,47 @@ try {
   console.log('dev sample run checks passed');
 } finally {
   await fs.rm(tempRoot, { recursive: true, force: true });
+}
+
+function buildTextPdf(text) {
+  const safeText = String(text || '').replace(/[()\\]/g, ' ');
+  const stream = [
+    'BT',
+    '/F1 18 Tf',
+    '72 720 Td',
+    `(${safeText}) Tj`,
+    'ET'
+  ].join('\n');
+  return Buffer.from(`%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length ${stream.length} >>
+stream
+${stream}
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000254 00000 n 
+0000000388 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+458
+%%EOF`);
 }

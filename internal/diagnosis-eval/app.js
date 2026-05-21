@@ -153,12 +153,12 @@
 
   function addFiles(files) {
     var accepted = files.filter(function (file) {
-      return /\.(txt|docx)$/i.test(file.name);
+      return /\.(txt|docx|pdf)$/i.test(file.name);
     });
     pendingFiles = pendingFiles.concat(accepted);
     renderPendingFiles();
     if (files.length !== accepted.length) {
-      setState('已忽略非 TXT / DOCX 文件。');
+      setState('已忽略非 TXT / DOCX / PDF 文件。');
     }
   }
 
@@ -183,7 +183,7 @@
       return;
     }
     if (!pendingFiles.length) {
-      setState('请先选择 TXT / DOCX 文件。');
+      setState('请先选择 TXT / DOCX / PDF 文件。');
       return;
     }
     if (pendingFiles.length > 1 && currentRun.sameStory === false && !currentRun.storyName && !currentRun.storyRelation) {
@@ -233,17 +233,25 @@
     });
 
     try {
-      await requestJson(API_BASE + '/' + encodeURIComponent(currentRun.runId) + '/samples', {
+      var data = await requestJson(API_BASE + '/' + encodeURIComponent(currentRun.runId) + '/samples', {
         method: 'POST',
         body: form
       });
       pendingFiles = [];
       renderPendingFiles();
       await selectRun(currentRun.runId);
-      setState('上传文件已保存为样本。');
+      setState(buildUploadStateMessage(data));
     } catch (err) {
       setState(err.message);
     }
+  }
+
+  function buildUploadStateMessage(data) {
+    var errors = Array.isArray(data && data.errors) ? data.errors : [];
+    if (!errors.length) return '上传文件已保存为样本。';
+    return '部分文件已保存，失败 ' + String(errors.length) + ' 个：' + errors.map(function (item) {
+      return (item.originalFileName || '未知文件') + '（' + (item.message || item.code || '失败') + '）';
+    }).join('；');
   }
 
   async function saveSamples(samples) {

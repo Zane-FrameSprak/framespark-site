@@ -137,11 +137,14 @@ export async function appendSamples(runId, rawSamples = [], { root = SAMPLE_ROOT
       name: sample.name,
       sourceType: sample.sourceType,
       originalFileName: sample.originalFileName,
+      fileType: sample.fileType,
+      extractedTextLength: sample.extractedTextLength,
       targetFormatExpected: sample.targetFormatExpected,
       materialFormExpected: sample.materialFormExpected,
       expectedDiagnosisDepth: sample.expectedDiagnosisDepth,
       testFocus: sample.testFocus,
       charCount: sample.text.length,
+      samplePath: relativePath,
       textPath: relativePath,
       createdAt: new Date().toISOString()
     };
@@ -179,12 +182,19 @@ function normalizeSample(raw, usedIds) {
     name: sanitizeText(sample.name, 160) || sampleId,
     sourceType: sanitizeText(sample.sourceType, 64) || 'pasted-text',
     originalFileName: sanitizeText(sample.originalFileName, 255),
+    fileType: sanitizeText(sample.fileType, 32) || 'pasted_text',
+    extractedTextLength: readTextLength(sample.extractedTextLength, text.length),
     targetFormatExpected,
     materialFormExpected,
     expectedDiagnosisDepth,
     testFocus: sanitizeText(sample.testFocus, 1000),
     text
   };
+}
+
+function readTextLength(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? Math.floor(number) : fallback;
 }
 
 async function resolveRunId(root, date, customName) {
@@ -373,6 +383,8 @@ function buildSamplesMarkdown(samples) {
       '',
       `- 来源：${sample.sourceType}`,
       `- 原文件名：${sample.originalFileName || '无'}`,
+      `- 文件类型：${sample.fileType || 'unknown'}`,
+      `- 提取文本长度：${sample.extractedTextLength ?? sample.charCount}`,
       `- 目标方向预期：${sample.targetFormatExpected}`,
       `- 材料形态预期：${sample.materialFormExpected}`,
       `- 预期诊断深度：${sample.expectedDiagnosisDepth}`,
