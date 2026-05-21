@@ -25,6 +25,24 @@ const ALLOWED_PREFIXES = Object.fromEntries(
   ])
 );
 
+const ADVANCE_PREFIX = '可进入进阶诊断';
+const ADVANCE_SYNONYM_PATTERNS = [
+  /可进入(?:更深入|深入|进阶)(?:的)?(?:故事)?诊断/,
+  /可以进入(?:更深入|深入|进阶)(?:的)?(?:故事)?诊断/,
+  /建议进入(?:更深入|深入|进阶)(?:的)?(?:故事)?诊断/,
+  /可以进行进阶评估/,
+  /建议进行(?:更深入|深入)(?:的)?故事诊断/
+];
+const ADVANCE_NEGATIVE_PATTERNS = [
+  /不建议.{0,12}进阶诊断/,
+  /暂不.{0,12}进阶诊断/,
+  /不能.{0,12}进阶诊断/,
+  /不适合.{0,12}进阶诊断/,
+  /尚不.{0,12}进阶诊断/,
+  /还不能.{0,12}进阶诊断/,
+  /需要先.{0,20}再.{0,8}进阶诊断/
+];
+
 // Three-strategy JSON extraction
 export function extractJson(content) {
   if (!content) {
@@ -92,7 +110,11 @@ export function normalizeReport(raw, materialType) {
     }
   }
 
-  const nextStep = stringOrFallback(raw.nextStep, '建议继续补充材料并打磨文本。');
+  const nextStepResult = normalizeNextStep(stringOrFallback(raw.nextStep, '建议继续补充材料并打磨文本。'));
+  const nextStep = nextStepResult.value;
+  if (nextStepResult.warning) {
+    warnings.push(nextStepResult.warning);
+  }
 
   // Validate nextStep prefix
   if (materialType) {
@@ -126,4 +148,29 @@ export function validateFields(raw) {
 function stringOrFallback(value, fallback) {
   const text = String(value || '').trim();
   return text || fallback;
+}
+
+export function normalizeNextStep(nextStep) {
+  const text = String(nextStep || '').trim();
+  if (!text) {
+    return { value: text, warning: '' };
+  }
+  if (text.startsWith(ADVANCE_PREFIX)) {
+    return { value: text, warning: '' };
+  }
+  if (ADVANCE_NEGATIVE_PATTERNS.some(pattern => pattern.test(text))) {
+    return { value: text, warning: '' };
+  }
+  if (!ADVANCE_SYNONYM_PATTERNS.some(pattern => pattern.test(text))) {
+    return { value: text, warning: '' };
+  }
+
+  return {
+    value: `${ADVANCE_PREFIX}：${stripLeadingPunctuation(text)}`,
+    warning: `nextStep 已规范化为「${ADVANCE_PREFIX}」前缀；原始值：${text.slice(0, 60)}`
+  };
+}
+
+function stripLeadingPunctuation(text) {
+  return text.replace(/^[：:，,。.、\s]+/, '');
 }
