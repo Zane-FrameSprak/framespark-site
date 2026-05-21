@@ -36,14 +36,38 @@ python3 -m http.server 8123
 http://127.0.0.1:8123/internal/diagnosis-eval/
 ```
 
-## 3. 创建测试批次
+## 3. 默认使用流程
+
+当前页面优先支持快速测试流程：
+
+1. 选择或创建一个测试批次
+2. 直接拖入 TXT / DOCX / PDF 文件，或粘贴一段文本
+3. 点击保存为样本
+
+目标方向预期、材料形态预期、预期诊断深度和测试重点都属于可选信息，默认会保存为：
+
+```json
+{
+  "targetFormatExpected": "unknown",
+  "materialFormExpected": "unknown",
+  "expectedDiagnosisDepth": "unknown",
+  "testFocus": ""
+}
+```
+
+这些字段主要用于后续精细复盘，不是保存样本的必填项。
+
+## 4. 创建测试批次
 
 进入页面后，可以在左侧“测试批次”区域创建新批次。
 
-可填写：
+默认只需要填写：
 
 - 批次名称，可选
 - 是否属于同一个故事 / 项目
+
+高级设置默认折叠，可选填写：
+
 - 故事 / 项目名称，可选
 - 文件关系说明，可选，例如“概念 + 梗概 + 人物小传”
 - 本轮测试目的 / 备注
@@ -62,16 +86,19 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 2026-05-21-short-concept-test-002
 ```
 
-## 4. 粘贴文本保存样本
+## 5. 粘贴文本保存样本
 
 选择或创建批次后，可以在“粘贴文本样本”区域填写：
 
-- 样本名称
+- 样本名称，可选
+- 样本文本
+
+以下字段在高级设置中，可选填写：
+
 - 目标方向预期
 - 材料形态预期
 - 预期诊断深度
 - 测试重点
-- 样本文本
 
 点击“保存为样本”后，样本文本会写入当前批次的：
 
@@ -86,7 +113,7 @@ samples-index.json
 samples.md
 ```
 
-## 5. 批量上传 TXT / DOCX / PDF
+## 6. 批量上传 TXT / DOCX / PDF
 
 “批量上传 TXT / DOCX / PDF”区域支持：
 
@@ -97,6 +124,18 @@ samples.md
 - 不支持扫描版 PDF / 图片版 PDF，不做 OCR
 
 每个文件会保存为一个样本。
+
+批量上传默认不要求逐个填写字段。每个文件会自动生成：
+
+- `sampleId`
+- `name`：原文件名去扩展名
+- `originalFileName`：原文件名
+- `targetFormatExpected: "unknown"`
+- `materialFormExpected: "unknown"`
+- `expectedDiagnosisDepth: "unknown"`
+- `testFocus: ""`
+
+如果需要，可以展开“批量高级设置”，把同一组预期字段统一应用到本批文件。
 
 如果一次上传多个文件，页面会询问：
 
@@ -110,7 +149,7 @@ samples.md
 run-meta.json
 ```
 
-## 6. 保存目录结构
+## 7. 保存目录结构
 
 每个测试批次目录大致如下：
 
@@ -135,7 +174,7 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 - `results/`：第一版不写入，留给后续诊断结果归档
 - `review-notes.md`：人工复盘记录
 
-## 7. 什么不会发生
+## 8. 什么不会发生
 
 当前 v1 工作台不会：
 
@@ -147,7 +186,7 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 - 不加入官网导航
 - 不作为公开入口
 
-## 8. 什么不会被提交
+## 9. 什么不会被提交
 
 真实日期测试批次默认被 `.gitignore` 忽略：
 
@@ -174,7 +213,7 @@ diagnosis-api/test-runs/sample-diagnosis/2026-05-21-manual-001/
 - 未确认授权的剧本文本
 - 批量测试产生的日期运行目录
 
-## 9. 安全提醒
+## 10. 安全提醒
 
 这个工作台只适合本地开发阶段使用。线上环境不要开启：
 

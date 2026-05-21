@@ -17,6 +17,11 @@
   var sameStoryDialog = document.getElementById('sameStoryDialog');
   var sameStoryForm = document.getElementById('sameStoryForm');
   var sameStoryCancel = document.getElementById('sameStoryCancel');
+  var sameStoryExtra = document.getElementById('sameStoryExtra');
+  var batchTargetFormatExpected = document.getElementById('batchTargetFormatExpected');
+  var batchMaterialFormExpected = document.getElementById('batchMaterialFormExpected');
+  var batchExpectedDiagnosisDepth = document.getElementById('batchExpectedDiagnosisDepth');
+  var batchTestFocus = document.getElementById('batchTestFocus');
 
   init();
 
@@ -36,6 +41,8 @@
       sameStoryDialog.close('cancel');
     });
     sameStoryForm.addEventListener('submit', confirmSameStory);
+    sameStoryForm.addEventListener('change', updateSameStoryDialog);
+    renderPendingFiles();
     loadRuns();
   }
 
@@ -120,10 +127,10 @@
     var sample = {
       name: form.get('name'),
       sourceType: 'pasted-text',
-      targetFormatExpected: form.get('targetFormatExpected'),
-      materialFormExpected: form.get('materialFormExpected'),
-      expectedDiagnosisDepth: form.get('expectedDiagnosisDepth'),
-      testFocus: form.get('testFocus'),
+      targetFormatExpected: form.get('targetFormatExpected') || 'unknown',
+      materialFormExpected: form.get('materialFormExpected') || 'unknown',
+      expectedDiagnosisDepth: form.get('expectedDiagnosisDepth') || 'unknown',
+      testFocus: form.get('testFocus') || '',
       text: form.get('text')
     };
 
@@ -187,6 +194,7 @@
       return;
     }
     if (pendingFiles.length > 1 && currentRun.sameStory === false && !currentRun.storyName && !currentRun.storyRelation) {
+      updateSameStoryDialog();
       sameStoryDialog.showModal();
       return;
     }
@@ -216,15 +224,16 @@
 
   async function uploadPendingFiles() {
     var form = new FormData();
+    var batchDefaults = getBatchDefaults();
     var metadata = pendingFiles.map(function (file) {
       return {
         name: file.name.replace(/\.[^.]+$/, ''),
         sourceType: 'uploaded-file',
         originalFileName: file.name,
-        targetFormatExpected: 'unknown',
-        materialFormExpected: 'unknown',
-        expectedDiagnosisDepth: 'unknown',
-        testFocus: ''
+        targetFormatExpected: batchDefaults.targetFormatExpected,
+        materialFormExpected: batchDefaults.materialFormExpected,
+        expectedDiagnosisDepth: batchDefaults.expectedDiagnosisDepth,
+        testFocus: batchDefaults.testFocus
       };
     });
     form.append('metadata', JSON.stringify(metadata));
@@ -239,6 +248,7 @@
       });
       pendingFiles = [];
       renderPendingFiles();
+      resetBatchDefaults();
       await selectRun(currentRun.runId);
       setState(buildUploadStateMessage(data));
     } catch (err) {
@@ -276,19 +286,89 @@
       return;
     }
     sampleList.innerHTML = samples.map(function (sample) {
+      var detailText = [
+        '目标方向预期：' + labelTarget(sample.targetFormatExpected),
+        '材料形态预期：' + labelForm(sample.materialFormExpected),
+        '诊断深度预期：' + labelDepth(sample.expectedDiagnosisDepth),
+        '测试重点：' + (sample.testFocus || '未填写'),
+        '文本路径：' + (sample.textPath || '-')
+      ].join(' · ');
       return [
         '<article class="sample-card">',
         '<strong>' + escapeHtml(sample.sampleId + ' · ' + sample.name) + '</strong>',
         '<p class="meta">',
-        '目标=' + escapeHtml(sample.targetFormatExpected || 'unknown'),
-        ' · 形态=' + escapeHtml(sample.materialFormExpected || 'unknown'),
-        ' · 深度=' + escapeHtml(sample.expectedDiagnosisDepth || 'unknown'),
-        ' · 来源=' + escapeHtml(sample.sourceType || '-'),
-        ' · 文本=' + escapeHtml(sample.textPath || '-'),
+        '来源=' + escapeHtml(labelSource(sample.sourceType)),
+        ' · 文件类型=' + escapeHtml(labelFileType(sample.fileType)),
+        ' · 字数=' + escapeHtml(String(sample.charCount || sample.extractedTextLength || 0)),
         '</p>',
+        '<details class="sample-card__details"><summary>查看预期字段</summary><p class="meta">' + escapeHtml(detailText) + '</p></details>',
         '</article>'
       ].join('');
     }).join('');
+  }
+
+  function getBatchDefaults() {
+    return {
+      targetFormatExpected: batchTargetFormatExpected.value || 'unknown',
+      materialFormExpected: batchMaterialFormExpected.value || 'unknown',
+      expectedDiagnosisDepth: batchExpectedDiagnosisDepth.value || 'unknown',
+      testFocus: batchTestFocus.value || ''
+    };
+  }
+
+  function resetBatchDefaults() {
+    batchTargetFormatExpected.value = 'unknown';
+    batchMaterialFormExpected.value = 'unknown';
+    batchExpectedDiagnosisDepth.value = 'unknown';
+    batchTestFocus.value = '';
+  }
+
+  function updateSameStoryDialog() {
+    var form = new FormData(sameStoryForm);
+    sameStoryExtra.hidden = form.get('sameStory') !== 'true';
+  }
+
+  function labelTarget(value) {
+    return {
+      short: '短片',
+      feature: '长片',
+      other: '其他 / 不确定',
+      unknown: '未确定'
+    }[value] || '未确定';
+  }
+
+  function labelForm(value) {
+    return {
+      concept: '故事概念',
+      synopsis: '梗概',
+      outline: '大纲',
+      character_bio: '人物小传',
+      worldbuilding: '世界观设定',
+      fragment: '片段文本',
+      full_script: '完整剧本',
+      unknown: '未确定'
+    }[value] || '未确定';
+  }
+
+  function labelDepth(value) {
+    return {
+      basic: '基础评估',
+      advanced: '深化评估',
+      unknown: '未确定'
+    }[value] || '未确定';
+  }
+
+  function labelSource(value) {
+    return value === 'uploaded-file' ? '上传文件' : '粘贴文本';
+  }
+
+  function labelFileType(value) {
+    return {
+      txt: 'TXT',
+      docx: 'DOCX',
+      pdf: 'PDF',
+      pasted_text: '粘贴文本'
+    }[value] || (value || '-');
   }
 
   async function requestJson(url, options) {

@@ -86,7 +86,7 @@ fieldset input {
 .eval-hero {
   border: 1px solid var(--line);
   background: linear-gradient(145deg, rgba(201, 168, 117, 0.09), transparent 45%), var(--panel);
-  padding: 28px;
+  padding: 24px 28px;
   margin-bottom: 22px;
 }
 
@@ -103,7 +103,7 @@ h1, h2, h3, p {
 
 h1 {
   margin-bottom: 14px;
-  font-size: clamp(30px, 5vw, 54px);
+  font-size: clamp(30px, 4vw, 48px);
   font-weight: 500;
 }
 
@@ -161,6 +161,25 @@ code {
   background: var(--panel-soft);
 }
 
+.advanced-box {
+  border: 1px solid rgba(204, 172, 112, 0.14);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.advanced-box summary {
+  padding: 10px 12px;
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.advanced-box__content {
+  display: grid;
+  gap: 12px;
+  padding: 0 12px 12px;
+}
+
 .run-list, .sample-list, .pending-files {
   display: grid;
   gap: 10px;
@@ -185,6 +204,16 @@ code {
   margin-bottom: 7px;
 }
 
+.sample-card__details {
+  margin-top: 8px;
+}
+
+.sample-card__details summary {
+  color: var(--gold);
+  font-size: 12px;
+  cursor: pointer;
+}
+
 .meta {
   color: var(--muted);
   font-size: 12px;
@@ -201,7 +230,8 @@ code {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 120px;
+  min-height: 140px;
+  padding: 18px;
   border: 1px dashed rgba(201, 168, 117, 0.46);
   background: rgba(201, 168, 117, 0.05);
   text-align: center;
@@ -237,6 +267,11 @@ code {
 }
 
 .dialog form {
+  display: grid;
+  gap: 14px;
+}
+
+.same-story-extra {
   display: grid;
   gap: 14px;
 }
