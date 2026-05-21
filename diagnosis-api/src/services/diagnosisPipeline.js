@@ -16,6 +16,7 @@ export async function runDiagnosisPipeline(payload) {
   if (!shouldAdvance) {
     return {
       internalStage: 'basic',
+      diagnosisDepth: 'basic',
       basicReport,
       finalReport: basicReport
     };
@@ -24,6 +25,7 @@ export async function runDiagnosisPipeline(payload) {
   const advancedReport = await generateAdvancedReport(buildAdvancedPayload(payload, basicReport));
   return {
     internalStage: 'advanced',
+    diagnosisDepth: 'advanced',
     basicReport,
     finalReport: advancedReport
   };

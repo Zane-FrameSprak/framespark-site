@@ -57,6 +57,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       const mockReport = buildMockDiagnosisReport(payload);
       result = {
         internalStage: 'mock',
+        diagnosisDepth: 'basic',
         basicReport: mockReport,
         finalReport: mockReport
       };
@@ -77,6 +78,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       mode,
       diagnosisId: logEntry?.id || null,
       internalStage: result.internalStage,
+      diagnosisDepth: getDiagnosisDepth(result),
       materialType,
       userSelectedType,
       targetFormat: materialRouting.targetFormat,
@@ -94,6 +96,13 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     next(err);
   }
 });
+
+export function getDiagnosisDepth(result) {
+  if (result?.diagnosisDepth === 'advanced' || result?.internalStage === 'advanced') {
+    return 'advanced';
+  }
+  return 'basic';
+}
 
 function normalizeMaterialType(value) {
   const valid = ['short', 'feature', 'other'];

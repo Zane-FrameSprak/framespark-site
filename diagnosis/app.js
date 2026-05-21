@@ -348,6 +348,7 @@
             ['目标方向', materialInfo.targetFormat],
             ['材料形态', materialInfo.materialForm],
             ['诊断方式', materialInfo.diagnosisMethod],
+            ['诊断深度', materialInfo.diagnosisDepth],
             ['字数', String(stats.charCount || 0)]
         ];
         var notice = materialInfo.notice || '系统已根据材料形态选择当前适合的诊断方式。';
@@ -539,6 +540,7 @@
                 targetFormat: formatTargetFormat((data.userSelectedType === 'short' || data.userSelectedType === 'feature') ? data.userSelectedType : 'unknown'),
                 materialForm: formatMaterialForm('unknown'),
                 diagnosisMethod: formatDiagnosisMethod(data.materialType),
+                diagnosisDepth: formatDiagnosisDepth(data.diagnosisDepth || data.internalStage),
                 notice: ''
             };
         }
@@ -552,8 +554,13 @@
             targetFormat: formatTargetFormat(targetFormat),
             materialForm: formatMaterialForm(routing.materialForm),
             diagnosisMethod: formatDiagnosisMethod(routing.effectiveDiagnosisType || data.materialType),
+            diagnosisDepth: formatDiagnosisDepth(data.diagnosisDepth || data.internalStage),
             notice: formatUserVisibleEnums(formatRoutingNotice(routing))
         };
+    }
+
+    function formatDiagnosisDepth(value) {
+        return value === 'advanced' ? '深化评估' : '基础评估';
     }
 
     function formatTargetFormat(value) {
