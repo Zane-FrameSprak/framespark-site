@@ -1,0 +1,260 @@
+:root {
+  color-scheme: dark;
+  --bg: #050504;
+  --panel: #11100e;
+  --panel-soft: #171411;
+  --line: rgba(204, 172, 112, 0.22);
+  --gold: #c9a875;
+  --gold-bright: #f0d9a3;
+  --ink: #f3eee4;
+  --muted: #aaa094;
+  --danger: #e7a28e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+}
+
+button.primary {
+  border-color: rgba(201, 168, 117, 0.52);
+  background: rgba(201, 168, 117, 0.12);
+  color: var(--gold-bright);
+}
+
+input, textarea, select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--ink);
+  padding: 10px 11px;
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.7;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+fieldset {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  margin: 0;
+  padding: 12px;
+}
+
+fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+fieldset input {
+  width: auto;
+}
+
+.eval-shell {
+  width: min(1380px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 36px 0 60px;
+}
+
+.eval-hero {
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, rgba(201, 168, 117, 0.09), transparent 45%), var(--panel);
+  padding: 28px;
+  margin-bottom: 22px;
+}
+
+.kicker {
+  margin: 0 0 12px;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-size: clamp(30px, 5vw, 54px);
+  font-weight: 500;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+h3 {
+  margin-bottom: 14px;
+  color: var(--gold-bright);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+code {
+  color: var(--gold-bright);
+}
+
+.eval-warning {
+  color: var(--danger);
+}
+
+.eval-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.34fr) minmax(0, 0.66fr);
+  gap: 18px;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 20px;
+}
+
+.panel--main {
+  display: grid;
+  gap: 20px;
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(204, 172, 112, 0.14);
+  background: var(--panel-soft);
+}
+
+.run-list, .sample-list, .pending-files {
+  display: grid;
+  gap: 10px;
+}
+
+.run-card, .sample-card, .file-card {
+  padding: 12px;
+  border: 1px solid rgba(204, 172, 112, 0.16);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.run-card {
+  cursor: pointer;
+}
+
+.run-card[data-active="true"] {
+  border-color: rgba(201, 168, 117, 0.58);
+}
+
+.run-card strong, .sample-card strong, .file-card strong {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.drop-zone {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  border: 1px dashed rgba(201, 168, 117, 0.46);
+  background: rgba(201, 168, 117, 0.05);
+  text-align: center;
+}
+
+.drop-zone[data-active="true"] {
+  border-color: var(--gold-bright);
+  background: rgba(201, 168, 117, 0.1);
+}
+
+.drop-zone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.state {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.dialog {
+  width: min(540px, calc(100% - 32px));
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 22px;
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.dialog form {
+  display: grid;
+  gap: 14px;
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .eval-grid,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .panel__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

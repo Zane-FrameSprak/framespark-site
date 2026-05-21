@@ -17,6 +17,7 @@ export const config = {
   deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
   deepseekModel: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
   aiTimeoutMs: readNumber('AI_TIMEOUT_MS', 90000),
+  enableDevTools: process.env.ENABLE_DEV_TOOLS === 'true',
   rateLimits: {
     diagnosisDailyLimit: readNumber('DIAGNOSIS_DAILY_LIMIT', 10),
     feedbackDailyLimit: readNumber('DIAGNOSIS_FEEDBACK_DAILY_LIMIT', 30)

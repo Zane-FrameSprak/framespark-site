@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FrameSpark 内部诊断评测工作台</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="eval-shell">
+    <section class="eval-hero">
+      <p class="kicker">INTERNAL TOOL · LOCAL DEV ONLY</p>
+      <h1>FrameSpark 内部诊断评测工作台</h1>
+      <p>用于本地整理故事开发诊断系统的测试样本。需要后端开启 <code>ENABLE_DEV_TOOLS=true</code>，不要填写未经授权的真实用户素材。</p>
+      <p class="eval-warning">本页面不调用 AI，不调用 <code>/api/diagnosis</code>，不生成正式诊断报告。</p>
+    </section>
+
+    <section class="eval-grid">
+      <aside class="panel">
+        <header class="panel__head">
+          <h2>测试批次</h2>
+          <button type="button" id="refreshRuns">刷新</button>
+        </header>
+        <div id="runList" class="run-list" aria-live="polite"></div>
+
+        <form id="createRunForm" class="stack">
+          <h3>新建批次</h3>
+          <label>
+            批次名称（可选）
+            <input name="name" placeholder="short-concept-test">
+          </label>
+          <fieldset>
+            <legend>是否属于同一个故事 / 项目</legend>
+            <label><input type="radio" name="sameStory" value="false" checked> 否</label>
+            <label><input type="radio" name="sameStory" value="true"> 是</label>
+          </fieldset>
+          <label>
+            故事 / 项目名称（可选）
+            <input name="storyName">
+          </label>
+          <label>
+            文件关系说明（可选）
+            <input name="storyRelation" placeholder="概念 + 梗概 + 人物小传">
+          </label>
+          <label>
+            本轮测试目的 / 备注
+            <textarea name="notes" rows="3"></textarea>
+          </label>
+          <button type="submit" class="primary">创建批次</button>
+        </form>
+      </aside>
+
+      <section class="panel panel--main">
+        <header class="panel__head">
+          <div>
+            <p class="kicker">CURRENT RUN</p>
+            <h2 id="currentRunTitle">请选择或创建测试批次</h2>
+          </div>
+          <span id="apiState" class="state"></span>
+        </header>
+
+        <section class="stack">
+          <h3>粘贴文本样本</h3>
+          <form id="pasteSampleForm" class="sample-form">
+            <div class="form-row">
+              <label>
+                样本名称
+                <input name="name" required>
+              </label>
+              <label>
+                目标方向预期
+                <select name="targetFormatExpected">
+                  <option value="unknown">未确定</option>
+                  <option value="short">短片</option>
+                  <option value="feature">长片</option>
+                  <option value="other">其他 / 不确定</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label>
+                材料形态预期
+                <select name="materialFormExpected">
+                  <option value="unknown">未确定</option>
+                  <option value="concept">故事概念</option>
+                  <option value="synopsis">梗概</option>
+                  <option value="outline">大纲</option>
+                  <option value="character_bio">人物小传</option>
+                  <option value="worldbuilding">世界观设定</option>
+                  <option value="fragment">片段文本</option>
+                  <option value="full_script">完整剧本</option>
+                </select>
+              </label>
+              <label>
+                预期诊断深度
+                <select name="expectedDiagnosisDepth">
+                  <option value="unknown">未确定</option>
+                  <option value="basic">基础评估</option>
+                  <option value="advanced">深化评估</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              测试重点
+              <input name="testFocus" placeholder="例如 concept vs synopsis 边界">
+            </label>
+            <label>
+              样本文本
+              <textarea name="text" rows="9" required></textarea>
+            </label>
+            <button type="submit" class="primary">保存为样本</button>
+          </form>
+        </section>
+
+        <section class="stack">
+          <h3>批量上传 TXT / DOCX</h3>
+          <div id="dropZone" class="drop-zone">
+            <p>拖拽多个 TXT / DOCX 文件到这里，或点击选择文件。</p>
+            <input id="fileInput" type="file" multiple accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+          </div>
+          <div id="pendingFiles" class="pending-files"></div>
+          <button type="button" id="saveFiles" class="primary">保存上传文件为样本</button>
+        </section>
+
+        <section class="stack">
+          <h3>当前批次样本</h3>
+          <div id="sampleList" class="sample-list"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="sameStoryDialog" class="dialog">
+    <form method="dialog" id="sameStoryForm">
+      <h3>这些文件是否属于同一个故事 / 项目？</h3>
+      <label><input type="radio" name="sameStory" value="false" checked> 否，它们是彼此独立的测试样本</label>
+      <label><input type="radio" name="sameStory" value="true"> 是，它们属于同一个故事 / 项目的不同材料</label>
+      <label>
+        故事 / 项目名称
+        <input name="storyName">
+      </label>
+      <label>
+        文件关系说明
+        <input name="storyRelation" placeholder="概念 + 梗概 + 人物小传">
+      </label>
+      <div class="dialog__actions">
+        <button type="button" id="sameStoryCancel">取消</button>
+        <button type="submit" class="primary">确认</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
