@@ -1,8 +1,8 @@
 (function () {
     'use strict';
 
-    var API_URL = 'http://127.0.0.1:8787/api/diagnosis';
-    var FEEDBACK_URL = 'http://127.0.0.1:8787/api/diagnosis-feedback';
+    var API_URL = '/api/diagnosis';
+    var FEEDBACK_URL = '/api/diagnosis-feedback';
 
     var form = document.getElementById('diagnosisForm');
     var fileInput = document.getElementById('diagnosisFile');
