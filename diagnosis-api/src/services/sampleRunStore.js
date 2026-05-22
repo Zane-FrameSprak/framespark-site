@@ -139,6 +139,9 @@ export async function appendSamples(runId, rawSamples = [], { root = SAMPLE_ROOT
       originalFileName: sample.originalFileName,
       fileType: sample.fileType,
       extractedTextLength: sample.extractedTextLength,
+      textQualityStatus: sample.textQualityStatus,
+      textQualityWarnings: sample.textQualityWarnings,
+      textQualityMetrics: sample.textQualityMetrics,
       targetFormatExpected: sample.targetFormatExpected,
       materialFormExpected: sample.materialFormExpected,
       expectedDiagnosisDepth: sample.expectedDiagnosisDepth,
@@ -184,12 +187,44 @@ function normalizeSample(raw, usedIds) {
     originalFileName: sanitizeText(sample.originalFileName, 255),
     fileType: sanitizeText(sample.fileType, 32) || 'pasted_text',
     extractedTextLength: readTextLength(sample.extractedTextLength, text.length),
+    textQualityStatus: normalizeQualityStatus(sample.textQualityStatus),
+    textQualityWarnings: normalizeStringArray(sample.textQualityWarnings, 10, 200),
+    textQualityMetrics: normalizeQualityMetrics(sample.textQualityMetrics),
     targetFormatExpected,
     materialFormExpected,
     expectedDiagnosisDepth,
     testFocus: sanitizeText(sample.testFocus, 1000),
     text
   };
+}
+
+function normalizeQualityStatus(value) {
+  const text = String(value || '').trim();
+  return ['ok', 'warning', 'failed'].includes(text) ? text : 'ok';
+}
+
+function normalizeStringArray(value, maxItems, maxLen) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, maxItems).map(item => sanitizeText(item, maxLen)).filter(Boolean);
+}
+
+function normalizeQualityMetrics(value) {
+  const metrics = value && typeof value === 'object' ? value : {};
+  return {
+    charCount: readTextLength(metrics.charCount, 0),
+    chineseCharRatio: readRatio(metrics.chineseCharRatio),
+    latinCharRatio: readRatio(metrics.latinCharRatio),
+    punctuationRatio: readRatio(metrics.punctuationRatio),
+    lineCount: readTextLength(metrics.lineCount, 0),
+    shortLineRatio: readRatio(metrics.shortLineRatio)
+  };
+}
+
+function readRatio(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) return 0;
+  if (number > 1) return 1;
+  return Math.round(number * 1000) / 1000;
 }
 
 function readTextLength(value, fallback) {
@@ -385,6 +420,8 @@ function buildSamplesMarkdown(samples) {
       `- 原文件名：${sample.originalFileName || '无'}`,
       `- 文件类型：${sample.fileType || 'unknown'}`,
       `- 提取文本长度：${sample.extractedTextLength ?? sample.charCount}`,
+      `- 文本质量：${sample.textQualityStatus || 'ok'}`,
+      `- 文本质量提示：${(sample.textQualityWarnings || []).join('；') || '无'}`,
       `- 目标方向预期：${sample.targetFormatExpected}`,
       `- 材料形态预期：${sample.materialFormExpected}`,
       `- 预期诊断深度：${sample.expectedDiagnosisDepth}`,

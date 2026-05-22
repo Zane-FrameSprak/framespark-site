@@ -15,12 +15,110 @@
       <p class="eval-warning">本页面不调用 AI，不调用 <code>/api/diagnosis</code>，不生成正式诊断报告。</p>
     </section>
 
-    <section class="eval-grid">
-      <aside class="panel">
-        <section class="quick-run-note">
-          <p class="kicker">QUICK RUN</p>
-          <h2>今日快速测试</h2>
-          <p class="meta">无需先建批次。直接上传或粘贴时，系统会自动准备今日 quick 批次。</p>
+    <section class="eval-main">
+      <section class="panel panel--main">
+        <header class="run-status">
+          <div>
+            <p class="kicker">CURRENT RUN</p>
+            <h2 id="currentRunTitle">正在准备今日快速测试批次</h2>
+          </div>
+          <span id="apiState" class="state"></span>
+        </header>
+
+        <form id="quickSampleForm" class="quick-input-card">
+          <div class="quick-input-card__head">
+            <div>
+              <p class="kicker">QUICK SAVE</p>
+              <h3>快速保存测试样本</h3>
+              <p class="meta">拖入 TXT / DOCX / PDF，或直接粘贴文本。系统会自动保存到今日快速测试批次。</p>
+            </div>
+          </div>
+
+          <label>
+            样本名称（可选）
+            <input id="sampleName" name="name" placeholder="不填则自动生成 pasted-text-001">
+          </label>
+
+          <label>
+            粘贴文本
+            <textarea id="sampleText" name="text" rows="12" placeholder="可粘贴故事概念、梗概、大纲、人物小传、世界观设定、片段文本或完整剧本。"></textarea>
+          </label>
+
+          <div id="dropZone" class="drop-zone">
+            <p>拖拽 TXT / DOCX / PDF 文件到这里，或点击选择文件。</p>
+            <p class="meta">PDF 仅支持可复制文字的文本型 PDF，不支持扫描版 PDF / 图片版 PDF。</p>
+            <input id="fileInput" type="file" multiple accept=".txt,.docx,.pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf">
+          </div>
+
+          <div id="pendingFiles" class="pending-files"></div>
+
+          <section id="sameStoryInline" class="same-story-inline" hidden>
+            <p>这些文件是否属于同一个故事 / 项目？</p>
+            <label><input type="radio" name="sameStoryQuick" value="false" checked> 否，彼此独立</label>
+            <label><input type="radio" name="sameStoryQuick" value="true"> 是，属于同一个故事 / 项目的不同材料</label>
+            <div id="sameStoryInlineExtra" class="same-story-extra" hidden>
+              <label>
+                故事 / 项目名称（可选）
+                <input id="quickStoryName" name="quickStoryName">
+              </label>
+              <label>
+                文件关系说明（可选）
+                <input id="quickStoryRelation" name="quickStoryRelation" placeholder="概念 + 梗概 + 人物小传">
+              </label>
+            </div>
+          </section>
+
+          <details class="advanced-box">
+            <summary>高级设置：预期字段（可选，用于后续精细复盘）</summary>
+            <div class="advanced-box__content">
+              <div class="form-row">
+                <label>
+                  目标方向预期
+                  <select id="batchTargetFormatExpected">
+                    <option value="unknown">未确定</option>
+                    <option value="short">短片</option>
+                    <option value="feature">长片</option>
+                    <option value="other">其他 / 不确定</option>
+                  </select>
+                </label>
+                <label>
+                  材料形态预期
+                  <select id="batchMaterialFormExpected">
+                    <option value="unknown">未确定</option>
+                    <option value="concept">故事概念</option>
+                    <option value="synopsis">梗概</option>
+                    <option value="outline">大纲</option>
+                    <option value="character_bio">人物小传</option>
+                    <option value="worldbuilding">世界观设定</option>
+                    <option value="fragment">片段文本</option>
+                    <option value="full_script">完整剧本</option>
+                  </select>
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  预期诊断深度
+                  <select id="batchExpectedDiagnosisDepth">
+                    <option value="unknown">未确定</option>
+                    <option value="basic">基础评估</option>
+                    <option value="advanced">深化评估</option>
+                  </select>
+                </label>
+                <label>
+                  测试重点
+                  <input id="batchTestFocus" placeholder="例如 full_script vs fragment 边界">
+                </label>
+              </div>
+            </div>
+          </details>
+
+          <button type="submit" id="saveSamplesButton" class="primary primary-large">保存为测试样本</button>
+          <div id="saveState" class="save-state" role="status" aria-live="polite"></div>
+        </form>
+
+        <section class="stack">
+          <h3>当前批次样本</h3>
+          <div id="sampleList" class="sample-list"></div>
         </section>
 
         <details class="run-manager">
@@ -64,161 +162,9 @@
             </form>
           </div>
         </details>
-      </aside>
-
-      <section class="panel panel--main">
-        <header class="panel__head">
-          <div>
-            <p class="kicker">CURRENT RUN</p>
-            <h2 id="currentRunTitle">请选择或创建测试批次</h2>
-          </div>
-          <span id="apiState" class="state"></span>
-        </header>
-
-        <section class="stack">
-          <h3>粘贴文本样本</h3>
-          <form id="pasteSampleForm" class="sample-form">
-            <div class="form-row">
-              <label>
-                样本名称（可选）
-                <input name="name" placeholder="不填则自动生成 sampleId">
-              </label>
-            </div>
-            <label>
-              样本文本
-              <textarea name="text" rows="11" required placeholder="直接粘贴故事概念、梗概、大纲、人物小传、世界观设定、片段文本或完整剧本。"></textarea>
-            </label>
-            <details class="advanced-box">
-              <summary>高级设置：预期字段（可选，用于后续精细复盘）</summary>
-              <div class="advanced-box__content">
-                <div class="form-row">
-                  <label>
-                    目标方向预期
-                    <select name="targetFormatExpected">
-                      <option value="unknown">未确定</option>
-                      <option value="short">短片</option>
-                      <option value="feature">长片</option>
-                      <option value="other">其他 / 不确定</option>
-                    </select>
-                  </label>
-                  <label>
-                    材料形态预期
-                    <select name="materialFormExpected">
-                      <option value="unknown">未确定</option>
-                      <option value="concept">故事概念</option>
-                      <option value="synopsis">梗概</option>
-                      <option value="outline">大纲</option>
-                      <option value="character_bio">人物小传</option>
-                      <option value="worldbuilding">世界观设定</option>
-                      <option value="fragment">片段文本</option>
-                      <option value="full_script">完整剧本</option>
-                    </select>
-                  </label>
-                </div>
-                <div class="form-row">
-                  <label>
-                    预期诊断深度
-                    <select name="expectedDiagnosisDepth">
-                      <option value="unknown">未确定</option>
-                      <option value="basic">基础评估</option>
-                      <option value="advanced">深化评估</option>
-                    </select>
-                  </label>
-                  <label>
-                    测试重点
-                    <input name="testFocus" placeholder="例如 concept vs synopsis 边界">
-                  </label>
-                </div>
-              </div>
-            </details>
-            <button type="submit" class="primary">保存为样本</button>
-          </form>
-        </section>
-
-        <section class="stack">
-          <h3>批量上传 TXT / DOCX / PDF</h3>
-          <p class="meta">快速测试时直接拖入文件即可；预期字段可以留空，系统会默认记为“未确定”。</p>
-          <div id="dropZone" class="drop-zone">
-            <p>拖拽多个 TXT / DOCX / PDF 文件到这里，或点击选择文件。</p>
-            <p class="meta">PDF 仅支持可复制文字的文本型 PDF，不支持扫描版 PDF / 图片版 PDF。</p>
-            <input id="fileInput" type="file" multiple accept=".txt,.docx,.pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf">
-          </div>
-          <details class="advanced-box">
-            <summary>批量高级设置：统一应用到本批文件</summary>
-            <div class="advanced-box__content">
-              <div class="form-row">
-                <label>
-                  目标方向预期
-                  <select id="batchTargetFormatExpected">
-                    <option value="unknown">未确定</option>
-                    <option value="short">短片</option>
-                    <option value="feature">长片</option>
-                    <option value="other">其他 / 不确定</option>
-                  </select>
-                </label>
-                <label>
-                  材料形态预期
-                  <select id="batchMaterialFormExpected">
-                    <option value="unknown">未确定</option>
-                    <option value="concept">故事概念</option>
-                    <option value="synopsis">梗概</option>
-                    <option value="outline">大纲</option>
-                    <option value="character_bio">人物小传</option>
-                    <option value="worldbuilding">世界观设定</option>
-                    <option value="fragment">片段文本</option>
-                    <option value="full_script">完整剧本</option>
-                  </select>
-                </label>
-              </div>
-              <div class="form-row">
-                <label>
-                  预期诊断深度
-                  <select id="batchExpectedDiagnosisDepth">
-                    <option value="unknown">未确定</option>
-                    <option value="basic">基础评估</option>
-                    <option value="advanced">深化评估</option>
-                  </select>
-                </label>
-                <label>
-                  测试重点
-                  <input id="batchTestFocus" placeholder="例如 full_script vs fragment 边界">
-                </label>
-              </div>
-            </div>
-          </details>
-          <div id="pendingFiles" class="pending-files"></div>
-          <button type="button" id="saveFiles" class="primary">保存上传文件为样本</button>
-        </section>
-
-        <section class="stack">
-          <h3>当前批次样本</h3>
-          <div id="sampleList" class="sample-list"></div>
-        </section>
       </section>
     </section>
   </main>
-
-  <dialog id="sameStoryDialog" class="dialog">
-    <form method="dialog" id="sameStoryForm">
-      <h3>这些文件是否属于同一个故事 / 项目？</h3>
-      <label><input type="radio" name="sameStory" value="false" checked> 否，它们是彼此独立的测试样本</label>
-      <label><input type="radio" name="sameStory" value="true"> 是，它们属于同一个故事 / 项目的不同材料</label>
-      <div id="sameStoryExtra" class="same-story-extra" hidden>
-        <label>
-          故事 / 项目名称
-          <input name="storyName">
-        </label>
-        <label>
-          文件关系说明
-          <input name="storyRelation" placeholder="概念 + 梗概 + 人物小传">
-        </label>
-      </div>
-      <div class="dialog__actions">
-        <button type="button" id="sameStoryCancel">取消</button>
-        <button type="submit" class="primary">确认</button>
-      </div>
-    </form>
-  </dialog>
 
   <script src="./app.js"></script>
 </body>

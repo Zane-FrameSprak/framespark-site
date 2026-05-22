@@ -87,6 +87,9 @@ async function resolveSamples(req) {
           originalFileName: file.originalname || '',
           fileType: parsed.source.type,
           extractedTextLength: parsed.source.extractedTextLength,
+          textQualityStatus: parsed.source.textQuality?.qualityStatus,
+          textQualityWarnings: parsed.source.textQuality?.qualityWarnings,
+          textQualityMetrics: parsed.source.textQuality?.qualityMetrics,
           text: parsed.text
         });
       } catch (err) {

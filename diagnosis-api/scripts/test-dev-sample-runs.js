@@ -10,6 +10,7 @@ import {
   readSampleRun
 } from '../src/services/sampleRunStore.js';
 import { parseDevUploadedFile } from '../src/services/devFileParser.js';
+import { evaluateTextQuality } from '../src/services/devFileParser.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,13 +79,22 @@ try {
   assert.equal(txtParsed.source.type, 'txt');
   assert.equal(txtParsed.text, 'TXT 原有行为测试。');
 
+  const normalQuality = evaluateTextQuality('第一场 内景 夜晚。林夏走进空教室，看见桌上有一封信。她停下脚步，听见走廊尽头传来脚步声。第二场 外景 清晨。林夏带着信来到河边，和陈默确认昨晚发生的事，两人的对话推动了新的选择。');
+  assert.equal(normalQuality.qualityStatus, 'ok');
+
+  const badExtractText = ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,\n))))))))))))))))))))))))))))\n、、、、、、、、、、、、、、、、\n.........................\n1\n2\n3\nWORLD CINEMA\n,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,\n))))))))))))))))))))))))))))';
+  const lowQuality = evaluateTextQuality(badExtractText);
+  assert.equal(lowQuality.qualityStatus, 'failed');
+  assert.ok(lowQuality.qualityWarnings.length > 0);
+
   const pdfParsed = await parseDevUploadedFile({
     originalname: 'feature-script.pdf',
     mimetype: 'application/pdf',
-    buffer: buildTextPdf('FrameSpark text PDF sample for internal diagnosis eval testing.')
+    buffer: buildTextPdf('FrameSpark text PDF sample for internal diagnosis eval testing. This readable script text contains scene action, character movement, and enough normal language for quality checks.')
   });
   assert.equal(pdfParsed.source.type, 'pdf');
   assert.match(pdfParsed.text, /FrameSpark text PDF sample/);
+  assert.equal(pdfParsed.source.textQuality.qualityStatus, 'ok');
 
   const pdfSaved = await appendSamples(run.runId, [{
     sampleId: 'pdf-001',
@@ -93,13 +103,40 @@ try {
     originalFileName: 'feature-script.pdf',
     fileType: pdfParsed.source.type,
     extractedTextLength: pdfParsed.source.extractedTextLength,
+    textQualityStatus: pdfParsed.source.textQuality.qualityStatus,
+    textQualityWarnings: pdfParsed.source.textQuality.qualityWarnings,
+    textQualityMetrics: pdfParsed.source.textQuality.qualityMetrics,
     text: pdfParsed.text
   }], { root: sampleRoot });
   const pdfRecord = pdfSaved.samples.find(item => item.sampleId === 'pdf-001');
   assert.equal(pdfRecord.fileType, 'pdf');
   assert.equal(pdfRecord.originalFileName, 'feature-script.pdf');
   assert.equal(pdfRecord.extractedTextLength, pdfParsed.source.extractedTextLength);
+  assert.equal(pdfRecord.textQualityStatus, 'ok');
+  assert.deepEqual(pdfRecord.textQualityWarnings, []);
+  assert.equal(typeof pdfRecord.textQualityMetrics.punctuationRatio, 'number');
   assert.equal(pdfRecord.samplePath, pdfRecord.textPath);
+
+  const badPdfSaved = await appendSamples(run.runId, [{
+    sampleId: 'pdf-bad',
+    name: '低质量 PDF 样本',
+    sourceType: 'uploaded-file',
+    originalFileName: 'bad-extract.pdf',
+    fileType: 'pdf',
+    extractedTextLength: lowQuality.qualityMetrics.charCount,
+    textQualityStatus: lowQuality.qualityStatus,
+    textQualityWarnings: lowQuality.qualityWarnings,
+    textQualityMetrics: lowQuality.qualityMetrics,
+    text: badExtractText
+  }], { root: sampleRoot });
+  const badPdfRecord = badPdfSaved.samples.find(item => item.sampleId === 'pdf-bad');
+  assert.equal(badPdfRecord.textQualityStatus, 'failed');
+  assert.ok(badPdfRecord.textQualityWarnings.length > 0);
+  assert.doesNotMatch(
+    await fs.readFile(path.join(sampleRoot, run.runId, 'samples-index.json'), 'utf8'),
+    /,,,,,,,,,,,,,,,,/,
+    'samples-index should not store low-quality full text'
+  );
 
   await assert.rejects(
     () => parseDevUploadedFile({

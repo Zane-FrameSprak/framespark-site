@@ -4,7 +4,7 @@
 
 它不是官网功能，不进入官网导航，不面向公开用户。
 
-## 1. 启动后端 dev API
+## 1. 启动后端 dev API（终端 1）
 
 工作台依赖后端 dev-only API。默认情况下该 API 关闭，必须显式开启：
 
@@ -21,7 +21,7 @@ http://127.0.0.1:8787
 
 如果没有设置 `ENABLE_DEV_TOOLS=true`，`/api/dev/sample-runs` 不会挂载，页面会提示 dev API 不可用。
 
-## 2. 启动静态前端
+## 2. 启动静态前端（终端 2）
 
 在项目根目录启动静态服务：
 
@@ -36,13 +36,29 @@ python3 -m http.server 8123
 http://127.0.0.1:8123/internal/diagnosis-eval/
 ```
 
+内部页面默认请求：
+
+```text
+http://127.0.0.1:8787/api/dev/sample-runs
+```
+
+如果后端端口不是 `8787`，可以在页面加载前配置：
+
+```html
+<script>
+  window.__FRAMESPARK_DEV_API_BASE__ = 'http://127.0.0.1:你的端口';
+</script>
+```
+
+或者临时修改 `internal/diagnosis-eval/app.js` 顶部的本地 `DEV_API_BASE` 默认值。
+
 ## 3. 默认使用流程
 
 当前页面优先支持快速测试流程：
 
 1. 打开页面，系统自动准备今日快速测试批次
-2. 直接拖入 TXT / DOCX / PDF 文件，或粘贴一段文本
-3. 点击保存为样本
+2. 直接拖入 TXT / DOCX / PDF 文件，或在大文本框粘贴一段文本
+3. 点击“保存为测试样本”
 
 目标方向预期、材料形态预期、预期诊断深度和测试重点都属于可选信息，默认会保存为：
 
@@ -80,7 +96,7 @@ YYYY-MM-DD-quick-001
 
 ## 5. 创建测试批次
 
-进入页面后，可以展开“更换 / 新建测试批次”创建新批次。
+日常测试不需要手动创建批次。进入页面后，可以在底部展开“更换 / 新建测试批次”创建新批次。
 
 默认只需要填写：
 
@@ -109,7 +125,7 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 
 ## 6. 粘贴文本保存样本
 
-页面会自动准备今日 quick 批次，也可以手动选择其他批次。之后在“粘贴文本样本”区域填写：
+页面会自动准备今日 quick 批次，也可以手动选择其他批次。之后在“快速保存测试样本”区域填写：
 
 - 样本名称，可选
 - 样本文本
@@ -121,7 +137,7 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 - 预期诊断深度
 - 测试重点
 
-点击“保存为样本”后，样本文本会写入当前批次的：
+点击“保存为测试样本”后，样本文本会写入当前批次的：
 
 ```text
 samples/<sampleId>-<safe-name>.txt
@@ -143,8 +159,9 @@ samples.md
 - 支持 `.txt` / `.docx` / `.pdf`
 - PDF 仅支持可复制文字的文本型 PDF
 - 不支持扫描版 PDF / 图片版 PDF，不做 OCR
+- PDF 即使保存成功，也需要查看文本质量状态；低质量提取结果不建议直接用于诊断
 
-每个文件会保存为一个样本。
+每个文件会保存为一个样本。文件列表会显示在大输入区下方。
 
 批量上传默认不要求逐个填写字段。每个文件会自动生成：
 
@@ -158,7 +175,7 @@ samples.md
 
 如果需要，可以展开“批量高级设置”，把同一组预期字段统一应用到本批文件。
 
-如果一次上传多个文件，页面会询问：
+如果一次上传多个文件，页面会在保存前显示轻量确认：
 
 ```text
 这些文件是否属于同一个故事 / 项目？
@@ -169,6 +186,17 @@ samples.md
 ```text
 run-meta.json
 ```
+
+如果不选择，默认按“否，它们是彼此独立的测试样本”处理。
+
+保存时页面会显示明确状态：
+
+- 保存中
+- 保存成功：已保存 X 个样本
+- 部分失败：成功 X 个，失败 Y 个，并列出失败文件和原因
+- 保存失败：显示后端返回的错误信息
+- 没有文本或文件时提示先粘贴文本或拖入文件
+- dev API 未开启时提示确认 `ENABLE_DEV_TOOLS=true`
 
 ## 8. 保存目录结构
 
@@ -191,6 +219,9 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 - `run-meta.json`：批次信息，包含 `sameStory`、`storyName`、`storyRelation`、`notes`
 - `samples/`：样本文本
 - `samples-index.json`：样本元数据和相对路径，不保存完整正文；PDF 样本会记录 `fileType: "pdf"` 和 `extractedTextLength`
+- `textQualityStatus`：文本质量状态，可能为 `ok`、`warning`、`failed`
+- `textQualityWarnings`：文本质量提示，例如标点比例过高、有效字符比例过低、疑似重复页眉页脚
+- `textQualityMetrics`：文本质量指标，包括字数、中文比例、英文比例、标点比例、行数和短行比例
 - `samples.md`：便于人工阅读的样本索引
 - `results/`：第一版不写入，留给后续诊断结果归档
 - `review-notes.md`：人工复盘记录
