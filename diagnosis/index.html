@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>故事开发诊断系统 | FrameSpark 帧火花</title>
-    <meta name="description" content="帧火花故事开发诊断系统，支持提交故事材料并生成故事开发诊断报告。">
+    <meta name="description" content="帧火花故事开发诊断系统当前处于内测准备阶段，公开上传暂未开放。">
     <meta name="theme-color" content="#0a0908">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,117 +44,39 @@
             <div class="subpage-hero__inner">
                 <p class="subpage-kicker">STORY DEVELOPMENT DIAGNOSIS</p>
                 <h1>故事开发诊断系统</h1>
-                <p class="subpage-lead">面向编剧与创作者的 AI 故事开发诊断工具。系统会根据材料阶段生成当前适合的诊断报告。</p>
+                <p class="subpage-lead">面向编剧与创作者的 AI 故事开发诊断工具。系统正在进行内测准备，正式开放时间以后续公告为准。</p>
             </div>
         </section>
 
         <section class="subpage-section diagnosis-section">
             <div class="subpage-section__inner diagnosis-console">
-                <form class="diagnosis-form" id="diagnosisForm">
+                <section class="diagnosis-form" aria-labelledby="diagnosisComingTitle">
                     <div class="diagnosis-form__head">
                         <p class="subpage-kicker">STORY DEVELOPMENT DIAGNOSIS</p>
-                        <h2>提交故事材料</h2>
-                        <p>系统将根据材料阶段生成当前适合的诊断报告。支持 TXT / DOCX，文件大小不超过 10MB。</p>
+                        <h2 id="diagnosisComingTitle">内测准备中</h2>
+                        <p>故事开发诊断系统当前处于内测准备阶段，暂未开放公开上传。正式开放时间以后续公告为准。</p>
                     </div>
 
-                    <label class="diagnosis-field">
-                        <span>目标方向</span>
-                        <select name="materialType" id="materialType">
-                            <option value="">请选择目标方向</option>
-                            <option value="short">短片方向</option>
-                            <option value="feature">长片方向</option>
-                            <option value="other">其他 / 不确定</option>
-                        </select>
-                    </label>
-
-                    <section class="diagnosis-material" aria-labelledby="diagnosisMaterialTitle">
+                    <section class="diagnosis-material" aria-labelledby="diagnosisStatusTitle">
                         <div class="diagnosis-material__head">
-                            <span id="diagnosisMaterialTitle">故事材料</span>
-                            <p>可直接粘贴文本，也可上传 TXT / DOCX 文件。系统会根据材料阶段选择适合的诊断方式。</p>
+                            <span id="diagnosisStatusTitle">当前状态</span>
+                            <p>后台诊断服务尚未在正式站点部署完成。为避免公开用户提交后失败，官网暂时关闭材料上传入口。</p>
                         </div>
-                        <textarea id="diagnosisText" name="text" placeholder="可粘贴故事概念、梗概、大纲、人物小传、世界观设定、片段文本或完整剧本。"></textarea>
-                        <div class="diagnosis-material__upload">
-                            <label class="diagnosis-file-button" for="diagnosisFile">
-                                上传 TXT / DOCX
-                                <input id="diagnosisFile" name="file" type="file" accept=".txt,.docx">
-                            </label>
-                            <span id="diagnosisFileName">未选择文件</span>
-                            <small>不超过 10MB。已选择文件时，将优先使用上传文件。</small>
-                        </div>
+                        <ul class="diagnosis-static-list">
+                            <li>当前系统处于内测准备阶段。</li>
+                            <li>暂未开放公开上传、公开诊断和公开反馈。</li>
+                            <li>正式开放时间以后续公告为准。</li>
+                        </ul>
                     </section>
 
-                    <div class="diagnosis-actions">
-                        <button class="diagnosis-submit" type="submit">开始诊断</button>
-                        <p id="diagnosisStatus" role="status">请选择材料并开始诊断。</p>
-                    </div>
-
-                    <p class="diagnosis-privacy">隐私说明：你提交的材料仅用于生成本次诊断报告。系统不会将原文用于模型训练；诊断日志不保存原始全文，诊断日志与反馈记录仅用于问题排查和系统改进。</p>
-
-                    <section class="diagnosis-progress" id="diagnosisProgress" aria-live="polite" hidden>
-                        <span class="diagnosis-progress__pulse" aria-hidden="true"></span>
-                        <div class="diagnosis-progress__copy">
-                            <p class="diagnosis-progress__eyebrow" id="diagnosisProgressCurrent">正在接收材料</p>
-                            <h3>诊断进行中</h3>
-                            <p id="diagnosisProgressDetail">系统正在识别材料阶段并生成适合当前材料的诊断报告，请稍候。</p>
-                        </div>
-                    </section>
-
-                    <div class="diagnosis-modal" id="materialTypeDialog" role="dialog" aria-modal="true" aria-labelledby="materialTypeDialogTitle" hidden>
-                        <div class="diagnosis-modal__panel">
-                            <h3 id="materialTypeDialogTitle">请选择目标方向</h3>
-                            <p>你选择的是作品目标方向。系统会参考你的选择，并根据材料实际形态自动选择诊断方式。</p>
-                            <div class="diagnosis-modal__options">
-                                <label>
-                                    <input type="radio" name="materialTypeConfirm" value="short">
-                                    <span>短片方向</span>
-                                </label>
-                                <label>
-                                    <input type="radio" name="materialTypeConfirm" value="feature">
-                                    <span>长片方向</span>
-                                </label>
-                                <label>
-                                    <input type="radio" name="materialTypeConfirm" value="other">
-                                    <span>其他 / 不确定</span>
-                                </label>
-                            </div>
-                            <div class="diagnosis-modal__actions">
-                                <button type="button" id="materialTypeConfirmButton">确认并开始诊断</button>
-                                <button type="button" id="materialTypeCancelButton">取消</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="diagnosis-modal diagnosis-modal--feedback" id="feedbackDialog" role="dialog" aria-modal="true" aria-labelledby="feedbackDialogTitle" hidden>
-                        <div class="diagnosis-modal__panel diagnosis-modal__panel--feedback">
-                            <h3 id="feedbackDialogTitle">反馈系统理解问题</h3>
-                            <p>请选择你认为系统理解不准确的地方。反馈会用于改进诊断系统，不会重新生成本次报告。</p>
-                            <div class="diagnosis-modal__options diagnosis-modal__options--checkbox" id="feedbackAreas">
-                                <label><input type="checkbox" name="feedbackArea" value="target_format_wrong"><span>目标方向不对</span></label>
-                                <label><input type="checkbox" name="feedbackArea" value="material_form_wrong"><span>材料形态不对</span></label>
-                                <label><input type="checkbox" name="feedbackArea" value="diagnosis_method_wrong"><span>诊断方式不对</span></label>
-                                <label><input type="checkbox" name="feedbackArea" value="core_understanding_wrong"><span>核心内容理解不准</span></label>
-                                <label><input type="checkbox" name="feedbackArea" value="problems_wrong"><span>报告问题不准</span></label>
-                                <label><input type="checkbox" name="feedbackArea" value="nextstep_wrong"><span>下一步判断不合理</span></label>
-                                <label><input type="checkbox" name="feedbackArea" value="other"><span>其他</span></label>
-                            </div>
-                            <label class="diagnosis-modal__textarea">
-                                <span>补充说明（选填）</span>
-                                <textarea id="feedbackComment" name="feedbackComment" placeholder="如有更具体的问题，可以在这里说明。"></textarea>
-                            </label>
-                            <p class="diagnosis-modal__hint" id="feedbackError" data-state="" aria-live="polite"></p>
-                            <div class="diagnosis-modal__actions">
-                                <button type="button" id="feedbackSubmitButton">提交反馈</button>
-                                <button type="button" id="feedbackCancelButton">取消</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                    <p class="diagnosis-privacy">隐私说明：当前公开页面暂未开放材料上传，因此不会收集、诊断或保存你的故事材料。正式开放后，系统将仅在你主动提交材料时用于生成本次诊断报告，并按届时页面说明处理诊断日志与反馈记录。</p>
+                </section>
 
                 <aside class="diagnosis-result" id="diagnosisResult" aria-live="polite">
                     <div class="diagnosis-result__empty">
-                        <p class="subpage-kicker">REPORT</p>
-                        <h2>等待上传</h2>
-                        <p>上传材料后，系统将在此生成诊断报告。</p>
+                        <p class="subpage-kicker">COMING SOON</p>
+                        <h2>公开诊断暂未开放</h2>
+                        <p>FrameSpark 正在进行内部样本测试与线上服务准备。开放后，本页将恢复材料提交与诊断报告展示。</p>
                     </div>
                 </aside>
             </div>
