@@ -32,6 +32,16 @@ if [ ! -f "$ERROR_LOG" ]; then
   exit 1
 fi
 
+if [ ! -r "$ACCESS_LOG" ]; then
+  echo "Error: Nginx 日志需要 sudo 权限读取，请使用 sudo bash scripts/run-nginx-traffic-summary.sh" >&2
+  exit 1
+fi
+
+if [ ! -r "$ERROR_LOG" ]; then
+  echo "Error: Nginx 错误日志需要 sudo 权限读取，请使用 sudo bash scripts/run-nginx-traffic-summary.sh" >&2
+  exit 1
+fi
+
 mkdir -p "$OUTPUT_DIR"
 
 run_summary() {

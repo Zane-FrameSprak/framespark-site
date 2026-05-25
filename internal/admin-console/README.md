@@ -139,6 +139,7 @@ someTarget: {
 后续真实访问统计接入 `scripts/nginx-traffic-summary.js` 生成的真实摘要 JSON，默认不使用 mock；接入方案见 `docs/内部控制台真实访问统计接入说明.md`。
 该摘要脚本会区分 `pageViews` 和更保守的 `validPageViews`：`validPageViews` 只统计已知站内页面，扫描路径、随机路径和 `/mailto:` 等异常请求不会进入有效访问。
 服务器上的真实访问统计摘要由 `scripts/run-nginx-traffic-summary.sh` 生成，默认存放在 `/home/ubuntu/framespark-reports/`，控制台后续读取该目录中的 JSON。
+服务器端手动运行和安装 cron 均应使用 `sudo`，因为 Nginx 日志通常归 `www` 用户 / 用户组管理，普通 `ubuntu` 用户没有读取权限；不要通过修改日志权限解决。
 
 当前 v1 尚未接入真实服务器 Nginx 日志。不要用 v1 图表判断真实线上流量。
 

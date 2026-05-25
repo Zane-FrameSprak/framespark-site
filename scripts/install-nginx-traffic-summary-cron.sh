@@ -7,6 +7,11 @@ CRON_LOG="$OUTPUT_DIR/traffic-summary-cron.log"
 MARKER="FrameSpark traffic summary"
 CRON_LINE="*/10 * * * * cd $PROJECT_DIR && bash scripts/run-nginx-traffic-summary.sh >> $CRON_LOG 2>&1 # $MARKER"
 
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Nginx 日志需要 root 权限读取，请使用 sudo bash scripts/install-nginx-traffic-summary-cron.sh" >&2
+  exit 1
+fi
+
 if [ ! -d "$PROJECT_DIR" ]; then
   echo "Error: project directory does not exist: $PROJECT_DIR" >&2
   exit 1
