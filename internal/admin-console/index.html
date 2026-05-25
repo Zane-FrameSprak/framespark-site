@@ -61,15 +61,30 @@
             <div>
               <p class="eyebrow">TRAFFIC</p>
               <h2>网站访问趋势图</h2>
-              <p class="mock-badge" id="trafficMockBadge" hidden>当前为本地 mock 摘要，尚未接入真实服务器 Nginx 日志</p>
+              <p class="mock-badge" id="trafficMockBadge" hidden>当前未接入真实 Nginx 日志，访问趋势与汇总暂不可用于运营判断</p>
             </div>
             <p class="panel-hint">PV 是访问次数，不等于用户数；独立 IP 不等于真实人数。diagnosis-api 未上线前，只能统计诊断页访问，不能统计真实诊断提交次数。</p>
           </div>
+          <div class="chart-controls" aria-label="图表控制">
+            <div class="segmented-control" id="trafficPeriodControl" aria-label="趋势周期">
+              <button type="button" class="is-active" data-period="today">当日趋势</button>
+              <button type="button" data-period="yesterday">昨日趋势</button>
+              <button type="button" data-period="7d" aria-disabled="true">近 7 日趋势</button>
+              <button type="button" data-period="30d" aria-disabled="true">近 30 日趋势</button>
+            </div>
+            <div class="segmented-control" id="chartHeightControl" aria-label="图表高度">
+              <button type="button" data-height="compact">紧凑</button>
+              <button type="button" class="is-active" data-height="standard">标准</button>
+              <button type="button" data-height="expanded">展开</button>
+            </div>
+          </div>
+          <p class="panel-hint" id="trafficControlStatus" role="status"></p>
           <div id="chartLegend" class="chart-legend"></div>
           <div class="chart-wrap">
             <canvas id="trafficChart" width="1180" height="420" aria-label="网站访问趋势图"></canvas>
             <div id="chartTooltip" class="chart-tooltip" hidden></div>
           </div>
+          <div class="traffic-summary" id="trafficSummary" aria-label="当前趋势数据汇总"></div>
           <p class="panel-hint" id="trafficSource"></p>
         </section>
 

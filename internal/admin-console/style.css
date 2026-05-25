@@ -164,7 +164,7 @@ h3 {
 .deadline-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .stats-grid {
@@ -173,7 +173,6 @@ h3 {
   gap: 12px;
 }
 
-.deadline-card,
 .stats-card,
 .reminders article {
   padding: 12px;
@@ -183,7 +182,7 @@ h3 {
 }
 
 .deadline-group {
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;
@@ -195,12 +194,12 @@ h3 {
 }
 
 .deadline-group__head {
-  margin-bottom: 9px;
+  margin-bottom: 7px;
 }
 
 .deadline-group__head h3 {
-  margin: 0 0 5px;
-  font-size: 15px;
+  margin: 0 0 3px;
+  font-size: 14px;
 }
 
 .deadline-group__head p {
@@ -212,14 +211,7 @@ h3 {
 
 .deadline-group__items {
   display: grid;
-  gap: 7px;
-}
-
-.deadline-card span {
-  display: block;
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
+  gap: 5px;
 }
 
 .stats-card span {
@@ -229,12 +221,39 @@ h3 {
   font-size: 12px;
 }
 
+.deadline-card {
+  display: grid;
+  grid-template-columns: minmax(76px, 0.8fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-soft);
+}
+
+.deadline-card span {
+  min-width: 0;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .deadline-card strong {
-  display: block;
   min-width: 0;
   overflow-wrap: anywhere;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.32;
+}
+
+.deadline-card strong small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
 }
 
 .stats-card strong {
@@ -258,42 +277,25 @@ h3 {
   border-style: dashed;
 }
 
-.deadline-days {
-  color: var(--amber) !important;
-  font-weight: 700;
-}
-
-.deadline-days--unknown {
-  color: var(--muted) !important;
-  font-weight: 600;
-}
-
-.deadline-card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 7px;
-}
-
-.deadline-card__foot em {
+.deadline-card > em {
   flex: 0 0 auto;
-  padding: 3px 7px;
+  padding: 2px 6px;
   border-radius: 999px;
   background: rgba(100, 116, 139, 0.1);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-style: normal;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.deadline-card[data-severity="attention"] .deadline-card__foot em,
-.deadline-card[data-severity="warning"] .deadline-card__foot em {
+.deadline-card[data-severity="attention"] > em,
+.deadline-card[data-severity="warning"] > em {
   background: rgba(217, 119, 6, 0.12);
   color: var(--amber);
 }
 
-.deadline-card[data-severity="urgent"] .deadline-card__foot em {
+.deadline-card[data-severity="urgent"] > em {
   background: rgba(220, 38, 38, 0.12);
   color: var(--red);
 }
@@ -389,6 +391,41 @@ button .shortcut-note {
   display: none;
 }
 
+.chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+
+.segmented-control {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.segmented-control button {
+  min-height: 32px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.segmented-control button.is-active {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: #fff;
+  color: var(--blue);
+}
+
+.segmented-control button[aria-disabled="true"]:not(.is-active) {
+  opacity: 0.58;
+}
+
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -412,6 +449,11 @@ button .shortcut-note {
   box-shadow: inset 0 0 0 1px var(--legend-color, var(--blue));
 }
 
+.legend-item.is-unavailable {
+  opacity: 0.42;
+  box-shadow: none;
+}
+
 .legend-item span {
   display: inline-block;
   width: 10px;
@@ -422,17 +464,105 @@ button .shortcut-note {
 
 .chart-wrap {
   position: relative;
-  overflow-x: auto;
+  overflow: hidden;
+  min-height: 340px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
 }
 
+.traffic-summary {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.traffic-summary__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.traffic-summary__head h3 {
+  margin: 0;
+}
+
+.traffic-summary__head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.traffic-summary__table {
+  display: grid;
+  gap: 6px;
+}
+
+.traffic-summary__row {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.8fr) repeat(7, minmax(62px, 1fr)) minmax(92px, 1.1fr);
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.traffic-summary__row--head {
+  min-height: 32px;
+  background: transparent;
+  border-color: transparent;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.traffic-summary__row span,
+.traffic-summary__row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.traffic-summary__row span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.traffic-summary__row strong {
+  font-size: 13px;
+}
+
+.traffic-summary__row--head span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.traffic-summary__row em {
+  justify-self: start;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.traffic-summary__row em[data-state="ready"] {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--blue);
+}
+
 canvas {
   display: block;
-  width: 100%;
-  min-width: 780px;
-  height: auto;
 }
 
 .chart-tooltip {
@@ -534,6 +664,14 @@ canvas {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .traffic-summary__table {
+    overflow-x: auto;
+  }
+
+  .traffic-summary__row {
+    min-width: 780px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -544,5 +682,14 @@ canvas {
   .deadline-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .deadline-card {
+    grid-template-columns: minmax(74px, 0.85fr) minmax(0, 1fr);
+  }
+
+  .deadline-card > em {
+    grid-column: 2;
+    justify-self: start;
   }
 }
