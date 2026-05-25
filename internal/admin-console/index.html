@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FrameSpark 内部控制台</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <div class="console-layout">
+      <aside class="status-sidebar" aria-label="项目状态栏">
+        <div class="section-head">
+          <p class="eyebrow">PROJECT STATUS</p>
+          <h2>项目状态栏</h2>
+        </div>
+        <div class="deadline-grid" id="deadlineGrid"></div>
+      </aside>
+
+      <div class="main-column">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">LOCAL ADMIN CONSOLE</p>
+            <h1>FrameSpark 内部控制台</h1>
+            <p class="lead">当前只读本地工具，不部署公网。</p>
+          </div>
+          <div class="refresh-box">
+            <span>最后刷新时间</span>
+            <strong id="lastRefresh">--</strong>
+          </div>
+        </header>
+
+        <section class="notice-row" aria-label="安全边界">
+          <span>只监听 127.0.0.1</span>
+          <span>不读取 .env</span>
+          <span>不执行任意命令</span>
+          <span>路径白名单</span>
+        </section>
+
+        <section class="grid-two">
+          <section class="panel">
+            <div class="section-head">
+              <p class="eyebrow">SHORTCUTS</p>
+              <h2>快捷入口</h2>
+            </div>
+            <div id="shortcutGroups" class="shortcut-groups"></div>
+            <p class="panel-hint" id="openTargetStatus" role="status"></p>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <p class="eyebrow">TODAY</p>
+              <h2>今日提醒</h2>
+            </div>
+            <div id="reminders" class="reminders"></div>
+          </section>
+        </section>
+
+        <section class="panel">
+          <div class="section-head section-head--inline">
+            <div>
+              <p class="eyebrow">TRAFFIC</p>
+              <h2>网站访问趋势图</h2>
+              <p class="mock-badge" id="trafficMockBadge" hidden>当前为本地 mock 摘要，尚未接入真实服务器 Nginx 日志</p>
+            </div>
+            <p class="panel-hint">PV 是访问次数，不等于用户数；独立 IP 不等于真实人数。diagnosis-api 未上线前，只能统计诊断页访问，不能统计真实诊断提交次数。</p>
+          </div>
+          <div id="chartLegend" class="chart-legend"></div>
+          <div class="chart-wrap">
+            <canvas id="trafficChart" width="1180" height="420" aria-label="网站访问趋势图"></canvas>
+          </div>
+          <p class="panel-hint" id="trafficSource"></p>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <p class="eyebrow">LOCAL RECORDS</p>
+            <h2>日志与记录概览</h2>
+          </div>
+          <div id="recordStats" class="stats-grid"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

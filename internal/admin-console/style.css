@@ -1,0 +1,484 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --panel-soft: #f8fafc;
+  --line: #dbe2ea;
+  --text: #172033;
+  --muted: #65748b;
+  --blue: #2563eb;
+  --green: #16a34a;
+  --amber: #d97706;
+  --red: #dc2626;
+  --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.shell {
+  width: min(1240px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 34px 0 50px;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 8px;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 20px;
+}
+
+h3 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.lead,
+.panel-hint {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.refresh-box {
+  min-width: 220px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  text-align: right;
+}
+
+.refresh-box span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.notice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.notice-row span {
+  padding: 7px 10px;
+  border: 1px solid #c8d3e2;
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+}
+
+.panel {
+  margin-bottom: 20px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.console-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.status-sidebar {
+  position: sticky;
+  top: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.status-sidebar .section-head {
+  margin-bottom: 14px;
+}
+
+.status-sidebar h2 {
+  font-size: 18px;
+}
+
+.main-column {
+  min-width: 0;
+}
+
+.section-head {
+  margin-bottom: 18px;
+}
+
+.section-head--inline {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.section-head--inline .panel-hint {
+  max-width: 620px;
+  margin-bottom: 0;
+  font-size: 13px;
+}
+
+.deadline-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.deadline-card,
+.stats-card,
+.reminders article {
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.deadline-group {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.deadline-group[data-category="操作风险类"] {
+  border-color: rgba(217, 119, 6, 0.34);
+  background: #fffaf2;
+}
+
+.deadline-group__head {
+  margin-bottom: 9px;
+}
+
+.deadline-group__head h3 {
+  margin: 0 0 5px;
+  font-size: 15px;
+}
+
+.deadline-group__head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.deadline-group__items {
+  display: grid;
+  gap: 10px;
+}
+
+.deadline-card span,
+.stats-card span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.deadline-card strong,
+.stats-card strong {
+  display: block;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.deadline-card[data-severity="attention"],
+.deadline-card[data-severity="warning"] {
+  border-color: rgba(217, 119, 6, 0.4);
+  background: #fff8ed;
+}
+
+.deadline-card[data-severity="urgent"] {
+  border-color: rgba(220, 38, 38, 0.45);
+  background: #fff1f2;
+}
+
+.deadline-card[data-severity="unknown"] {
+  border-style: dashed;
+}
+
+.deadline-days {
+  color: var(--amber) !important;
+  font-weight: 700;
+}
+
+.deadline-days--unknown {
+  color: var(--muted) !important;
+  font-weight: 600;
+}
+
+.deadline-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.deadline-card__foot em {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.deadline-card[data-severity="attention"] .deadline-card__foot em,
+.deadline-card[data-severity="warning"] .deadline-card__foot em {
+  background: rgba(217, 119, 6, 0.12);
+  color: var(--amber);
+}
+
+.deadline-card[data-severity="urgent"] .deadline-card__foot em {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--red);
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(300px, 0.82fr);
+  gap: 20px;
+}
+
+.shortcut-groups {
+  display: grid;
+  gap: 16px;
+}
+
+.shortcut-group > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+button {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2937;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+button small {
+  display: block;
+  margin-top: 2px;
+  color: var(--red);
+}
+
+button .shortcut-note {
+  max-width: 220px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.panel-hint[data-state="success"] {
+  color: var(--green);
+}
+
+.panel-hint[data-state="error"] {
+  color: var(--red);
+}
+
+.reminders {
+  display: grid;
+  gap: 10px;
+}
+
+.reminders article[data-level="urgent"] {
+  border-color: rgba(220, 38, 38, 0.45);
+  background: #fff1f2;
+}
+
+.reminders article[data-level="attention"] {
+  border-color: rgba(217, 119, 6, 0.4);
+  background: #fff8ed;
+}
+
+.mock-badge {
+  display: inline-flex;
+  margin: 8px 0 0;
+  padding: 6px 9px;
+  border: 1px solid rgba(217, 119, 6, 0.36);
+  border-radius: 999px;
+  background: #fff8ed;
+  color: #9a5b05;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mock-badge[hidden] {
+  display: none;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.legend-item {
+  border-color: #d6dee9;
+  background: #f8fafc;
+  color: var(--muted);
+  opacity: 0.72;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.legend-item.is-active {
+  opacity: 1;
+  border-color: var(--legend-color, var(--blue));
+  background: #fff;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--legend-color, var(--blue));
+}
+
+.legend-item span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 7px;
+  border-radius: 999px;
+}
+
+.chart-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  min-width: 780px;
+  height: auto;
+}
+
+.stats-card {
+  min-height: 92px;
+}
+
+.stats-card--priority {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: #f7faff;
+}
+
+.stats-card.is-zero {
+  background: #f8fafc;
+  color: var(--muted);
+}
+
+.stats-card.is-zero strong {
+  color: #94a3b8;
+}
+
+.stats-card small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .topbar,
+  .section-head--inline,
+  .grid-two {
+    display: block;
+  }
+
+  .console-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .status-sidebar {
+    position: static;
+    margin-bottom: 20px;
+  }
+
+  .refresh-box {
+    margin-top: 16px;
+    text-align: left;
+  }
+
+  .deadline-grid,
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: min(100% - 24px, 1240px);
+  }
+
+  .deadline-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

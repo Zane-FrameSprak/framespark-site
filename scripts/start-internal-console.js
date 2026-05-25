@@ -1,0 +1,595 @@
+#!/usr/bin/env node
+import fs from 'fs/promises';
+import fsSync from 'fs';
+import http from 'http';
+import path from 'path';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const REPO_ROOT = path.resolve(path.dirname(__filename), '..');
+
+const serverPort = 8130;
+const serverHost = '127.0.0.1';
+const consolePath = '/internal/admin-console/';
+const consoleUrl = `http://${serverHost}:${serverPort}${consolePath}`;
+
+const localPaths = {
+  projectRoot: REPO_ROOT,
+  statusDoc: path.join(REPO_ROOT, 'docs', '当前项目状态总结.md'),
+  evalConsole: `${consoleUrl.replace('/internal/admin-console/', '/internal/diagnosis-eval/')}`,
+  sampleRuns: path.join(REPO_ROOT, 'diagnosis-api', 'test-runs', 'sample-diagnosis'),
+  diagnosisLogs: path.join(REPO_ROOT, 'diagnosis-api', 'logs'),
+  reviewQueue: path.join(REPO_ROOT, 'diagnosis-api', 'logs', 'diagnosis', 'review-queue')
+};
+
+const allowedOpenTargets = {
+  officialSite: {
+    label: '打开正式官网',
+    type: 'url',
+    value: 'https://framespark.cn/'
+  },
+  projectRoot: {
+    label: '打开本地项目目录',
+    type: 'path',
+    value: localPaths.projectRoot
+  },
+  statusDoc: {
+    label: '打开项目状态文档',
+    type: 'path',
+    value: localPaths.statusDoc
+  },
+  evalConsole: {
+    label: '打开内部评测工作台',
+    type: 'url',
+    value: localPaths.evalConsole
+  },
+  sampleRuns: {
+    label: '打开样本测试目录',
+    type: 'path',
+    value: localPaths.sampleRuns
+  },
+  diagnosisLogs: {
+    label: '打开 diagnosis-api/logs 目录',
+    type: 'path',
+    value: localPaths.diagnosisLogs
+  },
+  reviewQueue: {
+    label: '打开 review queue 目录',
+    type: 'path',
+    value: localPaths.reviewQueue
+  }
+};
+
+const optionalBrandTargets = [
+  {
+    id: 'brandPositioningSheet',
+    label: '打开官号与个人号定位表',
+    type: 'path',
+    value: path.join(REPO_ROOT, 'docs', '官号与个人号定位表.md')
+  }
+];
+
+const deadlineConfig = [
+  {
+    id: 'domain',
+    label: '域名 framespark.cn 到期时间',
+    value: '',
+    unknownLabel: '待填写'
+  },
+  {
+    id: 'ssl',
+    label: 'SSL 证书到期时间',
+    value: '2026-08-13T07:59:59+08:00'
+  },
+  {
+    id: 'server',
+    label: '腾讯云服务器到期时间',
+    value: '',
+    unknownLabel: '待填写'
+  },
+  {
+    id: 'policeFiling',
+    label: '公安备案状态',
+    statusText: '已提交，待审核',
+    severity: 'warning'
+  },
+  {
+    id: 'diagnosisApi',
+    label: 'diagnosis-api',
+    statusText: '未线上部署',
+    severity: 'attention'
+  },
+  {
+    id: 'publicDiagnosis',
+    label: '公开诊断页',
+    statusText: '内测中，暂未开放上传',
+    severity: 'attention'
+  },
+  {
+    id: 'serverSync',
+    label: 'GitHub push 后不会自动同步腾讯云正式站',
+    statusText: '需要补部署同步流程',
+    severity: 'warning'
+  }
+];
+
+const dashboardConfig = {
+  title: 'FrameSpark 内部控制台',
+  subtitle: '当前只读本地工具',
+  badges: ['只监听 127.0.0.1', '不部署公网', '只读扫描'],
+  nginxLogPaths: [
+    '/www/wwwlogs/framespark.cn.log',
+    '/www/wwwlogs/framespark.cn.error.log'
+  ],
+  defaultVisibleSeries: ['pv', 'uniqueIp', 'diagnosis']
+};
+
+const staticRoot = path.join(REPO_ROOT, 'internal', 'admin-console');
+const contentTypes = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml'
+};
+
+const args = new Set(process.argv.slice(2));
+
+const server = http.createServer(async (req, res) => {
+  try {
+    await handleRequest(req, res);
+  } catch (err) {
+    sendJson(res, 500, {
+      ok: false,
+      error: 'INTERNAL_CONSOLE_ERROR',
+      message: err.message || '内部控制台暂时不可用。'
+    });
+  }
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`端口 ${serverPort} 已被占用。请先关闭占用该端口的本地服务后再启动 FrameSpark 内部控制台。`);
+    process.exit(1);
+  }
+  console.error(err);
+  process.exit(1);
+});
+
+server.listen(serverPort, serverHost, () => {
+  console.log(`FrameSpark 内部控制台已启动：${consoleUrl}`);
+  console.log('本地服务只监听 127.0.0.1，不对公网开放。');
+  if (args.has('--open')) {
+    openWithMac(consoleUrl);
+  }
+});
+
+async function handleRequest(req, res) {
+  const url = new URL(req.url, consoleUrl);
+
+  if (req.method === 'GET' && url.pathname === '/api/console/config') {
+    sendJson(res, 200, {
+      ok: true,
+      config: await buildPublicConfig()
+    });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/console/summary') {
+    sendJson(res, 200, {
+      ok: true,
+      summary: await buildSummary()
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/console/open-target') {
+    const body = await readJsonBody(req, 4096);
+    const result = await openAllowedTarget(body.targetId);
+    sendJson(res, result.ok ? 200 : result.status, result);
+    return;
+  }
+
+  if (req.method === 'GET') {
+    await serveStatic(url.pathname, res);
+    return;
+  }
+
+  sendJson(res, 405, {
+    ok: false,
+    error: 'METHOD_NOT_ALLOWED',
+    message: '不支持的请求方式。'
+  });
+}
+
+async function buildPublicConfig() {
+  const targets = { ...allowedOpenTargets };
+  for (const target of optionalBrandTargets) {
+    if (target.type === 'path' && await pathExists(target.value)) {
+      targets[target.id] = target;
+    }
+  }
+
+  return {
+    server: {
+      host: serverHost,
+      port: serverPort,
+      url: consoleUrl
+    },
+    dashboard: dashboardConfig,
+    deadlines: deadlineConfig.map(formatDeadline),
+    openTargets: Object.entries(targets).map(([id, target]) => ({
+      id,
+      label: target.label,
+      group: getTargetGroup(id),
+      available: target.type === 'url' ? true : fsSync.existsSync(target.value),
+      missingLabel: target.type === 'path' && !fsSync.existsSync(target.value) ? '路径不存在' : ''
+    }))
+  };
+}
+
+function formatDeadline(item) {
+  if (item.statusText) {
+    return {
+      id: item.id,
+      category: getDeadlineCategory(item.id),
+      label: item.label,
+      value: item.statusText,
+      severity: item.severity || 'normal',
+      daysLeft: null
+    };
+  }
+
+  if (!item.value) {
+    return {
+      id: item.id,
+      category: getDeadlineCategory(item.id),
+      label: item.label,
+      value: item.unknownLabel || '待填写',
+      severity: 'unknown',
+      daysLeft: null
+    };
+  }
+
+  const due = new Date(item.value);
+  const now = new Date();
+  const daysLeft = Math.ceil((due.getTime() - now.getTime()) / 86400000);
+  let severity = 'normal';
+  if (daysLeft < 7) severity = 'urgent';
+  else if (daysLeft < 30) severity = 'attention';
+
+  return {
+    id: item.id,
+    category: getDeadlineCategory(item.id),
+    label: item.label,
+    value: formatDateTime(due),
+    severity,
+    daysLeft
+  };
+}
+
+async function buildSummary() {
+  const [diagnosisLogs, reviewQueue, sampleRuns, traffic] = await Promise.all([
+    countDiagnosisLogs(),
+    countReviewQueue(),
+    countSampleRuns(),
+    readTrafficSummary()
+  ]);
+
+  const pdfQuality = await countPdfQualityIssues();
+  const reminders = buildReminders({ diagnosisLogs, reviewQueue, sampleRuns, pdfQuality, traffic });
+
+  return {
+    refreshedAt: new Date().toISOString(),
+    traffic,
+    counts: {
+      diagnosisLogs,
+      reviewQueue,
+      sampleRuns,
+      pdfQuality
+    },
+    reminders
+  };
+}
+
+async function countDiagnosisLogs() {
+  const files = await listFilesSafe(path.join(REPO_ROOT, 'diagnosis-api', 'logs', 'diagnosis', 'by-date'));
+  return countByDate(files.filter(file => file.endsWith('.json')));
+}
+
+async function countReviewQueue() {
+  const files = await listFilesSafe(path.join(REPO_ROOT, 'diagnosis-api', 'logs', 'diagnosis', 'review-queue'));
+  return countByDate(files.filter(file => file.endsWith('.md') || file.endsWith('.json')));
+}
+
+async function countSampleRuns() {
+  const base = path.join(REPO_ROOT, 'diagnosis-api', 'test-runs', 'sample-diagnosis');
+  const entries = await readdirSafe(base);
+  const runDirs = [];
+  for (const entry of entries) {
+    if (!/^20\d{2}-\d{2}-\d{2}-/.test(entry.name)) continue;
+    if (entry.isDirectory()) runDirs.push(path.join(base, entry.name));
+  }
+  return countByDate(runDirs);
+}
+
+async function countPdfQualityIssues() {
+  const base = path.join(REPO_ROOT, 'diagnosis-api', 'test-runs', 'sample-diagnosis');
+  const entries = await readdirSafe(base);
+  let warning = 0;
+  let failed = 0;
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !/^20\d{2}-\d{2}-\d{2}-/.test(entry.name)) continue;
+    const indexPath = path.join(base, entry.name, 'samples-index.json');
+    const samples = await readJsonSafe(indexPath, []);
+    if (!Array.isArray(samples)) continue;
+    for (const sample of samples) {
+      if (sample.textQualityStatus === 'warning') warning += 1;
+      if (sample.textQualityStatus === 'failed') failed += 1;
+    }
+  }
+  return { warning, failed };
+}
+
+async function readTrafficSummary() {
+  const mockPath = path.join(staticRoot, 'traffic-summary.mock.json');
+  const fromFile = await readJsonSafe(mockPath, null);
+  if (fromFile && Array.isArray(fromFile.hours)) return normalizeTraffic(fromFile);
+
+  return normalizeTraffic({
+    source: 'local-mock-summary',
+    note: '当前为本地 mock 摘要；后续可接入 Nginx 日志聚合。',
+    hours: Array.from({ length: 25 }, (_, hour) => ({
+      hour,
+      pv: hour >= 9 && hour <= 23 ? 6 + ((hour * 7) % 19) : ((hour * 3) % 5),
+      uniqueIp: hour >= 9 && hour <= 23 ? 2 + ((hour * 5) % 8) : hour % 2,
+      home: hour >= 9 && hour <= 23 ? 3 + ((hour * 4) % 10) : hour % 3,
+      diagnosis: hour >= 10 && hour <= 22 ? 1 + ((hour * 3) % 7) : 0,
+      talent: hour >= 10 && hour <= 21 ? ((hour * 2) % 4) : 0,
+      notFound: hour % 6 === 0 ? 1 : 0,
+      serverError: 0
+    }))
+  });
+}
+
+function normalizeTraffic(raw) {
+  const hours = Array.from({ length: 25 }, (_, hour) => {
+    const found = raw.hours.find(item => Number(item.hour) === hour) || {};
+    return {
+      hour,
+      pv: toSafeNumber(found.pv),
+      uniqueIp: toSafeNumber(found.uniqueIp),
+      home: toSafeNumber(found.home),
+      diagnosis: toSafeNumber(found.diagnosis),
+      talent: toSafeNumber(found.talent),
+      notFound: toSafeNumber(found.notFound),
+      serverError: toSafeNumber(found.serverError)
+    };
+  });
+  return {
+    source: raw.source || 'local-mock-summary',
+    isMock: raw.isMock !== false && String(raw.source || 'local-mock-summary').includes('mock'),
+    note: raw.note || '',
+    nginxLogPaths: dashboardConfig.nginxLogPaths,
+    series: [
+      { key: 'pv', label: '全站 PV', color: '#2563eb', defaultVisible: true },
+      { key: 'uniqueIp', label: '独立 IP', color: '#16a34a', defaultVisible: true },
+      { key: 'home', label: '首页访问', color: '#f59e0b', defaultVisible: false },
+      { key: 'diagnosis', label: '诊断页访问', color: '#dc2626', defaultVisible: true },
+      { key: 'talent', label: '人才页访问', color: '#7c3aed', defaultVisible: false },
+      { key: 'notFound', label: '404', color: '#64748b', defaultVisible: false },
+      { key: 'serverError', label: '5xx', color: '#111827', defaultVisible: false }
+    ],
+    hours
+  };
+}
+
+function buildReminders({ reviewQueue, pdfQuality, traffic }) {
+  const reminders = [];
+  const serverErrors = traffic.hours.reduce((sum, item) => sum + item.serverError, 0);
+  const notFound = traffic.hours.reduce((sum, item) => sum + item.notFound, 0);
+  const diagnosisVisits = traffic.hours.reduce((sum, item) => sum + item.diagnosis, 0);
+  const trafficLabel = traffic.isMock ? '（模拟数据）' : '';
+
+  if (serverErrors > 0) reminders.push({ level: 'urgent', text: `今日趋势中出现 ${serverErrors} 次 5xx${trafficLabel}，需要排查。` });
+  if (notFound > 0) reminders.push({ level: 'attention', text: `今日趋势中出现 ${notFound} 次 404${trafficLabel}，可检查入口链接。` });
+  if (reviewQueue.today > 0) reminders.push({ level: 'attention', text: `今日新增 ${reviewQueue.today} 条 review queue 待复查。` });
+  if (reviewQueue.userFeedbackToday > 0) reminders.push({ level: 'attention', text: `今日新增 ${reviewQueue.userFeedbackToday} 条用户反馈。` });
+  if (pdfQuality.warning + pdfQuality.failed > 0) {
+    reminders.push({ level: 'attention', text: `PDF 文本质量需复查：warning ${pdfQuality.warning}，failed ${pdfQuality.failed}。` });
+  }
+  if (diagnosisVisits >= 20) {
+    reminders.push({ level: 'attention', text: `诊断页访问较多${trafficLabel}，但 diagnosis-api 尚未线上部署，只能统计页面访问，不能统计真实诊断提交。` });
+  }
+  if (!reminders.length) reminders.push({ level: 'normal', text: '当前没有高优先级提醒。' });
+  return reminders;
+}
+
+async function openAllowedTarget(targetId) {
+  const target = { ...allowedOpenTargets, ...Object.fromEntries(optionalBrandTargets.map(target => [target.id, target])) }[targetId];
+  if (!target) {
+    return { ok: false, status: 400, error: 'TARGET_NOT_ALLOWED', message: '不允许打开该目标。' };
+  }
+
+  if (target.type === 'path' && !await pathExists(target.value)) {
+    return { ok: false, status: 404, error: 'PATH_NOT_FOUND', message: '路径不存在。' };
+  }
+
+  openWithMac(target.value);
+  return { ok: true, targetId, message: '已发送打开请求。' };
+}
+
+function openWithMac(value) {
+  const child = spawn('open', [value], {
+    detached: true,
+    stdio: 'ignore'
+  });
+  child.unref();
+}
+
+async function serveStatic(pathname, res) {
+  const normalized = pathname === '/' ? `${consolePath}index.html` : pathname;
+  if (!normalized.startsWith(consolePath)) {
+    sendText(res, 404, 'Not found');
+    return;
+  }
+
+  const relative = normalized.slice(consolePath.length) || 'index.html';
+  const safeRelative = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, '');
+  const filePath = path.resolve(staticRoot, safeRelative);
+  if (!filePath.startsWith(staticRoot + path.sep) && filePath !== staticRoot) {
+    sendText(res, 403, 'Forbidden');
+    return;
+  }
+
+  const stat = await statSafe(filePath);
+  if (!stat || !stat.isFile()) {
+    sendText(res, 404, 'Not found');
+    return;
+  }
+
+  const ext = path.extname(filePath).toLowerCase();
+  res.writeHead(200, {
+    'Content-Type': contentTypes[ext] || 'application/octet-stream',
+    'Cache-Control': 'no-store'
+  });
+  fsSync.createReadStream(filePath).pipe(res);
+}
+
+function countByDate(paths) {
+  const todayKey = getDateKey(new Date());
+  const weekStart = startOfLocalDay(new Date());
+  weekStart.setDate(weekStart.getDate() - 6);
+
+  let today = 0;
+  let week = 0;
+  for (const filePath of paths) {
+    const date = extractDateFromPath(filePath) || getDateKeyFromMtime(filePath);
+    if (!date) continue;
+    if (date === todayKey) today += 1;
+    if (date >= getDateKey(weekStart)) week += 1;
+  }
+
+  const userFeedbackToday = paths.filter(filePath => filePath.includes(`${path.sep}user-feedback${path.sep}`))
+    .filter(filePath => (extractDateFromPath(filePath) || getDateKeyFromMtime(filePath)) === todayKey)
+    .length;
+
+  return { today, week, userFeedbackToday };
+}
+
+function extractDateFromPath(filePath) {
+  const match = filePath.match(/(20\d{2}-\d{2}-\d{2})/);
+  return match ? match[1] : '';
+}
+
+function getDateKeyFromMtime(filePath) {
+  try {
+    return getDateKey(fsSync.statSync(filePath).mtime);
+  } catch (_) {
+    return '';
+  }
+}
+
+function getDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function startOfLocalDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function formatDateTime(date) {
+  const pad = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+async function listFilesSafe(root) {
+  const out = [];
+  const entries = await readdirSafe(root);
+  for (const entry of entries) {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...await listFilesSafe(fullPath));
+    } else if (entry.isFile()) {
+      out.push(fullPath);
+    }
+  }
+  return out;
+}
+
+async function readdirSafe(dir) {
+  try {
+    return await fs.readdir(dir, { withFileTypes: true });
+  } catch (err) {
+    if (err.code === 'ENOENT') return [];
+    throw err;
+  }
+}
+
+async function readJsonSafe(filePath, fallback) {
+  try {
+    return JSON.parse(await fs.readFile(filePath, 'utf8'));
+  } catch (_) {
+    return fallback;
+  }
+}
+
+async function statSafe(filePath) {
+  try {
+    return await fs.stat(filePath);
+  } catch (_) {
+    return null;
+  }
+}
+
+async function pathExists(filePath) {
+  return Boolean(await statSafe(filePath));
+}
+
+function toSafeNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : 0;
+}
+
+async function readJsonBody(req, maxBytes) {
+  let raw = '';
+  for await (const chunk of req) {
+    raw += chunk;
+    if (Buffer.byteLength(raw) > maxBytes) {
+      throw new Error('请求体过大。');
+    }
+  }
+  return raw ? JSON.parse(raw) : {};
+}
+
+function sendJson(res, status, payload) {
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store'
+  });
+  res.end(JSON.stringify(payload));
+}
+
+function sendText(res, status, text) {
+  res.writeHead(status, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'no-store'
+  });
+  res.end(text);
+}
+
+function getTargetGroup(id) {
+  if (['officialSite', 'projectRoot', 'statusDoc'].includes(id)) return '网站与项目';
+  if (['evalConsole', 'sampleRuns', 'diagnosisLogs', 'reviewQueue'].includes(id)) return '诊断与测试';
+  return '品牌与运营';
+}
+
+function getDeadlineCategory(id) {
+  if (['domain', 'ssl', 'server'].includes(id)) return '到期类';
+  if (['policeFiling', 'diagnosisApi', 'publicDiagnosis'].includes(id)) return '状态类';
+  return '操作风险类';
+}
