@@ -575,10 +575,10 @@
   }
 
   function resizeChartCanvas(canvas) {
-    if (!canvas) return { cssWidth: 780, cssHeight: 340, dpr: 1 };
+    if (!canvas) return { cssWidth: 620, cssHeight: 340, dpr: 1 };
     var wrap = canvas.parentElement;
     var rect = wrap.getBoundingClientRect();
-    var width = Math.max(780, Math.round(rect.width));
+    var width = Math.max(620, Math.round(rect.width));
     var height = getChartHeight();
     var dpr = Math.max(1, window.devicePixelRatio || 1);
     var pixelWidth = Math.round(width * dpr);

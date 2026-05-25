@@ -25,21 +25,31 @@ body {
 }
 
 .shell {
-  width: min(1240px, calc(100% - 40px));
+  width: calc(100% - 20px);
+  max-width: none;
   margin: 0 auto;
-  padding: 34px 0 50px;
+  padding: 10px 0 28px;
 }
 
 .topbar {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.topbar > div:first-child {
+  width: 250px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .eyebrow {
-  margin: 0 0 8px;
+  margin: 0 0 5px;
   color: var(--blue);
   font-size: 12px;
   font-weight: 700;
@@ -54,14 +64,14 @@ p {
 }
 
 h1 {
-  margin-bottom: 8px;
-  font-size: 34px;
+  margin-bottom: 4px;
+  font-size: 21px;
   letter-spacing: -0.02em;
 }
 
 h2 {
   margin-bottom: 0;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 h3 {
@@ -72,12 +82,17 @@ h3 {
 .lead,
 .panel-hint {
   color: var(--muted);
-  line-height: 1.7;
+  line-height: 1.55;
+}
+
+.lead {
+  margin-bottom: 0;
+  font-size: 12px;
 }
 
 .refresh-box {
-  min-width: 220px;
-  padding: 16px;
+  min-width: 168px;
+  padding: 9px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
@@ -86,7 +101,7 @@ h3 {
 
 .refresh-box span {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -94,12 +109,14 @@ h3 {
 .notice-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 18px;
+  justify-content: center;
+  gap: 7px;
+  flex: 1 1 auto;
+  margin-bottom: 0;
 }
 
 .notice-row span {
-  padding: 7px 10px;
+  padding: 5px 8px;
   border: 1px solid #c8d3e2;
   border-radius: 999px;
   background: #fff;
@@ -108,24 +125,7 @@ h3 {
 }
 
 .panel {
-  margin-bottom: 20px;
-  padding: 22px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--panel);
-  box-shadow: var(--shadow);
-}
-
-.console-layout {
-  display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
-  align-items: start;
-  gap: 20px;
-}
-
-.status-sidebar {
-  position: sticky;
-  top: 18px;
+  margin-bottom: 14px;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -133,30 +133,66 @@ h3 {
   box-shadow: var(--shadow);
 }
 
-.status-sidebar .section-head {
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+
+.left-rail {
+  display: grid;
+  gap: 14px;
+}
+
+.main-workspace {
+  min-width: 0;
+}
+
+.top-insights {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.55fr) minmax(520px, 1.45fr);
+  gap: 14px;
   margin-bottom: 14px;
+}
+
+.status-sidebar {
+  position: sticky;
+  top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.shortcuts-panel,
+.reminders-panel,
+.records-panel,
+.traffic-panel {
+  margin-bottom: 0;
+}
+
+.status-sidebar .section-head {
+  margin-bottom: 10px;
 }
 
 .status-sidebar h2 {
   font-size: 18px;
 }
 
-.main-column {
-  min-width: 0;
-}
-
 .section-head {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .section-head--inline {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
 }
 
 .section-head--inline .panel-hint {
-  max-width: 620px;
+  max-width: 660px;
   margin-bottom: 0;
   font-size: 13px;
 }
@@ -173,16 +209,21 @@ h3 {
   gap: 12px;
 }
 
+.top-insights .stats-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .stats-card,
 .reminders article {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-soft);
 }
 
 .deadline-group {
-  padding: 8px;
+  padding: 7px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;
@@ -199,14 +240,14 @@ h3 {
 
 .deadline-group__head h3 {
   margin: 0 0 3px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .deadline-group__head p {
   margin: 0;
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.6;
+  line-height: 1.45;
 }
 
 .deadline-group__items {
@@ -223,11 +264,11 @@ h3 {
 
 .deadline-card {
   display: grid;
-  grid-template-columns: minmax(76px, 0.8fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(66px, 0.8fr) minmax(0, 1fr) auto;
   align-items: center;
   gap: 7px;
-  min-height: 32px;
-  padding: 6px 8px;
+  min-height: 30px;
+  padding: 5px 7px;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--panel-soft);
@@ -303,23 +344,23 @@ h3 {
 .grid-two {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(300px, 0.82fr);
-  gap: 20px;
+  gap: 14px;
 }
 
 .shortcut-groups {
   display: grid;
-  gap: 16px;
+  gap: 10px;
 }
 
 .shortcut-group > div {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 button {
-  min-height: 38px;
-  padding: 0 13px;
+  min-height: 34px;
+  padding: 0 10px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #fff;
@@ -396,7 +437,7 @@ button .shortcut-note {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
 }
 
 .segmented-control {
@@ -430,7 +471,7 @@ button .shortcut-note {
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .legend-item {
@@ -465,15 +506,15 @@ button .shortcut-note {
 .chart-wrap {
   position: relative;
   overflow: hidden;
-  min-height: 340px;
+  min-height: 360px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
 }
 
 .traffic-summary {
-  margin-top: 14px;
-  padding: 14px;
+  margin-top: 12px;
+  padding: 11px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-soft);
@@ -508,8 +549,8 @@ button .shortcut-note {
   grid-template-columns: minmax(64px, 0.8fr) repeat(7, minmax(62px, 1fr)) minmax(92px, 1.1fr);
   align-items: center;
   gap: 6px;
-  min-height: 40px;
-  padding: 8px 9px;
+  min-height: 36px;
+  padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: #fff;
@@ -602,7 +643,16 @@ canvas {
 }
 
 .stats-card {
-  min-height: 92px;
+  min-height: 76px;
+}
+
+.top-insights .stats-card {
+  min-height: 72px;
+  padding: 8px;
+}
+
+.top-insights .stats-card strong {
+  font-size: 14px;
 }
 
 .stats-card--priority {
@@ -640,13 +690,21 @@ canvas {
 }
 
 @media (max-width: 900px) {
-  .topbar,
   .section-head--inline,
   .grid-two {
     display: block;
   }
 
-  .console-layout {
+  .topbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .top-insights {
     grid-template-columns: 1fr;
   }
 
@@ -665,6 +723,10 @@ canvas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .top-insights .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .traffic-summary__table {
     overflow-x: auto;
   }
@@ -676,7 +738,7 @@ canvas {
 
 @media (max-width: 560px) {
   .shell {
-    width: min(100% - 24px, 1240px);
+    width: calc(100% - 24px);
   }
 
   .deadline-grid,
