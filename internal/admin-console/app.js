@@ -4,7 +4,8 @@
   var state = {
     config: null,
     summary: null,
-    visibleSeries: {}
+    visibleSeries: {},
+    chartMeta: null
   };
 
   var seriesLabels = {
@@ -27,6 +28,7 @@
       state.summary = summaryResponse.summary;
 
       initVisibleSeries();
+      setupChartTooltip();
       renderAll();
     } catch (err) {
       document.body.innerHTML = '<main class="shell"><section class="panel"><h1>内部控制台启动失败</h1><p>' + escapeHtml(err.message) + '</p></section></main>';
@@ -208,6 +210,7 @@
     var width = canvas.width - padding.left - padding.right;
     var height = canvas.height - padding.top - padding.bottom;
     var maxValue = Math.max(10, maxSeriesValue(hours, series));
+    state.chartMeta = { padding: padding, width: width, height: height, maxValue: maxValue };
 
     drawAxes(ctx, padding, width, height, maxValue);
 
@@ -216,13 +219,72 @@
       ctx.strokeStyle = item.color;
       ctx.lineWidth = 3;
       hours.forEach(function (row, index) {
-        var x = padding.left + (index / 24) * width;
+        var x = getPointX(index, padding, width);
         var y = padding.top + height - (Number(row[item.key] || 0) / maxValue) * height;
         if (index === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
       ctx.stroke();
+
+      hours.forEach(function (row, index) {
+        var x = getPointX(index, padding, width);
+        var y = padding.top + height - (Number(row[item.key] || 0) / maxValue) * height;
+        ctx.beginPath();
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 2;
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
     });
+  }
+
+  function setupChartTooltip() {
+    var canvas = document.getElementById('trafficChart');
+    var tooltip = document.getElementById('chartTooltip');
+    if (!canvas || !tooltip) return;
+
+    canvas.addEventListener('mousemove', function (event) {
+      renderChartTooltip(event, canvas, tooltip);
+    });
+    canvas.addEventListener('mouseleave', function () {
+      tooltip.hidden = true;
+    });
+  }
+
+  function renderChartTooltip(event, canvas, tooltip) {
+    if (!state.summary || !state.chartMeta) return;
+    var traffic = state.summary.traffic || {};
+    var hours = traffic.hours || [];
+    var visible = (traffic.series || []).filter(function (item) {
+      return state.visibleSeries[item.key];
+    });
+    if (!hours.length || !visible.length) {
+      tooltip.hidden = true;
+      return;
+    }
+
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var mouseX = (event.clientX - rect.left) * scaleX;
+    var meta = state.chartMeta;
+    var rawIndex = Math.round(((mouseX - meta.padding.left) / meta.width) * 24);
+    var index = Math.max(0, Math.min(24, rawIndex));
+    var row = hours[index] || {};
+    var pointX = getPointX(index, meta.padding, meta.width) / scaleX;
+    var tooltipX = Math.min(Math.max(pointX + 12, 12), rect.width - 260);
+    var tooltipY = Math.max(12, event.clientY - rect.top + 14);
+
+    tooltip.innerHTML = [
+      '<strong>' + escapeHtml(String(index).padStart(2, '0') + ':00') + '</strong>',
+      visible.map(function (item) {
+        return '<span><i style="background:' + escapeHtml(item.color) + '"></i>' + escapeHtml(item.label) + '：' + escapeHtml(String(row[item.key] || 0)) + '</span>';
+      }).join('')
+    ].join('');
+    tooltip.style.left = tooltipX + 'px';
+    tooltip.style.top = tooltipY + 'px';
+    tooltip.hidden = false;
   }
 
   function drawAxes(ctx, padding, width, height, maxValue) {
@@ -275,6 +337,10 @@
       });
     });
     return max;
+  }
+
+  function getPointX(index, padding, width) {
+    return padding.left + (index / 24) * width;
   }
 
   async function fetchJson(url, options) {

@@ -118,7 +118,7 @@ h3 {
 
 .console-layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: 340px minmax(0, 1fr);
   align-items: start;
   gap: 20px;
 }
@@ -126,7 +126,7 @@ h3 {
 .status-sidebar {
   position: sticky;
   top: 18px;
-  padding: 18px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--panel);
@@ -164,7 +164,7 @@ h3 {
 .deadline-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .stats-grid {
@@ -176,14 +176,14 @@ h3 {
 .deadline-card,
 .stats-card,
 .reminders article {
-  padding: 13px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-soft);
 }
 
 .deadline-group {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;
@@ -212,10 +212,16 @@ h3 {
 
 .deadline-group__items {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
-.deadline-card span,
+.deadline-card span {
+  display: block;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .stats-card span {
   display: block;
   margin-bottom: 7px;
@@ -223,7 +229,14 @@ h3 {
   font-size: 12px;
 }
 
-.deadline-card strong,
+.deadline-card strong {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .stats-card strong {
   display: block;
   font-size: 16px;
@@ -260,10 +273,11 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 9px;
+  margin-top: 7px;
 }
 
 .deadline-card__foot em {
+  flex: 0 0 auto;
   padding: 3px 7px;
   border-radius: 999px;
   background: rgba(100, 116, 139, 0.1);
@@ -407,6 +421,7 @@ button .shortcut-note {
 }
 
 .chart-wrap {
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -418,6 +433,42 @@ canvas {
   width: 100%;
   min-width: 780px;
   height: auto;
+}
+
+.chart-tooltip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  min-width: 170px;
+  max-width: 260px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+  color: var(--text);
+  pointer-events: none;
+}
+
+.chart-tooltip strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+}
+
+.chart-tooltip span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-tooltip i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
 }
 
 .stats-card {
