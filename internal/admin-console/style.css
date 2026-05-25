@@ -485,6 +485,19 @@ canvas {
   color: var(--muted);
 }
 
+.stats-card.is-clickable {
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.stats-card.is-clickable:hover,
+.stats-card.is-clickable:focus {
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+  outline: none;
+  transform: translateY(-1px);
+}
+
 .stats-card.is-zero strong {
   color: #94a3b8;
 }

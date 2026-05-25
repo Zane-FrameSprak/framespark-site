@@ -113,13 +113,13 @@
 
     root.querySelectorAll('button[data-target-id]').forEach(function (button) {
       button.addEventListener('click', function () {
-        openTarget(button.getAttribute('data-target-id'));
+        openTarget(button.getAttribute('data-target-id'), 'openTargetStatus');
       });
     });
   }
 
-  async function openTarget(targetId) {
-    var status = document.getElementById('openTargetStatus');
+  async function openTarget(targetId, statusId) {
+    var status = document.getElementById(statusId || 'openTargetStatus');
     status.textContent = '正在打开...';
     status.dataset.state = '';
     try {
@@ -146,15 +146,15 @@
   function renderStats() {
     var stats = state.summary.counts || {};
     var rows = [
-      { label: '用户反馈', value: stats.reviewQueue && stats.reviewQueue.userFeedbackToday, priority: true },
-      { label: 'review queue 待复查', value: stats.reviewQueue && stats.reviewQueue.today, priority: true },
-      { label: 'PDF 需复查样本', value: stats.pdfQuality && stats.pdfQuality.warning, priority: true },
-      { label: 'PDF 不建议诊断样本', value: stats.pdfQuality && stats.pdfQuality.failed, priority: true },
-      { label: '今日新增测试批次', value: stats.sampleRuns && stats.sampleRuns.today, priority: true },
-      { label: '本周新增测试批次', value: stats.sampleRuns && stats.sampleRuns.week },
-      { label: '今日新增日志', value: stats.diagnosisLogs && stats.diagnosisLogs.today },
-      { label: '本周新增日志', value: stats.diagnosisLogs && stats.diagnosisLogs.week },
-      { label: '本周新增 review queue', value: stats.reviewQueue && stats.reviewQueue.week }
+      { label: '用户反馈', value: stats.reviewQueue && stats.reviewQueue.userFeedbackToday, priority: true, targetId: 'reviewQueue' },
+      { label: 'review queue 待复查', value: stats.reviewQueue && stats.reviewQueue.today, priority: true, targetId: 'reviewQueue' },
+      { label: 'PDF 需复查样本', value: stats.pdfQuality && stats.pdfQuality.warning, priority: true, targetId: 'sampleRuns' },
+      { label: 'PDF 不建议诊断样本', value: stats.pdfQuality && stats.pdfQuality.failed, priority: true, targetId: 'sampleRuns' },
+      { label: '今日新增测试批次', value: stats.sampleRuns && stats.sampleRuns.today, priority: true, targetId: 'sampleRuns' },
+      { label: '本周新增测试批次', value: stats.sampleRuns && stats.sampleRuns.week, targetId: 'sampleRuns' },
+      { label: '今日新增日志', value: stats.diagnosisLogs && stats.diagnosisLogs.today, targetId: 'diagnosisLogs' },
+      { label: '本周新增日志', value: stats.diagnosisLogs && stats.diagnosisLogs.week, targetId: 'diagnosisLogs' },
+      { label: '本周新增 review queue', value: stats.reviewQueue && stats.reviewQueue.week, targetId: 'reviewQueue' }
     ];
 
     document.getElementById('recordStats').innerHTML = rows.map(function (row) {
@@ -162,14 +162,30 @@
       var classes = ['stats-card'];
       if (row.priority) classes.push('stats-card--priority');
       if (!value) classes.push('is-zero');
+      if (value && row.targetId) classes.push('is-clickable');
+      var attrs = value && row.targetId
+        ? ' data-target-id="' + escapeHtml(row.targetId) + '" role="button" tabindex="0"'
+        : '';
       return [
-        '<article class="' + classes.join(' ') + '">',
+        '<article class="' + classes.join(' ') + '"' + attrs + '>',
         '<span>' + escapeHtml(row.label) + '</span>',
         '<strong>' + escapeHtml(value ? String(value) : '0') + '</strong>',
-        '<small>' + escapeHtml(value ? '需要查看' : '尚无记录') + '</small>',
+        '<small>' + escapeHtml(value ? '点击查看' : '尚无记录') + '</small>',
         '</article>'
       ].join('');
     }).join('');
+
+    document.querySelectorAll('#recordStats [data-target-id]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        openTarget(card.getAttribute('data-target-id'), 'recordStatsStatus');
+      });
+      card.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openTarget(card.getAttribute('data-target-id'), 'recordStatsStatus');
+        }
+      });
+    });
   }
 
   function renderLegend() {

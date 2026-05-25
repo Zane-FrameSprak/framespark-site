@@ -77,6 +77,16 @@ scripts/start-internal-console.js
 - `localPaths`
 - `serverPort`
 
+日志与记录概览中的“点击查看”卡片也复用同一套白名单 `targetId`：
+
+- 用户反馈：当前先打开 `reviewQueue`。后续如需要，可单独增加固定的 `userFeedback` 白名单入口。
+- review queue 待复查：打开 `reviewQueue`
+- PDF 文本质量 warning / failed：打开 `sampleRuns`
+- 测试批次：打开 `sampleRuns`
+- 诊断日志：打开 `diagnosisLogs`
+
+控制台不支持前端传入任意路径，也不支持通过 query 或 body 指定自定义 path。
+
 ## 如何新增快捷入口
 
 在 `scripts/start-internal-console.js` 的 `allowedOpenTargets` 中增加一项：
