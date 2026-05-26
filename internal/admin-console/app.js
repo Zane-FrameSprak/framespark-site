@@ -16,7 +16,7 @@
 
   var seriesLabels = {
     allRequests: '全部请求',
-    validPageViews: '有效访问',
+    validPageViews: '有效页面访问',
     homeViews: '首页',
     diagnosisViews: '诊断页',
     talentViews: '人才页',
@@ -28,7 +28,7 @@
 
   var seriesConfig = [
     { key: 'allRequests', label: '全部请求', color: '#2563eb', defaultVisible: true },
-    { key: 'validPageViews', label: '有效访问', color: '#16a34a', defaultVisible: true },
+    { key: 'validPageViews', label: '有效页面访问', color: '#16a34a', defaultVisible: true },
     { key: 'homeViews', label: '首页', color: '#f59e0b', defaultVisible: false },
     { key: 'diagnosisViews', label: '诊断页', color: '#dc2626', defaultVisible: true },
     { key: 'talentViews', label: '人才页', color: '#7c3aed', defaultVisible: false },
@@ -541,7 +541,7 @@
         ].join('');
       }).join(''),
       '</div>',
-      '<p class="panel-hint">全部请求不等于用户数；独立 IP 不等于真实人数；有效访问是按已知站内页面保守过滤后的结果。扫描 / 异常请求不作为用户兴趣判断。</p>'
+      '<p class="panel-hint">全部请求包含静态资源、扫描与异常请求；有效页面访问是按已知站内页面保守过滤后的请求，不等于独立用户。真实用户 / 访客数量需后续通过匿名访客统计获得。</p>'
     ].join('');
   }
 
