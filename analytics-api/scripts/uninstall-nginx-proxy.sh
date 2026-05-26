@@ -2,10 +2,27 @@
 set -euo pipefail
 
 NGINX_CONF="/www/server/panel/vhost/nginx/framespark.cn.conf"
+BT_NGINX_BIN="/www/server/nginx/sbin/nginx"
+BT_NGINX_CONF="/www/server/nginx/conf/nginx.conf"
 MARK_START="# FrameSpark analytics proxy start"
 MARK_END="# FrameSpark analytics proxy end"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP="${NGINX_CONF}.bak.analytics-${TIMESTAMP}"
+
+reload_nginx() {
+  if [ -x "${BT_NGINX_BIN}" ] && [ -f "${BT_NGINX_CONF}" ]; then
+    "${BT_NGINX_BIN}" -s reload -c "${BT_NGINX_CONF}"
+    return
+  fi
+
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl reload nginx
+    return
+  fi
+
+  echo "无法 reload Nginx：未找到宝塔 Nginx 命令，也无法使用 systemctl reload nginx。"
+  return 1
+}
 
 if [ "${EUID}" -ne 0 ]; then
   echo "请使用 sudo bash analytics-api/scripts/uninstall-nginx-proxy.sh"
@@ -59,6 +76,11 @@ if ! nginx -t; then
   exit 1
 fi
 
-systemctl reload nginx
+if ! reload_nginx; then
+  echo "Nginx 配置已通过 nginx -t，但 reload 失败。请手动执行："
+  echo "${BT_NGINX_BIN} -s reload -c ${BT_NGINX_CONF}"
+  exit 1
+fi
+
 echo "Nginx analytics proxy uninstalled."
 echo "Backup: ${BACKUP}"

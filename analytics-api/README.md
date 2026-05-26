@@ -257,6 +257,14 @@ sudo bash analytics-api/scripts/install-nginx-proxy.sh
 
 该脚本只会在 `/www/server/panel/vhost/nginx/framespark.cn.conf` 的 HTTPS server 块中插入带标记的 `/api/analytics/` location。脚本会先备份配置，执行 `nginx -t`，失败时自动恢复备份；成功后 reload Nginx。
 
+当前腾讯云服务器使用宝塔 Nginx，reload 优先执行：
+
+```bash
+/www/server/nginx/sbin/nginx -s reload -c /www/server/nginx/conf/nginx.conf
+```
+
+如果该命令不存在，脚本才会 fallback 到 `systemctl reload nginx`。因此脚本不依赖 `nginx.service` 必须处于 active 状态。
+
 3. 公网 HTTPS 测试：
 
 当前 analytics-api 只有本机 `/health`，没有公网 `/api/analytics/health`。公网应使用事件接口测试：
