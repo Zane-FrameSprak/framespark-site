@@ -110,6 +110,82 @@ curl -X POST http://127.0.0.1:8788/api/analytics/event \
   }'
 ```
 
+## 服务器部署
+
+analytics-api 在服务器上应作为 systemd 后台服务运行，只监听 `127.0.0.1:8787`。它不直接对公网开放；后续需要 Nginx 反代 `/api/analytics/` 才能被官网页面访问。
+
+1. 更新服务器代码：
+
+```bash
+cd /tmp/framespark-site
+git pull
+```
+
+2. 安装依赖：
+
+```bash
+cd /tmp/framespark-site/analytics-api
+npm install --omit=dev
+```
+
+3. 临时测试：
+
+```bash
+ANALYTICS_HOST=127.0.0.1 \
+ANALYTICS_PORT=8787 \
+ANALYTICS_DATA_DIR=/home/ubuntu/framespark-analytics \
+npm start
+```
+
+4. 安装 systemd 服务：
+
+```bash
+cd /tmp/framespark-site
+sudo bash analytics-api/scripts/install-systemd-service.sh
+```
+
+安装脚本会创建：
+
+```text
+framespark-analytics.service
+```
+
+服务配置：
+
+- 运行用户：`ubuntu`
+- 工作目录：`/tmp/framespark-site/analytics-api`
+- 启动命令：`/usr/bin/npm start`
+- 监听地址：`127.0.0.1:8787`
+- 数据目录：`/home/ubuntu/framespark-analytics`
+- 自动重启：`Restart=always`
+
+5. 查看状态：
+
+```bash
+sudo systemctl status framespark-analytics.service --no-pager
+curl -s http://127.0.0.1:8787/health
+```
+
+6. 查看日志：
+
+```bash
+journalctl -u framespark-analytics.service -n 80 --no-pager
+```
+
+7. 卸载服务：
+
+```bash
+sudo bash analytics-api/scripts/uninstall-systemd-service.sh
+```
+
+卸载脚本只停止并移除 systemd 服务，不删除数据目录：
+
+```text
+/home/ubuntu/framespark-analytics
+```
+
+analytics 日志只应保存在该目录，不应写入 `/www/wwwroot/framespark.cn/` 等公网目录。
+
 ## 环境变量
 
 - `ANALYTICS_HOST`：默认 `127.0.0.1`
