@@ -11,7 +11,10 @@
     trafficPeriod: 'today',
     trafficReports: null,
     trafficStatus: 'loading',
-    trafficError: ''
+    trafficError: '',
+    analyticsReports: null,
+    analyticsStatus: 'loading',
+    analyticsError: ''
   };
 
   var seriesLabels = {
@@ -53,9 +56,11 @@
 
       initVisibleSeries();
       await loadTrafficSummary();
+      await loadAnalyticsSummary();
       setupChartTooltip();
       setupChartResize();
       setupChartControls();
+      setupAnalyticsControls();
       renderAll();
     } catch (err) {
       document.body.innerHTML = '<main class="shell"><section class="panel"><h1>内部控制台启动失败</h1><p>' + escapeHtml(err.message) + '</p></section></main>';
@@ -93,6 +98,31 @@
     setText('trafficControlStatus', '正在读取服务器真实访问摘要...');
   }
 
+  async function loadAnalyticsSummary() {
+    state.analyticsStatus = 'loading';
+    state.analyticsError = '';
+    renderAnalyticsLoadingState();
+    try {
+      var response = await fetchJson('/api/console/analytics-summary');
+      state.analyticsReports = response;
+      state.analyticsStatus = 'ready';
+      state.analyticsError = '';
+    } catch (err) {
+      state.analyticsReports = null;
+      state.analyticsStatus = 'error';
+      state.analyticsError = err.message || '读取匿名访客统计摘要失败。';
+    }
+  }
+
+  function renderAnalyticsLoadingState() {
+    var badge = document.getElementById('analyticsStatusBadge');
+    if (badge) {
+      badge.textContent = '正在读取匿名访客统计...';
+      badge.dataset.state = 'loading';
+    }
+    setText('analyticsControlStatus', '正在读取匿名访客统计...');
+  }
+
   function renderAll() {
     setText('lastRefresh', formatDateTime(state.summary.refreshedAt));
     renderDeadlines();
@@ -100,6 +130,7 @@
     renderReminders();
     renderStats();
     renderLegend();
+    renderAnalytics();
     drawChart();
     renderTrafficSummary();
     setText('trafficControlStatus', getTrafficPeriodStatusText(state.trafficPeriod));
@@ -389,6 +420,17 @@
     }
   }
 
+  function setupAnalyticsControls() {
+    var refreshButton = document.getElementById('refreshAnalyticsButton');
+    if (!refreshButton) return;
+    refreshButton.addEventListener('click', async function () {
+      refreshButton.disabled = true;
+      await loadAnalyticsSummary();
+      renderAnalytics();
+      refreshButton.disabled = false;
+    });
+  }
+
   function renderChartTooltip(event, canvas, tooltip) {
     if (!state.summary || !state.chartMeta) return;
     var hours = getTrafficRowsForCurrentPeriod();
@@ -486,6 +528,153 @@
       ctx.lineTo(padding.left + width, y);
       ctx.stroke();
     });
+  }
+
+  function renderAnalytics() {
+    renderAnalyticsBadge();
+    renderAnalyticsCards();
+    renderAnalyticsSummary();
+    renderAnalyticsSource();
+  }
+
+  function renderAnalyticsBadge() {
+    var badge = document.getElementById('analyticsStatusBadge');
+    if (badge) {
+      badge.textContent = getAnalyticsBadgeText();
+      badge.dataset.state = state.analyticsStatus;
+    }
+    setText('analyticsControlStatus', getAnalyticsStatusText());
+  }
+
+  function getAnalyticsBadgeText() {
+    if (state.analyticsStatus === 'loading') return '正在读取匿名访客统计...';
+    if (state.analyticsStatus === 'error') return '读取失败，请检查 SSH 免密、summary 文件或 cron。';
+    return '已读取服务器匿名访客统计摘要。';
+  }
+
+  function getAnalyticsStatusText() {
+    if (state.analyticsStatus === 'loading') return '正在读取服务器匿名访客统计摘要...';
+    if (state.analyticsStatus === 'error') return '读取失败：' + (state.analyticsError || '请检查 SSH 免密、summary 文件或 cron。');
+    return '已读取真实匿名访客统计。匿名独立访客不等于真实自然人。';
+  }
+
+  function renderAnalyticsCards() {
+    var root = document.getElementById('analyticsCards');
+    if (!root) return;
+    var today = getAnalyticsReport('today');
+    var summary = today && today.summary ? today.summary : {};
+    var ready = state.analyticsStatus === 'ready' && today && today.summary;
+    var cards = [
+      { label: '匿名独立访客', key: 'anonymousVisitors' },
+      { label: '新访客', key: 'newVisitors' },
+      { label: '回访访客', key: 'returningVisitors' },
+      { label: '会话', key: 'sessions' },
+      { label: '首页访客', key: 'homeVisitors' },
+      { label: '诊断页访客', key: 'diagnosisVisitors' },
+      { label: '人才页访客', key: 'talentVisitors' },
+      { label: '项目页访客', key: 'projectVisitors' },
+      { label: '诊断入口点击', key: 'diagnosisEntryClicks' },
+      { label: '首页 → 诊断页', key: 'homeToDiagnosisVisitors' }
+    ];
+
+    root.innerHTML = cards.map(function (card) {
+      return [
+        '<article class="analytics-card' + (ready ? '' : ' is-empty') + '">',
+        '<span>' + escapeHtml(card.label) + '</span>',
+        '<strong>' + escapeHtml(ready ? String(getAnalyticsMetric(summary, card.key)) : '—') + '</strong>',
+        '<small>' + escapeHtml(ready ? '当日' : getAnalyticsEmptyLabel()) + '</small>',
+        '</article>'
+      ].join('');
+    }).join('');
+  }
+
+  function renderAnalyticsSummary() {
+    var root = document.getElementById('analyticsSummary');
+    if (!root) return;
+    var rows = [
+      buildAnalyticsPeriod('当日', 'today'),
+      buildAnalyticsPeriod('昨日', 'yesterday'),
+      buildAnalyticsPeriod('近 7 日', 'last7'),
+      buildAnalyticsPeriod('近 30 日', 'last30')
+    ];
+    var columns = [
+      { label: '匿名访客', key: 'anonymousVisitors' },
+      { label: '新访客', key: 'newVisitors' },
+      { label: '回访访客', key: 'returningVisitors' },
+      { label: '会话', key: 'sessions' },
+      { label: '首页访客', key: 'homeVisitors' },
+      { label: '诊断页访客', key: 'diagnosisVisitors' },
+      { label: '人才页访客', key: 'talentVisitors' },
+      { label: '项目页访客', key: 'projectVisitors' },
+      { label: '诊断入口点击', key: 'diagnosisEntryClicks' },
+      { label: '首页→诊断页', key: 'homeToDiagnosisVisitors' }
+    ];
+
+    root.innerHTML = [
+      '<div class="analytics-summary__head">',
+      '<h3>匿名访客数据汇总</h3>',
+      '<p>基于浏览器匿名 visitorId 聚合，不输出 visitorId、sessionId 或 ipHash 明细。</p>',
+      '</div>',
+      '<div class="analytics-summary__table" role="table" aria-label="匿名访客统计汇总">',
+      '<div class="analytics-summary__row analytics-summary__row--head" role="row">',
+      '<span>周期</span>',
+      columns.map(function (column) { return '<span>' + escapeHtml(column.label) + '</span>'; }).join(''),
+      '<span>状态</span>',
+      '</div>',
+      rows.map(function (row) {
+        return [
+          '<div class="analytics-summary__row" role="row">',
+          '<strong>' + escapeHtml(row.label) + '</strong>',
+          columns.map(function (column) {
+            return '<span>' + escapeHtml(row.available ? String(getAnalyticsMetric(row.summary, column.key)) : '—') + '</span>';
+          }).join(''),
+          '<em data-state="' + escapeHtml(row.state) + '">' + escapeHtml(row.status) + '</em>',
+          '</div>'
+        ].join('');
+      }).join(''),
+      '</div>',
+      '<p class="panel-hint">匿名独立访客只是同一浏览器的随机标识去重；同一人多设备、清缓存或无痕模式会造成误差。</p>'
+    ].join('');
+  }
+
+  function buildAnalyticsPeriod(label, key) {
+    if (state.analyticsStatus === 'error') {
+      return { label: label, status: '读取失败', state: 'error', summary: null, available: false };
+    }
+    if (state.analyticsStatus === 'loading') {
+      return { label: label, status: '正在读取', state: 'pending', summary: null, available: false };
+    }
+    var report = getAnalyticsReport(key);
+    if (!report || !report.summary) {
+      return { label: label, status: '暂无数据', state: 'pending', summary: null, available: false };
+    }
+    return { label: label, status: '真实匿名访客统计', state: 'ready', summary: report.summary, available: true };
+  }
+
+  function renderAnalyticsSource() {
+    var text = [
+      state.analyticsStatus === 'ready' ? '数据来源：服务器匿名访客 summary JSON' : '数据来源：' + getAnalyticsStatusText(),
+      '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-analytics-summaries/*.json',
+      '用户行为统计与服务器 Nginx 请求统计分开展示'
+    ].filter(Boolean).join('。');
+    setText('analyticsSource', text);
+  }
+
+  function getAnalyticsReport(key) {
+    var reports = state.analyticsReports && state.analyticsReports.reports ? state.analyticsReports.reports : {};
+    return reports[key] || null;
+  }
+
+  function getAnalyticsMetric(summary, key) {
+    if (!summary || summary[key] == null || summary[key] === '') return '—';
+    var value = Number(summary[key]);
+    return Number.isFinite(value) ? value : '—';
+  }
+
+  function getAnalyticsEmptyLabel() {
+    if (state.analyticsStatus === 'error') return '读取失败';
+    if (state.analyticsStatus === 'loading') return '读取中';
+    return '暂无数据';
   }
 
   function renderTrafficSource() {

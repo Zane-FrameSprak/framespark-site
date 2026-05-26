@@ -40,6 +40,7 @@ http://127.0.0.1:8130/internal/admin-console/
 - 打开正式官网、本地项目目录、项目状态文档
 - 打开诊断系统测试区、样本测试目录、诊断日志目录、review queue 目录
 - 查看网站访问趋势图
+- 查看用户行为统计：匿名访客、会话、页面访客和关键入口点击
 - 查看本地诊断日志、review queue、样本测试批次的今日 / 本周概览
 - 查看 PDF 文本质量 warning / failed 样本数量
 - 查看今日高价值提醒
@@ -195,9 +196,36 @@ v1 暂不做复杂 X / Y 轴滑块。当日图的 X 轴固定为 0–24 小时�
 
 后续如果需要更接近真实用户规模，应单独建设“匿名访客统计 v1”，统计匿名独立访客、页面访客和关键点击；不要把 Nginx 请求统计直接当作用户数。
 
+## 用户行为统计
+
+用户行为统计来自 analytics-api 产生的匿名访客事件摘要，与 Nginx 服务器请求统计分开展示。
+
+控制台通过本机接口 `/api/console/analytics-summary` 使用 SSH 只读读取服务器上的固定摘要 JSON：
+
+```text
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-today.json
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-yesterday.json
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-last7.json
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-last30.json
+```
+
+这些摘要由服务器上的 `analytics-api/scripts/run-analytics-summary.sh` 生成，默认每 5 分钟由 cron 刷新一次。
+
+控制台只读取聚合摘要，不读取原始 JSONL，不输出 `visitorId`、`sessionId`、`ipHash` 明细，也不读取剧本材料、上传文件、邮箱、姓名或手机号。
+
+口径说明：
+
+- 匿名独立访客基于浏览器随机 `visitorId` 去重，不等于真实自然人。
+- 同一人多设备、清缓存、无痕模式会导致重复计数。
+- 新访客 / 回访访客基于服务器可用事件历史判断，不是绝对新用户。
+- 用户行为统计更接近浏览器行为；服务器访问统计更适合观察请求量、错误和扫描。
+
+如果 SSH、summary 文件或 cron 异常，模块会显示读取失败，不使用 mock 数据兜底。
+
 ## 后续扩展方向
 
 - 接入真实 Nginx 日志摘要
+- 接入匿名访客统计摘要到更多控制台图表
 - 增加公安备案、SSL、服务器续费的真实到期日期
 - 增加腾讯云部署同步状态
 - 增加诊断系统线上 API 健康状态

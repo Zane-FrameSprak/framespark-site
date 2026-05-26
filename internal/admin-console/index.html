@@ -66,6 +66,24 @@
           </section>
         </div>
 
+        <section class="panel analytics-panel">
+          <div class="section-head section-head--inline">
+            <div>
+              <p class="eyebrow">USER BEHAVIOR</p>
+              <h2>用户行为统计</h2>
+              <p class="mock-badge" id="analyticsStatusBadge">正在读取匿名访客统计...</p>
+            </div>
+            <p class="panel-hint">基于匿名 visitorId 的浏览器访客统计，不等于实名用户或自然人；比 Nginx 请求数更接近真实用户行为。</p>
+          </div>
+          <div class="analytics-actions">
+            <button type="button" class="refresh-traffic-button" id="refreshAnalyticsButton">刷新用户行为数据</button>
+            <p class="panel-hint" id="analyticsControlStatus" role="status">正在读取匿名访客统计...</p>
+          </div>
+          <div id="analyticsCards" class="analytics-cards" aria-label="匿名访客核心指标"></div>
+          <div id="analyticsSummary" class="analytics-summary" aria-label="匿名访客数据汇总"></div>
+          <p class="panel-hint" id="analyticsSource"></p>
+        </section>
+
         <section class="panel traffic-panel">
           <div class="section-head section-head--inline">
             <div>

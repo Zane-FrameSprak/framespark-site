@@ -136,6 +136,17 @@ const trafficSummaryConfig = {
   }
 };
 
+const analyticsSummaryConfig = {
+  server: 'ubuntu@124.221.146.10',
+  sshTimeoutMs: 8000,
+  reports: {
+    today: '/home/ubuntu/framespark-analytics-summaries/analytics-summary-today.json',
+    yesterday: '/home/ubuntu/framespark-analytics-summaries/analytics-summary-yesterday.json',
+    last7: '/home/ubuntu/framespark-analytics-summaries/analytics-summary-last7.json',
+    last30: '/home/ubuntu/framespark-analytics-summaries/analytics-summary-last30.json'
+  }
+};
+
 const staticRoot = path.join(REPO_ROOT, 'internal', 'admin-console');
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -197,6 +208,12 @@ async function handleRequest(req, res) {
 
   if (req.method === 'GET' && url.pathname === '/api/console/traffic-summary') {
     const result = await readServerTrafficReports();
+    sendJson(res, result.ok ? 200 : 502, result);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/console/analytics-summary') {
+    const result = await readServerAnalyticsReports();
     sendJson(res, result.ok ? 200 : 502, result);
     return;
   }
@@ -313,7 +330,7 @@ async function buildSummary() {
 async function readServerTrafficReports() {
   try {
     const entries = await Promise.all(Object.entries(trafficSummaryConfig.reports).map(async ([key, reportPath]) => {
-      const json = await readRemoteTrafficJson(reportPath);
+      const json = await readRemoteJson(trafficSummaryConfig, reportPath);
       return [key, json];
     }));
 
@@ -333,16 +350,39 @@ async function readServerTrafficReports() {
   }
 }
 
-function readRemoteTrafficJson(reportPath) {
+async function readServerAnalyticsReports() {
+  try {
+    const entries = await Promise.all(Object.entries(analyticsSummaryConfig.reports).map(async ([key, reportPath]) => {
+      const json = await readRemoteJson(analyticsSummaryConfig, reportPath);
+      return [key, json];
+    }));
+
+    return {
+      ok: true,
+      generatedAt: new Date().toISOString(),
+      source: 'server-ssh',
+      server: analyticsSummaryConfig.server,
+      reports: Object.fromEntries(entries)
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: 'ANALYTICS_SUMMARY_READ_FAILED',
+      message: err.message || '读取匿名访客统计摘要失败。'
+    };
+  }
+}
+
+function readRemoteJson(config, reportPath) {
   return new Promise((resolve, reject) => {
     execFile('ssh', [
       '-o', 'BatchMode=yes',
-      '-o', `ConnectTimeout=${Math.ceil(trafficSummaryConfig.sshTimeoutMs / 1000)}`,
-      trafficSummaryConfig.server,
+      '-o', `ConnectTimeout=${Math.ceil(config.sshTimeoutMs / 1000)}`,
+      config.server,
       'cat',
       reportPath
     ], {
-      timeout: trafficSummaryConfig.sshTimeoutMs,
+      timeout: config.sshTimeoutMs,
       maxBuffer: 1024 * 1024 * 4
     }, (error, stdout, stderr) => {
       if (error) {
