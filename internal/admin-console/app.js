@@ -8,6 +8,7 @@
     chartMeta: null,
     resizeTimer: null,
     chartHeightMode: 'standard',
+    trendMode: 'analytics',
     trafficPeriod: 'today',
     trafficReports: null,
     trafficStatus: 'loading',
@@ -17,7 +18,7 @@
     analyticsError: ''
   };
 
-  var seriesLabels = {
+  var trafficSeriesLabels = {
     allRequests: '全部请求',
     validPageViews: '有效页面访问',
     homeViews: '首页',
@@ -29,16 +30,38 @@
     suspiciousRequests: '疑似扫描'
   };
 
-  var seriesConfig = [
-    { key: 'allRequests', label: '全部请求', color: '#2563eb', defaultVisible: true },
+  var trafficSeriesConfig = [
+    { key: 'allRequests', label: '全部请求', color: '#2563eb', defaultVisible: false },
     { key: 'validPageViews', label: '有效页面访问', color: '#16a34a', defaultVisible: true },
     { key: 'homeViews', label: '首页', color: '#f59e0b', defaultVisible: false },
-    { key: 'diagnosisViews', label: '诊断页', color: '#dc2626', defaultVisible: true },
+    { key: 'diagnosisViews', label: '诊断页', color: '#dc2626', defaultVisible: false },
     { key: 'talentViews', label: '人才页', color: '#7c3aed', defaultVisible: false },
     { key: 'projectViews', label: '项目页', color: '#0f766e', defaultVisible: false },
-    { key: 'notFound', label: '404', color: '#64748b', defaultVisible: false },
-    { key: 'serverErrors', label: '5xx', color: '#111827', defaultVisible: false },
-    { key: 'suspiciousRequests', label: '疑似扫描', color: '#ea580c', defaultVisible: false }
+    { key: 'notFound', label: '404', color: '#64748b', defaultVisible: true },
+    { key: 'serverErrors', label: '5xx', color: '#111827', defaultVisible: true },
+    { key: 'suspiciousRequests', label: '疑似扫描', color: '#ea580c', defaultVisible: true }
+  ];
+
+  var analyticsTrendLabels = {
+    anonymousVisitors: '匿名独立访客',
+    pageViews: '页面浏览',
+    clicks: '点击',
+    diagnosisVisitors: '诊断页访客',
+    talentVisitors: '人才页访客',
+    projectVisitors: '项目页访客',
+    diagnosisEntryClicks: '诊断入口点击',
+    homeToDiagnosisVisitors: '首页→诊断页'
+  };
+
+  var analyticsTrendConfig = [
+    { key: 'anonymousVisitors', label: '匿名独立访客', color: '#2563eb', defaultVisible: true },
+    { key: 'pageViews', label: '页面浏览', color: '#16a34a', defaultVisible: true },
+    { key: 'clicks', label: '点击', color: '#f59e0b', defaultVisible: false },
+    { key: 'diagnosisVisitors', label: '诊断页访客', color: '#dc2626', defaultVisible: false },
+    { key: 'talentVisitors', label: '人才页访客', color: '#7c3aed', defaultVisible: false },
+    { key: 'projectVisitors', label: '项目页访客', color: '#0f766e', defaultVisible: false },
+    { key: 'diagnosisEntryClicks', label: '诊断入口点击', color: '#ea580c', defaultVisible: true },
+    { key: 'homeToDiagnosisVisitors', label: '首页→诊断页', color: '#0891b2', defaultVisible: true }
   ];
 
   // Mock traffic is only for local UI development. Default dashboard must show
@@ -68,7 +91,7 @@
   }
 
   function initVisibleSeries() {
-    seriesConfig.forEach(function (item) {
+    analyticsTrendConfig.concat(trafficSeriesConfig).forEach(function (item) {
       state.visibleSeries[item.key] = Boolean(item.defaultVisible);
     });
   }
@@ -133,7 +156,7 @@
     renderAnalytics();
     drawChart();
     renderTrafficSummary();
-    setText('trafficControlStatus', getTrafficPeriodStatusText(state.trafficPeriod));
+    renderTrendModeText();
     renderTrafficSource();
   }
 
@@ -275,8 +298,8 @@
 
   function renderLegend() {
     var root = document.getElementById('chartLegend');
-    var series = seriesConfig;
-    var unavailable = !canUseTrafficData();
+    var series = getCurrentSeriesConfig();
+    var unavailable = !canUseCurrentTrendData();
     root.innerHTML = series.map(function (item) {
       var active = state.visibleSeries[item.key] ? ' is-active' : '';
       var disabled = unavailable ? ' is-unavailable' : '';
@@ -302,8 +325,8 @@
     var canvas = document.getElementById('trafficChart');
     var dimensions = resizeChartCanvas(canvas);
     var ctx = canvas.getContext('2d');
-    var hours = getTrafficRowsForCurrentPeriod();
-    var series = seriesConfig.filter(function (item) {
+    var rows = getRowsForCurrentTrend();
+    var series = getCurrentSeriesConfig().filter(function (item) {
       return state.visibleSeries[item.key];
     });
 
@@ -313,12 +336,12 @@
     var padding = { top: 28, right: 28, bottom: 44, left: 54 };
     var width = dimensions.cssWidth - padding.left - padding.right;
     var height = dimensions.cssHeight - padding.top - padding.bottom;
-    var maxValue = Math.max(10, maxSeriesValue(hours, series));
-    state.chartMeta = { padding: padding, width: width, height: height, maxValue: maxValue, rows: hours };
+    var maxValue = Math.max(10, maxSeriesValue(rows, series));
+    state.chartMeta = { padding: padding, width: width, height: height, maxValue: maxValue, rows: rows };
 
-    drawAxes(ctx, padding, width, height, maxValue, hours);
+    drawAxes(ctx, padding, width, height, maxValue, rows);
 
-    if (!hours.some(rowHasAnyMetric)) {
+    if (!rows.some(rowHasAnyMetric)) {
       drawEmptyChartState(ctx, padding, width, height);
       return;
     }
@@ -328,13 +351,13 @@
       ctx.strokeStyle = item.color;
       ctx.lineWidth = 3;
       var hasPoint = false;
-      hours.forEach(function (row, index) {
+      rows.forEach(function (row, index) {
         var value = getMetricValue(row, item.key);
         if (value == null) {
           hasPoint = false;
           return;
         }
-        var x = getPointXForRow(row, index, padding, width, hours.length);
+        var x = getPointXForRow(row, index, padding, width, rows.length);
         var y = padding.top + height - (value / maxValue) * height;
         if (!hasPoint) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
@@ -342,10 +365,10 @@
       });
       ctx.stroke();
 
-      hours.forEach(function (row, index) {
+      rows.forEach(function (row, index) {
         var value = getMetricValue(row, item.key);
         if (value == null) return;
-        var x = getPointXForRow(row, index, padding, width, hours.length);
+        var x = getPointXForRow(row, index, padding, width, rows.length);
         var y = padding.top + height - (value / maxValue) * height;
         ctx.beginPath();
         ctx.fillStyle = '#fff';
@@ -383,7 +406,21 @@
   function setupChartControls() {
     var heightControl = document.getElementById('chartHeightControl');
     var periodControl = document.getElementById('trafficPeriodControl');
+    var trendModeControl = document.getElementById('trendModeControl');
     var refreshButton = document.getElementById('refreshTrafficButton');
+    var refreshAnalyticsButton = document.getElementById('refreshAnalyticsButton');
+    if (trendModeControl) {
+      trendModeControl.querySelectorAll('[data-trend-mode]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          state.trendMode = button.getAttribute('data-trend-mode') || 'analytics';
+          updateSegmentedControl(trendModeControl, 'data-trend-mode', state.trendMode);
+          renderLegend();
+          renderTrendModeText();
+          drawChart();
+          renderTrafficSource();
+        });
+      });
+    }
     if (heightControl) {
       heightControl.querySelectorAll('[data-height]').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -399,7 +436,7 @@
           var period = button.getAttribute('data-period');
           state.trafficPeriod = period || 'today';
           updateSegmentedControl(periodControl, 'data-period', state.trafficPeriod);
-          setText('trafficControlStatus', getTrafficPeriodStatusText(state.trafficPeriod));
+          renderTrendModeText();
           drawChart();
           renderTrafficSummary();
           renderTrafficSource();
@@ -413,31 +450,37 @@
         renderLegend();
         drawChart();
         renderTrafficSummary();
-        setText('trafficControlStatus', getTrafficPeriodStatusText(state.trafficPeriod));
+        renderTrendModeText();
         renderTrafficSource();
         refreshButton.disabled = false;
+      });
+    }
+    if (refreshAnalyticsButton) {
+      refreshAnalyticsButton.addEventListener('click', async function () {
+        refreshAnalyticsButton.disabled = true;
+        await loadAnalyticsSummary();
+        renderAnalytics();
+        renderLegend();
+        drawChart();
+        renderTrendModeText();
+        renderTrafficSource();
+        refreshAnalyticsButton.disabled = false;
       });
     }
   }
 
   function setupAnalyticsControls() {
-    var refreshButton = document.getElementById('refreshAnalyticsButton');
-    if (!refreshButton) return;
-    refreshButton.addEventListener('click', async function () {
-      refreshButton.disabled = true;
-      await loadAnalyticsSummary();
-      renderAnalytics();
-      refreshButton.disabled = false;
-    });
+    // Kept for init ordering compatibility; refresh is wired in setupChartControls
+    // because the same data source also drives the default trend chart.
   }
 
   function renderChartTooltip(event, canvas, tooltip) {
     if (!state.summary || !state.chartMeta) return;
-    var hours = getTrafficRowsForCurrentPeriod();
-    var visible = seriesConfig.filter(function (item) {
+    var rows = getRowsForCurrentTrend();
+    var visible = getCurrentSeriesConfig().filter(function (item) {
       return state.visibleSeries[item.key];
     });
-    if (!hours.length || !visible.length) {
+    if (!rows.length || !visible.length) {
       tooltip.hidden = true;
       return;
     }
@@ -446,13 +489,13 @@
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
     var meta = state.chartMeta;
-    var hit = findNearestVisiblePoint(mouseX, mouseY, hours, visible, meta);
+    var hit = findNearestVisiblePoint(mouseX, mouseY, rows, visible, meta);
     if (!hit) {
       tooltip.hidden = true;
       return;
     }
     var index = hit.index;
-    var row = hours[index] || {};
+    var row = rows[index] || {};
 
     tooltip.innerHTML = [
       '<strong>' + escapeHtml(getTooltipLabel(row, index)) + '</strong>',
@@ -465,14 +508,14 @@
     positionTooltip(tooltip, hit.x, hit.y, rect);
   }
 
-  function findNearestVisiblePoint(mouseX, mouseY, hours, visible, meta) {
+  function findNearestVisiblePoint(mouseX, mouseY, rows, visible, meta) {
     var radius = 11;
     var best = null;
     visible.forEach(function (item) {
-      hours.forEach(function (row, index) {
+      rows.forEach(function (row, index) {
         var value = getMetricValue(row, item.key);
         if (value == null) return;
-        var x = getPointXForRow(row, index, meta.padding, meta.width, hours.length);
+        var x = getPointXForRow(row, index, meta.padding, meta.width, rows.length);
         var y = meta.padding.top + meta.height - (value / meta.maxValue) * meta.height;
         var distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
         if (distance <= radius && (!best || distance < best.distance)) {
@@ -681,13 +724,18 @@
     var badge = document.getElementById('trafficMockBadge');
     if (badge) {
       badge.hidden = false;
-      badge.textContent = getTrafficBadgeText();
-      badge.dataset.state = state.trafficStatus;
+      badge.textContent = getTrendBadgeText();
+      badge.dataset.state = state.trendMode === 'analytics' ? state.analyticsStatus : state.trafficStatus;
     }
-    var text = [
-      state.trafficStatus === 'ready' ? '数据来源：服务器真实 Nginx 日志摘要 JSON' : '数据来源：' + getTrafficPeriodStatusText(state.trafficPeriod),
-      '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-reports/*.json'
-    ].filter(Boolean).join('。');
+    var text = state.trendMode === 'analytics'
+      ? [
+        state.analyticsStatus === 'ready' ? '当前趋势数据来源：服务器匿名访客 summary JSON' : '当前趋势数据来源：' + getAnalyticsTrendStatusText(state.trafficPeriod),
+        '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-analytics-summaries/*.json'
+      ].filter(Boolean).join('。')
+      : [
+        state.trafficStatus === 'ready' ? '当前趋势数据来源：服务器真实 Nginx 日志摘要 JSON' : '当前趋势数据来源：' + getTrafficPeriodStatusText(state.trafficPeriod),
+        '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-reports/*.json'
+      ].filter(Boolean).join('。');
     setText('trafficSource', text);
   }
 
@@ -697,10 +745,19 @@
     return '已读取服务器真实访问摘要，数据来自 Nginx 日志摘要 JSON。';
   }
 
+  function getTrendBadgeText() {
+    if (state.trendMode === 'analytics') {
+      if (state.analyticsStatus === 'loading') return '正在读取匿名访客行为摘要...';
+      if (state.analyticsStatus === 'error') return '读取匿名访客行为摘要失败。';
+      return '用户行为趋势来自匿名访客 summary JSON。';
+    }
+    return getTrafficBadgeText();
+  }
+
   function renderTrafficSummary() {
     var root = document.getElementById('trafficSummary');
     if (!root || !state.summary) return;
-    var metricKeys = Object.keys(seriesLabels);
+    var metricKeys = Object.keys(trafficSeriesLabels);
     var periods = [
       buildSummaryPeriod('当日', 'today'),
       buildSummaryPeriod('昨日', 'yesterday'),
@@ -715,7 +772,7 @@
       '<div class="traffic-summary__table" role="table" aria-label="访问数据汇总">',
       '<div class="traffic-summary__row traffic-summary__row--head" role="row">',
       '<span>周期</span>',
-      metricKeys.map(function (key) { return '<span>' + escapeHtml(seriesLabels[key]) + '</span>'; }).join(''),
+      metricKeys.map(function (key) { return '<span>' + escapeHtml(trafficSeriesLabels[key]) + '</span>'; }).join(''),
       '<span>状态</span>',
       '</div>',
       periods.map(function (period) {
@@ -765,8 +822,25 @@
     return max;
   }
 
-  function getTrafficRowsForCurrentPeriod() {
-    return getTrafficRowsForPeriod(state.trafficPeriod);
+  function renderTrendModeText() {
+    var isAnalytics = state.trendMode === 'analytics';
+    var status = isAnalytics
+      ? getAnalyticsTrendStatusText(state.trafficPeriod)
+      : getTrafficPeriodStatusText(state.trafficPeriod);
+    setText('trafficControlStatus', status);
+    setText('trendModeDescription', isAnalytics
+      ? '基于匿名 visitorId 的浏览器行为统计，更适合判断访问与转化；不等于真实自然人。'
+      : '基于 Nginx 日志，主要用于观察请求量、错误、扫描和服务器异常；不用于判断真实用户数量。');
+  }
+
+  function getCurrentSeriesConfig() {
+    return state.trendMode === 'analytics' ? analyticsTrendConfig : trafficSeriesConfig;
+  }
+
+  function getRowsForCurrentTrend() {
+    return state.trendMode === 'analytics'
+      ? getAnalyticsRowsForPeriod(state.trafficPeriod)
+      : getTrafficRowsForPeriod(state.trafficPeriod);
   }
 
   function getTrafficRowsForPeriod(period) {
@@ -808,12 +882,57 @@
     };
   }
 
+  function getAnalyticsRowsForPeriod(period) {
+    if (!canUseAnalyticsTrendData(period)) return [];
+    var report = getAnalyticsReportForPeriod(period);
+    if (!report) return [];
+    if (isDailyPeriod(period)) {
+      return normalizeAnalyticsDailyRows(report.daily || []);
+    }
+    return normalizeAnalyticsHourlyRows(report.hourly || []);
+  }
+
+  function normalizeAnalyticsHourlyRows(rows) {
+    return Array.from({ length: 24 }, function (_, hour) {
+      var found = rows.find(function (item) { return Number(item.hour) === hour; }) || {};
+      return normalizeAnalyticsRow({ ...found, hour: hour });
+    });
+  }
+
+  function normalizeAnalyticsDailyRows(rows) {
+    return rows.map(function (row) {
+      return normalizeAnalyticsRow(row);
+    });
+  }
+
+  function normalizeAnalyticsRow(row) {
+    return {
+      hour: row.hour,
+      date: row.date,
+      anonymousVisitors: toNullableNumber(row.anonymousVisitors),
+      pageViews: toNullableNumber(row.pageViews),
+      clicks: toNullableNumber(row.clicks),
+      diagnosisVisitors: toNullableNumber(row.diagnosisVisitors),
+      talentVisitors: toNullableNumber(row.talentVisitors),
+      projectVisitors: toNullableNumber(row.projectVisitors),
+      diagnosisEntryClicks: toNullableNumber(row.diagnosisEntryClicks),
+      homeToDiagnosisVisitors: toNullableNumber(row.homeToDiagnosisVisitors)
+    };
+  }
+
   function getReportForPeriod(period) {
     var reports = state.trafficReports && state.trafficReports.reports ? state.trafficReports.reports : {};
     if (period === 'yesterday') return reports.yesterday;
     if (period === '7d') return reports.last7;
     if (period === '30d') return reports.last30;
     return reports.today;
+  }
+
+  function getAnalyticsReportForPeriod(period) {
+    if (period === 'yesterday') return getAnalyticsReport('yesterday');
+    if (period === '7d') return getAnalyticsReport('last7');
+    if (period === '30d') return getAnalyticsReport('last30');
+    return getAnalyticsReport('today');
   }
 
   function getMetricValue(row, key) {
@@ -829,13 +948,21 @@
   }
 
   function rowHasAnyMetric(row) {
-    return Object.keys(seriesLabels).some(function (key) {
+    var labels = state.trendMode === 'analytics' ? analyticsTrendLabels : trafficSeriesLabels;
+    return Object.keys(labels).some(function (key) {
       return getMetricValue(row, key) != null;
     });
   }
 
-  function canUseTrafficData() {
+  function canUseCurrentTrendData() {
     var period = arguments.length > 0 && arguments[0] ? arguments[0] : state.trafficPeriod;
+    return state.trendMode === 'analytics'
+      ? canUseAnalyticsTrendData(period)
+      : canUseTrafficData(period);
+  }
+
+  function canUseTrafficData(period) {
+    period = period || state.trafficPeriod;
     if (state.trafficStatus !== 'ready') return false;
     var report = getReportForPeriod(period);
     if (!report || !report.meta || report.meta.usesMockData) return false;
@@ -850,6 +977,22 @@
     return '暂无真实' + getTrafficPeriodLabel(period) + '访问数据。';
   }
 
+  function canUseAnalyticsTrendData(period) {
+    period = period || state.trafficPeriod;
+    if (state.analyticsStatus !== 'ready') return false;
+    var report = getAnalyticsReportForPeriod(period);
+    if (!report || !report.meta || report.meta.usesMockData) return false;
+    if (isDailyPeriod(period)) return Array.isArray(report.daily) && report.daily.length > 0;
+    return Array.isArray(report.hourly) && report.hourly.length > 0;
+  }
+
+  function getAnalyticsTrendStatusText(period) {
+    if (state.analyticsStatus === 'loading') return '正在读取匿名访客行为摘要...';
+    if (state.analyticsStatus === 'error') return '读取失败，请检查 SSH 免密、summary 文件或 cron。' + (state.analyticsError ? ' ' + state.analyticsError : '');
+    if (canUseAnalyticsTrendData(period)) return '已读取匿名访客行为摘要，趋势图来自 analytics summary JSON。';
+    return '暂无真实' + getTrafficPeriodLabel(period) + '用户行为数据。';
+  }
+
   function getTrafficPeriodLabel(period) {
     if (period === 'yesterday') return '昨日';
     if (period === '7d') return '近 7 日';
@@ -862,10 +1005,12 @@
     ctx.textAlign = 'center';
     ctx.fillStyle = '#172033';
     ctx.font = '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText(state.trafficStatus === 'error' ? '读取服务器真实访问摘要失败' : '暂无真实访问数据', padding.left + width / 2, padding.top + height / 2 - 8);
+    var isAnalytics = state.trendMode === 'analytics';
+    var isError = isAnalytics ? state.analyticsStatus === 'error' : state.trafficStatus === 'error';
+    ctx.fillText(isError ? (isAnalytics ? '读取匿名访客行为摘要失败' : '读取服务器真实访问摘要失败') : '暂无真实' + (isAnalytics ? '用户行为' : '访问') + '数据', padding.left + width / 2, padding.top + height / 2 - 8);
     ctx.fillStyle = '#65748b';
     ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText(state.trafficStatus === 'error' ? '请检查 SSH 免密、服务器摘要文件或 cron' : '无真实数据时不显示 mock 曲线或假数字', padding.left + width / 2, padding.top + height / 2 + 18);
+    ctx.fillText(isError ? '请检查 SSH 免密、summary 文件或 cron' : '无真实数据时不显示 mock 曲线或假数字', padding.left + width / 2, padding.top + height / 2 + 18);
     ctx.restore();
   }
 

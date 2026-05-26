@@ -624,6 +624,15 @@ button .shortcut-note {
   color: var(--blue);
 }
 
+.segmented-control--primary {
+  background: #eaf1ff;
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.segmented-control--primary button {
+  font-weight: 800;
+}
+
 .segmented-control button[aria-disabled="true"]:not(.is-active) {
   opacity: 0.58;
 }

@@ -88,12 +88,16 @@
           <div class="section-head section-head--inline">
             <div>
               <p class="eyebrow">TRAFFIC</p>
-              <h2>网站访问趋势图</h2>
+              <h2>访问趋势图</h2>
               <p class="mock-badge" id="trafficMockBadge" hidden>正在读取服务器真实访问摘要...</p>
             </div>
-            <p class="panel-hint">当前为服务器 Nginx 日志统计，用于观察访问请求、页面访问、错误与扫描情况；不等于真实用户人数。真实用户 / 访客数量需后续通过匿名访客统计获得。</p>
+            <p class="panel-hint" id="trendModeDescription">基于匿名 visitorId 的浏览器行为统计，更适合判断访问与转化；不等于真实自然人。</p>
           </div>
           <div class="chart-controls" aria-label="图表控制">
+            <div class="segmented-control segmented-control--primary" id="trendModeControl" aria-label="趋势数据源">
+              <button type="button" class="is-active" data-trend-mode="analytics">用户行为趋势</button>
+              <button type="button" data-trend-mode="traffic">服务器访问趋势</button>
+            </div>
             <div class="segmented-control" id="trafficPeriodControl" aria-label="趋势周期">
               <button type="button" class="is-active" data-period="today">当日趋势</button>
               <button type="button" data-period="yesterday">昨日趋势</button>
