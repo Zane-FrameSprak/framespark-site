@@ -186,6 +186,64 @@ sudo bash analytics-api/scripts/uninstall-systemd-service.sh
 
 analytics 日志只应保存在该目录，不应写入 `/www/wwwroot/framespark.cn/` 等公网目录。
 
+## Nginx 反代
+
+analytics-api 服务只监听 `127.0.0.1:8787`。公网访问需要 Nginx 只暴露 `/api/analytics/`，不要暴露 `/health`、数据目录或其他内部路径。
+
+1. 确认本机服务：
+
+```bash
+curl -s http://127.0.0.1:8787/health
+```
+
+2. 安装 Nginx 反代：
+
+```bash
+cd /tmp/framespark-site
+sudo bash analytics-api/scripts/install-nginx-proxy.sh
+```
+
+该脚本只会在 `/www/server/panel/vhost/nginx/framespark.cn.conf` 的 HTTPS server 块中插入带标记的 `/api/analytics/` location。脚本会先备份配置，执行 `nginx -t`，失败时自动恢复备份；成功后 reload Nginx。
+
+3. 公网 HTTPS 测试：
+
+当前 analytics-api 只有本机 `/health`，没有公网 `/api/analytics/health`。公网应使用事件接口测试：
+
+```bash
+curl -s -X POST https://framespark.cn/api/analytics/event \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "visitorId": "fs_test_visitor_001",
+    "sessionId": "fs_test_session_001",
+    "eventType": "page_view",
+    "path": "/",
+    "pageType": "home"
+  }'
+```
+
+预期返回：
+
+```json
+{"ok":true}
+```
+
+4. 卸载 Nginx 反代：
+
+```bash
+sudo bash analytics-api/scripts/uninstall-nginx-proxy.sh
+```
+
+卸载脚本只删除 `# FrameSpark analytics proxy start` 到 `# FrameSpark analytics proxy end` 之间的 block，不删除 analytics-api 服务，也不删除 `/home/ubuntu/framespark-analytics` 数据目录。
+
+说明：
+
+- Nginx 只暴露 `/api/analytics/`
+- analytics-api 仍只监听 `127.0.0.1`
+- 不暴露 `/health` 到公网
+- 不影响静态官网页面
+- 不影响 `diagnosis-api`
+- 不暴露 analytics 日志目录
+
 ## 环境变量
 
 - `ANALYTICS_HOST`：默认 `127.0.0.1`
