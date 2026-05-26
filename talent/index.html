@@ -39,7 +39,7 @@
     </header>
 
     <main class="subpage-main">
-        <a class="home-shortcut" href="../index.html#systems" aria-label="返回主页">HOME</a>
+        <a class="home-shortcut" href="../index.html#systems" aria-label="返回主页" data-analytics-target="talent_back_home">HOME</a>
         <section class="subpage-hero talent-coming">
             <div class="subpage-hero__inner talent-coming__inner">
                 <div class="talent-coming__copy">
@@ -81,7 +81,7 @@
                         </label>
                     </fieldset>
 
-                    <button type="submit">上线后通知我</button>
+                    <button type="submit" data-analytics-target="talent_primary_action">上线后通知我</button>
                     <p class="talent-notify__message" id="talentNotifyMessage" aria-live="polite"></p>
                 </form>
             </div>
@@ -152,5 +152,6 @@
             });
         })();
     </script>
+    <script src="/js/analytics.js" defer></script>
 </body>
 </html>

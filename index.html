@@ -154,8 +154,8 @@
                 <p class="footer__en">FRAMESPARK</p>
             </div>
             <div class="footer__contact">
-                <a href="mailto:script@framespark.cn">script@framespark.cn</a>
-                <a href="mailto:producer@framespark.cn">producer@framespark.cn</a>
+                <a href="mailto:script@framespark.cn" data-analytics-target="home_contact">script@framespark.cn</a>
+                <a href="mailto:producer@framespark.cn" data-analytics-target="home_contact">producer@framespark.cn</a>
             </div>
             <p class="footer__copy">
                 © 2025 FrameSpark 帧火花. All rights reserved.<br>
@@ -166,5 +166,24 @@
 
     <script src="js/site-data.js?v=20260519-platform-copy"></script>
     <script src="js/main.js?v=20260519-platform-copy"></script>
+    <script>
+        (function () {
+            var diagnosisEntry = document.querySelector('a[href="diagnosis/"]');
+            var talentEntry = document.querySelector('a[href="talent/"]');
+
+            if (diagnosisEntry) {
+                diagnosisEntry.setAttribute('data-analytics-target', 'home_to_diagnosis');
+            }
+
+            if (talentEntry) {
+                talentEntry.setAttribute('data-analytics-target', 'home_to_talent');
+            }
+
+            document.querySelectorAll('#projectReel a[href^="projects/"]').forEach(function (link) {
+                link.setAttribute('data-analytics-target', 'home_project_card');
+            });
+        })();
+    </script>
+    <script src="/js/analytics.js" defer></script>
 </body>
 </html>
