@@ -80,6 +80,58 @@ ANALYTICS_DATA_DIR=analytics-api/data
 
 `analytics-api/data/` 已加入 `.gitignore`，不要提交真实事件数据。
 
+## 匿名访客统计摘要
+
+analytics-api 原始事件是 JSONL，内部控制台后续不会直接读取原始事件，而是读取聚合后的摘要 JSON。
+
+手动生成摘要：
+
+```bash
+cd /tmp/framespark-site
+bash analytics-api/scripts/run-analytics-summary.sh
+```
+
+默认读取：
+
+```text
+/home/ubuntu/framespark-analytics
+```
+
+默认输出：
+
+```text
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-today.json
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-yesterday.json
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-last7.json
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-last30.json
+```
+
+安装定时任务：
+
+```bash
+cd /tmp/framespark-site
+sudo bash analytics-api/scripts/install-analytics-summary-cron.sh
+```
+
+cron 每 5 分钟运行一次，日志写入：
+
+```text
+/home/ubuntu/framespark-analytics-summaries/analytics-summary-cron.log
+```
+
+摘要包含：
+
+- 匿名访客数、会话数、页面浏览数、点击数
+- 首页 / 诊断页 / 人才页 / 项目页访客与浏览
+- 诊断入口、人才入口、项目卡片点击
+- 首页到诊断页的轻量漏斗
+- today / yesterday 的按小时统计
+- last7 / last30 的按天统计
+
+摘要只输出聚合数量，不输出 `visitorId`、`sessionId`、`ipHash` 明细，不输出原始事件，不保存邮箱、姓名、剧本正文或上传材料。
+
+匿名访客数不等于真实自然人数量：同一人多设备、清缓存、无痕模式会造成误差。该数据用于观察匿名浏览器行为趋势，不用于实名用户判断。
+
 ## 本地启动
 
 安装依赖后：
@@ -275,7 +327,7 @@ v1 使用单进程内存限流，每 IP 每分钟 120 次。服务重启后计�
 
 ## 后续步骤
 
-1. `js/analytics.js` 草案用于在前端生成匿名 `visitorId` / `sessionId`，但尚未接入任何公开页面。
-2. 接入公开页面前，必须确认隐私政策草案已经上线并覆盖匿名访客统计边界。
-3. 下一步才是在公开页面添加 `script` 标签，并为关键入口添加 `data-analytics-target`。
+1. 公开页面已接入 `js/analytics.js`，并为关键入口添加 `data-analytics-target`。
+2. 隐私政策草案已覆盖匿名访客统计边界，正式长期使用前仍应经过法律审核。
+3. 下一步是让服务器定时生成 analytics summary JSON。
 4. 为内部控制台新增“用户行为统计”模块，与 Nginx 服务器访问统计分开展示。
