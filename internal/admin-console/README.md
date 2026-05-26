@@ -121,10 +121,10 @@ someTarget: {
 
 ## 网站访问趋势图
 
-控制台默认数据必须来自真实来源。当前 v1 尚未接入真实服务器 Nginx 日志，因此访问趋势图和数据汇总默认显示空状态，不展示 mock 曲线、mock 折点或 mock 汇总数字。页面会明确标注：
+控制台默认数据必须来自真实来源。当前 v1 通过 SSH 读取服务器侧已生成的 Nginx 摘要 JSON。读取失败或数据缺失时，访问趋势图和数据汇总显示失败 / 空状态，不展示 mock 曲线、mock 折点或 mock 汇总数字。页面会明确标注：
 
 ```text
-当前未接入真实 Nginx 日志，访问趋势与汇总暂不可用于运营判断
+已读取服务器真实访问摘要，数据来自 Nginx 日志摘要 JSON
 ```
 
 未接入数据源时使用 “— / 待接入真实日志”，不能用 mock 或 0 代替。0 只表示真实数据源已经接入且统计结果为 0。
@@ -136,12 +136,21 @@ someTarget: {
 /www/wwwlogs/framespark.cn.error.log
 ```
 
-后续真实访问统计接入 `scripts/nginx-traffic-summary.js` 生成的真实摘要 JSON，默认不使用 mock；接入方案见 `docs/内部控制台真实访问统计接入说明.md`。
+真实访问统计使用 `scripts/nginx-traffic-summary.js` 生成摘要 JSON，默认不使用 mock；接入方案见 `docs/内部控制台真实访问统计接入说明.md`。
 该摘要脚本会区分 `pageViews` 和更保守的 `validPageViews`：`validPageViews` 只统计已知站内页面，扫描路径、随机路径和 `/mailto:` 等异常请求不会进入有效访问。
-服务器上的真实访问统计摘要由 `scripts/run-nginx-traffic-summary.sh` 生成，默认存放在 `/home/ubuntu/framespark-reports/`，控制台后续读取该目录中的 JSON。
+服务器上的真实访问统计摘要由 `scripts/run-nginx-traffic-summary.sh` 生成，默认存放在 `/home/ubuntu/framespark-reports/`。控制台通过本机接口 `/api/console/traffic-summary` 使用 SSH 只读读取该目录中的 JSON。
 服务器端手动运行和安装 cron 均应使用 `sudo`，因为 Nginx 日志通常归 `www` 用户 / 用户组管理，普通 `ubuntu` 用户没有读取权限；不要通过修改日志权限解决。
 
-当前 v1 尚未接入真实服务器 Nginx 日志。不要用 v1 图表判断真实线上流量。
+控制台读取的固定文件为：
+
+```text
+/home/ubuntu/framespark-reports/traffic-summary-today.json
+/home/ubuntu/framespark-reports/traffic-summary-yesterday.json
+/home/ubuntu/framespark-reports/traffic-summary-last7.json
+/home/ubuntu/framespark-reports/traffic-summary-last30.json
+```
+
+读取前需要 Mac 本机已配置到 `ubuntu@124.221.146.10` 的 SSH 免密。控制台不会读取 Nginx 原始日志，不允许前端传服务器地址、文件路径或 shell 命令；如果 SSH 或 JSON 读取失败，页面显示读取失败，不使用 mock 数据。
 
 如果后续为了 UI 调试保留 mock 数据，必须默认关闭，只能通过代码中的明确开发开关启用；mock 不得作为默认看板数据，也不得用于运营判断。
 
@@ -149,10 +158,11 @@ v1 暂不做复杂 X / Y 轴滑块。当日图的 X 轴固定为 0–24 小时�
 
 当前周期入口的规则：
 
-- 当日趋势：待接入真实 Nginx 日志后启用；未接入前不绘制曲线。
-- 昨日趋势：待接入真实 Nginx 日志后启用。
-- 近 7 日趋势 / 近 30 日趋势：需要接入真实 Nginx 日志聚合后启用。
-- 数据汇总表按当日 / 昨日 / 近 7 日 / 近 30 日四行展示。未接入真实日志时全部显示“—”和“待接入真实日志”，不显示假 0。
+- 当日趋势：读取 `traffic-summary-today.json`，使用 `hourly` 数据。
+- 昨日趋势：读取 `traffic-summary-yesterday.json`，使用 `hourly` 数据。
+- 近 7 日趋势：读取 `traffic-summary-last7.json`，使用 `daily` 数据。
+- 近 30 日趋势：读取 `traffic-summary-last30.json`，使用 `daily` 数据。
+- 数据汇总表按当日 / 昨日 / 近 7 日 / 近 30 日四行展示。读取失败或缺失时显示“— / 读取失败 / 暂无数据”，不显示假 0。
 
 真实日志接入后，访问数据需要区分以下口径：
 

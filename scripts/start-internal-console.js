@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import http from 'http';
 import path from 'path';
-import { spawn } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -125,6 +125,17 @@ const dashboardConfig = {
   defaultVisibleSeries: ['pv', 'uniqueIp', 'diagnosis']
 };
 
+const trafficSummaryConfig = {
+  server: 'ubuntu@124.221.146.10',
+  sshTimeoutMs: 8000,
+  reports: {
+    today: '/home/ubuntu/framespark-reports/traffic-summary-today.json',
+    yesterday: '/home/ubuntu/framespark-reports/traffic-summary-yesterday.json',
+    last7: '/home/ubuntu/framespark-reports/traffic-summary-last7.json',
+    last30: '/home/ubuntu/framespark-reports/traffic-summary-last30.json'
+  }
+};
+
 const staticRoot = path.join(REPO_ROOT, 'internal', 'admin-console');
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -181,6 +192,12 @@ async function handleRequest(req, res) {
       ok: true,
       summary: await buildSummary()
     });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/console/traffic-summary') {
+    const result = await readServerTrafficReports();
+    sendJson(res, result.ok ? 200 : 502, result);
     return;
   }
 
@@ -293,6 +310,56 @@ async function buildSummary() {
   };
 }
 
+async function readServerTrafficReports() {
+  try {
+    const entries = await Promise.all(Object.entries(trafficSummaryConfig.reports).map(async ([key, reportPath]) => {
+      const json = await readRemoteTrafficJson(reportPath);
+      return [key, json];
+    }));
+
+    return {
+      ok: true,
+      generatedAt: new Date().toISOString(),
+      source: 'server-ssh',
+      server: trafficSummaryConfig.server,
+      reports: Object.fromEntries(entries)
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: 'TRAFFIC_SUMMARY_READ_FAILED',
+      message: err.message || '读取服务器访问摘要失败。'
+    };
+  }
+}
+
+function readRemoteTrafficJson(reportPath) {
+  return new Promise((resolve, reject) => {
+    execFile('ssh', [
+      '-o', 'BatchMode=yes',
+      '-o', `ConnectTimeout=${Math.ceil(trafficSummaryConfig.sshTimeoutMs / 1000)}`,
+      trafficSummaryConfig.server,
+      'cat',
+      reportPath
+    ], {
+      timeout: trafficSummaryConfig.sshTimeoutMs,
+      maxBuffer: 1024 * 1024 * 4
+    }, (error, stdout, stderr) => {
+      if (error) {
+        const detail = String(stderr || error.message || '').trim();
+        reject(new Error(`读取 ${reportPath} 失败：${detail || error.code || 'SSH 读取失败'}`));
+        return;
+      }
+
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (parseError) {
+        reject(new Error(`解析 ${reportPath} JSON 失败：${parseError.message}`));
+      }
+    });
+  });
+}
+
 async function countDiagnosisLogs() {
   const files = await listFilesSafe(path.join(REPO_ROOT, 'diagnosis-api', 'logs', 'diagnosis', 'by-date'));
   return countByDate(files.filter(file => file.endsWith('.json')));
@@ -333,29 +400,18 @@ async function countPdfQualityIssues() {
 }
 
 async function readTrafficSummary() {
-  const mockPath = path.join(staticRoot, 'traffic-summary.mock.json');
-  const fromFile = await readJsonSafe(mockPath, null);
-  if (fromFile && Array.isArray(fromFile.hours)) return normalizeTraffic(fromFile);
-
   return normalizeTraffic({
-    source: 'local-mock-summary',
-    note: '当前为本地 mock 摘要；后续可接入 Nginx 日志聚合。',
-    hours: Array.from({ length: 25 }, (_, hour) => ({
-      hour,
-      pv: hour >= 9 && hour <= 23 ? 6 + ((hour * 7) % 19) : ((hour * 3) % 5),
-      uniqueIp: hour >= 9 && hour <= 23 ? 2 + ((hour * 5) % 8) : hour % 2,
-      home: hour >= 9 && hour <= 23 ? 3 + ((hour * 4) % 10) : hour % 3,
-      diagnosis: hour >= 10 && hour <= 22 ? 1 + ((hour * 3) % 7) : 0,
-      talent: hour >= 10 && hour <= 21 ? ((hour * 2) % 4) : 0,
-      notFound: hour % 6 === 0 ? 1 : 0,
-      serverError: 0
-    }))
+    source: 'server-summary-pending',
+    isMock: false,
+    note: '真实访问统计由 /api/console/traffic-summary 读取服务器摘要 JSON。',
+    hours: []
   });
 }
 
 function normalizeTraffic(raw) {
-  const hours = Array.from({ length: 25 }, (_, hour) => {
-    const found = raw.hours.find(item => Number(item.hour) === hour) || {};
+  const rawHours = Array.isArray(raw.hours) ? raw.hours : [];
+  const hours = Array.from({ length: rawHours.length ? 24 : 0 }, (_, hour) => {
+    const found = rawHours.find(item => Number(item.hour) === hour) || {};
     return {
       hour,
       pv: toSafeNumber(found.pv),

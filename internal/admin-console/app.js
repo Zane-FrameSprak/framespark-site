@@ -8,18 +8,35 @@
     chartMeta: null,
     resizeTimer: null,
     chartHeightMode: 'standard',
-    trafficPeriod: 'today'
+    trafficPeriod: 'today',
+    trafficReports: null,
+    trafficStatus: 'loading',
+    trafficError: ''
   };
 
   var seriesLabels = {
-    pv: '全站 PV',
-    uniqueIp: '独立 IP',
-    home: '首页访问',
-    diagnosis: '诊断页访问',
-    talent: '人才页访问',
+    allRequests: '全部请求',
+    validPageViews: '有效访问',
+    homeViews: '首页',
+    diagnosisViews: '诊断页',
+    talentViews: '人才页',
+    projectViews: '项目页',
     notFound: '404',
-    serverError: '5xx'
+    serverErrors: '5xx',
+    suspiciousRequests: '疑似扫描'
   };
+
+  var seriesConfig = [
+    { key: 'allRequests', label: '全部请求', color: '#2563eb', defaultVisible: true },
+    { key: 'validPageViews', label: '有效访问', color: '#16a34a', defaultVisible: true },
+    { key: 'homeViews', label: '首页', color: '#f59e0b', defaultVisible: false },
+    { key: 'diagnosisViews', label: '诊断页', color: '#dc2626', defaultVisible: true },
+    { key: 'talentViews', label: '人才页', color: '#7c3aed', defaultVisible: false },
+    { key: 'projectViews', label: '项目页', color: '#0f766e', defaultVisible: false },
+    { key: 'notFound', label: '404', color: '#64748b', defaultVisible: false },
+    { key: 'serverErrors', label: '5xx', color: '#111827', defaultVisible: false },
+    { key: 'suspiciousRequests', label: '疑似扫描', color: '#ea580c', defaultVisible: false }
+  ];
 
   // Mock traffic is only for local UI development. Default dashboard must show
   // real data or an empty state, never simulated operations numbers.
@@ -35,6 +52,7 @@
       state.summary = summaryResponse.summary;
 
       initVisibleSeries();
+      await loadTrafficSummary();
       setupChartTooltip();
       setupChartResize();
       setupChartControls();
@@ -45,10 +63,34 @@
   }
 
   function initVisibleSeries() {
-    var series = state.summary.traffic.series || [];
-    series.forEach(function (item) {
+    seriesConfig.forEach(function (item) {
       state.visibleSeries[item.key] = Boolean(item.defaultVisible);
     });
+  }
+
+  async function loadTrafficSummary() {
+    state.trafficStatus = 'loading';
+    state.trafficError = '';
+    renderTrafficLoadingState();
+    try {
+      var response = await fetchJson('/api/console/traffic-summary');
+      state.trafficReports = response;
+      state.trafficStatus = 'ready';
+      state.trafficError = '';
+    } catch (err) {
+      state.trafficReports = null;
+      state.trafficStatus = 'error';
+      state.trafficError = err.message || '读取服务器真实访问摘要失败。';
+    }
+  }
+
+  function renderTrafficLoadingState() {
+    var badge = document.getElementById('trafficMockBadge');
+    if (badge) {
+      badge.hidden = false;
+      badge.textContent = '正在读取服务器真实访问摘要...';
+    }
+    setText('trafficControlStatus', '正在读取服务器真实访问摘要...');
   }
 
   function renderAll() {
@@ -202,7 +244,7 @@
 
   function renderLegend() {
     var root = document.getElementById('chartLegend');
-    var series = state.summary.traffic.series || [];
+    var series = seriesConfig;
     var unavailable = !canUseTrafficData();
     root.innerHTML = series.map(function (item) {
       var active = state.visibleSeries[item.key] ? ' is-active' : '';
@@ -229,9 +271,8 @@
     var canvas = document.getElementById('trafficChart');
     var dimensions = resizeChartCanvas(canvas);
     var ctx = canvas.getContext('2d');
-    var traffic = state.summary.traffic;
     var hours = getTrafficRowsForCurrentPeriod();
-    var series = (traffic.series || []).filter(function (item) {
+    var series = seriesConfig.filter(function (item) {
       return state.visibleSeries[item.key];
     });
 
@@ -242,9 +283,9 @@
     var width = dimensions.cssWidth - padding.left - padding.right;
     var height = dimensions.cssHeight - padding.top - padding.bottom;
     var maxValue = Math.max(10, maxSeriesValue(hours, series));
-    state.chartMeta = { padding: padding, width: width, height: height, maxValue: maxValue };
+    state.chartMeta = { padding: padding, width: width, height: height, maxValue: maxValue, rows: hours };
 
-    drawAxes(ctx, padding, width, height, maxValue);
+    drawAxes(ctx, padding, width, height, maxValue, hours);
 
     if (!hours.some(rowHasAnyMetric)) {
       drawEmptyChartState(ctx, padding, width, height);
@@ -262,7 +303,7 @@
           hasPoint = false;
           return;
         }
-        var x = getPointX(index, padding, width);
+        var x = getPointXForRow(row, index, padding, width, hours.length);
         var y = padding.top + height - (value / maxValue) * height;
         if (!hasPoint) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
@@ -273,7 +314,7 @@
       hours.forEach(function (row, index) {
         var value = getMetricValue(row, item.key);
         if (value == null) return;
-        var x = getPointX(index, padding, width);
+        var x = getPointXForRow(row, index, padding, width, hours.length);
         var y = padding.top + height - (value / maxValue) * height;
         ctx.beginPath();
         ctx.fillStyle = '#fff';
@@ -311,6 +352,7 @@
   function setupChartControls() {
     var heightControl = document.getElementById('chartHeightControl');
     var periodControl = document.getElementById('trafficPeriodControl');
+    var refreshButton = document.getElementById('refreshTrafficButton');
     if (heightControl) {
       heightControl.querySelectorAll('[data-height]').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -329,16 +371,28 @@
           setText('trafficControlStatus', getTrafficPeriodStatusText(state.trafficPeriod));
           drawChart();
           renderTrafficSummary();
+          renderTrafficSource();
         });
+      });
+    }
+    if (refreshButton) {
+      refreshButton.addEventListener('click', async function () {
+        refreshButton.disabled = true;
+        await loadTrafficSummary();
+        renderLegend();
+        drawChart();
+        renderTrafficSummary();
+        setText('trafficControlStatus', getTrafficPeriodStatusText(state.trafficPeriod));
+        renderTrafficSource();
+        refreshButton.disabled = false;
       });
     }
   }
 
   function renderChartTooltip(event, canvas, tooltip) {
     if (!state.summary || !state.chartMeta) return;
-    var traffic = state.summary.traffic || {};
     var hours = getTrafficRowsForCurrentPeriod();
-    var visible = (traffic.series || []).filter(function (item) {
+    var visible = seriesConfig.filter(function (item) {
       return state.visibleSeries[item.key];
     });
     if (!hours.length || !visible.length) {
@@ -359,7 +413,7 @@
     var row = hours[index] || {};
 
     tooltip.innerHTML = [
-      '<strong>' + escapeHtml(String(index).padStart(2, '0') + ':00') + '</strong>',
+      '<strong>' + escapeHtml(getTooltipLabel(row, index)) + '</strong>',
       visible.map(function (item) {
         var value = getMetricValue(row, item.key);
         return '<span><i style="background:' + escapeHtml(item.color) + '"></i>' + escapeHtml(item.label) + '：' + escapeHtml(String(value == null ? 0 : value)) + '</span>';
@@ -376,7 +430,7 @@
       hours.forEach(function (row, index) {
         var value = getMetricValue(row, item.key);
         if (value == null) return;
-        var x = getPointX(index, meta.padding, meta.width);
+        var x = getPointXForRow(row, index, meta.padding, meta.width, hours.length);
         var y = meta.padding.top + meta.height - (value / meta.maxValue) * meta.height;
         var distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
         if (distance <= radius && (!best || distance < best.distance)) {
@@ -404,7 +458,7 @@
     tooltip.style.top = top + 'px';
   }
 
-  function drawAxes(ctx, padding, width, height, maxValue) {
+  function drawAxes(ctx, padding, width, height, maxValue, rows) {
     ctx.strokeStyle = '#d9dee8';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -416,9 +470,9 @@
     ctx.fillStyle = '#64748b';
     ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     ctx.textAlign = 'center';
-    [0, 6, 12, 18, 24].forEach(function (hour) {
-      var x = padding.left + (hour / 24) * width;
-      ctx.fillText(String(hour), x, padding.top + height + 28);
+    getAxisLabels(rows).forEach(function (item) {
+      var x = getPointXForRow(item.row, item.index, padding, width, rows.length);
+      ctx.fillText(item.label, x, padding.top + height + 28);
     });
 
     ctx.textAlign = 'right';
@@ -435,34 +489,39 @@
   }
 
   function renderTrafficSource() {
-    var traffic = state.summary.traffic || {};
     var badge = document.getElementById('trafficMockBadge');
-    if (badge) badge.hidden = canUseTrafficData();
+    if (badge) {
+      badge.hidden = false;
+      badge.textContent = getTrafficBadgeText();
+      badge.dataset.state = state.trafficStatus;
+    }
     var text = [
-      canUseTrafficData() ? '数据来源：' + (traffic.source || 'Nginx 日志摘要') : '数据来源：暂无真实 Nginx 日志摘要',
-      '真实服务器日志路径：' + (traffic.nginxLogPaths || []).join(' / ')
+      state.trafficStatus === 'ready' ? '数据来源：服务器真实 Nginx 日志摘要 JSON' : '数据来源：' + getTrafficPeriodStatusText(state.trafficPeriod),
+      '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-reports/*.json'
     ].filter(Boolean).join('。');
     setText('trafficSource', text);
+  }
+
+  function getTrafficBadgeText() {
+    if (state.trafficStatus === 'loading') return '正在读取服务器真实访问摘要...';
+    if (state.trafficStatus === 'error') return '读取失败，请检查 SSH 免密、服务器摘要文件或 cron。';
+    return '已读取服务器真实访问摘要，数据来自 Nginx 日志摘要 JSON。';
   }
 
   function renderTrafficSummary() {
     var root = document.getElementById('trafficSummary');
     if (!root || !state.summary) return;
     var metricKeys = Object.keys(seriesLabels);
-    var hasData = canUseTrafficData();
-    var todayRows = hasData
-      ? getTrafficRowsForPeriod('today').filter(function (row) { return row && row.pv != null; })
-      : [];
     var periods = [
-      { label: '当日', status: hasData ? '真实日志' : '待接入真实日志', rows: todayRows, available: hasData },
-      { label: '昨日', status: '待接入真实日志', rows: [], available: false },
-      { label: '近 7 日', status: '待接入真实日志', rows: [], available: false },
-      { label: '近 30 日', status: '待接入真实日志', rows: [], available: false }
+      buildSummaryPeriod('当日', 'today'),
+      buildSummaryPeriod('昨日', 'yesterday'),
+      buildSummaryPeriod('近 7 日', '7d'),
+      buildSummaryPeriod('近 30 日', '30d')
     ];
     root.innerHTML = [
       '<div class="traffic-summary__head">',
       '<h3>数据汇总</h3>',
-      '<p>当前未接入真实 Nginx 日志时，所有周期显示 “— / 待接入真实日志”。汇总表不受图例开关影响。</p>',
+      '<p>汇总表来自服务器真实 Nginx 摘要 JSON，不受图例开关影响。读取失败或数据缺失时显示 “—”。</p>',
       '</div>',
       '<div class="traffic-summary__table" role="table" aria-label="访问数据汇总">',
       '<div class="traffic-summary__row traffic-summary__row--head" role="row">',
@@ -475,22 +534,35 @@
           '<div class="traffic-summary__row" role="row">',
           '<strong>' + escapeHtml(period.label) + '</strong>',
           metricKeys.map(function (key) {
-            return '<span>' + escapeHtml(period.available ? String(sumMetric(period.rows, key)) : '—') + '</span>';
+            return '<span>' + escapeHtml(period.available ? String(getSummaryMetric(period.report, key)) : '—') + '</span>';
           }).join(''),
-          '<em data-state="' + (period.available ? 'ready' : 'pending') + '">' + escapeHtml(period.status) + '</em>',
+          '<em data-state="' + escapeHtml(period.state) + '">' + escapeHtml(period.status) + '</em>',
           '</div>'
         ].join('');
       }).join(''),
       '</div>',
-      '<p class="panel-hint">当前未接入真实服务器 Nginx 日志，访问趋势与汇总暂不可用于运营判断。真实日志接入后，需要区分全部访问、外部访客和内部测试。独立 IP 不等于真实人数。</p>'
+      '<p class="panel-hint">全部请求不等于用户数；独立 IP 不等于真实人数；有效访问是按已知站内页面保守过滤后的结果。扫描 / 异常请求不作为用户兴趣判断。</p>'
     ].join('');
   }
 
-  function sumMetric(rows, key) {
-    return rows.reduce(function (sum, row) {
-      var value = getMetricValue(row, key);
-      return sum + (value == null ? 0 : value);
-    }, 0);
+  function buildSummaryPeriod(label, period) {
+    if (state.trafficStatus === 'error') {
+      return { label: label, status: '读取失败', state: 'error', report: null, available: false };
+    }
+    if (state.trafficStatus === 'loading') {
+      return { label: label, status: '正在读取', state: 'pending', report: null, available: false };
+    }
+    var report = getReportForPeriod(period);
+    if (!report || !report.summary) {
+      return { label: label, status: '暂无数据', state: 'pending', report: null, available: false };
+    }
+    return { label: label, status: '真实数据', state: 'ready', report: report, available: true };
+  }
+
+  function getSummaryMetric(report, key) {
+    if (!report || !report.summary) return '—';
+    var value = report.summary[key];
+    return value == null || value === '' ? '—' : value;
   }
 
   function maxSeriesValue(hours, series) {
@@ -509,29 +581,62 @@
   }
 
   function getTrafficRowsForPeriod(period) {
-    var traffic = state.summary && state.summary.traffic ? state.summary.traffic : {};
-    var rows = traffic.hours || [];
-    if (!canUseTrafficData()) return [];
-    if (period !== 'today') return [];
-    var currentHour = new Date().getHours();
-    return rows.map(function (row, index) {
-      if (index <= currentHour) return row;
-      return createBlankTrafficRow(index);
+    if (!canUseTrafficData(period)) return [];
+    var report = getReportForPeriod(period);
+    if (!report) return [];
+    if (isDailyPeriod(period)) {
+      return normalizeDailyRows(report.daily || []);
+    }
+    return normalizeHourlyRows(report.hourly || []);
+  }
+
+  function normalizeHourlyRows(rows) {
+    return Array.from({ length: 24 }, function (_, hour) {
+      var found = rows.find(function (item) { return Number(item.hour) === hour; }) || {};
+      return normalizeTrafficRow({ ...found, hour: hour });
     });
   }
 
-  function createBlankTrafficRow(hour) {
-    var row = { hour: hour };
-    Object.keys(seriesLabels).forEach(function (key) {
-      row[key] = null;
+  function normalizeDailyRows(rows) {
+    return rows.map(function (row) {
+      return normalizeTrafficRow(row);
     });
-    return row;
+  }
+
+  function normalizeTrafficRow(row) {
+    return {
+      hour: row.hour,
+      date: row.date,
+      allRequests: toNullableNumber(row.allRequests),
+      validPageViews: toNullableNumber(row.validPageViews),
+      homeViews: toNullableNumber(row.homeViews),
+      diagnosisViews: toNullableNumber(row.diagnosisViews),
+      talentViews: toNullableNumber(row.talentViews),
+      projectViews: toNullableNumber(row.projectViews),
+      notFound: toNullableNumber(row.notFound),
+      serverErrors: toNullableNumber(row.serverErrors),
+      suspiciousRequests: toNullableNumber(row.suspiciousRequests)
+    };
+  }
+
+  function getReportForPeriod(period) {
+    var reports = state.trafficReports && state.trafficReports.reports ? state.trafficReports.reports : {};
+    if (period === 'yesterday') return reports.yesterday;
+    if (period === '7d') return reports.last7;
+    if (period === '30d') return reports.last30;
+    return reports.today;
   }
 
   function getMetricValue(row, key) {
     if (!row || row[key] == null || row[key] === '') return null;
     var value = Number(row[key]);
     return Number.isFinite(value) ? value : null;
+  }
+
+  function toNullableNumber(value) {
+    if (value == null || value === '') return null;
+    var number = Number(value);
+    return Number.isFinite(number) ? number : null;
   }
 
   function rowHasAnyMetric(row) {
@@ -541,14 +646,19 @@
   }
 
   function canUseTrafficData() {
-    var traffic = state.summary && state.summary.traffic ? state.summary.traffic : {};
-    if (!traffic.hours || !traffic.hours.length) return false;
-    return traffic.isMock ? ENABLE_TRAFFIC_MOCK : true;
+    var period = arguments.length > 0 && arguments[0] ? arguments[0] : state.trafficPeriod;
+    if (state.trafficStatus !== 'ready') return false;
+    var report = getReportForPeriod(period);
+    if (!report || !report.meta || report.meta.usesMockData) return false;
+    if (isDailyPeriod(period)) return Array.isArray(report.daily) && report.daily.length > 0;
+    return Array.isArray(report.hourly) && report.hourly.length > 0;
   }
 
   function getTrafficPeriodStatusText(period) {
-    if (canUseTrafficData() && period === 'today') return '';
-    return '尚未接入真实服务器 Nginx 日志，暂无可用于判断的' + getTrafficPeriodLabel(period) + '访问数据。';
+    if (state.trafficStatus === 'loading') return '正在读取服务器真实访问摘要...';
+    if (state.trafficStatus === 'error') return '读取失败，请检查 SSH 免密、服务器摘要文件或 cron。' + (state.trafficError ? ' ' + state.trafficError : '');
+    if (canUseTrafficData(period)) return '已读取服务器真实访问摘要，数据来自 Nginx 日志摘要 JSON。';
+    return '暂无真实' + getTrafficPeriodLabel(period) + '访问数据。';
   }
 
   function getTrafficPeriodLabel(period) {
@@ -563,15 +673,58 @@
     ctx.textAlign = 'center';
     ctx.fillStyle = '#172033';
     ctx.font = '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText('尚未接入真实服务器 Nginx 日志', padding.left + width / 2, padding.top + height / 2 - 8);
+    ctx.fillText(state.trafficStatus === 'error' ? '读取服务器真实访问摘要失败' : '暂无真实访问数据', padding.left + width / 2, padding.top + height / 2 - 8);
     ctx.fillStyle = '#65748b';
     ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText('暂无可用于运营判断的访问趋势数据', padding.left + width / 2, padding.top + height / 2 + 18);
+    ctx.fillText(state.trafficStatus === 'error' ? '请检查 SSH 免密、服务器摘要文件或 cron' : '无真实数据时不显示 mock 曲线或假数字', padding.left + width / 2, padding.top + height / 2 + 18);
     ctx.restore();
   }
 
-  function getPointX(index, padding, width) {
-    return padding.left + (index / 24) * width;
+  function getAxisLabels(rows) {
+    if (isDailyPeriod(state.trafficPeriod)) {
+      if (!rows.length) return [];
+      var indexes = [0, Math.floor((rows.length - 1) / 2), rows.length - 1]
+        .filter(function (value, index, all) { return all.indexOf(value) === index; });
+      return indexes.map(function (index) {
+        return {
+          index: index,
+          row: rows[index],
+          label: formatAxisDate(rows[index] && rows[index].date)
+        };
+      });
+    }
+    return [0, 6, 12, 18, 24].map(function (hour) {
+      return {
+        index: hour,
+        row: { hour: hour },
+        label: String(hour)
+      };
+    });
+  }
+
+  function getPointXForRow(row, index, padding, width, totalRows) {
+    if (isDailyPeriod(state.trafficPeriod)) {
+      var denominator = Math.max(1, totalRows - 1);
+      return padding.left + (index / denominator) * width;
+    }
+    return padding.left + (Number(row && row.hour != null ? row.hour : index) / 24) * width;
+  }
+
+  function formatAxisDate(value) {
+    if (!value || typeof value !== 'string') return '--';
+    return value.slice(5);
+  }
+
+  function getTooltipLabel(row, index) {
+    if (isDailyPeriod(state.trafficPeriod)) {
+      return row && row.date ? row.date : '第 ' + (index + 1) + ' 天';
+    }
+    var hour = row && row.hour != null ? row.hour : index;
+    return String(hour).padStart(2, '0') + ':00';
+  }
+
+  function isDailyPeriod(period) {
+    return period === '7d' || period === '30d';
   }
 
   function resizeChartCanvas(canvas) {
