@@ -198,12 +198,21 @@ function parseNginxDate(value) {
     date,
     dateKey: getShanghaiDateKey(date),
     localTime: getShanghaiDateTimeText(date),
-    hour: Number(new Intl.DateTimeFormat('en-US', {
+    hour: normalizeHour(new Intl.DateTimeFormat('en-GB', {
       timeZone: TIMEZONE,
       hour: '2-digit',
-      hour12: false
+      hour12: false,
+      hourCycle: 'h23'
     }).format(date))
   };
+}
+
+function normalizeHour(value) {
+  const hour = Number(value);
+  if (!Number.isFinite(hour)) {
+    return 0;
+  }
+  return hour === 24 ? 0 : Math.max(0, Math.min(23, hour));
 }
 
 function getShanghaiDateTimeText(date) {

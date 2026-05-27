@@ -850,11 +850,12 @@
     if (isDailyPeriod(period)) {
       return normalizeDailyRows(report.daily || []);
     }
-    return normalizeHourlyRows(report.hourly || []);
+    return normalizeHourlyRows(report.hourly || [], report, period);
   }
 
-  function normalizeHourlyRows(rows) {
-    return Array.from({ length: 24 }, function (_, hour) {
+  function normalizeHourlyRows(rows, report, period) {
+    var cutoffHour = getHourlyCutoffHour(report, period);
+    return Array.from({ length: cutoffHour + 1 }, function (_, hour) {
       var found = rows.find(function (item) { return Number(item.hour) === hour; }) || {};
       return normalizeTrafficRow({ ...found, hour: hour });
     });
@@ -889,11 +890,12 @@
     if (isDailyPeriod(period)) {
       return normalizeAnalyticsDailyRows(report.daily || []);
     }
-    return normalizeAnalyticsHourlyRows(report.hourly || []);
+    return normalizeAnalyticsHourlyRows(report.hourly || [], report, period);
   }
 
-  function normalizeAnalyticsHourlyRows(rows) {
-    return Array.from({ length: 24 }, function (_, hour) {
+  function normalizeAnalyticsHourlyRows(rows, report, period) {
+    var cutoffHour = getHourlyCutoffHour(report, period);
+    return Array.from({ length: cutoffHour + 1 }, function (_, hour) {
       var found = rows.find(function (item) { return Number(item.hour) === hour; }) || {};
       return normalizeAnalyticsRow({ ...found, hour: hour });
     });
@@ -1055,6 +1057,33 @@
     }
     var hour = row && row.hour != null ? row.hour : index;
     return String(hour).padStart(2, '0') + ':00';
+  }
+
+  function getHourlyCutoffHour(report, period) {
+    if (period && period !== 'today') return 23;
+    var generatedAt = report && report.generatedAt ? new Date(report.generatedAt) : null;
+    if (!generatedAt || Number.isNaN(generatedAt.getTime())) {
+      return new Date().getHours();
+    }
+
+    var reportDate = report && report.range && report.range.startDate;
+    var generatedDate = formatLocalDate(generatedAt);
+    if (reportDate && generatedDate < reportDate) return 0;
+    if (reportDate && generatedDate > reportDate) return 23;
+    return clampHour(generatedAt.getHours());
+  }
+
+  function clampHour(value) {
+    var hour = Number(value);
+    if (!Number.isFinite(hour)) return 0;
+    return Math.max(0, Math.min(23, Math.floor(hour)));
+  }
+
+  function formatLocalDate(date) {
+    var year = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var day = String(date.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
   }
 
   function isDailyPeriod(period) {
