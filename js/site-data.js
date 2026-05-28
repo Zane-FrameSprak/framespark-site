@@ -36,11 +36,11 @@
         platforms: [
             {
                 number: '01',
-                status: 'MVP 已开放',
+                status: '内测中',
                 title: '故事开发诊断系统',
                 freeLabel: '免费',
                 english: 'FRAMESPARK STORY DEVELOPMENT DIAGNOSIS',
-                description: '面向创作者的故事开发诊断工具',
+                description: '故事开发诊断工具',
                 href: 'diagnosis/'
             },
             {
@@ -49,7 +49,7 @@
                 title: '项目人才生态平台',
                 freeLabel: '',
                 english: 'FRAMESPARK PROJECT & TALENT',
-                description: '连接项目与人才的影视创作者生态',
+                description: '影视创作者人才档案网络',
                 href: 'talent/'
             }
         ],
