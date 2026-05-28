@@ -12,13 +12,12 @@
       <div>
         <p class="eyebrow">LOCAL ADMIN CONSOLE</p>
         <h1>FrameSpark 内部控制台</h1>
-        <p class="lead">当前只读本地工具，不部署公网。</p>
+        <p class="lead">本地只读。</p>
       </div>
       <section class="notice-row" aria-label="安全边界">
-        <span>只监听 127.0.0.1</span>
-        <span>不读取 .env</span>
-        <span>不执行任意命令</span>
-        <span>路径白名单</span>
+        <span>127.0.0.1</span>
+        <span>不读 .env</span>
+        <span>白名单</span>
       </section>
       <div class="refresh-box">
         <span>最后刷新时间</span>
@@ -66,24 +65,6 @@
           </section>
         </div>
 
-        <section class="panel analytics-panel">
-          <div class="section-head section-head--inline">
-            <div>
-              <p class="eyebrow">USER BEHAVIOR</p>
-              <h2>用户行为统计</h2>
-              <p class="mock-badge" id="analyticsStatusBadge">正在读取匿名访客统计...</p>
-            </div>
-            <p class="panel-hint">基于匿名 visitorId 的浏览器访客统计，不等于实名用户或自然人；比 Nginx 请求数更接近真实用户行为。</p>
-          </div>
-          <div class="analytics-actions">
-            <button type="button" class="refresh-traffic-button" id="refreshAnalyticsButton">刷新用户行为数据</button>
-            <p class="panel-hint" id="analyticsControlStatus" role="status">正在读取匿名访客统计...</p>
-          </div>
-          <div id="analyticsCards" class="analytics-cards" aria-label="匿名访客核心指标"></div>
-          <div id="analyticsSummary" class="analytics-summary" aria-label="匿名访客数据汇总"></div>
-          <p class="panel-hint" id="analyticsSource"></p>
-        </section>
-
         <section class="panel traffic-panel">
           <div class="section-head section-head--inline">
             <div>
@@ -91,7 +72,7 @@
               <h2>访问趋势图</h2>
               <p class="mock-badge" id="trafficMockBadge" hidden>正在读取服务器真实访问摘要...</p>
             </div>
-            <p class="panel-hint" id="trendModeDescription">基于匿名 visitorId 的浏览器行为统计，更适合判断访问与转化；不等于真实自然人。</p>
+            <p class="panel-hint" id="trendModeDescription">匿名访客行为。非自然人数。</p>
           </div>
           <div class="chart-controls" aria-label="图表控制">
             <div class="segmented-control segmented-control--primary" id="trendModeControl" aria-label="趋势数据源">
@@ -119,6 +100,27 @@
           </div>
           <div class="traffic-summary" id="trafficSummary" aria-label="当前趋势数据汇总"></div>
           <p class="panel-hint" id="trafficSource"></p>
+        </section>
+
+        <section class="panel analytics-panel">
+          <div class="section-head section-head--inline">
+            <div>
+              <p class="eyebrow">USER BEHAVIOR</p>
+              <h2>用户行为统计</h2>
+              <p class="mock-badge" id="analyticsStatusBadge">正在读取匿名访客统计...</p>
+            </div>
+            <p class="panel-hint">匿名 visitorId。非自然人数。</p>
+          </div>
+          <div class="analytics-actions">
+            <button type="button" class="refresh-traffic-button" id="refreshAnalyticsButton">刷新用户行为数据</button>
+            <p class="panel-hint" id="analyticsControlStatus" role="status">正在读取匿名访客统计...</p>
+          </div>
+          <div id="analyticsCards" class="analytics-cards" aria-label="匿名访客核心指标"></div>
+          <details class="summary-details">
+            <summary>数据汇总</summary>
+            <div id="analyticsSummary" class="analytics-summary" aria-label="匿名访客数据汇总"></div>
+          </details>
+          <p class="panel-hint" id="analyticsSource"></p>
         </section>
       </section>
     </div>

@@ -25,10 +25,10 @@ body {
 }
 
 .shell {
-  width: calc(100% - 20px);
+  width: calc(100% - 16px);
   max-width: none;
   margin: 0 auto;
-  padding: 10px 0 28px;
+  padding: 8px 0 24px;
 }
 
 .topbar {
@@ -36,13 +36,13 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .topbar > div:first-child {
-  width: 250px;
+  width: 220px;
   max-width: 100%;
-  padding: 8px 10px;
+  padding: 7px 9px;
   border: 1px solid rgba(37, 99, 235, 0.28);
   border-radius: 0;
   background: rgba(255, 255, 255, 0.72);
@@ -64,8 +64,8 @@ p {
 }
 
 h1 {
-  margin-bottom: 4px;
-  font-size: 21px;
+  margin-bottom: 3px;
+  font-size: 18px;
   letter-spacing: -0.02em;
 }
 
@@ -87,12 +87,12 @@ h3 {
 
 .lead {
   margin-bottom: 0;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .refresh-box {
-  min-width: 168px;
-  padding: 9px 10px;
+  min-width: 158px;
+  padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
@@ -110,13 +110,13 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
   flex: 1 1 auto;
   margin-bottom: 0;
 }
 
 .notice-row span {
-  padding: 5px 8px;
+  padding: 4px 8px;
   border: 1px solid #c8d3e2;
   border-radius: 999px;
   background: #fff;
@@ -125,8 +125,8 @@ h3 {
 }
 
 .panel {
-  margin-bottom: 14px;
-  padding: 16px;
+  margin-bottom: 12px;
+  padding: 13px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--panel);
@@ -135,14 +135,14 @@ h3 {
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   align-items: start;
-  gap: 14px;
+  gap: 12px;
 }
 
 .left-rail {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .main-workspace {
@@ -151,15 +151,15 @@ h3 {
 
 .top-insights {
   display: grid;
-  grid-template-columns: minmax(300px, 0.55fr) minmax(520px, 1.45fr);
-  gap: 14px;
-  margin-bottom: 14px;
+  grid-template-columns: minmax(300px, 0.42fr) minmax(620px, 1.58fr);
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .status-sidebar {
   position: sticky;
   top: 10px;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--panel);
@@ -175,15 +175,15 @@ h3 {
 }
 
 .status-sidebar .section-head {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .status-sidebar h2 {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .section-head {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .section-head--inline {
@@ -201,13 +201,13 @@ h3 {
 .deadline-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
 }
 
 .top-insights .stats-grid {
@@ -217,14 +217,14 @@ h3 {
 
 .stats-card,
 .reminders article {
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-soft);
 }
 
 .deadline-group {
-  padding: 7px;
+  padding: 6px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;
@@ -236,7 +236,7 @@ h3 {
 }
 
 .deadline-group__head {
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
 
 .deadline-group__head h3 {
@@ -253,7 +253,7 @@ h3 {
 
 .deadline-group__items {
   display: grid;
-  gap: 5px;
+  gap: 4px;
 }
 
 .stats-card span {
@@ -265,11 +265,11 @@ h3 {
 
 .deadline-card {
   display: grid;
-  grid-template-columns: minmax(66px, 0.8fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(58px, 0.72fr) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  padding: 5px 7px;
+  gap: 5px;
+  min-height: 26px;
+  padding: 4px 6px;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--panel-soft);
@@ -286,7 +286,7 @@ h3 {
 .deadline-card strong {
   min-width: 0;
   overflow-wrap: anywhere;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.32;
 }
 
@@ -321,7 +321,7 @@ h3 {
 
 .deadline-card > em {
   flex: 0 0 auto;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 999px;
   background: rgba(100, 116, 139, 0.1);
   color: var(--muted);
@@ -360,8 +360,8 @@ h3 {
 }
 
 button {
-  min-height: 34px;
-  padding: 0 10px;
+  min-height: 32px;
+  padding: 0 9px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #fff;
@@ -452,7 +452,7 @@ button .shortcut-note {
 }
 
 .analytics-panel {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .analytics-actions {
@@ -460,7 +460,7 @@ button .shortcut-note {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .analytics-actions .panel-hint {
@@ -469,14 +469,14 @@ button .shortcut-note {
 
 .analytics-cards {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 8px;
 }
 
 .analytics-card {
-  min-height: 76px;
-  padding: 9px;
+  min-height: 58px;
+  padding: 7px;
   border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: 12px;
   background: #f7faff;
@@ -497,16 +497,29 @@ button .shortcut-note {
 
 .analytics-card strong {
   display: block;
-  margin: 6px 0 4px;
-  font-size: 18px;
+  margin: 3px 0 2px;
+  font-size: 16px;
   line-height: 1.2;
 }
 
 .analytics-summary {
+  margin-top: 8px;
   padding: 11px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-soft);
+}
+
+.summary-details {
+  margin-top: 2px;
+}
+
+.summary-details > summary {
+  width: fit-content;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .analytics-summary__head {
@@ -691,7 +704,7 @@ button .shortcut-note {
 .chart-wrap {
   position: relative;
   overflow: hidden;
-  min-height: 360px;
+  min-height: 340px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;

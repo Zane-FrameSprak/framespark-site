@@ -163,9 +163,9 @@
   function renderDeadlines() {
     var grid = document.getElementById('deadlineGrid');
     var groups = [
-      { key: '到期类', label: '到期提醒', note: '续费、证书和服务器期限。' },
-      { key: '状态类', label: '当前状态', note: '当前阶段状态，不代表立即故障。' },
-      { key: '操作风险类', label: '操作风险类', note: '容易造成正式站不同步或误部署的事项。' }
+      { key: '到期类', label: '到期提醒', note: '续费与证书。' },
+      { key: '状态类', label: '当前状态', note: '阶段状态。' },
+      { key: '操作风险类', label: '操作风险类', note: '误部署风险。' }
     ];
     var deadlines = appendStaticOperationRisks(state.config.deadlines || []);
     grid.innerHTML = groups.map(function (group) {
@@ -212,7 +212,7 @@
         var suffix = target.missingLabel ? '<small>' + escapeHtml(target.missingLabel) + '</small>' : '';
         var label = target.id === 'evalConsole' ? '诊断系统测试区' : target.label;
         var description = target.id === 'evalConsole'
-          ? '<small class="shortcut-note">导入 TXT / DOCX / PDF 测试样本，保存测试批次，复查文本质量状态。</small>'
+          ? '<small class="shortcut-note">导入样本，运行测试。</small>'
           : '';
         return '<button type="button" data-target-id="' + escapeHtml(target.id) + '"' + disabled + '>' + escapeHtml(label) + description + suffix + '</button>';
       }).join('');
@@ -590,15 +590,15 @@
   }
 
   function getAnalyticsBadgeText() {
-    if (state.analyticsStatus === 'loading') return '正在读取匿名访客统计...';
-    if (state.analyticsStatus === 'error') return '读取失败，请检查 SSH 免密、summary 文件或 cron。';
-    return '已读取服务器匿名访客统计摘要。';
+    if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
+    if (state.analyticsStatus === 'error') return '读取失败。';
+    return '已读取匿名访客统计。';
   }
 
   function getAnalyticsStatusText() {
-    if (state.analyticsStatus === 'loading') return '正在读取服务器匿名访客统计摘要...';
-    if (state.analyticsStatus === 'error') return '读取失败：' + (state.analyticsError || '请检查 SSH 免密、summary 文件或 cron。');
-    return '已读取真实匿名访客统计。匿名独立访客不等于真实自然人。';
+    if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
+    if (state.analyticsStatus === 'error') return '读取失败：' + (state.analyticsError || '检查 SSH、summary 或 cron。');
+    return '已读取匿名访客统计。';
   }
 
   function renderAnalyticsCards() {
@@ -655,8 +655,8 @@
 
     root.innerHTML = [
       '<div class="analytics-summary__head">',
-      '<h3>匿名访客数据汇总</h3>',
-      '<p>基于浏览器匿名 visitorId 聚合，不输出 visitorId、sessionId 或 ipHash 明细。</p>',
+      '<h3>汇总</h3>',
+      '<p>匿名 visitorId 聚合。</p>',
       '</div>',
       '<div class="analytics-summary__table" role="table" aria-label="匿名访客统计汇总">',
       '<div class="analytics-summary__row analytics-summary__row--head" role="row">',
@@ -676,7 +676,7 @@
         ].join('');
       }).join(''),
       '</div>',
-      '<p class="panel-hint">匿名独立访客只是同一浏览器的随机标识去重；同一人多设备、清缓存或无痕模式会造成误差。</p>'
+      '<p class="panel-hint">匿名访客不等于自然人。</p>'
     ].join('');
   }
 
@@ -691,14 +691,13 @@
     if (!report || !report.summary) {
       return { label: label, status: '暂无数据', state: 'pending', summary: null, available: false };
     }
-    return { label: label, status: '真实匿名访客统计', state: 'ready', summary: report.summary, available: true };
+    return { label: label, status: '真实数据', state: 'ready', summary: report.summary, available: true };
   }
 
   function renderAnalyticsSource() {
     var text = [
-      state.analyticsStatus === 'ready' ? '数据来源：服务器匿名访客 summary JSON' : '数据来源：' + getAnalyticsStatusText(),
-      '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-analytics-summaries/*.json',
-      '用户行为统计与服务器 Nginx 请求统计分开展示'
+      state.analyticsStatus === 'ready' ? '来源：analytics summary JSON' : '来源：' + getAnalyticsStatusText(),
+      'SSH 只读读取'
     ].filter(Boolean).join('。');
     setText('analyticsSource', text);
   }
@@ -729,27 +728,27 @@
     }
     var text = state.trendMode === 'analytics'
       ? [
-        state.analyticsStatus === 'ready' ? '当前趋势数据来源：服务器匿名访客 summary JSON' : '当前趋势数据来源：' + getAnalyticsTrendStatusText(state.trafficPeriod),
-        '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-analytics-summaries/*.json'
+        state.analyticsStatus === 'ready' ? '来源：analytics summary JSON' : '来源：' + getAnalyticsTrendStatusText(state.trafficPeriod),
+        'SSH 只读读取'
       ].filter(Boolean).join('。')
       : [
-        state.trafficStatus === 'ready' ? '当前趋势数据来源：服务器真实 Nginx 日志摘要 JSON' : '当前趋势数据来源：' + getTrafficPeriodStatusText(state.trafficPeriod),
-        '读取方式：本机控制台通过 SSH 只读读取 /home/ubuntu/framespark-reports/*.json'
+        state.trafficStatus === 'ready' ? '来源：Nginx 摘要 JSON' : '来源：' + getTrafficPeriodStatusText(state.trafficPeriod),
+        'SSH 只读读取'
       ].filter(Boolean).join('。');
     setText('trafficSource', text);
   }
 
   function getTrafficBadgeText() {
-    if (state.trafficStatus === 'loading') return '正在读取服务器真实访问摘要...';
-    if (state.trafficStatus === 'error') return '读取失败，请检查 SSH 免密、服务器摘要文件或 cron。';
-    return '已读取服务器真实访问摘要，数据来自 Nginx 日志摘要 JSON。';
+    if (state.trafficStatus === 'loading') return '读取服务器摘要...';
+    if (state.trafficStatus === 'error') return '读取失败。';
+    return '已读取 Nginx 摘要。';
   }
 
   function getTrendBadgeText() {
     if (state.trendMode === 'analytics') {
-      if (state.analyticsStatus === 'loading') return '正在读取匿名访客行为摘要...';
-      if (state.analyticsStatus === 'error') return '读取匿名访客行为摘要失败。';
-      return '用户行为趋势来自匿名访客 summary JSON。';
+      if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
+      if (state.analyticsStatus === 'error') return '读取失败。';
+      return '用户行为趋势。';
     }
     return getTrafficBadgeText();
   }
@@ -767,7 +766,7 @@
     root.innerHTML = [
       '<div class="traffic-summary__head">',
       '<h3>数据汇总</h3>',
-      '<p>汇总表来自服务器真实 Nginx 摘要 JSON，不受图例开关影响。读取失败或数据缺失时显示 “—”。</p>',
+      '<p>Nginx 摘要，不受图例开关影响。</p>',
       '</div>',
       '<div class="traffic-summary__table" role="table" aria-label="访问数据汇总">',
       '<div class="traffic-summary__row traffic-summary__row--head" role="row">',
@@ -787,7 +786,7 @@
         ].join('');
       }).join(''),
       '</div>',
-      '<p class="panel-hint">全部请求包含静态资源、扫描与异常请求；有效页面访问是按已知站内页面保守过滤后的请求，不等于独立用户。真实用户 / 访客数量需后续通过匿名访客统计获得。</p>'
+      '<p class="panel-hint">全部请求含静态资源、扫描与异常。有效页面访问不等于用户数。</p>'
     ].join('');
   }
 
@@ -829,8 +828,8 @@
       : getTrafficPeriodStatusText(state.trafficPeriod);
     setText('trafficControlStatus', status);
     setText('trendModeDescription', isAnalytics
-      ? '基于匿名 visitorId 的浏览器行为统计，更适合判断访问与转化；不等于真实自然人。'
-      : '基于 Nginx 日志，主要用于观察请求量、错误、扫描和服务器异常；不用于判断真实用户数量。');
+      ? '匿名访客行为。非自然人数。'
+      : 'Nginx 请求、错误与扫描。');
   }
 
   function getCurrentSeriesConfig() {
@@ -973,10 +972,10 @@
   }
 
   function getTrafficPeriodStatusText(period) {
-    if (state.trafficStatus === 'loading') return '正在读取服务器真实访问摘要...';
-    if (state.trafficStatus === 'error') return '读取失败，请检查 SSH 免密、服务器摘要文件或 cron。' + (state.trafficError ? ' ' + state.trafficError : '');
-    if (canUseTrafficData(period)) return '已读取服务器真实访问摘要，数据来自 Nginx 日志摘要 JSON。';
-    return '暂无真实' + getTrafficPeriodLabel(period) + '访问数据。';
+    if (state.trafficStatus === 'loading') return '读取服务器摘要...';
+    if (state.trafficStatus === 'error') return '读取失败。' + (state.trafficError ? ' ' + state.trafficError : '');
+    if (canUseTrafficData(period)) return '已读取 Nginx 摘要。';
+    return '暂无' + getTrafficPeriodLabel(period) + '数据。';
   }
 
   function canUseAnalyticsTrendData(period) {
@@ -989,10 +988,10 @@
   }
 
   function getAnalyticsTrendStatusText(period) {
-    if (state.analyticsStatus === 'loading') return '正在读取匿名访客行为摘要...';
-    if (state.analyticsStatus === 'error') return '读取失败，请检查 SSH 免密、summary 文件或 cron。' + (state.analyticsError ? ' ' + state.analyticsError : '');
-    if (canUseAnalyticsTrendData(period)) return '已读取匿名访客行为摘要，趋势图来自 analytics summary JSON。';
-    return '暂无真实' + getTrafficPeriodLabel(period) + '用户行为数据。';
+    if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
+    if (state.analyticsStatus === 'error') return '读取失败。' + (state.analyticsError ? ' ' + state.analyticsError : '');
+    if (canUseAnalyticsTrendData(period)) return '已读取匿名访客统计。';
+    return '暂无' + getTrafficPeriodLabel(period) + '数据。';
   }
 
   function getTrafficPeriodLabel(period) {
@@ -1009,10 +1008,10 @@
     ctx.font = '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     var isAnalytics = state.trendMode === 'analytics';
     var isError = isAnalytics ? state.analyticsStatus === 'error' : state.trafficStatus === 'error';
-    ctx.fillText(isError ? (isAnalytics ? '读取匿名访客行为摘要失败' : '读取服务器真实访问摘要失败') : '暂无真实' + (isAnalytics ? '用户行为' : '访问') + '数据', padding.left + width / 2, padding.top + height / 2 - 8);
+    ctx.fillText(isError ? '读取失败' : '暂无数据', padding.left + width / 2, padding.top + height / 2 - 8);
     ctx.fillStyle = '#65748b';
     ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText(isError ? '请检查 SSH 免密、summary 文件或 cron' : '无真实数据时不显示 mock 曲线或假数字', padding.left + width / 2, padding.top + height / 2 + 18);
+    ctx.fillText(isError ? '检查 SSH、summary 或 cron' : '无真实数据不显示曲线', padding.left + width / 2, padding.top + height / 2 + 18);
     ctx.restore();
   }
 

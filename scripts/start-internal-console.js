@@ -12,6 +12,7 @@ const REPO_ROOT = path.resolve(path.dirname(__filename), '..');
 const serverPort = 8130;
 const serverHost = '127.0.0.1';
 const consolePath = '/internal/admin-console/';
+const evalConsolePath = '/internal/diagnosis-eval/';
 const consoleUrl = `http://${serverHost}:${serverPort}${consolePath}`;
 
 const localPaths = {
@@ -147,7 +148,8 @@ const analyticsSummaryConfig = {
   }
 };
 
-const staticRoot = path.join(REPO_ROOT, 'internal', 'admin-console');
+const staticRoot = path.join(REPO_ROOT, 'internal');
+const allowedStaticPrefixes = [consolePath, evalConsolePath];
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -526,12 +528,14 @@ function openWithMac(value) {
 
 async function serveStatic(pathname, res) {
   const normalized = pathname === '/' ? `${consolePath}index.html` : pathname;
-  if (!normalized.startsWith(consolePath)) {
+  const matchedPrefix = allowedStaticPrefixes.find(prefix => normalized.startsWith(prefix));
+  if (!matchedPrefix) {
     sendText(res, 404, 'Not found');
     return;
   }
 
-  const relative = normalized.slice(consolePath.length) || 'index.html';
+  let relative = normalized.slice('/internal/'.length) || 'admin-console/index.html';
+  if (relative.endsWith('/')) relative += 'index.html';
   const safeRelative = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, '');
   const filePath = path.resolve(staticRoot, safeRelative);
   if (!filePath.startsWith(staticRoot + path.sep) && filePath !== staticRoot) {
