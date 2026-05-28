@@ -3,8 +3,10 @@ import { buildBasicDiagnosisMessages } from '../prompts/basicDiagnosis.js';
 import { buildAdvancedShortDiagnosisMessages } from '../prompts/advancedShortDiagnosis.js';
 import { buildAdvancedFeatureDiagnosisMessages } from '../prompts/advancedFeatureDiagnosis.js';
 import { buildAdvancedOtherDiagnosisMessages } from '../prompts/advancedOtherDiagnosis.js';
+import { buildUnifiedDiagnosisV1Messages } from '../prompts/unifiedDiagnosisV1.js';
 import { ApiError } from '../utils/errors.js';
 import { extractJson, isCriticallyMissing, normalizeReport, validateFields } from './reportParser.js';
+import { normalizeReportV1 } from './reportV1Parser.js';
 
 const ADVANCED_BUILDERS = {
   short:   buildAdvancedShortDiagnosisMessages,
@@ -44,6 +46,13 @@ export async function generateAdvancedReport(payload) {
     throw new ApiError(400, 'UNSUPPORTED_MATERIAL_TYPE', `不支持进阶诊断的材料类型：${payload.materialType}`);
   }
   return generateReport(payload, buildMessages);
+}
+
+export async function generateUnifiedDiagnosisV1(payload) {
+  if (!hasAiProvider()) {
+    throw new ApiError(500, 'AI_NOT_CONFIGURED', 'AI 服务尚未配置。');
+  }
+  return generateReportV1(payload, buildUnifiedDiagnosisV1Messages);
 }
 
 export async function classifyMaterialForm(input) {
@@ -107,6 +116,25 @@ async function generateReport(payload, buildMessagesFn) {
   return normalizeReport(raw, materialType);
 }
 
+async function generateReportV1(payload, buildMessagesFn) {
+  const messages = buildMessagesFn(payload);
+
+  let raw;
+  try {
+    const content = await makeRequest(messages);
+    raw = extractJson(content);
+    return normalizeReportV1(raw, payload);
+  } catch (err) {
+    if (err instanceof ApiError && err.code === 'AI_REQUEST_TIMEOUT') {
+      throw err;
+    }
+    const retryMessages = buildV1RetryMessages(messages);
+    const content = await makeRequest(retryMessages);
+    raw = extractJson(content);
+    return normalizeReportV1(raw, payload);
+  }
+}
+
 async function makeRequest(messages, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(function () {
@@ -165,6 +193,24 @@ function buildRetryMessages(originalMessages) {
     {
       role: 'user',
       content: '请严格只输出合法 JSON 对象，不要包含任何说明文字、markdown 代码块或其他格式。必须包含以下六个字段：summary、core、strengths、problems、suggestions、nextStep。'
+    }
+  ];
+}
+
+function buildV1RetryMessages(originalMessages) {
+  return [
+    ...originalMessages,
+    {
+      role: 'assistant',
+      content: '抱歉，我需要重新输出。'
+    },
+    {
+      role: 'user',
+      content: [
+        '请严格只输出合法 JSON 对象，不要包含任何说明文字、markdown 代码块或其他格式。',
+        '必须包含 V1 字段：schema_version、material_type、primary_material_type、maturity_level、material_summary、story_core、strengths、main_problems、priority_revisions、next_step、conversion_advice、rejection_reason。',
+        'material_type 和 primary_material_type 必须使用允许枚举；maturity_level 必须使用 S/A/B/C/D0。'
+      ].join('\n')
     }
   ];
 }

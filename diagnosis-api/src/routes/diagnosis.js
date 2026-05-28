@@ -79,6 +79,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       diagnosisId: logEntry?.id || null,
       internalStage: result.internalStage,
       diagnosisDepth: getDiagnosisDepth(result),
+      diagnosisEngine: result.diagnosisEngine || null,
       materialType,
       userSelectedType,
       targetFormat: materialRouting.targetFormat,
@@ -88,6 +89,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       materialRouting,
       source: parsed.source,
       stats: guard.stats,
+      reportV1: result.reportV1 || null,
       basicReport: result.basicReport,
       finalReport: result.finalReport,
       report: result.finalReport  // backward compat for existing frontend
