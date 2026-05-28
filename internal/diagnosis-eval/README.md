@@ -21,19 +21,19 @@ http://127.0.0.1:8787
 
 如果没有设置 `ENABLE_DEV_TOOLS=true`，`/api/dev/sample-runs` 不会挂载，页面会提示 dev API 不可用。
 
-## 2. 启动静态前端（终端 2）
+## 2. 启动内部控制台（终端 2）
 
-在项目根目录启动静态服务：
+在项目根目录启动本地内部控制台：
 
 ```bash
 cd /Users/chenzuhuanhuan/framespark-site
-python3 -m http.server 8123
+node scripts/start-internal-console.js --open
 ```
 
-然后在浏览器打开：
+然后打开：
 
 ```text
-http://127.0.0.1:8123/internal/diagnosis-eval/
+http://127.0.0.1:8130/internal/diagnosis-eval/
 ```
 
 内部页面默认请求：
@@ -59,6 +59,8 @@ http://127.0.0.1:8787/api/dev/sample-runs
 1. 打开页面，系统自动准备今日快速测试批次
 2. 直接拖入 TXT / DOCX / PDF 文件，或在大文本框粘贴一段文本
 3. 点击“保存为测试样本”
+4. 勾选需要测试的样本
+5. 点击“运行诊断测试”
 
 目标方向预期、材料形态预期、预期诊断深度和测试重点都属于可选信息，默认会保存为：
 
@@ -72,6 +74,8 @@ http://127.0.0.1:8787/api/dev/sample-runs
 ```
 
 这些字段主要用于后续精细复盘，不是保存样本的必填项。
+
+保存样本不会调用 AI。只有点击“运行诊断测试”时，页面才会调用本地 diagnosis-api 的内部测试接口，并使用当前后端配置执行诊断流程。
 
 ## 4. 今日快速测试批次
 
@@ -211,6 +215,9 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
   samples-index.json
   samples.md
   results/
+    result-001-name.json
+  results-index.json
+  results.md
   review-notes.md
 ```
 
@@ -223,22 +230,32 @@ diagnosis-api/test-runs/sample-diagnosis/<runId>/
 - `textQualityWarnings`：文本质量提示，例如标点比例过高、有效字符比例过低、疑似重复页眉页脚
 - `textQualityMetrics`：文本质量指标，包括字数、中文比例、英文比例、标点比例、行数和短行比例
 - `samples.md`：便于人工阅读的样本索引
-- `results/`：第一版不写入，留给后续诊断结果归档
+- `results/`：诊断测试完整结果 JSON，不保存样本正文
+- `results-index.json`：诊断测试结果索引，保存 summary、core、nextStep、识别形态、诊断深度和结果路径
+- `results.md`：便于人工阅读的诊断测试结果摘要
 - `review-notes.md`：人工复盘记录
 
-## 9. 什么不会发生
+## 9. 诊断测试边界
+
+运行诊断测试会调用本地后端诊断流程。需要注意：
+
+- 只有点击“运行诊断测试”时才会触发。
+- 如果本地后端配置了 AI key，会产生真实 AI 调用。
+- 如果没有 AI key，会使用 mock 模式。
+- 结果保存到当前批次 `results/`，同时更新 `results-index.json` 和 `results.md`。
+- 该功能仍是内部工具，不进入官网导航，不作为公开入口。
+
+## 10. 什么不会发生
 
 当前 v1 工作台不会：
 
-- 不调用 AI
-- 不调用 `/api/diagnosis`
-- 不生成诊断报告
-- 不写入 `diagnosis-api/logs/`
+- 保存样本时不会调用 AI
+- 不自动运行诊断
 - 不读取真实用户诊断日志
 - 不加入官网导航
 - 不作为公开入口
 
-## 10. 什么不会被提交
+## 11. 什么不会被提交
 
 真实日期测试批次默认被 `.gitignore` 忽略：
 

@@ -12,8 +12,8 @@
       <a class="console-back" href="/internal/admin-console/">返回内部控制台</a>
       <p class="kicker">INTERNAL TOOL · LOCAL DEV ONLY</p>
       <h1>诊断系统测试区</h1>
-      <p>用于本地导入测试样本、整理诊断评测材料，不调用正式 <code>/api/diagnosis</code>。打开页面后可直接拖入文件或粘贴文本；系统会自动归入今日快速测试批次。需要分组复盘时，可手动创建测试批次。</p>
-      <p class="eval-warning">本页面不调用 AI，不调用 <code>/api/diagnosis</code>，不生成正式诊断报告。</p>
+      <p>导入样本，保存批次，运行本地诊断测试。</p>
+      <p class="eval-warning">保存样本不诊断；运行测试才调用本地接口。</p>
     </section>
 
     <section class="eval-main">
@@ -31,7 +31,7 @@
             <div>
               <p class="kicker">QUICK SAVE</p>
               <h3>快速保存测试样本</h3>
-              <p class="meta">拖入 TXT / DOCX / PDF，或直接粘贴文本。系统会自动保存到今日快速测试批次。</p>
+              <p class="meta">拖入文件或粘贴文本，保存到今日批次。</p>
             </div>
           </div>
 
@@ -42,12 +42,12 @@
 
           <label>
             粘贴文本
-            <textarea id="sampleText" name="text" rows="12" placeholder="可粘贴故事概念、梗概、大纲、人物小传、世界观设定、片段文本或完整剧本。"></textarea>
+            <textarea id="sampleText" name="text" rows="7" placeholder="粘贴故事材料。"></textarea>
           </label>
 
           <div id="dropZone" class="drop-zone">
-            <p>拖拽 TXT / DOCX / PDF 文件到这里，或点击选择文件。</p>
-            <p class="meta">PDF 仅支持可复制文字的文本型 PDF，不支持扫描版 PDF / 图片版 PDF。</p>
+            <p>拖入 TXT / DOCX / PDF，或点击选择。</p>
+            <p class="meta">PDF 仅支持文本型。</p>
             <input id="fileInput" type="file" multiple accept=".txt,.docx,.pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf">
           </div>
 
@@ -119,7 +119,38 @@
 
         <section class="stack">
           <h3>当前批次样本</h3>
+          <p class="meta">勾选样本后运行测试。结果保存到 <code>results/</code>。</p>
           <div id="sampleList" class="sample-list"></div>
+        </section>
+
+        <section class="diagnosis-test-card">
+          <div>
+            <p class="kicker">DIAGNOSIS TEST</p>
+            <h3>运行诊断测试</h3>
+            <p class="meta">调用本地诊断流程。</p>
+          </div>
+          <div class="form-row">
+            <label>
+              运行目标方向
+              <select id="diagnosisMaterialType">
+                <option value="auto">使用样本预期 / 不确定</option>
+                <option value="short">短片</option>
+                <option value="feature">长片</option>
+                <option value="other">其他 / 不确定</option>
+              </select>
+            </label>
+            <label>
+              已选样本
+              <input id="selectedSampleCount" value="0 个" readonly>
+            </label>
+          </div>
+          <button type="button" id="runDiagnosisButton" class="primary primary-large">运行诊断测试</button>
+          <div id="diagnosisState" class="save-state" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="stack">
+          <h3>当前批次诊断结果</h3>
+          <div id="resultList" class="result-list"></div>
         </section>
 
         <details class="run-manager">

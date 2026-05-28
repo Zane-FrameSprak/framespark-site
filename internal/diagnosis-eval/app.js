@@ -1,7 +1,7 @@
 (function () {
   var DEV_API_BASE = window.__FRAMESPARK_DEV_API_BASE__ || 'http://127.0.0.1:8787';
   var API_BASE = DEV_API_BASE.replace(/\/$/, '') + '/api/dev/sample-runs';
-  var DEV_API_ERROR = '无法连接内部接口。请确认后端已用 ENABLE_DEV_TOOLS=true 启动，并且 DEV_API_BASE 指向正确端口。';
+  var DEV_API_ERROR = '内部接口未连接。启动 diagnosis-api：ENABLE_DEV_TOOLS=true npm start';
   var currentRun = null;
   var pendingFiles = [];
 
@@ -19,6 +19,11 @@
   var saveSamplesButton = document.getElementById('saveSamplesButton');
   var saveState = document.getElementById('saveState');
   var sampleList = document.getElementById('sampleList');
+  var resultList = document.getElementById('resultList');
+  var diagnosisMaterialType = document.getElementById('diagnosisMaterialType');
+  var selectedSampleCount = document.getElementById('selectedSampleCount');
+  var runDiagnosisButton = document.getElementById('runDiagnosisButton');
+  var diagnosisState = document.getElementById('diagnosisState');
   var sameStoryInline = document.getElementById('sameStoryInline');
   var sameStoryInlineExtra = document.getElementById('sameStoryInlineExtra');
   var quickStoryName = document.getElementById('quickStoryName');
@@ -36,6 +41,7 @@
     });
     createRunForm.addEventListener('submit', createRun);
     quickSampleForm.addEventListener('submit', saveQuickSamples);
+    runDiagnosisButton.addEventListener('click', runSelectedDiagnosisTests);
     fileInput.addEventListener('change', function () {
       addFiles(Array.from(fileInput.files || []));
       fileInput.value = '';
@@ -68,7 +74,7 @@
 
   function renderRuns(runs) {
     if (!runs.length) {
-      runList.innerHTML = '<p class="meta">暂无测试批次。</p>';
+      runList.innerHTML = '<p class="meta">暂无批次。</p>';
       return;
     }
     runList.innerHTML = runs.map(function (run) {
@@ -108,7 +114,7 @@
       currentRun = data.run;
       renderCurrentRun();
       await loadRuns();
-      setSaveState('批次已创建，可以开始保存样本。', 'success');
+      setSaveState('批次已创建。', 'success');
     } catch (err) {
       setSaveState(err.message, 'error');
     }
@@ -187,6 +193,57 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ samples: [sample] })
     });
+  }
+
+  async function runSelectedDiagnosisTests() {
+    var selectedIds = getSelectedSampleIds();
+    if (!selectedIds.length) {
+      setDiagnosisState('请先选择样本。', 'error');
+      return;
+    }
+    if (!currentRun) {
+      setDiagnosisState('请先准备批次。', 'error');
+      return;
+    }
+
+    setDiagnosisState('测试运行中...', 'loading');
+    runDiagnosisButton.disabled = true;
+
+    try {
+      var data = await requestJson(API_BASE + '/' + encodeURIComponent(currentRun.runId) + '/diagnosis-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sampleIds: selectedIds,
+          materialType: diagnosisMaterialType.value || 'auto'
+        })
+      });
+      currentRun = data.run || currentRun;
+      renderCurrentRun();
+      await loadRuns();
+      var errors = Array.isArray(data.errors) ? data.errors : [];
+      var message = errors.length
+        ? '部分完成：已保存 ' + String(data.savedCount || 0) + ' 个结果，失败 ' + String(errors.length) + ' 个。' + errors.map(function (item) {
+          return '\n- ' + (item.sampleId || '未知样本') + '：' + (item.message || item.code || '失败');
+        }).join('')
+        : '诊断测试完成：已保存 ' + String(data.savedCount || 0) + ' 个结果。';
+      setDiagnosisState(message, errors.length ? 'warning' : 'success');
+    } catch (err) {
+      setDiagnosisState('诊断测试失败：' + (err.message || '请求失败。'), 'error');
+    } finally {
+      runDiagnosisButton.disabled = false;
+    }
+  }
+
+  function getSelectedSampleIds() {
+    return Array.from(document.querySelectorAll('.sample-select:checked')).map(function (input) {
+      return input.value;
+    }).filter(Boolean);
+  }
+
+  function updateSelectedSampleCount() {
+    if (!selectedSampleCount) return;
+    selectedSampleCount.value = String(getSelectedSampleIds().length) + ' 个';
   }
 
   async function uploadPendingFiles() {
@@ -282,25 +339,62 @@
     if (!currentRun) {
       currentRunTitle.textContent = '正在准备今日快速测试批次';
       sampleList.innerHTML = '';
+      resultList.innerHTML = '';
+      updateSelectedSampleCount();
       return;
     }
     currentRunTitle.textContent = formatRunTitle(currentRun);
     var samples = currentRun.samples || [];
     if (!samples.length) {
-      sampleList.innerHTML = '<p class="meta">当前批次还没有样本。</p>';
+      sampleList.innerHTML = '<p class="meta">暂无样本。</p>';
+    } else {
+      sampleList.innerHTML = samples.map(function (sample) {
+        return [
+          '<article class="sample-card">',
+          '<label class="sample-card__select">',
+          '<input type="checkbox" class="sample-select" value="' + escapeHtml(sample.sampleId) + '">',
+          '<span>选择</span>',
+          '</label>',
+          '<strong>' + escapeHtml(sample.name || sample.sampleId) + '</strong>',
+          '<p class="meta">',
+          escapeHtml(sample.sampleId || '-'),
+          ' · 文件类型=' + escapeHtml(labelFileType(sample.fileType)),
+          ' · 质量=' + escapeHtml(labelQuality(sample.textQualityStatus)),
+          ' · 字数=' + escapeHtml(String(sample.charCount || sample.extractedTextLength || 0)),
+          ' · 保存时间=' + escapeHtml(formatTime(sample.createdAt)),
+          '</p>',
+          '</article>'
+        ].join('');
+      }).join('');
+      sampleList.querySelectorAll('.sample-select').forEach(function (input) {
+        input.addEventListener('change', updateSelectedSampleCount);
+      });
+    }
+
+    renderResults(currentRun.results || []);
+    updateSelectedSampleCount();
+  }
+
+  function renderResults(results) {
+    if (!resultList) return;
+    if (!results.length) {
+      resultList.innerHTML = '<p class="meta">暂无测试结果。</p>';
       return;
     }
-    sampleList.innerHTML = samples.map(function (sample) {
+    resultList.innerHTML = results.map(function (result) {
       return [
-        '<article class="sample-card">',
-        '<strong>' + escapeHtml(sample.name || sample.sampleId) + '</strong>',
+        '<article class="result-card">',
+        '<strong>' + escapeHtml(result.sampleName || result.sampleId || result.resultId) + '</strong>',
         '<p class="meta">',
-        escapeHtml(sample.sampleId || '-'),
-        ' · 文件类型=' + escapeHtml(labelFileType(sample.fileType)),
-        ' · 质量=' + escapeHtml(labelQuality(sample.textQualityStatus)),
-        ' · 字数=' + escapeHtml(String(sample.charCount || sample.extractedTextLength || 0)),
-        ' · 保存时间=' + escapeHtml(formatTime(sample.createdAt)),
+        escapeHtml(result.sampleId || '-'),
+        ' · 目标=' + escapeHtml(labelTargetFormat(result.targetFormat)),
+        ' · 形态=' + escapeHtml(labelMaterialForm(result.materialForm)),
+        ' · 深度=' + escapeHtml(labelDepth(result.diagnosisDepth)),
+        ' · mode=' + escapeHtml(result.mode || '-'),
+        ' · 时间=' + escapeHtml(formatTime(result.createdAt)),
         '</p>',
+        '<p>' + escapeHtml(result.summary || '无 summary') + '</p>',
+        '<p class="meta">nextStep：' + escapeHtml(result.nextStep || '无') + '</p>',
         '</article>'
       ].join('');
     }).join('');
@@ -324,11 +418,11 @@
     var quickRun = findTodayQuickRun(runs);
     if (quickRun) {
       await selectRun(quickRun.runId);
-      setState('已进入今日快速测试批次。');
+      setState('今日快速测试。');
       return currentRun;
     }
 
-    setState('正在创建今日快速测试批次...');
+    setState('创建今日批次...');
     var data = await requestJson(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -341,7 +435,7 @@
     currentRun = data.run;
     renderCurrentRun();
     await loadRuns();
-    setState('今日快速测试批次已准备好。');
+    setState('今日批次已准备。');
     return currentRun;
   }
 
@@ -439,13 +533,21 @@
   }
 
   async function requestJson(url, options) {
-    var response = await fetch(url, options);
+    var response;
+    try {
+      response = await fetch(url, options);
+    } catch (err) {
+      if (url.indexOf(API_BASE) === 0) {
+        throw new Error(DEV_API_ERROR);
+      }
+      throw err;
+    }
     var data = await response.json().catch(function () { return null; });
     if (!response.ok || !data || !data.ok) {
       var error = data && data.error ? data.error : null;
       var message = error && error.message ? error.message : '请求失败。';
       if ((response.status === 403 || response.status === 404) && url.indexOf(API_BASE) === 0) {
-        message = DEV_API_ERROR + ' 当前地址没有可用的 /api/dev/sample-runs。';
+        message = DEV_API_ERROR + '。当前地址没有 /api/dev/sample-runs。';
       }
       throw new Error(message);
     }
@@ -462,6 +564,11 @@
   function setSaveState(message, type) {
     saveState.textContent = message || '';
     saveState.dataset.type = type || '';
+  }
+
+  function setDiagnosisState(message, type) {
+    diagnosisState.textContent = message || '';
+    diagnosisState.dataset.type = type || '';
   }
 
   function formatBytes(bytes) {
@@ -492,6 +599,35 @@
       warning: '需复查',
       failed: '不建议用于诊断'
     }[value] || '可用';
+  }
+
+  function labelTargetFormat(value) {
+    return {
+      short: '短片',
+      feature: '长片',
+      other: '其他 / 不确定',
+      unknown: '未确定'
+    }[value] || (value || '-');
+  }
+
+  function labelMaterialForm(value) {
+    return {
+      concept: '故事概念',
+      synopsis: '梗概',
+      outline: '大纲',
+      character_bio: '人物小传',
+      worldbuilding: '世界观设定',
+      fragment: '片段文本',
+      full_script: '完整剧本',
+      unknown: '未确定'
+    }[value] || (value || '-');
+  }
+
+  function labelDepth(value) {
+    return {
+      basic: '基础评估',
+      advanced: '深化评估'
+    }[value] || (value || '-');
   }
 
   function escapeHtml(value) {

@@ -4,10 +4,12 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
+  appendDiagnosisResults,
   appendSamples,
   createSampleRun,
   listSampleRuns,
-  readSampleRun
+  readSampleRun,
+  readSampleText
 } from '../src/services/sampleRunStore.js';
 import { parseDevUploadedFile } from '../src/services/devFileParser.js';
 import { evaluateTextQuality } from '../src/services/devFileParser.js';
@@ -65,6 +67,9 @@ try {
 
   const sampleText = await fs.readFile(path.join(sampleRoot, run.runId, saved.samples[0].textPath), 'utf8');
   assert.equal(sampleText, '一个完整但较短的故事概念，用于测试样本保存。');
+  const readBack = await readSampleText(run.runId, 'sample-001', { root: sampleRoot });
+  assert.equal(readBack.sample.sampleId, 'sample-001');
+  assert.equal(readBack.text, '一个完整但较短的故事概念，用于测试样本保存。');
 
   const indexRaw = await fs.readFile(path.join(sampleRoot, run.runId, 'samples-index.json'), 'utf8');
   assert.doesNotMatch(indexRaw, /一个完整但较短的故事概念/, 'samples-index should not store full text');
@@ -149,6 +154,35 @@ try {
 
   const runs = await listSampleRuns({ root: sampleRoot });
   assert.equal(runs.length, 2);
+
+  const diagnosisResults = await appendDiagnosisResults(run.runId, [{
+    resultId: 'result-001',
+    sampleId: 'sample-001',
+    sampleName: '短片概念',
+    mode: 'mock',
+    materialType: 'short',
+    targetFormat: 'short',
+    materialForm: 'concept',
+    effectiveDiagnosisType: 'short',
+    diagnosisDepth: 'basic',
+    diagnosisId: 'diag-001',
+    summary: '测试 summary',
+    core: '测试 core',
+    nextStep: '测试 nextStep',
+    report: {
+      summary: '测试 summary',
+      core: '测试 core',
+      nextStep: '测试 nextStep'
+    }
+  }], { root: sampleRoot, now: new Date('2026-05-21T02:00:00.000Z') });
+  assert.equal(diagnosisResults.savedCount, 1);
+  assert.equal(diagnosisResults.saved[0].resultPath, 'results/result-001-短片概念.json');
+  const resultIndexRaw = await fs.readFile(path.join(sampleRoot, run.runId, 'results-index.json'), 'utf8');
+  assert.match(resultIndexRaw, /测试 summary/);
+  assert.doesNotMatch(resultIndexRaw, /"report"/, 'results-index should not store full report object');
+  const fullResultRaw = await fs.readFile(path.join(sampleRoot, run.runId, diagnosisResults.saved[0].resultPath), 'utf8');
+  assert.match(fullResultRaw, /"report"/);
+  assert.match(await fs.readFile(path.join(sampleRoot, run.runId, 'results.md'), 'utf8'), /本轮诊断测试结果/);
 
   await assert.rejects(
     () => appendSamples(run.runId, Array.from({ length: 51 }, (_, index) => ({

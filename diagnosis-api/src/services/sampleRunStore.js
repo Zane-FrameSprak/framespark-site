@@ -56,6 +56,7 @@ export async function createSampleRun(input = {}, { root = SAMPLE_ROOT, now = ne
   await fs.mkdir(path.join(runDir, 'results'), { recursive: true });
   await writeJson(path.join(runDir, 'run-meta.json'), meta);
   await writeJson(path.join(runDir, 'samples-index.json'), []);
+  await writeJson(path.join(runDir, 'results-index.json'), []);
   await fs.writeFile(path.join(runDir, 'run-notes.md'), buildRunNotes(meta), 'utf8');
   await fs.writeFile(path.join(runDir, 'review-notes.md'), buildReviewNotes(), 'utf8');
 
@@ -67,6 +68,7 @@ export async function readSampleRun(runId, { root = SAMPLE_ROOT } = {}) {
   const runDir = getRunDir(root, safeRunId);
   const meta = await readJson(path.join(runDir, 'run-meta.json'), null);
   const samples = await readJson(path.join(runDir, 'samples-index.json'), []);
+  const results = await readJson(path.join(runDir, 'results-index.json'), []);
   if (!meta) {
     return {
       runId: safeRunId,
@@ -76,12 +78,14 @@ export async function readSampleRun(runId, { root = SAMPLE_ROOT } = {}) {
       storyRelation: '',
       notes: '',
       source: '',
-      samples: Array.isArray(samples) ? samples : []
+      samples: Array.isArray(samples) ? samples : [],
+      results: Array.isArray(results) ? results : []
     };
   }
   return {
     ...meta,
-    samples: Array.isArray(samples) ? samples : []
+    samples: Array.isArray(samples) ? samples : [],
+    results: Array.isArray(results) ? results : []
   };
 }
 
@@ -161,6 +165,114 @@ export async function appendSamples(runId, rawSamples = [], { root = SAMPLE_ROOT
     runId: safeRunId,
     savedCount: saved.length,
     samples: nextIndex
+  };
+}
+
+export async function readSampleText(runId, sampleId, { root = SAMPLE_ROOT } = {}) {
+  const safeRunId = assertSafeRunId(runId);
+  const safeSampleId = sanitizeText(sampleId, 120);
+  const runDir = getRunDir(root, safeRunId);
+  await ensureRunExists(runDir);
+  const samples = await readJson(path.join(runDir, 'samples-index.json'), []);
+  const sample = Array.isArray(samples) ? samples.find(item => item.sampleId === safeSampleId) : null;
+  if (!sample) {
+    throw new ApiError(404, 'SAMPLE_NOT_FOUND', '测试样本不存在。');
+  }
+  const relativePath = assertSafeRelativePath(sample.textPath || sample.samplePath);
+  const text = await fs.readFile(path.join(runDir, relativePath), 'utf8');
+  return { sample, text };
+}
+
+export async function appendDiagnosisResults(runId, rawResults = [], { root = SAMPLE_ROOT, now = new Date() } = {}) {
+  const safeRunId = assertSafeRunId(runId);
+  const runDir = getRunDir(root, safeRunId);
+  await ensureRunExists(runDir);
+  const resultDir = path.join(runDir, 'results');
+  await fs.mkdir(resultDir, { recursive: true });
+
+  const results = Array.isArray(rawResults) ? rawResults : [];
+  if (!results.length) {
+    return { runId: safeRunId, savedCount: 0, results: await readResultsIndex(runDir) };
+  }
+
+  const indexPath = path.join(runDir, 'results-index.json');
+  const currentIndex = await readResultsIndex(runDir);
+  const nextIndex = [...currentIndex];
+  const saved = [];
+
+  for (const raw of results) {
+    const result = normalizeDiagnosisResult(raw, now);
+    const filename = `${result.resultId}-${slugify(result.sampleName || result.sampleId || 'diagnosis-result') || 'diagnosis-result'}.json`;
+    const relativePath = `results/${filename}`;
+    const fullRecord = {
+      ...result,
+      resultPath: relativePath
+    };
+    await writeJson(path.join(runDir, relativePath), fullRecord);
+    const indexRecord = buildResultIndexRecord(fullRecord);
+    nextIndex.unshift(indexRecord);
+    saved.push(indexRecord);
+  }
+
+  await writeJson(indexPath, nextIndex);
+  await fs.writeFile(path.join(runDir, 'results.md'), buildResultsMarkdown(nextIndex), 'utf8');
+
+  return {
+    runId: safeRunId,
+    savedCount: saved.length,
+    saved,
+    results: nextIndex
+  };
+}
+
+async function readResultsIndex(runDir) {
+  const value = await readJson(path.join(runDir, 'results-index.json'), []);
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeDiagnosisResult(raw, now) {
+  const input = raw && typeof raw === 'object' ? raw : {};
+  const createdAt = input.createdAt || now.toISOString();
+  const resultId = slugify(input.resultId) || `result-${createdAt.replace(/[-:.TZ]/g, '').slice(0, 14)}-${Math.random().toString(36).slice(2, 7)}`;
+  return {
+    resultId,
+    sampleId: sanitizeText(input.sampleId, 120),
+    sampleName: sanitizeText(input.sampleName, 160),
+    createdAt,
+    mode: sanitizeText(input.mode, 32),
+    materialType: sanitizeText(input.materialType, 32),
+    targetFormat: sanitizeText(input.targetFormat, 32),
+    materialForm: sanitizeText(input.materialForm, 64),
+    effectiveDiagnosisType: sanitizeText(input.effectiveDiagnosisType, 32),
+    diagnosisDepth: sanitizeText(input.diagnosisDepth, 32),
+    diagnosisId: sanitizeText(input.diagnosisId, 120),
+    summary: sanitizeText(input.summary, 2000),
+    core: sanitizeText(input.core, 3000),
+    nextStep: sanitizeText(input.nextStep, 2000),
+    report: input.report && typeof input.report === 'object' ? input.report : null,
+    materialRouting: input.materialRouting && typeof input.materialRouting === 'object' ? input.materialRouting : null,
+    stats: input.stats && typeof input.stats === 'object' ? input.stats : null,
+    source: input.source && typeof input.source === 'object' ? input.source : null
+  };
+}
+
+function buildResultIndexRecord(result) {
+  return {
+    resultId: result.resultId,
+    sampleId: result.sampleId,
+    sampleName: result.sampleName,
+    createdAt: result.createdAt,
+    mode: result.mode,
+    materialType: result.materialType,
+    targetFormat: result.targetFormat,
+    materialForm: result.materialForm,
+    effectiveDiagnosisType: result.effectiveDiagnosisType,
+    diagnosisDepth: result.diagnosisDepth,
+    diagnosisId: result.diagnosisId,
+    summary: result.summary,
+    core: result.core,
+    nextStep: result.nextStep,
+    resultPath: result.resultPath
   };
 }
 
@@ -276,6 +388,21 @@ function getRunDir(root, runId) {
     throw new ApiError(400, 'INVALID_RUN_ID', '测试批次 ID 不合法。');
   }
   return fullPath;
+}
+
+function assertSafeRelativePath(value) {
+  const relativePath = String(value || '').trim();
+  if (!relativePath || path.isAbsolute(relativePath) || relativePath.includes('\0')) {
+    throw new ApiError(400, 'INVALID_SAMPLE_PATH', '样本文本路径不合法。');
+  }
+  const normalized = path.normalize(relativePath);
+  if (normalized.startsWith('..') || normalized.includes(`${path.sep}..${path.sep}`)) {
+    throw new ApiError(400, 'INVALID_SAMPLE_PATH', '样本文本路径不合法。');
+  }
+  if (!normalized.startsWith(`samples${path.sep}`) && !normalized.startsWith('samples/')) {
+    throw new ApiError(400, 'INVALID_SAMPLE_PATH', '样本文本路径不合法。');
+  }
+  return normalized;
 }
 
 function assertSafeRunId(runId) {
@@ -428,6 +555,38 @@ function buildSamplesMarkdown(samples) {
       `- 字数：${sample.charCount}`,
       `- 测试重点：${sample.testFocus || '无'}`,
       `- 文本路径：${sample.textPath}`,
+      ''
+    );
+  }
+  return lines.join('\n');
+}
+
+function buildResultsMarkdown(results) {
+  const lines = ['# 本轮诊断测试结果', ''];
+  for (const result of results) {
+    lines.push(
+      `## ${result.sampleId} · ${result.sampleName || result.resultId}`,
+      '',
+      `- resultId：${result.resultId}`,
+      `- createdAt：${result.createdAt}`,
+      `- mode：${result.mode}`,
+      `- targetFormat：${result.targetFormat}`,
+      `- materialForm：${result.materialForm}`,
+      `- diagnosisDepth：${result.diagnosisDepth}`,
+      `- diagnosisId：${result.diagnosisId || '无'}`,
+      `- 结果路径：${result.resultPath}`,
+      '',
+      '### summary',
+      '',
+      result.summary || '（无）',
+      '',
+      '### core',
+      '',
+      result.core || '（无）',
+      '',
+      '### nextStep',
+      '',
+      result.nextStep || '（无）',
       ''
     );
   }
