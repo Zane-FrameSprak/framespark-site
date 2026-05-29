@@ -19,6 +19,20 @@ This is a lightweight product system, not only a static website. It currently in
 - Logs, review queues, and sample-run storage.
 - AI handoff documents.
 
+## AI Handoff Files
+
+Current handoff set:
+
+- `docs/ai-handoff/PROJECT_CONTEXT.md`
+- `docs/ai-handoff/WORKING_RULES.md`
+- `docs/ai-handoff/PROJECT_STATE.md`
+- `docs/ai-handoff/NEXT_TASKS.md`
+- `docs/ai-handoff/CHANGELOG_AI.md`
+- `docs/ai-handoff/ARCHITECTURE.md`
+- `docs/ai-handoff/DECISIONS.md`
+
+When Codex or Claude Code takes over, read the normal startup files first. For high-risk work, also read `ARCHITECTURE.md`, `DECISIONS.md`, and recent `CHANGELOG_AI.md` entries.
+
 ## Public Site State
 
 The public site is static and already has a partial modular structure.
