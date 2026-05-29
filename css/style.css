@@ -150,6 +150,43 @@ svg {
         var(--bg);
 }
 
+.hero-animate-ready .intro,
+.hero-animate-ready .intro .eyebrow,
+.hero-animate-ready .intro h1,
+.hero-animate-ready .intro__lead {
+    transition:
+        min-height 0.68s ease,
+        padding 0.68s ease,
+        font-size 0.68s ease,
+        margin 0.68s ease,
+        opacity 0.42s ease,
+        transform 0.68s ease,
+        max-height 0.68s ease;
+}
+
+.hero-compact .intro {
+    min-height: clamp(250px, 34vh, 360px);
+    padding-top: clamp(36px, 4.8vw, 62px);
+    padding-bottom: clamp(36px, 4.8vw, 62px);
+}
+
+.hero-compact .intro .eyebrow {
+    margin-bottom: clamp(12px, 1.8vw, 18px);
+    opacity: 0.78;
+}
+
+.hero-compact .intro h1 {
+    font-size: clamp(44px, 5.8vw, 78px);
+}
+
+.hero-compact .intro__lead {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    transform: translateY(-8px);
+    overflow: hidden;
+}
+
 .sleeping-flame {
     position: fixed;
     right: clamp(18px, 3vw, 42px);
@@ -2047,6 +2084,16 @@ svg {
             var(--bg);
     }
 
+    .hero-compact .intro {
+        min-height: 220px;
+        padding-top: 34px;
+        padding-bottom: 38px;
+    }
+
+    .hero-compact .intro h1 {
+        font-size: clamp(40px, 10vw, 58px);
+    }
+
     .sleeping-flame {
         right: 18px;
         bottom: 18px;
@@ -2153,6 +2200,22 @@ svg {
     .intro__lead {
         margin-top: 16px;
         font-size: clamp(18px, 6vw, 24px);
+    }
+
+    .hero-compact .intro {
+        min-height: 188px;
+        padding-top: 26px;
+        padding-bottom: 30px;
+    }
+
+    .hero-compact .intro .eyebrow {
+        margin-bottom: 10px;
+        font-size: 9px;
+        letter-spacing: 0.2em;
+    }
+
+    .hero-compact .intro h1 {
+        font-size: clamp(34px, 11vw, 48px);
     }
 
     .project-marquee {

@@ -25,7 +25,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="stylesheet" href="css/style.css">
+    <script>
+        (function () {
+            var key = 'framespark_hero_compacted';
+            var shouldCompact = false;
+
+            try {
+                shouldCompact = window.sessionStorage && window.sessionStorage.getItem(key) === '1';
+            } catch (error) {
+                shouldCompact = false;
+            }
+
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                shouldCompact = true;
+            }
+
+            if (shouldCompact) {
+                document.documentElement.classList.add('hero-compact');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="css/style.css?v=20260528-hero-compact">
 </head>
 <body>
     <div class="grain" aria-hidden="true"></div>
@@ -165,7 +185,7 @@
     </footer>
 
     <script src="js/site-data.js?v=20260519-platform-copy"></script>
-    <script src="js/main.js?v=20260519-platform-copy"></script>
+    <script src="js/main.js?v=20260528-hero-compact"></script>
     <script>
         (function () {
             var diagnosisEntry = document.querySelector('a[href="diagnosis/"]');
