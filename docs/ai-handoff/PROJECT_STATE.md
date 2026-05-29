@@ -9,15 +9,45 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-The public site is a static site. The home page skeleton is in `index.html`, while home page data is already centralized in `js/site-data.js`. The home page rendering and project marquee logic are in `js/main.js`.
+This is a lightweight product system, not only a static website. It currently includes:
 
-Important current home page data areas:
+- Public static site.
+- Story diagnosis frontend.
+- `diagnosis-api` backend.
+- Internal control console.
+- Diagnosis evaluation workspace.
+- Logs, review queues, and sample-run storage.
+- AI handoff documents.
+
+## Public Site State
+
+The public site is static and already has a partial modular structure.
+
+Current structure:
+
+- `index.html`: public home page skeleton and mount points.
+- `css/style.css`: shared visual styling for home page, diagnosis page, project pages, talent page, legal pages, and responsive states.
+- `js/site-data.js`: content data for public home page.
+- `js/main.js`: renders home page cards and project marquee behavior.
+- `js/analytics.js`: anonymous analytics and click tracking.
+- `projects/`: static project detail pages.
+- `talent/`: static talent-platform development notice page.
+- `legal/`: placeholder legal pages.
+
+Home page data areas:
 
 - `FrameSparkData.projects`
 - `FrameSparkData.platforms`
 - `FrameSparkData.ecosystem`
 
-## Recent Diagnosis V1 Work
+Important modularity note:
+
+- Project cards already support a `cover` field, but covers are currently empty / placeholder-based.
+- Future project cards should be expanded through data fields such as `cover`, `badges`, `stage`, `status`, `logline`, `order`, `visible`, and `talentNeeds`.
+- High-change public site areas are project cards, talent platform copy/status, and system/platform cards.
+- Do not rewrite the public site into a frontend framework unless explicitly requested.
+
+## Diagnosis System State
 
 The following diagnosis V1 commits are on GitHub:
 
@@ -34,7 +64,7 @@ Current diagnosis behavior:
 - If V1 fails, the code falls back to the legacy pipeline and builds a fallback `reportV1`.
 - API responses still preserve legacy fields: `basicReport`, `finalReport`, and `report`.
 
-## Known Route-Level Issue
+## Route / Guard / Router Risk
 
 V1 pipeline smoke tests passed, but route-level behavior still needs product review.
 
@@ -45,27 +75,36 @@ Observed route-level issues:
 - Short screenplay fragments may be blocked by existing full-script length thresholds.
 - `synopsis` and `prose_fiction` classification boundaries were refined in prompt rules, but need another real AI smoke test.
 
+Current guard thresholds include:
+
+- `full_script`: 800 chars.
+- `synopsis`: 300 chars.
+- `outline`: 300 chars.
+- `fragment`: 300 chars.
+- `concept`: 80 chars.
+
 Do not change route admission behavior without a plan and user approval.
 
-## Public Site State
+## Internal Control / Evaluation State
 
-The public home page already uses a data-driven structure for:
+The internal tooling is more mature than a simple placeholder.
 
-- Project cards.
-- System/platform cards.
-- Ecosystem items.
+Known components:
 
-`index.html` contains section skeletons and mount points such as `platformList`, `projectReel`, and `ecosystemGrid`.
+- `scripts/start-internal-console.js` starts a local-only internal console at `127.0.0.1:8130`.
+- `internal/admin-console/` provides the internal dashboard page.
+- `internal/diagnosis-eval/` provides the diagnosis evaluation workspace.
+- `diagnosis-api/src/routes/devSampleRuns.js` exposes dev-only sample-run APIs when `ENABLE_DEV_TOOLS=true`.
+- `diagnosis-api/src/services/sampleRunStore.js` stores sample runs under `diagnosis-api/test-runs/sample-diagnosis/`.
 
-`js/site-data.js` currently holds project, platform, and ecosystem data.
+The future idea of Codex generating synthetic samples, running them through the diagnosis system, and viewing results in the internal workspace should extend the existing sample-run system.
 
-`js/main.js` renders cards and handles interactions such as the project marquee.
+## Deployment / Runtime State
 
-Future site work should prioritize modularity in high-change areas:
-
-- Development project cards.
-- Talent platform content.
-- System/platform cards.
+- `.github/workflows/pages.yml` deploys the static site to GitHub Pages on pushes to `main`.
+- Existing project notes indicate the formal public site may be served from Tencent Cloud / Nginx, not GitHub Pages.
+- Pushing to GitHub may not automatically update the production server unless a separate sync/deploy process exists.
+- `diagnosis-api` is not deployed by GitHub Pages and needs separate backend deployment planning.
 
 ## Important Local-State Note
 
@@ -84,3 +123,4 @@ When working locally, run `git status` first. Do not assume GitHub reflects loca
 - Do not modify route / guard / materialRouter admission behavior without planning.
 - Do not mix public site visual changes with diagnosis API changes.
 - Do not push unless explicitly asked.
+- Prefer updating `js/site-data.js` for public-site content changes before editing HTML structure.
