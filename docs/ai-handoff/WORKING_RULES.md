@@ -16,7 +16,7 @@ These rules apply to Codex, Claude Code, ChatGPT, and any other AI coding agent 
 
 ## Before Starting Work
 
-Read these files first when available:
+For normal tasks, read these files first when available:
 
 ```text
 docs/ai-handoff/PROJECT_CONTEXT.md
@@ -25,9 +25,11 @@ docs/ai-handoff/PROJECT_STATE.md
 docs/ai-handoff/NEXT_TASKS.md
 ```
 
-For high-risk tasks, also review recent entries in:
+For architecture, diagnosis route, deployment, internal tooling, or other high-risk tasks, also read:
 
 ```text
+docs/ai-handoff/ARCHITECTURE.md
+docs/ai-handoff/DECISIONS.md
 docs/ai-handoff/CHANGELOG_AI.md
 ```
 
@@ -103,12 +105,31 @@ High-risk areas:
 
 ## Handoff File Rules
 
+Core handoff files:
+
+```text
+docs/ai-handoff/PROJECT_CONTEXT.md
+docs/ai-handoff/WORKING_RULES.md
+docs/ai-handoff/PROJECT_STATE.md
+docs/ai-handoff/NEXT_TASKS.md
+docs/ai-handoff/CHANGELOG_AI.md
+docs/ai-handoff/ARCHITECTURE.md
+docs/ai-handoff/DECISIONS.md
+```
+
 At the end of meaningful tasks, update:
 
 ```text
 docs/ai-handoff/PROJECT_STATE.md
 docs/ai-handoff/NEXT_TASKS.md
 docs/ai-handoff/CHANGELOG_AI.md
+```
+
+Also update these when relevant:
+
+```text
+docs/ai-handoff/ARCHITECTURE.md   # architecture, data flow, module boundaries
+docs/ai-handoff/DECISIONS.md      # product or engineering decisions
 ```
 
 Only update `PROJECT_CONTEXT.md` when product direction changes.
