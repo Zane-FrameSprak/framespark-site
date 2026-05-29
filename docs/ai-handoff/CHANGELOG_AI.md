@@ -2,10 +2,27 @@
 
 ## Recent Summary
 
+- 2026-05-29: Committed homepage hero compact animation (`94160f1`) — not yet pushed.
 - 2026-05-29: Added AI handoff files under `docs/ai-handoff/`.
 - 2026-05-29: Diagnosis V1 schema, gated pipeline, and prompt boundary refinements are present on GitHub.
 - 2026-05-29: `ENABLE_DIAGNOSIS_V1` remains false by default.
 - 2026-05-29: Completed a broad repository read of core text files and updated handoff files with architecture/state findings.
+
+## 2026-05-29 (Claude Code — local session)
+
+### Committed
+
+- Homepage hero compact animation — commit `94160f1`.
+- Files changed: `index.html`, `css/style.css`, `js/main.js`.
+- Behavior: first visit expands hero for ~1s then compresses with CSS transitions; return visits within session start already compact via sessionStorage; `prefers-reduced-motion` skips animation.
+- No diagnosis-api changes. No `ENABLE_DIAGNOSIS_V1` change. Not yet pushed to GitHub.
+
+### Synced
+
+- Pulled `docs/ai-handoff/` 7 files from GitHub to local working tree via `git pull --ff-only`.
+- Updated `PROJECT_STATE.md`, `NEXT_TASKS.md`, `CHANGELOG_AI.md` to reflect hero commit and current local state.
+
+---
 
 ## 2026-05-29
 

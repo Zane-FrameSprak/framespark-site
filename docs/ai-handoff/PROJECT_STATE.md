@@ -1,7 +1,7 @@
 # Project State
 
 Last updated: 2026-05-29
-Updated by: ChatGPT via GitHub connector
+Updated by: Claude Code (local)
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
 
@@ -18,6 +18,18 @@ This is a lightweight product system, not only a static website. It currently in
 - Diagnosis evaluation workspace.
 - Logs, review queues, and sample-run storage.
 - AI handoff documents.
+
+## Local Working Tree State
+
+As of 2026-05-29:
+
+- Working tree is clean (no uncommitted files).
+- Local `main` is ahead of `origin/main` by 1 commit (`94160f1`) — not yet pushed.
+- `docs/ai-handoff/` 7 files are synced locally (pulled from GitHub this session).
+
+Recent local commits not yet on GitHub:
+
+- `94160f1` — `feat: add hero compact animation with session persistence`
 
 ## AI Handoff Files
 
@@ -120,15 +132,18 @@ The future idea of Codex generating synthetic samples, running them through the 
 - Pushing to GitHub may not automatically update the production server unless a separate sync/deploy process exists.
 - `diagnosis-api` is not deployed by GitHub Pages and needs separate backend deployment planning.
 
+## Public Site — Hero Animation State
+
+Homepage hero compact animation is complete and committed locally:
+
+- Commit: `94160f1` — `feat: add hero compact animation with session persistence`
+- Files: `index.html`, `css/style.css`, `js/main.js`
+- Behavior: on first visit, hero expands for ~1 second then compresses smoothly; subsequent visits within the same session start already compact (sessionStorage); `prefers-reduced-motion` users skip the animation entirely.
+- Not yet pushed to GitHub.
+
 ## Important Local-State Note
 
-In the user's local working tree, there may still be uncommitted home hero animation changes in:
-
-- `index.html`
-- `css/style.css`
-- `js/main.js`
-
-When working locally, run `git status` first. Do not assume GitHub reflects local uncommitted changes.
+Run `git status` before starting work. Do not assume GitHub reflects the current local state — local `main` may be ahead of `origin/main`.
 
 ## Current Safe Defaults
 

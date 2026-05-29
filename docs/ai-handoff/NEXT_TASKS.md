@@ -1,7 +1,7 @@
 # Next Tasks
 
 Last updated: 2026-05-29
-Updated by: ChatGPT via GitHub connector
+Updated by: Claude Code (local)
 
 ## Now
 
@@ -9,7 +9,11 @@ Updated by: ChatGPT via GitHub connector
 - Use existing V1 commits as the base for future testing.
 - Preserve legacy diagnosis response fields while V1 is being evaluated.
 - When switching AI coding agents, have them read the AI handoff files before making changes.
-- Keep local uncommitted home hero animation files isolated from diagnosis-system commits.
+- **Decide whether to push local `main` to GitHub** — currently ahead by 1 commit (`94160f1` hero animation). User decision required before pushing.
+
+## Recently Completed
+
+- `94160f1` — Homepage hero compact animation committed locally (2026-05-29). Files: `index.html`, `css/style.css`, `js/main.js`. Not yet pushed.
 
 ## Next — Diagnosis V1
 
