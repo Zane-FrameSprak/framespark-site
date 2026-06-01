@@ -99,8 +99,10 @@ const cases = [
     name: 'health check 不受限流影响',
     run() {
       const serverSource = fs.readFileSync(new URL('../src/server.js', import.meta.url), 'utf8');
-      const healthIndex = serverSource.indexOf("app.get('/health'");
-      const diagnosisLimitIndex = serverSource.indexOf("app.use(\n  '/api/diagnosis'");
+      const healthMatch = serverSource.match(/app\.get\(\s*['"]\/health['"]/);
+      const diagnosisLimitMatch = serverSource.match(/app\.use\(\s*['"]\/api\/diagnosis['"]/);
+      const healthIndex = healthMatch ? healthMatch.index : -1;
+      const diagnosisLimitIndex = diagnosisLimitMatch ? diagnosisLimitMatch.index : -1;
       assertTruthy(healthIndex >= 0, 'health route exists');
       assertTruthy(diagnosisLimitIndex >= 0, 'diagnosis route exists');
       assertTruthy(healthIndex < diagnosisLimitIndex, 'health route registered before diagnosis rate limit');
