@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">FrameSpark 帧火花</title>
+  <desc id="desc">帧火花官网分享图</desc>
+  <rect width="1200" height="630" fill="#0a0908"/>
+  <rect x="1" y="1" width="1198" height="628" fill="none" stroke="#2b2318" stroke-width="2"/>
+  <path d="M0 0h1200v630H0z" fill="url(#grain)" opacity=".18"/>
+  <defs>
+    <pattern id="grain" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M0 40h80M40 0v80" stroke="#c9a875" stroke-opacity=".14" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <g transform="translate(105 98)" fill="none" stroke="#c9a875">
+    <rect x="0" y="0" width="74" height="74" stroke-width="3"/>
+    <rect x="18" y="18" width="38" height="38" stroke-width="2"/>
+    <circle cx="37" cy="37" r="8" fill="#c9a875" stroke="none"/>
+  </g>
+  <text x="105" y="258" fill="#f4efe6" font-size="82" font-family="serif" letter-spacing="10">帧火花</text>
+  <text x="108" y="334" fill="#c9a875" font-size="34" font-family="Arial, sans-serif" letter-spacing="18">FRAMESPARK</text>
+  <text x="108" y="430" fill="#f4efe6" font-size="40" font-family="serif" letter-spacing="5">讲好每一个故事</text>
+  <text x="108" y="506" fill="#9d9488" font-size="24" font-family="Arial, sans-serif" letter-spacing="3">故事开发诊断系统 | 项目人才生态平台</text>
+  <circle cx="1000" cy="168" r="132" fill="none" stroke="#c9a875" stroke-opacity=".12" stroke-width="2"/>
+  <circle cx="1000" cy="168" r="86" fill="none" stroke="#c9a875" stroke-opacity=".18" stroke-width="1"/>
+</svg>
