@@ -18,15 +18,16 @@ Updated by: Codex
 - Project marquee wheel scroll disabled; left/right buttons and auto marquee remain.
 - `f78c44b` — Rate-limit test script made resilient to route indentation changes.
 - `9eae74f` — Added generic `low-token-agent-mode` skill under `.agents/` and `.claude/`.
+- Added FrameSpark project workflow skills locally:
+  - `framespark-handoff-check`
+  - `framespark-static-site-release-check`
+  - `framespark-deploy-check`
 - Tencent Cloud synced 2026-05-29 via rsync (hero animation version). Needs re-sync after redesign commit.
 
 ## Next — AI Workflow Skills
 
-- Add project-specific skills later:
-  - `framespark-handoff-check`
-  - `framespark-static-site-release-check`
-  - `framespark-deploy-check`
-- Do not add them in unrelated commits.
+- Review the new FrameSpark workflow skills after first use and keep them short.
+- Diagnosis regression Skill remains deferred.
 
 ## Next — Diagnosis V1
 

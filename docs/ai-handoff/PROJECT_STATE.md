@@ -26,6 +26,10 @@ As of 2026-06-01:
 - Homepage visual redesign has been committed locally: `669e3dd` — `refine: simplify homepage layout and brand presentation`.
 - Rate-limit test script hardening has been committed locally: `f78c44b` — `test: make rate limit route check resilient`.
 - Low-token agent skill has been committed locally: `9eae74f` — `docs: add low-token agent mode skill`.
+- Project workflow skills have been added locally in this session and should be committed together:
+  - `framespark-handoff-check`
+  - `framespark-static-site-release-check`
+  - `framespark-deploy-check`
 - Remaining uncommitted changes should be checked with `git status` before new work.
 
 ## AI Handoff Files
@@ -46,8 +50,14 @@ Additional AI workflow files:
 
 - `.agents/skills/low-token-agent-mode/SKILL.md`
 - `.claude/skills/low-token-agent-mode/SKILL.md`
+- `.agents/skills/framespark-handoff-check/SKILL.md`
+- `.claude/skills/framespark-handoff-check/SKILL.md`
+- `.agents/skills/framespark-static-site-release-check/SKILL.md`
+- `.claude/skills/framespark-static-site-release-check/SKILL.md`
+- `.agents/skills/framespark-deploy-check/SKILL.md`
+- `.claude/skills/framespark-deploy-check/SKILL.md`
 
-`low-token-agent-mode` is a generic concise-collaboration skill. Project-specific skills are still pending.
+`low-token-agent-mode` is the generic concise-collaboration skill. The three FrameSpark-specific skills cover handoff checks, static-site release checks, and Tencent Cloud deploy checks.
 
 ## Public Site State
 
@@ -149,7 +159,7 @@ The hero section has been completely removed. Homepage top-to-bottom structure i
 
 No hero animation. No sleeping flame. No principle section. `home-kicker` uses `max-width: 1440px; margin: 0 auto` inner wrapper aligned with nav.
 
-**Known Edit tool issue:** Claude Code's Edit tool can convert ASCII `"` to Unicode curly quotes in some contexts. This silently breaks HTML class attributes. Frontend visual tasks must check for smart quotes with `grep -R -n '[“”‘’]' ...` before commit.
+**Known Edit tool issue:** Claude Code's Edit tool can convert ASCII `"` to Unicode curly quote characters in some contexts. This silently breaks HTML class attributes. Frontend visual tasks must check for U+201C, U+201D, U+2018, and U+2019 before commit.
 
 ## Tencent Cloud Deployment State
 

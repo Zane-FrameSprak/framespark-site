@@ -23,12 +23,16 @@
 - `9eae74f` — `docs: add low-token agent mode skill`
   - Files: `.agents/skills/low-token-agent-mode/SKILL.md`, `.claude/skills/low-token-agent-mode/SKILL.md`.
   - Generic concise collaboration skill; project-specific skills are still pending.
+- FrameSpark project workflow skills added in this session:
+  - `framespark-handoff-check`
+  - `framespark-static-site-release-check`
+  - `framespark-deploy-check`
 
 ### Notes
 
 - Frontend visual tasks must check for smart quote pollution before commit.
 - Tencent Cloud formal site is not automatically updated by GitHub push. Short-term deployment remains local rsync to `/www/wwwroot/framespark.cn`.
-- Deferred project-specific skills: `framespark-handoff-check`, `framespark-static-site-release-check`, `framespark-deploy-check`.
+- Diagnosis regression Skill remains deferred.
 
 ---
 
