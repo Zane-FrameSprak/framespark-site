@@ -25,27 +25,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
     <link rel="manifest" href="site.webmanifest">
-    <script>
-        (function () {
-            var key = 'framespark_hero_compacted';
-            var shouldCompact = false;
-
-            try {
-                shouldCompact = window.sessionStorage && window.sessionStorage.getItem(key) === '1';
-            } catch (error) {
-                shouldCompact = false;
-            }
-
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                shouldCompact = true;
-            }
-
-            if (shouldCompact) {
-                document.documentElement.classList.add('hero-compact');
-            }
-        })();
-    </script>
-    <link rel="stylesheet" href="css/style.css?v=20260528-hero-compact">
+    <link rel="stylesheet" href="css/style.css?v=20260529-final">
 </head>
 <body>
     <div class="grain" aria-hidden="true"></div>
@@ -53,12 +33,8 @@
     <header class="nav" id="nav">
         <div class="nav__inner">
             <a class="brand" href="#top" aria-label="FrameSpark 帧火花">
-                <span class="brand__mark" aria-hidden="true">
-                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="2.5" y="2.5" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1"/>
-                        <rect x="8" y="8" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1"/>
-                        <circle cx="16" cy="16" r="3" fill="currentColor"/>
-                    </svg>
+                <span class="brand__mark">
+                    <img src="assets/brand/framespark-logo.svg" alt="帧火花 FrameSpark">
                 </span>
                 <span class="brand__text">
                     <span class="brand__cn">帧火花</span>
@@ -67,26 +43,21 @@
             </a>
 
             <nav class="nav__menu" aria-label="主导航">
-                <a href="#intro">简介</a>
                 <a href="#projects">项目</a>
                 <a href="#systems">系统</a>
                 <a href="#ecosystem">生态</a>
-                <a href="#principle">理念</a>
             </nav>
         </div>
     </header>
 
-    <main id="top">
-        <section class="intro" id="intro">
-            <div class="intro__inner">
-                <p class="eyebrow">A VERTICALLY INTEGRATED STUDIO</p>
-                <h1>帧火花</h1>
-                <p class="intro__lead">
-                    “讲好每一个故事”
-                </p>
-            </div>
-        </section>
+    <section class="home-kicker" aria-label="FrameSpark introduction">
+        <div class="home-kicker__inner">
+            <p class="home-kicker__en">WHERE STORIES COME ALIVE</p>
+            <p class="home-kicker__cn">讲好每一个故事</p>
+        </div>
+    </section>
 
+    <main id="top">
         <section class="platform-section" id="systems">
             <span id="platforms" aria-hidden="true"></span>
             <div class="section-head">
@@ -128,64 +99,28 @@
             <div class="ecosystem-grid" id="ecosystemGrid"></div>
         </section>
 
-        <section class="principle" id="principle">
-            <div class="principle__inner">
-                <p class="principle__quote">在营业主义上，加一点良心的主张</p>
-                <p class="principle__cite">致敬 郑正秋（1889-1935）</p>
-            </div>
-        </section>
     </main>
-
-    <div class="sleeping-flame" aria-hidden="true">
-        <svg viewBox="0 0 112 112" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <radialGradient id="emberBody" cx="42%" cy="34%" r="72%">
-                    <stop offset="0%" stop-color="#2a2621" stop-opacity="0.7"/>
-                    <stop offset="52%" stop-color="#12100f" stop-opacity="0.58"/>
-                    <stop offset="100%" stop-color="#050505" stop-opacity="0.42"/>
-                </radialGradient>
-                <linearGradient id="emberRim" x1="22%" y1="8%" x2="82%" y2="96%">
-                    <stop offset="0%" stop-color="#ffe9a0"/>
-                    <stop offset="45%" stop-color="#c9a875"/>
-                    <stop offset="100%" stop-color="#8a6f42"/>
-                </linearGradient>
-                <radialGradient id="emberCheek" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#c9a875" stop-opacity="0.26"/>
-                    <stop offset="100%" stop-color="#c9a875" stop-opacity="0"/>
-                </radialGradient>
-            </defs>
-            <ellipse class="sleeping-flame__shadow" cx="56" cy="96" rx="29" ry="6"/>
-            <path class="sleeping-flame__body" d="M56 92c-20.5 0-34.5-14.1-34.5-32.1 0-14.1 8.6-24.3 20.5-29.7 2.6-1.2 4.4-3.1 5.4-5.7 1.1-2.9 4.8-3.7 7-1.6 1.4 1.4 3.7 1.5 5.2.1 2.2-2 5.8-1 6.8 1.7.9 2.4 2.9 4.2 5.5 5.5 11.1 5.5 18.6 15.6 18.6 29.1C90.5 77.8 76.9 92 56 92Z" fill="url(#emberBody)" stroke="url(#emberRim)" stroke-width="1.55" stroke-linejoin="round"/>
-            <path class="sleeping-flame__fuzz" d="M38 34c4.2-2.4 7.5-5.6 9.4-9.5 1.1-2.9 4.8-3.7 7-1.6 1.4 1.4 3.7 1.5 5.2.1 2.2-2 5.8-1 6.8 1.7 1.4 3.8 4.5 6.8 9.2 9.3" fill="none" stroke="url(#emberRim)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
-            <ellipse class="sleeping-flame__highlight" cx="39" cy="41" rx="10" ry="13" fill="#f5f1e8" opacity="0.06" transform="rotate(28 39 41)"/>
-            <circle cx="40" cy="66" r="9" fill="url(#emberCheek)"/>
-            <circle cx="72" cy="66" r="9" fill="url(#emberCheek)"/>
-            <path d="M35 57c5 4 10 4 15 0M62 57c5 4 10 4 15 0" fill="none" stroke="#c9a875" stroke-width="2.2" stroke-linecap="round" opacity="0.74"/>
-            <path d="M49 73c4 2.4 10 2.4 14 0" fill="none" stroke="#c9a875" stroke-width="1.8" stroke-linecap="round" opacity="0.42"/>
-        </svg>
-        <span class="sleeping-flame__z sleeping-flame__z--one">Z</span>
-        <span class="sleeping-flame__z sleeping-flame__z--two">Z</span>
-    </div>
 
     <footer class="footer">
         <div class="footer__inner">
-            <div>
+            <div class="footer__brand-block">
                 <p class="footer__brand">帧火花</p>
                 <p class="footer__en">FRAMESPARK</p>
+                <p class="footer__motto">在营业主义上，加一点良心的主张<span class="footer__motto__cite"> — 郑正秋（1889-1935）</span></p>
             </div>
             <div class="footer__contact">
                 <a href="mailto:script@framespark.cn" data-analytics-target="home_contact">script@framespark.cn</a>
                 <a href="mailto:producer@framespark.cn" data-analytics-target="home_contact">producer@framespark.cn</a>
             </div>
-            <p class="footer__copy">
-                © 2025 FrameSpark 帧火花. All rights reserved.<br>
-                <span>沪ICP备2026021671号</span>
-            </p>
+        </div>
+        <div class="footer__bottom">
+            <span>© 2025 FrameSpark 帧火花. All rights reserved.</span>
+            <span>沪ICP备2026021671号</span>
         </div>
     </footer>
 
     <script src="js/site-data.js?v=20260519-platform-copy"></script>
-    <script src="js/main.js?v=20260528-hero-compact"></script>
+    <script src="js/main.js?v=20260529-hero-static"></script>
     <script>
         (function () {
             var diagnosisEntry = document.querySelector('a[href="diagnosis/"]');

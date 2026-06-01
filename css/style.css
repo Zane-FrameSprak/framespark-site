@@ -77,7 +77,7 @@ svg {
 
 .nav__inner {
     max-width: 1440px;
-    min-height: 76px;
+    min-height: 72px;
     margin: 0 auto;
     padding: 0 var(--pad-x);
     display: flex;
@@ -94,9 +94,16 @@ svg {
 }
 
 .brand__mark {
-    width: 32px;
-    height: 32px;
+    width: clamp(30px, 2.6vw, 36px);
+    height: clamp(30px, 2.6vw, 36px);
     color: var(--gold);
+}
+
+.brand__mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .brand__text {
@@ -140,51 +147,54 @@ svg {
 
 .intro {
     position: relative;
-    min-height: clamp(420px, 68vh, 680px);
     display: flex;
     align-items: center;
-    padding: clamp(64px, 8vw, 104px) var(--pad-x) clamp(64px, 8vw, 104px);
+    padding: clamp(16px, 1.8vw, 24px) var(--pad-x);
     border-bottom: 1px solid var(--line);
     background:
         linear-gradient(90deg, rgba(201, 168, 117, 0.07) 1px, transparent 1px) 0 0 / 25vw 100%,
         var(--bg);
 }
 
-.hero-animate-ready .intro,
-.hero-animate-ready .intro .eyebrow,
-.hero-animate-ready .intro h1,
-.hero-animate-ready .intro__lead {
-    transition:
-        min-height 0.68s ease,
-        padding 0.68s ease,
-        font-size 0.68s ease,
-        margin 0.68s ease,
-        opacity 0.42s ease,
-        transform 0.68s ease,
-        max-height 0.68s ease;
+.home-kicker {
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-soft);
 }
 
-.hero-compact .intro {
-    min-height: clamp(250px, 34vh, 360px);
-    padding-top: clamp(36px, 4.8vw, 62px);
-    padding-bottom: clamp(36px, 4.8vw, 62px);
+.home-kicker__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--pad-x);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
 }
 
-.hero-compact .intro .eyebrow {
-    margin-bottom: clamp(12px, 1.8vw, 18px);
-    opacity: 0.78;
+.home-kicker__en {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.32em;
 }
 
-.hero-compact .intro h1 {
-    font-size: clamp(44px, 5.8vw, 78px);
+.home-kicker__cn {
+    font-family: var(--font-serif-cn);
+    font-size: 13px;
+    color: var(--ink-muted);
+    letter-spacing: 0.12em;
 }
 
-.hero-compact .intro__lead {
-    max-height: 0;
-    margin-top: 0;
-    opacity: 0;
-    transform: translateY(-8px);
-    overflow: hidden;
+@media (max-width: 620px) {
+    .home-kicker__inner {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
 }
 
 .sleeping-flame {
@@ -280,28 +290,29 @@ svg {
 }
 
 .intro .eyebrow {
-    margin-bottom: clamp(20px, 3vw, 28px);
+    margin-bottom: clamp(6px, 1vw, 10px);
+    opacity: 0.68;
 }
 
 .intro h1 {
     font-family: var(--font-serif-cn);
-    font-size: clamp(58px, 8vw, 112px);
+    font-size: clamp(30px, 4vw, 54px);
     font-weight: 500;
     line-height: 1.05;
     letter-spacing: 0.12em;
 }
 
 .intro__lead {
-    margin-top: clamp(18px, 3vw, 28px);
+    margin-top: clamp(6px, 0.8vw, 10px);
     font-family: var(--font-serif-cn);
-    font-size: clamp(20px, 2.4vw, 32px);
-    color: var(--ink);
+    font-size: clamp(13px, 1.2vw, 17px);
+    color: var(--ink-muted);
     letter-spacing: 0.08em;
 }
 
 .section-head {
     max-width: 1440px;
-    margin: 0 auto 52px;
+    margin: 0 auto 20px;
     padding: 0 var(--pad-x);
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -531,7 +542,7 @@ svg {
 }
 
 .platform-section {
-    padding: var(--section-y) 0;
+    padding: clamp(28px, 3.2vw, 40px) 0 clamp(28px, 3.2vw, 44px);
     background: var(--bg);
 }
 
@@ -550,9 +561,9 @@ svg {
 }
 
 .platform-card {
-    min-height: 460px;
+    min-height: 280px;
     position: relative;
-    padding: clamp(48px, 6vw, 78px);
+    padding: clamp(24px, 3vw, 40px);
     border: 1px solid var(--line);
     background: var(--bg-soft);
     overflow: hidden;
@@ -591,7 +602,7 @@ svg {
 .platform-card__meta {
     display: flex;
     gap: 10px;
-    margin-bottom: 54px;
+    margin-bottom: 20px;
 }
 
 .platform-card__meta span {
@@ -656,7 +667,7 @@ svg {
 
 .platform-card__text {
     max-width: 620px;
-    margin-top: 34px;
+    margin-top: 16px;
     color: var(--ink-soft);
     font-size: 15px;
     line-height: 2;
@@ -714,11 +725,10 @@ svg {
 }
 
 .principle {
-    min-height: 62vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--section-y) var(--pad-x);
+    padding: clamp(32px, 4vw, 52px) var(--pad-x);
     border-top: 1px solid var(--line);
     background:
         linear-gradient(180deg, rgba(201, 168, 117, 0.06), transparent 42%),
@@ -732,14 +742,14 @@ svg {
 
 .principle__quote {
     font-family: var(--font-serif-cn);
-    font-size: clamp(32px, 5vw, 68px);
+    font-size: clamp(18px, 2.4vw, 32px);
     font-weight: 500;
     line-height: 1.45;
     letter-spacing: 0.08em;
 }
 
 .principle__cite {
-    margin-top: 28px;
+    margin-top: 14px;
     font-family: var(--font-sans);
     font-size: 13px;
     color: var(--ink-muted);
@@ -748,17 +758,37 @@ svg {
 
 .footer {
     border-top: 1px solid var(--line);
-    background: var(--bg);
+    background:
+        linear-gradient(180deg, rgba(201, 168, 117, 0.05), transparent 60%),
+        var(--bg-soft);
 }
 
 .footer__inner {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 42px var(--pad-x);
+    padding: 40px var(--pad-x) 28px;
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: end;
-    gap: 28px;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: clamp(24px, 3vw, 48px);
+}
+
+.footer__motto {
+    margin-top: 12px;
+    font-family: var(--font-serif-cn);
+    font-size: 12px;
+    color: var(--ink-muted);
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+    opacity: 0.58;
+}
+
+.footer__motto__cite {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--ink-muted);
+    letter-spacing: 0.16em;
+    opacity: 0.72;
 }
 
 .footer__brand {
@@ -780,17 +810,25 @@ svg {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    text-align: center;
+    text-align: right;
     font-family: var(--font-sans);
-    color: var(--gold);
+    color: rgba(201, 168, 117, 0.82);
     letter-spacing: 0.06em;
 }
 
-.footer__copy {
+.footer__bottom {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 16px var(--pad-x);
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
     color: var(--ink-muted);
     font-size: 12px;
-    line-height: 1.8;
-    text-align: right;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
 }
 
 .subpage-main {
@@ -840,25 +878,25 @@ svg {
 }
 
 .diagnosis-hero {
-    padding: clamp(56px, 7vw, 92px) var(--pad-x) clamp(38px, 5vw, 64px);
+    padding: clamp(20px, 2.4vw, 32px) var(--pad-x) clamp(16px, 2vw, 24px);
 }
 
 .diagnosis-hero .subpage-kicker {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .diagnosis-hero h1 {
-    font-size: clamp(36px, 4.8vw, 62px);
+    font-size: clamp(30px, 4vw, 54px);
 }
 
 .diagnosis-hero .subpage-lead {
     max-width: 680px;
-    margin-top: 18px;
+    margin-top: 10px;
     line-height: 1.8;
 }
 
 .diagnosis-section {
-    padding-top: clamp(34px, 4.8vw, 58px);
+    padding-top: clamp(20px, 2.4vw, 28px);
 }
 
 .placeholder-grid {
@@ -2057,6 +2095,10 @@ svg {
 }
 
 @media (max-width: 980px) {
+    .nav__tagline {
+        display: none;
+    }
+
     .nav__inner {
         min-height: auto;
         padding-top: 14px;
@@ -2077,21 +2119,11 @@ svg {
 
     .intro {
         min-height: auto;
-        padding-top: 54px;
-        padding-bottom: 60px;
+        padding-top: 24px;
+        padding-bottom: 28px;
         background:
             linear-gradient(90deg, rgba(201, 168, 117, 0.07) 1px, transparent 1px) 0 0 / 50vw 100%,
             var(--bg);
-    }
-
-    .hero-compact .intro {
-        min-height: 220px;
-        padding-top: 34px;
-        padding-bottom: 38px;
-    }
-
-    .hero-compact .intro h1 {
-        font-size: clamp(40px, 10vw, 58px);
     }
 
     .sleeping-flame {
@@ -2117,11 +2149,21 @@ svg {
     .footer__inner {
         grid-template-columns: 1fr;
         align-items: start;
+        gap: 18px;
     }
 
-    .footer__contact,
-    .footer__copy {
+    .footer__motto {
         text-align: left;
+    }
+
+    .footer__contact {
+        text-align: left;
+    }
+
+    .footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 
     .placeholder-grid {
@@ -2200,22 +2242,6 @@ svg {
     .intro__lead {
         margin-top: 16px;
         font-size: clamp(18px, 6vw, 24px);
-    }
-
-    .hero-compact .intro {
-        min-height: 188px;
-        padding-top: 26px;
-        padding-bottom: 30px;
-    }
-
-    .hero-compact .intro .eyebrow {
-        margin-bottom: 10px;
-        font-size: 9px;
-        letter-spacing: 0.2em;
-    }
-
-    .hero-compact .intro h1 {
-        font-size: clamp(34px, 11vw, 48px);
     }
 
     .project-marquee {

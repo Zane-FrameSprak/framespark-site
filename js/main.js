@@ -171,42 +171,6 @@
     renderPlatformCards();
     renderEcosystemItems();
 
-    (function setupHeroCompact() {
-        var intro = document.getElementById('intro');
-        if (!intro) return;
-
-        var key = 'framespark_hero_compacted';
-        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var alreadyCompacted = false;
-
-        try {
-            alreadyCompacted = window.sessionStorage && window.sessionStorage.getItem(key) === '1';
-        } catch (error) {
-            alreadyCompacted = false;
-        }
-
-        function compactHero() {
-            document.documentElement.classList.add('hero-compact');
-            try {
-                if (window.sessionStorage) {
-                    window.sessionStorage.setItem(key, '1');
-                }
-            } catch (error) {
-                // Non-critical; the visual state can still update without storage.
-            }
-        }
-
-        if (reduceMotion || alreadyCompacted) {
-            compactHero();
-            return;
-        }
-
-        window.requestAnimationFrame(function () {
-            document.documentElement.classList.add('hero-animate-ready');
-            window.setTimeout(compactHero, 1000);
-        });
-    })();
-
     var nav = document.getElementById('nav');
     var ticking = false;
 
@@ -286,7 +250,6 @@
     var autoSpeed = 28;
     var rampStartTime = null;
     var rampDuration = 500;
-    var wheelResumeTimer = null;
 
     function getProjectStep() {
         if (!reel) return 0;
@@ -335,27 +298,6 @@
             autoPausedUntil = 0;
             rampStartTime = window.performance.now();
         }, 2000);
-    }
-
-    function handleProjectWheel(event) {
-        if (!marquee || !reel) return;
-
-        var wheelDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-        if (!wheelDelta) return;
-
-        event.preventDefault();
-        autoPausedUntil = Infinity;
-        offset = normalizeOffset(offset - wheelDelta * 0.85);
-        renderProjects();
-
-        if (wheelResumeTimer) {
-            window.clearTimeout(wheelResumeTimer);
-        }
-
-        wheelResumeTimer = window.setTimeout(function () {
-            autoPausedUntil = 0;
-            rampStartTime = window.performance.now();
-        }, 900);
     }
 
     function moveProjects(direction) {
@@ -439,7 +381,6 @@
 
         renderProjects();
         window.requestAnimationFrame(tickProjects);
-        stage.addEventListener('wheel', handleProjectWheel, { passive: false });
     }
 
     window.addEventListener('resize', function () {
