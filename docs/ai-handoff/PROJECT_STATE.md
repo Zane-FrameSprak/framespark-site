@@ -23,14 +23,11 @@ This is a lightweight product system, not only a static website. It currently in
 
 As of 2026-06-01:
 
-- Homepage visual redesign has been committed locally: `669e3dd` — `refine: simplify homepage layout and brand presentation`.
-- Rate-limit test script hardening has been committed locally: `f78c44b` — `test: make rate limit route check resilient`.
-- Low-token agent skill has been committed locally: `9eae74f` — `docs: add low-token agent mode skill`.
-- Project workflow skills have been added locally in this session and should be committed together:
-  - `framespark-handoff-check`
-  - `framespark-static-site-release-check`
-  - `framespark-deploy-check`
-- Remaining uncommitted changes should be checked with `git status` before new work.
+- Homepage mobile responsive optimization is committed and deployed: `0eede24` — `refine: improve mobile homepage layout`.
+- Subpage footer alignment is committed and deployed: `35e4ae1` — `refine: align subpage footer layout`.
+- Low-token agent mode and FrameSpark workflow skills are available under `.agents/skills/` and `.claude/skills/`.
+- Current collaboration flow is being tightened: terminal scripts for read-only checks, editor/manual tools for single-file visual tweaks, Codex/Claude Code for scoped cross-file target tasks.
+- Always run `git status` before new work.
 
 ## AI Handoff Files
 
@@ -74,6 +71,12 @@ Current structure:
 - `projects/`: static project detail pages.
 - `talent/`: static talent-platform development notice page.
 - `legal/`: placeholder legal pages.
+
+Recent public-site state:
+
+- Mobile homepage density was tightened for `home-kicker`, platform cards, project cards, and ecosystem cards.
+- Subpage footers now match the home footer structure and use CSS cache-busting query strings.
+- Tencent Cloud production was updated by local sudo rsync, not by GitHub push.
 
 Home page data areas:
 

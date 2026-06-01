@@ -5,8 +5,9 @@ Updated by: Codex
 
 ## Now
 
-- **Review remaining handoff / AI workflow docs** — homepage and rate-limit cleanup are committed locally; check `git status` before new work.
-- **Sync Tencent Cloud after confirmed public-site commits** — server cannot git pull from GitHub. Short-term production deploy remains local rsync to `/www/wwwroot/framespark.cn`.
+- **Keep low-token workflow active** — routine low-risk tasks should proceed in goal mode within allowed scope and report briefly.
+- **Use terminal scripts for read-only checks** where possible to reduce Codex / Claude token use.
+- **Use the verified sudo rsync deploy template** for Tencent Cloud; GitHub push still does not update production.
 - Keep diagnosis V1 disabled by default.
 - Preserve legacy diagnosis response fields while V1 is being evaluated.
 - When switching AI coding agents, have them read the AI handoff files before making changes.
@@ -14,20 +15,24 @@ Updated by: Codex
 
 ## Recently Completed
 
+- `0eede24` — Mobile homepage layout density improved.
+- `35e4ae1` — Subpage footer structure aligned with the home footer.
+- Tencent Cloud production deployed latest mobile homepage and footer sync by sudo rsync.
 - `669e3dd` — Homepage fully redesigned: hero removed, nav simplified, home-kicker strip added, footer restructured, sleeping flame removed, principle section moved to footer.
 - Project marquee wheel scroll disabled; left/right buttons and auto marquee remain.
 - `f78c44b` — Rate-limit test script made resilient to route indentation changes.
 - `9eae74f` — Added generic `low-token-agent-mode` skill under `.agents/` and `.claude/`.
-- Added FrameSpark project workflow skills locally:
+- Added FrameSpark project workflow skills:
   - `framespark-handoff-check`
   - `framespark-static-site-release-check`
   - `framespark-deploy-check`
 - Added `CLAUDE.md` startup instructions for Claude Code.
-- Tencent Cloud synced 2026-05-29 via rsync (hero animation version). Needs re-sync after redesign commit.
+- Diagnosis regression Skill remains deferred.
 
 ## Next — AI Workflow Skills
 
 - Review the new FrameSpark workflow skills after first use and keep them short.
+- Keep reports short: result, files, checks, risk, commit, next step.
 - Diagnosis regression Skill remains deferred.
 
 ## Next — Diagnosis V1

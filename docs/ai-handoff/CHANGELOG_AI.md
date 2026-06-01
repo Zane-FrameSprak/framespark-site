@@ -2,6 +2,8 @@
 
 ## Recent Summary
 
+- 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.
+- 2026-06-01: Collaboration workflow is being tightened for low-token multi-agent work: short reports, terminal-first read-only checks, verified deploy template, and high-risk Plan first.
 - 2026-06-01: Homepage visual cleanup committed locally (`669e3dd`); rate-limit test hardening committed locally (`f78c44b`); low-token agent skill committed locally (`9eae74f`).
 - 2026-06-01: Tencent Cloud production site still does not update automatically from GitHub push; short-term deploy path remains local rsync to `/www/wwwroot/framespark.cn`.
 - 2026-05-30: Homepage visually redesigned — hero removed, nav simplified, footer restructured, home-kicker strip added.
@@ -14,6 +16,12 @@
 
 ### Committed
 
+- `0eede24` — `refine: improve mobile homepage layout`
+  - File: `css/style.css`.
+  - Mobile-only density pass for home-kicker, platform cards, project cards, and ecosystem cards.
+- `35e4ae1` — `refine: align subpage footer layout`
+  - Files: diagnosis, talent, project, and legal subpage HTML.
+  - Subpage footers now match the home footer structure and use CSS cache-busting query strings.
 - `669e3dd` — `refine: simplify homepage layout and brand presentation`
   - Files: `index.html`, `css/style.css`, `js/main.js`, `assets/brand/framespark-logo.svg`.
   - Hero removed, home-kicker retained, nav simplified, footer motto lowered in visual weight, project wheel-scroll disabled.
@@ -33,6 +41,7 @@
 
 - Frontend visual tasks must check for smart quote pollution before commit.
 - Tencent Cloud formal site is not automatically updated by GitHub push. Short-term deployment remains local rsync to `/www/wwwroot/framespark.cn`.
+- Current AI collaboration target: less manual relay, shorter reports, terminal scripts for read-only checks, and Codex/Claude Code for scoped multi-file tasks.
 - Diagnosis regression Skill remains deferred.
 
 ---

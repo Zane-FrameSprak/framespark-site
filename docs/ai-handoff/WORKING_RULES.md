@@ -1,7 +1,7 @@
 # Working Rules for AI Coding Agents
 
-Last updated: 2026-05-29
-Updated by: ChatGPT via GitHub connector
+Last updated: 2026-06-01
+Updated by: Codex
 
 These rules apply to Codex, Claude Code, ChatGPT, and any other AI coding agent working in this repository.
 
@@ -13,6 +13,18 @@ These rules apply to Codex, Claude Code, ChatGPT, and any other AI coding agent 
 - Do not introduce new frameworks, build systems, or large dependencies without approval.
 - Keep one commit focused on one clear goal.
 - Do not mix unrelated changes in the same commit.
+
+## Low-token Multi-agent Workflow
+
+- Use goal mode for routine small tasks; do not ask step-by-step unless a stop condition is hit.
+- Normal reports should be 10 lines or fewer.
+- Report only: result, changed files, checks, risks, commit, next step.
+- Paste key errors or logs only when something fails.
+- Visual tasks need user screenshot confirmation first, then execute concrete spacing, size, or structure changes.
+- Do not use abstract design words like premium, cinematic, or like X as execution criteria.
+- Deploy tasks must use the verified sudo rsync template; do not invent new deploy commands.
+- Read-only checks should prefer terminal scripts; users may run them directly to reduce Codex usage.
+- High-risk files require Plan first and no direct edits.
 
 ## Before Starting Work
 

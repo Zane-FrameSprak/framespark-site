@@ -22,6 +22,7 @@ For high-risk tasks, also read:
 - Make small, focused changes.
 - Do not mix unrelated files.
 - Plan first for high-risk work.
+- For routine low-risk tasks, use goal mode and continue automatically within allowed scope; stop only on explicit stop conditions.
 
 ## Available Skills
 

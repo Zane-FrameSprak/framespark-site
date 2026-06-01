@@ -23,6 +23,10 @@ The goal is not to reduce quality. The goal is to reduce wasted turns, long expl
 8. Prefer small, reversible changes.
 9. When information is missing, ask one concise clarification instead of guessing.
 10. When the task is clear, proceed directly.
+11. Normal reports must be 10 lines or fewer.
+12. Do not paste full diffs or full command output unless something failed.
+13. Low-risk tasks may run checks and commit automatically only when the user asked for commit or gave commit rules.
+14. Stop on high-risk scope, deploy risk, delete risk, sensitive file risk, or unexpected files.
 
 ## Before Editing Code
 
@@ -66,6 +70,8 @@ After completing the task, respond only with:
 
 ### Next
 - Give only one recommended next step.
+
+Keep the whole report short. Use one-line bullets.
 
 ## If No Code Was Changed
 

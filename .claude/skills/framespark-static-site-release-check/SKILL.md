@@ -27,6 +27,8 @@ node --check js/site-data.js
 node --check js/analytics.js
 git diff --check
 grep -R -n 'localhost\\|127\\.0\\.0\\.1\\|8787\\|8130' index.html css js diagnosis talent projects legal 404.html 2>/dev/null || true
+grep -R -n 'index.html#principle\\|#principle' diagnosis talent projects legal 2>/dev/null || true
+grep -R -n 'footer__brand-block\\|footer__motto\\|footer__bottom' diagnosis talent projects legal 2>/dev/null || true
 ```
 
 Also check manually:
@@ -34,6 +36,9 @@ Also check manually:
 - Core links and project links.
 - Public diagnosis copy matches actual API availability.
 - Analytics failures are silent.
+- Browser loads current CSS and JS, not cached assets.
+- Subpage footers match the home footer structure.
+- Stale anchors from removed sections are gone.
 - `robots.txt`, `sitemap.xml`, canonical, title, description, favicon, `og:image`.
 - Mobile and WeChat rendering.
 - Browser Console and Network errors.
@@ -48,9 +53,9 @@ Also check manually:
 
 ## Output
 
-- Pass/fail summary.
-- Blocking risks.
-- Commands run.
+- 10 lines or fewer.
+- P0 / P1 / P2 risks only.
+- Commands run only as a short list.
 - One next action.
 
 ## Update Handoff
