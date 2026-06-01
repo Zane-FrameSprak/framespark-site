@@ -1,19 +1,32 @@
 # Next Tasks
 
-Last updated: 2026-05-29
-Updated by: Claude Code (local)
+Last updated: 2026-06-01
+Updated by: Codex
 
 ## Now
 
+- **Review remaining handoff / AI workflow docs** — homepage and rate-limit cleanup are committed locally; check `git status` before new work.
+- **Sync Tencent Cloud after confirmed public-site commits** — server cannot git pull from GitHub. Short-term production deploy remains local rsync to `/www/wwwroot/framespark.cn`.
 - Keep diagnosis V1 disabled by default.
-- Use existing V1 commits as the base for future testing.
 - Preserve legacy diagnosis response fields while V1 is being evaluated.
 - When switching AI coding agents, have them read the AI handoff files before making changes.
-- **Decide whether to push local `main` to GitHub** — currently ahead by 1 commit (`94160f1` hero animation). User decision required before pushing.
+- Frontend visual tasks must check for smart quote pollution before commit.
 
 ## Recently Completed
 
-- `94160f1` — Homepage hero compact animation committed locally (2026-05-29). Files: `index.html`, `css/style.css`, `js/main.js`. Not yet pushed.
+- `669e3dd` — Homepage fully redesigned: hero removed, nav simplified, home-kicker strip added, footer restructured, sleeping flame removed, principle section moved to footer.
+- Project marquee wheel scroll disabled; left/right buttons and auto marquee remain.
+- `f78c44b` — Rate-limit test script made resilient to route indentation changes.
+- `9eae74f` — Added generic `low-token-agent-mode` skill under `.agents/` and `.claude/`.
+- Tencent Cloud synced 2026-05-29 via rsync (hero animation version). Needs re-sync after redesign commit.
+
+## Next — AI Workflow Skills
+
+- Add project-specific skills later:
+  - `framespark-handoff-check`
+  - `framespark-static-site-release-check`
+  - `framespark-deploy-check`
+- Do not add them in unrelated commits.
 
 ## Next — Diagnosis V1
 

@@ -1,7 +1,7 @@
 # Project State
 
-Last updated: 2026-05-29
-Updated by: Claude Code (local)
+Last updated: 2026-06-01
+Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
 
@@ -21,15 +21,12 @@ This is a lightweight product system, not only a static website. It currently in
 
 ## Local Working Tree State
 
-As of 2026-05-29:
+As of 2026-06-01:
 
-- Working tree is clean (no uncommitted files).
-- Local `main` is ahead of `origin/main` by 1 commit (`94160f1`) — not yet pushed.
-- `docs/ai-handoff/` 7 files are synced locally (pulled from GitHub this session).
-
-Recent local commits not yet on GitHub:
-
-- `94160f1` — `feat: add hero compact animation with session persistence`
+- Homepage visual redesign has been committed locally: `669e3dd` — `refine: simplify homepage layout and brand presentation`.
+- Rate-limit test script hardening has been committed locally: `f78c44b` — `test: make rate limit route check resilient`.
+- Low-token agent skill has been committed locally: `9eae74f` — `docs: add low-token agent mode skill`.
+- Remaining uncommitted changes should be checked with `git status` before new work.
 
 ## AI Handoff Files
 
@@ -44,6 +41,13 @@ Current handoff set:
 - `docs/ai-handoff/DECISIONS.md`
 
 When Codex or Claude Code takes over, read the normal startup files first. For high-risk work, also read `ARCHITECTURE.md`, `DECISIONS.md`, and recent `CHANGELOG_AI.md` entries.
+
+Additional AI workflow files:
+
+- `.agents/skills/low-token-agent-mode/SKILL.md`
+- `.claude/skills/low-token-agent-mode/SKILL.md`
+
+`low-token-agent-mode` is a generic concise-collaboration skill. Project-specific skills are still pending.
 
 ## Public Site State
 
@@ -132,14 +136,29 @@ The future idea of Codex generating synthetic samples, running them through the 
 - Pushing to GitHub may not automatically update the production server unless a separate sync/deploy process exists.
 - `diagnosis-api` is not deployed by GitHub Pages and needs separate backend deployment planning.
 
-## Public Site — Hero Animation State
+## Public Site — Current Homepage Structure (2026-05-30)
 
-Homepage hero compact animation is complete and committed locally:
+The hero section has been completely removed. Homepage top-to-bottom structure is now:
 
-- Commit: `94160f1` — `feat: add hero compact animation with session persistence`
-- Files: `index.html`, `css/style.css`, `js/main.js`
-- Behavior: on first visit, hero expands for ~1 second then compresses smoothly; subsequent visits within the same session start already compact (sessionStorage); `prefers-reduced-motion` users skip the animation entirely.
-- Not yet pushed to GitHub.
+1. **Nav** (72px): diamond logo + 帧火花/FRAMESPARK left; 项目/系统/生态 right. No tagline in nav.
+2. **home-kicker strip** (52px): `WHERE STORIES COME ALIVE` left (gold), `讲好每一个故事` right (muted serif). Between nav and main content.
+3. **系统与平台** — first-screen primary content. Two platform cards immediately visible at 1440×900.
+4. **开发中项目** — project marquee. Wheel-scroll disabled; left/right buttons still work.
+5. **创作生态** — ecosystem grid.
+6. **Footer** — brand and low-weight motto on the left, contact emails on the right, copyright/ICP in a separate bottom strip.
+
+No hero animation. No sleeping flame. No principle section. `home-kicker` uses `max-width: 1440px; margin: 0 auto` inner wrapper aligned with nav.
+
+**Known Edit tool issue:** Claude Code's Edit tool can convert ASCII `"` to Unicode curly quotes in some contexts. This silently breaks HTML class attributes. Frontend visual tasks must check for smart quotes with `grep -R -n '[“”‘’]' ...` before commit.
+
+## Tencent Cloud Deployment State
+
+- Server: `124.221.146.10` (Ubuntu 22.04, 宝塔 Nginx).
+- Webroot: `/www/wwwroot/framespark.cn/` — **not a git repo**, files owned by `www:www`.
+- Git repo on server: `/tmp/framespark-site` — is a git repo but cannot pull from GitHub (HTTPS port 443 blocked on server side). Currently 26+ commits behind `origin/main`.
+- Deploy method: `sudo rsync` from local machine directly to webroot. Run before any rsync: `ssh ubuntu@124.221.146.10 "cd /tmp/framespark-site && git stash push -u"` to preserve server-local analytics scripts.
+- SSH login: `ubuntu@124.221.146.10` using `~/.ssh/id_rsa`.
+- Current short-term deployment method is local `rsync` to `/www/wwwroot/framespark.cn/`. GitHub push does not automatically update the Tencent Cloud production site.
 
 ## Important Local-State Note
 

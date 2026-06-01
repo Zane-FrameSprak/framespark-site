@@ -2,11 +2,88 @@
 
 ## Recent Summary
 
-- 2026-05-29: Committed homepage hero compact animation (`94160f1`) — not yet pushed.
-- 2026-05-29: Added AI handoff files under `docs/ai-handoff/`.
-- 2026-05-29: Diagnosis V1 schema, gated pipeline, and prompt boundary refinements are present on GitHub.
-- 2026-05-29: `ENABLE_DIAGNOSIS_V1` remains false by default.
-- 2026-05-29: Completed a broad repository read of core text files and updated handoff files with architecture/state findings.
+- 2026-06-01: Homepage visual cleanup committed locally (`669e3dd`); rate-limit test hardening committed locally (`f78c44b`); low-token agent skill committed locally (`9eae74f`).
+- 2026-06-01: Tencent Cloud production site still does not update automatically from GitHub push; short-term deploy path remains local rsync to `/www/wwwroot/framespark.cn`.
+- 2026-05-30: Homepage visually redesigned — hero removed, nav simplified, footer restructured, home-kicker strip added.
+- 2026-05-30: Diagnosis backend fully checked — 18/18 non-AI tests pass, rate-limit test bug fixed.
+- 2026-05-30: materialRouter gap identified: no hybrid/mixed material type support.
+- 2026-05-29: Tencent Cloud synced via rsync (server cannot reach GitHub HTTPS).
+- 2026-05-29: Committed homepage hero compact animation (`94160f1`) and handoff update (`731040a`) — both pushed.
+
+## 2026-06-01 (Codex — local session)
+
+### Committed
+
+- `669e3dd` — `refine: simplify homepage layout and brand presentation`
+  - Files: `index.html`, `css/style.css`, `js/main.js`, `assets/brand/framespark-logo.svg`.
+  - Hero removed, home-kicker retained, nav simplified, footer motto lowered in visual weight, project wheel-scroll disabled.
+- `f78c44b` — `test: make rate limit route check resilient`
+  - File: `diagnosis-api/scripts/test-rate-limit.js`.
+  - Test script now uses regex matching for route order instead of indentation-sensitive string matching.
+- `9eae74f` — `docs: add low-token agent mode skill`
+  - Files: `.agents/skills/low-token-agent-mode/SKILL.md`, `.claude/skills/low-token-agent-mode/SKILL.md`.
+  - Generic concise collaboration skill; project-specific skills are still pending.
+
+### Notes
+
+- Frontend visual tasks must check for smart quote pollution before commit.
+- Tencent Cloud formal site is not automatically updated by GitHub push. Short-term deployment remains local rsync to `/www/wwwroot/framespark.cn`.
+- Deferred project-specific skills: `framespark-handoff-check`, `framespark-static-site-release-check`, `framespark-deploy-check`.
+
+---
+
+## 2026-05-30 (Claude Code — local session)
+
+### Homepage Visual Redesign
+
+Initial local redesign notes. This work was later cleaned up and committed in `669e3dd`.
+
+**Removed:**
+- Hero section (`<section class="intro">`) entirely deleted — no more hero banner of any kind.
+- Hero compact animation (`setupHeroCompact`) removed from `js/main.js`.
+- Sleeping flame decoration removed from `index.html`.
+- Principle section (`<section class="principle">`) removed — motto moved to footer.
+- `nav__tagline` ("讲好每一个故事") removed from nav.
+- Project marquee wheel-scroll handler removed (`handleProjectWheel`, `stage.addEventListener('wheel', ...)`).
+
+**Added:**
+- `home-kicker` strip between nav and main: left `WHERE STORIES COME ALIVE`, right `讲好每一个故事`. Height 52px desktop, 44px mobile.
+- Diamond logo added as `assets/brand/framespark-logo.svg` and later referenced from the nav brand mark.
+
+**Changed:**
+- Nav simplified to `项目 / 系统 / 生态` only (removed 简介 and 理念 links).
+- Nav height: 76px → 72px.
+- Platform section top padding reduced to `clamp(28px, 3.2vw, 40px)`.
+- Platform card `min-height`: 460px → 280px; padding reduced.
+- Platform card `platform-card__meta` margin-bottom: 54px → 20px (main reason cards were too tall).
+- Section-head margin-bottom: 52px → 20px.
+- Footer later settled as a low-weight brand/footer layout: brand and motto on the left, contact emails on the right, copyright + ICP in the bottom strip.
+- Diagnosis page hero (`diagnosis-hero`) top/bottom padding significantly reduced.
+
+**Bug found and fixed:**
+- Claude Code's Edit tool was silently converting ASCII double quotes `"` to Unicode curly quotes `"` `"` in HTML attributes. This caused CSS class selectors to not match elements — `display:flex` and `justify-content:space-between` appeared to have no effect because the class was never applied. Affected `index.html` lines 60–68. Fixed by Python script replacing all curly quotes with ASCII.
+
+### Tencent Cloud Deployment
+
+- Server at `124.221.146.10` cannot connect to GitHub via HTTPS (port 443 blocked/timing out).
+- Static files synced via `rsync` from local machine directly to `/www/wwwroot/framespark.cn/` using `sudo rsync --chown=www:www`.
+- `/tmp/framespark-site` git repo on server is now 26 commits behind `origin/main`.
+- Server-local analytics scripts were stashed before rsync and restored after.
+
+### Diagnosis Backend Check (non-AI)
+
+- `npm run check`: 40 files — all pass.
+- 18 non-AI test scripts: 17/17 passed without fix; `test:rate-limit` had 1 failure.
+- `test-rate-limit.js` failure was a test-script bug: used `indexOf("app.use(\n  '/api/diagnosis'")` (2-space indent) but `server.js` uses 4-space indent inside `createApp()`. Fixed by replacing with regex `/app\.use\(\s*['"]\/api\/diagnosis['"]/`. Production logic is correct.
+- Backend live check (no AI): health ✅, empty-body rejection ✅, short-text guard ✅, feedback validation ✅, 404 ✅.
+
+### materialRouter Gap Identified
+
+- System picks exactly one material type per submission (winner-takes-all scoring).
+- No "hybrid/mixed" material type exists — a document combining concept + character bio + worldbuilding will be classified as whichever type scores highest, and the others ignored.
+- This is a known gap, not a bug. Decision to add a hybrid type is deferred to user.
+
+---
 
 ## 2026-05-29 (Claude Code — local session)
 
