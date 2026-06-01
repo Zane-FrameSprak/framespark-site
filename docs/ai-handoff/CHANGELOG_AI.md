@@ -74,6 +74,15 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Footer later settled as a low-weight brand/footer layout: brand and motto on the left, contact emails on the right, copyright + ICP in the bottom strip.
 - Diagnosis page hero (`diagnosis-hero`) top/bottom padding significantly reduced.
 
+## 2026-06-01
+
+### Public Site Metadata Polish
+
+- Added apple touch icon support and manifest PNG icon reference.
+- Completed 404 page head metadata: canonical, noindex, OG/Twitter image, favicon, and apple touch icon.
+- Rechecked robots, sitemap, canonical, OG/Twitter image, and public local-address residue.
+- `site.webmanifest` MIME remains a server configuration todo; static files were not used to change Nginx.
+
 **Bug found and fixed:**
 - Claude Code's Edit tool was silently converting ASCII double quotes `"` to Unicode curly quotes `"` `"` in HTML attributes. This caused CSS class selectors to not match elements — `display:flex` and `justify-content:space-between` appeared to have no effect because the class was never applied. Affected `index.html` lines 60–68. Fixed by Python script replacing all curly quotes with ASCII.
 

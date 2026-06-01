@@ -186,3 +186,9 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Do not mix public site visual changes with diagnosis API changes.
 - Do not push unless explicitly asked.
 - Prefer updating `js/site-data.js` for public-site content changes before editing HTML structure.
+
+## Public Site Metadata State (2026-06-01)
+
+- Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
+- `site.webmanifest` is structurally valid, but production still serves it as `application/octet-stream`; this is a server MIME configuration todo and should not be fixed in static files.
+- Public diagnosis remains in internal-test / not-open-for-public-upload state.

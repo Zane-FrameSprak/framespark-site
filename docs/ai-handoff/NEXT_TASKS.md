@@ -15,6 +15,8 @@ Updated by: Codex
 
 ## Recently Completed
 
+- Public site metadata/icons polish completed: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
+- `site.webmanifest` MIME remains a Tencent Cloud / Nginx server todo; do not change Nginx unless explicitly requested.
 - `0eede24` — Mobile homepage layout density improved.
 - `35e4ae1` — Subpage footer structure aligned with the home footer.
 - Tencent Cloud production deployed latest mobile homepage and footer sync by sudo rsync.
@@ -78,6 +80,7 @@ Updated by: Codex
 
 ## Later
 
+- Confirm or fix `site.webmanifest` MIME in Nginx when server config work is explicitly approved.
 - Consider adding `ARCHITECTURE.md` and `DECISIONS.md` once architecture work becomes heavier.
 - Consider splitting the large `css/style.css` into clearer sections or files only after the current static-site deployment flow is stable.
 - Consider making project detail pages more data-driven after project-card data structure stabilizes.
