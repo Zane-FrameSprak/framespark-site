@@ -22,6 +22,7 @@ Updated by: Codex
   - `framespark-handoff-check`
   - `framespark-static-site-release-check`
   - `framespark-deploy-check`
+- Added `CLAUDE.md` startup instructions for Claude Code.
 - Tencent Cloud synced 2026-05-29 via rsync (hero animation version). Needs re-sync after redesign commit.
 
 ## Next — AI Workflow Skills

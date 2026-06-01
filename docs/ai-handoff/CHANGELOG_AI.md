@@ -27,6 +27,7 @@
   - `framespark-handoff-check`
   - `framespark-static-site-release-check`
   - `framespark-deploy-check`
+- `CLAUDE.md` created in this session to make Claude Code read handoff files and project Skills on startup.
 
 ### Notes
 

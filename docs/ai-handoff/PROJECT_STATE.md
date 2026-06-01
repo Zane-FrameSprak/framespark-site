@@ -48,6 +48,7 @@ When Codex or Claude Code takes over, read the normal startup files first. For h
 
 Additional AI workflow files:
 
+- `CLAUDE.md`
 - `.agents/skills/low-token-agent-mode/SKILL.md`
 - `.claude/skills/low-token-agent-mode/SKILL.md`
 - `.agents/skills/framespark-handoff-check/SKILL.md`
@@ -57,7 +58,7 @@ Additional AI workflow files:
 - `.agents/skills/framespark-deploy-check/SKILL.md`
 - `.claude/skills/framespark-deploy-check/SKILL.md`
 
-`low-token-agent-mode` is the generic concise-collaboration skill. The three FrameSpark-specific skills cover handoff checks, static-site release checks, and Tencent Cloud deploy checks.
+`CLAUDE.md` gives Claude Code the startup rules for reading handoff files and using project Skills. `low-token-agent-mode` is the generic concise-collaboration skill. The three FrameSpark-specific skills cover handoff checks, static-site release checks, and Tencent Cloud deploy checks.
 
 ## Public Site State
 
