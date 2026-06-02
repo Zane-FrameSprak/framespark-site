@@ -114,3 +114,14 @@ analytics-api already uses `127.0.0.1:8787`, so reusing the default diagnosis-ap
 
 Impact:
 Production env examples and deployment docs should use `PORT=8788`; Nginx `/api/diagnosis/` should proxy to `http://127.0.0.1:8788/api/diagnosis/`.
+
+## 2026-06-02 — Public diagnosis upload formats are TXT/DOCX/paste for now
+
+Decision:
+Short-term public diagnosis copy must only promise TXT, DOCX, and pasted text. Do not publicly promise PDF support yet.
+
+Reason:
+The public parser supports TXT/DOCX/paste. Internal dev tooling may parse text PDF samples, but that is not public support.
+
+Impact:
+PDF support is a separate future task requiring parser migration, tests, and error copy. Scanned PDF / OCR is out of current scope.

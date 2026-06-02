@@ -45,8 +45,9 @@ Updated by: Codex
 - Deploy `diagnosis-api` separately before reopening public diagnosis uploads.
 - Configure and verify a production `/api/diagnosis` Nginx reverse proxy only after backend deployment is ready.
 - Keep `/diagnosis/` in internal-test / public-upload-disabled state until the production API is confirmed.
-- Resolve PDF support mismatch: either implement public PDF parsing or keep public copy limited to TXT/DOCX/paste.
-- Next safe paths: resolve PDF support/copy mismatch, or prepare systemd/Nginx execution steps from the runbook. Do not reopen public uploads yet.
+- Keep public diagnosis upload copy limited to TXT/DOCX/paste until PDF support is separately implemented.
+- Treat public PDF support as a standalone task: migrate parser logic, add tests, add error copy, and keep scanned PDF / OCR out of current scope.
+- Next safe paths: prepare systemd/Nginx execution steps from the runbook, or plan public PDF support separately. Do not reopen public uploads yet.
 - Run a focused real AI classification smoke test for:
   - `idea_concept`
   - `synopsis`

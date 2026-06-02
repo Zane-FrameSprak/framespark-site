@@ -39,6 +39,7 @@ Use an environment file outside the repository, for example `/home/ubuntu/frames
 - `diagnosis-api` dependencies are installed.
 - `/home/ubuntu/framespark-diagnosis.env` exists and is not in Git.
 - Public upload controls are still disabled.
+- Public copy only promises TXT/DOCX/paste.
 
 ## systemd plan
 
@@ -82,7 +83,7 @@ Stop if any of these happen:
 - `/api/diagnosis` returns HTML.
 - The fix requires changing high-risk business files.
 - The fix requires restoring the public upload entry.
-- PDF support and public copy are not aligned.
+- Public copy promises PDF before public parser support is implemented.
 
 ## Public upload restore gates
 
@@ -95,4 +96,4 @@ Only restore public upload controls after all are true:
 - Rate limit is OK.
 - Error copy is understandable.
 - Privacy and upload copy are OK.
-- PDF support is implemented, or the page copy is narrowed to TXT/DOCX/paste.
+- Page copy is narrowed to TXT/DOCX/paste, or PDF support is separately implemented and tested.

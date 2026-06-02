@@ -6,6 +6,7 @@
 
 - 健康检查接口
 - `.txt` / `.docx` 上传
+- 粘贴文本提交
 - 文本解析
 - 基础字数守门
 - mock 诊断报告
@@ -93,5 +94,7 @@ materialType: short | feature | other
 - 后续接入 DeepSeek / OpenAI 兼容接口时，API Key 只能放在后端环境变量中。
 - 不允许在静态官网前端暴露 AI API Key。
 - `.env` 不提交到 GitHub。
-- 当前公开解析器支持 TXT / DOCX，不要提前承诺 PDF 支持。
+- 当前公开解析器支持 TXT / DOCX / 粘贴文本，不要提前承诺 PDF 支持。
+- 内部评测解析器可能支持文本型 PDF，但这不等于公网诊断链路支持 PDF。
+- 如后续支持 PDF，需要单独迁移解析逻辑、补测试和错误提示；扫描版 PDF / OCR 不在当前范围。
 - 正式站接入计划见 `DEPLOYMENT.md`。

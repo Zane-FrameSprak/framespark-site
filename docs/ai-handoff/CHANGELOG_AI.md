@@ -21,6 +21,7 @@
 - Updated `.env.example` for `PORT=8788`, `ENABLE_DIAGNOSIS_V1=false`, `ENABLE_DEV_TOOLS=false`, and rate-limit env placeholders.
 - Updated README to clarify production `DEEPSEEK_API_KEY`, V1 default-off state, and TXT/DOCX-only public parser support.
 - Recorded that analytics-api owns `8787`; diagnosis-api should use `8788` if deployed.
+- Short-term public upload format copy is now aligned to TXT/DOCX/paste only. PDF remains a separate future task; scanned PDF / OCR is out of current scope.
 
 ### Production API Read-Only Check
 

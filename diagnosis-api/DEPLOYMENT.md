@@ -48,8 +48,8 @@ Only restore public upload controls after all are true:
 - rate limit behavior is verified
 - error responses are understandable
 - privacy and upload copy are aligned
-- TXT/DOCX support is clear, and PDF support is either implemented or not promised
+- TXT/DOCX/paste support is clear, and PDF support is not promised unless separately implemented
 
 ## Current Format Note
 
-The public parser currently supports TXT and DOCX. PDF support is not part of the current public parser and must not be promised before implementation or copy alignment.
+The public parser currently supports TXT, DOCX, and pasted text. PDF support is not part of the current public parser and must not be promised before implementation, tests, and copy alignment. Internal dev parsing may support text PDF samples, but that is not public support.
