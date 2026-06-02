@@ -157,6 +157,8 @@ The future idea of Codex generating synthetic samples, running them through the 
 - Nginx currently confirms only `/api/analytics/` reverse proxy to analytics-api.
 - analytics-api listens on `127.0.0.1:8787`; `HEAD /api/analytics/event` returning 404 is not a P0 because the endpoint is intended for POST events.
 - Before reopening public uploads, deploy `diagnosis-api` separately and add a verified `/api/diagnosis` Nginx reverse proxy.
+- Diagnosis API production plan is now documented in `diagnosis-api/DEPLOYMENT.md`; recommended runtime port is `8788` to avoid the analytics-api `8787` port.
+- Public parser currently supports TXT / DOCX; PDF support and public copy need alignment before uploads reopen.
 
 ## Public Site — Current Homepage Structure (2026-05-30)
 

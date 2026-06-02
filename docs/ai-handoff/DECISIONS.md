@@ -103,3 +103,14 @@ Production currently confirms only `/api/analytics/` reverse proxy. `/api/diagno
 
 Impact:
 Do not restore public upload controls or imply live diagnosis availability before backend deployment and proxy verification.
+
+## 2026-06-02 — Use port 8788 for production diagnosis-api
+
+Decision:
+Use `127.0.0.1:8788` for the production diagnosis API service plan.
+
+Reason:
+analytics-api already uses `127.0.0.1:8787`, so reusing the default diagnosis-api port would conflict.
+
+Impact:
+Production env examples and deployment docs should use `PORT=8788`; Nginx `/api/diagnosis/` should proxy to `http://127.0.0.1:8788/api/diagnosis/`.

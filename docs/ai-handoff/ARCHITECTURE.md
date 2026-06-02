@@ -254,6 +254,7 @@ Current V1 limitation: logs are still mostly legacy-oriented and should later re
 - GitHub Pages does not deploy `diagnosis-api`.
 - Production backend deployment and static-site sync need separate planning.
 - Production currently confirms only the `/api/analytics/` reverse proxy. `/api/diagnosis` is not wired to a live diagnosis backend yet.
+- Diagnosis API deployment plan uses `127.0.0.1:8788` because analytics-api already uses `127.0.0.1:8787`.
 
 ## High-Risk Change Areas
 
