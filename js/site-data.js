@@ -41,15 +41,19 @@
                 freeLabel: '免费',
                 english: 'FRAMESPARK STORY DEVELOPMENT DIAGNOSIS',
                 description: '故事开发诊断工具',
+                actionLabel: '点击进入',
+                notice: '诊断系统内测中，暂未开放公开上传。',
                 href: 'diagnosis/'
             },
             {
                 number: '02',
-                status: '开发中',
+                status: '筹备中',
                 title: '项目人才生态平台',
                 freeLabel: '',
                 english: 'FRAMESPARK PROJECT & TALENT',
                 description: '影视创作者人才档案网络',
+                actionLabel: '点击进入',
+                notice: '人才平台筹备中，暂未开放。',
                 href: 'talent/'
             }
         ],

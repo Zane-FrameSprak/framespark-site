@@ -207,3 +207,4 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Public diagnosis remains in internal-test / not-open-for-public-upload state.
 - Public site positioning is currently brand display plus internal-test preview. Diagnosis, talent, and project areas are not open product flows.
 - Development project pages remain accessible as lightweight project files, but are marked `noindex` and removed from sitemap until their public status is firmer.
+- Home platform cards now use unavailable-state prompts instead of opening real product flows; project cards show a light "details in design" prompt instead of navigating from the homepage.

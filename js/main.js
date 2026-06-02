@@ -75,11 +75,8 @@
     renderProjectCards();
 
     function createPlatformCard(platform, index) {
-        var article = document.createElement(platform.href ? 'a' : 'article');
+        var article = document.createElement('article');
         article.className = 'platform-card';
-        if (platform.href) {
-            article.href = platform.href;
-        }
 
         var meta = document.createElement('div');
         meta.className = 'platform-card__meta';
@@ -113,12 +110,35 @@
         description.className = 'platform-card__text';
         description.textContent = platform.description || '';
 
+        var action = document.createElement('button');
+        action.className = 'platform-card__action';
+        action.type = 'button';
+        action.textContent = platform.actionLabel || '点击进入';
+
+        var notice = document.createElement('p');
+        notice.className = 'platform-card__notice';
+        notice.textContent = platform.notice || '当前暂未开放。';
+        notice.setAttribute('aria-live', 'polite');
+
+        var noticeTimer = null;
+        action.addEventListener('click', function () {
+            if (noticeTimer) {
+                window.clearTimeout(noticeTimer);
+            }
+            article.classList.add('is-notice-active');
+            noticeTimer = window.setTimeout(function () {
+                article.classList.remove('is-notice-active');
+            }, 3200);
+        });
+
         article.appendChild(meta);
         article.appendChild(number);
         article.appendChild(title);
         article.appendChild(freeRow);
         article.appendChild(english);
         article.appendChild(description);
+        article.appendChild(action);
+        article.appendChild(notice);
 
         return article;
     }
@@ -241,6 +261,8 @@
     var reel = marquee ? marquee.querySelector('.project-reel') : null;
     var prevButton = marquee ? marquee.querySelector('.project-marquee__control--prev') : null;
     var nextButton = marquee ? marquee.querySelector('.project-marquee__control--next') : null;
+    var projectNotice = null;
+    var projectNoticeTimer = null;
     var offset = 0;
     var lastFrameTime = null;
     var isPointerPaused = false;
@@ -369,6 +391,28 @@
     }
 
     if (stage && reel) {
+        projectNotice = document.createElement('div');
+        projectNotice.className = 'project-marquee__notice';
+        projectNotice.textContent = '详情页设计中';
+        projectNotice.setAttribute('aria-live', 'polite');
+        marquee.appendChild(projectNotice);
+
+        function showProjectNotice(card) {
+            if (projectNoticeTimer) {
+                window.clearTimeout(projectNoticeTimer);
+            }
+            if (card) {
+                var cardRect = card.getBoundingClientRect();
+                var marqueeRect = marquee.getBoundingClientRect();
+                var center = cardRect.left + cardRect.width / 2 - marqueeRect.left;
+                projectNotice.style.left = Math.max(64, Math.min(center, marqueeRect.width - 64)) + 'px';
+            }
+            projectNotice.classList.add('is-visible');
+            projectNoticeTimer = window.setTimeout(function () {
+                projectNotice.classList.remove('is-visible');
+            }, 2200);
+        }
+
         reel.querySelectorAll('.project-card').forEach(function (card) {
             card.addEventListener('mouseenter', function () {
                 isPointerPaused = true;
@@ -376,6 +420,11 @@
 
             card.addEventListener('mouseleave', function () {
                 isPointerPaused = false;
+            });
+
+            card.addEventListener('click', function (event) {
+                event.preventDefault();
+                showProjectNotice(card);
             });
         });
 

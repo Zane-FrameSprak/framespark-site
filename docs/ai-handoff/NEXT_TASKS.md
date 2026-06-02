@@ -9,6 +9,7 @@ Updated by: Codex
 - **Use terminal scripts for read-only checks** where possible to reduce Codex / Claude token use.
 - **Use the verified sudo rsync deploy template** for Tencent Cloud; GitHub push still does not update production.
 - Keep the public site as brand display plus internal-test preview; do not make unfinished diagnosis, talent, or project areas look open.
+- Keep homepage card clicks as unavailable-state prompts until product flows are intentionally opened.
 - Keep diagnosis V1 disabled by default.
 - Preserve legacy diagnosis response fields while V1 is being evaluated.
 - When switching AI coding agents, have them read the AI handoff files before making changes.
