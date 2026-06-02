@@ -253,6 +253,7 @@ Current V1 limitation: logs are still mostly legacy-oriented and should later re
 - Historical project notes indicate the formal public site may be served from Tencent Cloud / Nginx.
 - GitHub Pages does not deploy `diagnosis-api`.
 - Production backend deployment and static-site sync need separate planning.
+- Production currently confirms only the `/api/analytics/` reverse proxy. `/api/diagnosis` is not wired to a live diagnosis backend yet.
 
 ## High-Risk Change Areas
 

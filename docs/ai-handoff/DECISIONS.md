@@ -92,3 +92,14 @@ The user switches between multiple AI tools and model subscriptions. Repository-
 
 Impact:
 Future agents should keep `PROJECT_STATE.md`, `NEXT_TASKS.md`, and `CHANGELOG_AI.md` current. Architecture or decision changes should update `ARCHITECTURE.md` and `DECISIONS.md`.
+
+## 2026-06-02 — Do not reopen public diagnosis before backend proxy is live
+
+Decision:
+Keep the public diagnosis page in internal-test / upload-disabled state until `diagnosis-api` is separately deployed and `/api/diagnosis` is verified through Nginx.
+
+Reason:
+Production currently confirms only `/api/analytics/` reverse proxy. `/api/diagnosis` falls through to static 404 HTML behavior and is not a live JSON API.
+
+Impact:
+Do not restore public upload controls or imply live diagnosis availability before backend deployment and proxy verification.

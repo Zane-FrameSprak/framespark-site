@@ -14,6 +14,14 @@
 
 ## 2026-06-01 (Codex — local session)
 
+### Production API Read-Only Check
+
+- Checked production API state without changing files or server config.
+- `/api/diagnosis` is not a live diagnosis API; it falls through to static 404 HTML behavior.
+- `/diagnosis/` does not expose a public `/api/diagnosis` call and remains internal-test / upload-disabled.
+- Nginx confirms `/api/analytics/` reverse proxy only; analytics-api listens on `127.0.0.1:8787`.
+- No P0 public-site risk found. Public diagnosis must stay closed until `diagnosis-api` is separately deployed and proxied.
+
 ### Committed
 
 - `0eede24` — `refine: improve mobile homepage layout`

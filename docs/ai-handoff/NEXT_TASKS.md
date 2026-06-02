@@ -39,6 +39,9 @@ Updated by: Codex
 
 ## Next — Diagnosis V1
 
+- Deploy `diagnosis-api` separately before reopening public diagnosis uploads.
+- Configure and verify a production `/api/diagnosis` Nginx reverse proxy only after backend deployment is ready.
+- Keep `/diagnosis/` in internal-test / public-upload-disabled state until the production API is confirmed.
 - Run a focused real AI classification smoke test for:
   - `idea_concept`
   - `synopsis`

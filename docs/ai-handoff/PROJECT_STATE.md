@@ -150,6 +150,14 @@ The future idea of Codex generating synthetic samples, running them through the 
 - Pushing to GitHub may not automatically update the production server unless a separate sync/deploy process exists.
 - `diagnosis-api` is not deployed by GitHub Pages and needs separate backend deployment planning.
 
+## Production API State (2026-06-02)
+
+- `/api/diagnosis` is not a live diagnosis JSON API in production. Current request behavior falls through to the static site / 404 HTML path, so it must not be treated as deployed.
+- `/diagnosis/` remains in internal-test / public-upload-disabled state and does not expose a public `/api/diagnosis` call.
+- Nginx currently confirms only `/api/analytics/` reverse proxy to analytics-api.
+- analytics-api listens on `127.0.0.1:8787`; `HEAD /api/analytics/event` returning 404 is not a P0 because the endpoint is intended for POST events.
+- Before reopening public uploads, deploy `diagnosis-api` separately and add a verified `/api/diagnosis` Nginx reverse proxy.
+
 ## Public Site — Current Homepage Structure (2026-05-30)
 
 The hero section has been completely removed. Homepage top-to-bottom structure is now:
