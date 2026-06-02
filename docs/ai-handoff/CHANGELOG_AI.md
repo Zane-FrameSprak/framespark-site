@@ -22,6 +22,7 @@
 - Updated README to clarify production `DEEPSEEK_API_KEY`, V1 default-off state, and TXT/DOCX-only public parser support.
 - Recorded that analytics-api owns `8787`; diagnosis-api should use `8788` if deployed.
 - Short-term public upload format copy is now aligned to TXT/DOCX/paste only. PDF remains a separate future task; scanned PDF / OCR is out of current scope.
+- Added diagnosis-api deployment script drafts for systemd install, Nginx proxy planning, and service uninstall. They were not executed; server still lacks diagnosis env, systemd service, and `/api/diagnosis` Nginx proxy.
 
 ### Production API Read-Only Check
 

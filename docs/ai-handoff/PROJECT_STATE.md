@@ -160,6 +160,8 @@ The future idea of Codex generating synthetic samples, running them through the 
 - Diagnosis API production plan is now documented in `diagnosis-api/DEPLOYMENT.md`; recommended runtime port is `8788` to avoid the analytics-api `8787` port.
 - Diagnosis API production runbook is now documented in `diagnosis-api/DEPLOYMENT_RUNBOOK.md`; it is a manual execution checklist, not an automatic deploy script.
 - Public parser currently supports TXT / DOCX / pasted text. Short-term public copy must not promise PDF; internal dev parsing may support text PDF samples, but that is not public support.
+- Server preflight confirms Node/npm are available, `/tmp/framespark-site/diagnosis-api` exists, `8787` is analytics-api, and `8788` is free. `framespark-diagnosis.service` and `/home/ubuntu/framespark-diagnosis.env` do not exist yet.
+- Diagnosis deployment script drafts now exist under `diagnosis-api/scripts/`; they are not executed and do not reopen public uploads.
 
 ## Public Site — Current Homepage Structure (2026-05-30)
 

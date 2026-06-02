@@ -41,6 +41,24 @@ Use an environment file outside the repository, for example `/home/ubuntu/frames
 - Public upload controls are still disabled.
 - Public copy only promises TXT/DOCX/paste.
 
+## Script drafts
+
+Script drafts are available under `diagnosis-api/scripts/`. They must be reviewed before execution.
+
+- `install-diagnosis-systemd.sh`: checks env, port, directory, installs dependencies, then creates and starts `framespark-diagnosis.service`.
+- `install-diagnosis-nginx-proxy.sh`: checks service health, backs up the known Nginx config, then prints the manual `/api/diagnosis/` location. It intentionally does not blind-insert Nginx config.
+- `uninstall-diagnosis-service.sh`: stops and disables the systemd service. It does not delete env, source, or Nginx config.
+
+Recommended order:
+
+1. Create `/home/ubuntu/framespark-diagnosis.env` manually.
+2. Review and run the systemd script.
+3. Confirm `curl http://127.0.0.1:8788/health`.
+4. Review Nginx proxy snippet and apply manually.
+5. Run `nginx -t`, then reload only if it passes.
+6. Run internal smoke checks.
+7. Keep public upload controls disabled until all restore gates pass.
+
 ## systemd plan
 
 - Service name: `framespark-diagnosis.service`

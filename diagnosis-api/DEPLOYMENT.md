@@ -4,6 +4,8 @@ This is a deployment plan only. Do not reopen the public diagnosis upload entry 
 
 Before production execution, read `DEPLOYMENT_RUNBOOK.md`.
 
+Script drafts live in `diagnosis-api/scripts/`; review them before any server execution.
+
 ## Runtime
 
 - Service name: `framespark-diagnosis.service`
