@@ -8,6 +8,7 @@ Updated by: Codex
 - **Keep low-token workflow active** — routine low-risk tasks should proceed in goal mode within allowed scope and report briefly.
 - **Use terminal scripts for read-only checks** where possible to reduce Codex / Claude token use.
 - **Use the verified sudo rsync deploy template** for Tencent Cloud; GitHub push still does not update production.
+- Keep the public site as brand display plus internal-test preview; do not make unfinished diagnosis, talent, or project areas look open.
 - Keep diagnosis V1 disabled by default.
 - Preserve legacy diagnosis response fields while V1 is being evaluated.
 - When switching AI coding agents, have them read the AI handoff files before making changes.
@@ -71,6 +72,7 @@ Updated by: Codex
 ## Public Site / Modularization
 
 - Treat `js/site-data.js` as the first place to update project cards, platform cards, and ecosystem content.
+- Keep development project detail pages `noindex` and out of sitemap until they are meant for public indexing.
 - Prioritize modularity for the most frequently changing areas:
   - development project cards
   - talent platform copy and status

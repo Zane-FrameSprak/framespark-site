@@ -2,6 +2,7 @@
 
 ## Recent Summary
 
+- 2026-06-02: Public unfinished product areas were frozen for launch posture: talent copy says not open, development project pages are `noindex`, and project detail URLs were removed from sitemap.
 - 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.
 - 2026-06-01: Collaboration workflow is being tightened for low-token multi-agent work: short reports, terminal-first read-only checks, verified deploy template, and high-risk Plan first.
 - 2026-06-01: Homepage visual cleanup committed locally (`669e3dd`); rate-limit test hardening committed locally (`f78c44b`); low-token agent skill committed locally (`9eae74f`).

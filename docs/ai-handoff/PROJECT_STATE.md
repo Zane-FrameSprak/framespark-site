@@ -205,3 +205,5 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
 - `site.webmanifest` is structurally valid, but production still serves it as `application/octet-stream`; this is a server MIME configuration todo and should not be fixed in static files.
 - Public diagnosis remains in internal-test / not-open-for-public-upload state.
+- Public site positioning is currently brand display plus internal-test preview. Diagnosis, talent, and project areas are not open product flows.
+- Development project pages remain accessible as lightweight project files, but are marked `noindex` and removed from sitemap until their public status is firmer.

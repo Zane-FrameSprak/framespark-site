@@ -125,3 +125,14 @@ The public parser supports TXT/DOCX/paste. Internal dev tooling may parse text P
 
 Impact:
 PDF support is a separate future task requiring parser migration, tests, and error copy. Scanned PDF / OCR is out of current scope.
+
+## 2026-06-02 — Keep unfinished public product areas closed
+
+Decision:
+Treat the public site as a brand display and internal-test preview site for now. Diagnosis, talent, and development project areas must not read as open product flows.
+
+Reason:
+The diagnosis backend is not yet proxied in production, the talent platform is not open, and development project files are not public collaboration or recruitment pages.
+
+Impact:
+Diagnosis stays upload-disabled, talent copy stays not-open, and development project detail pages stay accessible but `noindex` and out of sitemap until public indexing is intentional.
