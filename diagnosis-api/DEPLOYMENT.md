@@ -2,6 +2,8 @@
 
 This is a deployment plan only. Do not reopen the public diagnosis upload entry until the API is deployed and verified.
 
+Before production execution, read `DEPLOYMENT_RUNBOOK.md`.
+
 ## Runtime
 
 - Service name: `framespark-diagnosis.service`

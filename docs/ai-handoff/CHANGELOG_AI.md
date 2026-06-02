@@ -17,6 +17,7 @@
 ### Diagnosis API Production Plan
 
 - Added `diagnosis-api/DEPLOYMENT.md` as the production connection plan.
+- Added `diagnosis-api/DEPLOYMENT_RUNBOOK.md` as the manual production execution checklist. `diagnosis-api` is still not deployed to the formal site, and `/api/diagnosis` still has no verified production reverse proxy.
 - Updated `.env.example` for `PORT=8788`, `ENABLE_DIAGNOSIS_V1=false`, `ENABLE_DEV_TOOLS=false`, and rate-limit env placeholders.
 - Updated README to clarify production `DEEPSEEK_API_KEY`, V1 default-off state, and TXT/DOCX-only public parser support.
 - Recorded that analytics-api owns `8787`; diagnosis-api should use `8788` if deployed.

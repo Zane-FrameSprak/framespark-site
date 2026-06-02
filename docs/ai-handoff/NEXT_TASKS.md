@@ -40,11 +40,13 @@ Updated by: Codex
 ## Next — Diagnosis V1
 
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
+- Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.
 - Prepare production env with `PORT=8788`, `HOST=127.0.0.1`, `DEEPSEEK_API_KEY`, and `ENABLE_DIAGNOSIS_V1=false`.
 - Deploy `diagnosis-api` separately before reopening public diagnosis uploads.
 - Configure and verify a production `/api/diagnosis` Nginx reverse proxy only after backend deployment is ready.
 - Keep `/diagnosis/` in internal-test / public-upload-disabled state until the production API is confirmed.
 - Resolve PDF support mismatch: either implement public PDF parsing or keep public copy limited to TXT/DOCX/paste.
+- Next safe paths: resolve PDF support/copy mismatch, or prepare systemd/Nginx execution steps from the runbook. Do not reopen public uploads yet.
 - Run a focused real AI classification smoke test for:
   - `idea_concept`
   - `synopsis`
