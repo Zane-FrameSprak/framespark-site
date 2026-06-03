@@ -12,6 +12,7 @@
 - 2026-06-03: Gated real V1 staged prompts in `v1StageRunner` behind `ENABLE_V1_REAL_PROMPTS=false` and injected stage AI calls. No real AI was run.
 - 2026-06-03: Added guarded V1 staged smoke script. Default run is mock/no-AI; real mode requires explicit `--real` and temporary V1 switches.
 - 2026-06-03: Added fictional internal V1 staged smoke sample and wired the smoke script to read it without printing full text. Real AI smoke still has not been run.
+- 2026-06-03: Ran one guarded V1 basic real smoke successfully against DeepSeek, with reportV1 and diagnostics present and no fallback. Then enhanced smoke output to show only safe summary fields.
 - 2026-06-02: Public unfinished product areas were frozen for launch posture: talent copy says not open, development project pages are `noindex`, and project detail URLs were removed from sitemap.
 - 2026-06-02: Homepage platform cards gained unavailable-state prompts, and project cards now show a "details in design" prompt instead of navigating from the homepage.
 - 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.

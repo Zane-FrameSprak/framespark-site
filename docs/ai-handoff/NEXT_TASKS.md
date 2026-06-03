@@ -54,7 +54,8 @@ Updated by: Codex
 - `v1StageRunner` now supports injected stage AI calls behind `ENABLE_V1_REAL_PROMPTS=false`.
 - `npm run smoke:v1-staged-real` runs a guarded mock-only basic-stage smoke. Do not run `--real` without explicit approval.
 - The guarded smoke now reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, a fictional internal short synopsis sample.
-- Next recommended step: manually run the guarded `--real` basic smoke only after confirming key, switches, cost, and logging rules.
+- First guarded `--real` basic smoke has succeeded once with no fallback; next do not jump to public upload.
+- Next recommended step: review the enhanced smoke summary, then plan whether to test advanced/final with mock first.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.

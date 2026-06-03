@@ -13,6 +13,8 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const samplePath = resolve(scriptDir, '../dev-samples/v1-staged-smoke-short-synopsis.txt');
 
 async function main() {
+  const startedAt = Date.now();
+
   if (realMode) {
     const missing = getMissingRealGuards();
     if (missing.length > 0) {
@@ -23,8 +25,14 @@ async function main() {
         stage: STAGE,
         noAi: true,
         realCall: false,
+        stageReached: '',
+        decision: '',
+        promptVersion: V1_BASIC_PROMPT_VERSION,
+        model: getModelName(),
+        fallback: false,
         reportV1: false,
         diagnostics: false,
+        latencyMs: Date.now() - startedAt,
         missingGuard: missing.join(',')
       });
       process.exitCode = 1;
@@ -64,11 +72,17 @@ async function main() {
     sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
     sampleChars: sampleText.length,
     mode: realMode ? 'real' : 'mock',
-    stage: STAGE,
     noAi: !realMode,
     realCall: realMode,
+    stage: STAGE,
+    stageReached: getStageReached(reportV1),
+    decision: getDecision(reportV1),
+    promptVersion: getPromptVersion(reportV1),
+    model: getModelName(realMode),
+    fallback: Boolean(reportV1?.diagnostics?.fallback),
     reportV1: Boolean(reportV1),
-    diagnostics: Boolean(reportV1?.diagnostics)
+    diagnostics: Boolean(reportV1?.diagnostics),
+    latencyMs: Date.now() - startedAt
   });
 }
 
@@ -152,6 +166,25 @@ function printLines(values) {
   });
 }
 
+function getStageReached(reportV1) {
+  return reportV1?.diagnostics?.stageReached || reportV1?.stage || STAGE;
+}
+
+function getDecision(reportV1) {
+  return reportV1?.diagnostics?.decision
+    || reportV1?.diagnostics?.stageDecisionHints?.recommendedAction
+    || reportV1?.stageDecisionHints?.recommendedAction
+    || '';
+}
+
+function getPromptVersion(reportV1) {
+  return reportV1?.diagnostics?.promptVersion || V1_BASIC_PROMPT_VERSION;
+}
+
+function getModelName(includeRealModel = true) {
+  return includeRealModel ? (process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash') : 'mock';
+}
+
 main().catch((err) => {
   printLines({
     sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
@@ -160,6 +193,11 @@ main().catch((err) => {
     stage: STAGE,
     noAi: !realMode,
     realCall: realMode,
+    stageReached: '',
+    decision: '',
+    promptVersion: V1_BASIC_PROMPT_VERSION,
+    model: getModelName(realMode),
+    fallback: false,
     reportV1: false,
     diagnostics: false,
     errorCode: err?.code || err?.name || 'ERROR',
