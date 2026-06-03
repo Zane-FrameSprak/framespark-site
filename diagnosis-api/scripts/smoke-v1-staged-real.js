@@ -18,6 +18,8 @@ import {
 const STAGE = 'basic';
 const STAGES = ['basic', 'advanced', 'final'];
 const realMode = process.argv.includes('--real');
+const realStage = parseRealStage();
+const realStageConfirmed = parseConfirmRealStage();
 const maxStage = parseMaxStage();
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const samplePath = resolve(scriptDir, '../dev-samples/v1-staged-smoke-short-synopsis.txt');
@@ -25,24 +27,48 @@ const samplePath = resolve(scriptDir, '../dev-samples/v1-staged-smoke-short-syno
 async function main() {
   const startedAt = Date.now();
 
-  if (realMode && maxStage !== 'basic') {
-    printLines({
-      sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
-      sampleChars: 0,
-      mode: 'real',
-      maxStage,
-      noAi: true,
+  if (realStage && !realMode) {
+    printGuardFailure({
+      startedAt,
+      mode: 'mock',
       realCall: false,
-      stage: STAGE,
-      stageSequence: '',
-      stageReached: '',
-      decision: '',
-      promptVersion: '',
-      model: getModelName(),
-      fallback: false,
-      reportV1: false,
-      diagnostics: false,
-      latencyMs: Date.now() - startedAt,
+      noAi: true,
+      error: '--real-stage requires --real.'
+    });
+    process.exitCode = 1;
+    return;
+  }
+
+  if (realStage && realStage !== 'advanced') {
+    printGuardFailure({
+      startedAt,
+      mode: 'real',
+      realCall: false,
+      noAi: true,
+      error: 'Only --real-stage=advanced is supported in this smoke step.'
+    });
+    process.exitCode = 1;
+    return;
+  }
+
+  if (realStage === 'advanced' && realStageConfirmed !== 'advanced') {
+    printGuardFailure({
+      startedAt,
+      mode: 'real',
+      realCall: false,
+      noAi: true,
+      error: '--real-stage=advanced requires --confirm-real-stage=advanced.'
+    });
+    process.exitCode = 1;
+    return;
+  }
+
+  if (realMode && maxStage !== 'basic') {
+    printGuardFailure({
+      startedAt,
+      mode: 'real',
+      realCall: false,
+      noAi: true,
       error: 'advanced/final real smoke requires a separate confirmation step.'
     });
     process.exitCode = 1;
@@ -52,23 +78,11 @@ async function main() {
   if (realMode) {
     const missing = getMissingRealGuards();
     if (missing.length > 0) {
-      printLines({
-        sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
-        sampleChars: 0,
+      printGuardFailure({
+        startedAt,
         mode: 'real',
-        maxStage,
-        stage: STAGE,
-        stageSequence: '',
-        noAi: true,
         realCall: false,
-        stageReached: '',
-        decision: '',
-        promptVersion: V1_BASIC_PROMPT_VERSION,
-        model: getModelName(),
-        fallback: false,
-        reportV1: false,
-        diagnostics: false,
-        latencyMs: Date.now() - startedAt,
+        noAi: true,
         missingGuard: missing.join(',')
       });
       process.exitCode = 1;
@@ -103,6 +117,7 @@ async function main() {
     sampleChars: sampleText.length,
     mode: realMode ? 'real' : 'mock',
     maxStage,
+    realStage: realStage || '',
     noAi: !realMode,
     realCall: realMode,
     stage: finalResult?.stage || STAGE,
@@ -119,6 +134,12 @@ async function main() {
 }
 
 async function runStages(payload) {
+  if (realMode && realStage === 'advanced') {
+    const basicReport = await generateMockStageReport('basic', payload);
+    const reportV1 = await generateRealAdvancedReport(payload, basicReport);
+    return [{ stage: 'advanced', reportV1 }];
+  }
+
   const stageSequence = STAGES.slice(0, STAGES.indexOf(maxStage) + 1);
   const results = [];
   let basicReport = null;
@@ -141,6 +162,29 @@ async function runStages(payload) {
   }
 
   return results;
+}
+
+async function generateMockStageReport(stage, payload) {
+  const stageInput = buildStageInput(stage, payload, null, null);
+  return generateV1StageReport({
+    stage,
+    messages: stageInput.messages,
+    promptVersion: stageInput.promptVersion,
+    payload,
+    metadata: payload.materialHint,
+    requestFn: () => mockRequest(stage)
+  });
+}
+
+async function generateRealAdvancedReport(payload, basicReport) {
+  const stageInput = buildStageInput('advanced', payload, basicReport, null);
+  return generateV1StageReport({
+    stage: 'advanced',
+    messages: stageInput.messages,
+    promptVersion: stageInput.promptVersion,
+    payload,
+    metadata: payload.materialHint
+  });
 }
 
 function buildStageInput(stage, payload, basicReport, advancedReport) {
@@ -286,12 +330,47 @@ function parseMaxStage() {
   return 'basic';
 }
 
+function parseRealStage() {
+  const arg = process.argv.find((item) => item.startsWith('--real-stage='));
+  return arg ? arg.split('=')[1] : '';
+}
+
+function parseConfirmRealStage() {
+  const arg = process.argv.find((item) => item.startsWith('--confirm-real-stage='));
+  return arg ? arg.split('=')[1] : '';
+}
+
+function printGuardFailure({ startedAt, mode, realCall, noAi, error = '', missingGuard = '' }) {
+  printLines({
+    sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
+    sampleChars: 0,
+    mode,
+    maxStage,
+    realStage: realStage || '',
+    stage: STAGE,
+    stageSequence: '',
+    noAi,
+    realCall,
+    stageReached: '',
+    decision: '',
+    promptVersion: '',
+    model: getModelName(realCall),
+    fallback: false,
+    reportV1: false,
+    diagnostics: false,
+    latencyMs: Date.now() - startedAt,
+    ...(missingGuard ? { missingGuard } : {}),
+    ...(error ? { error } : {})
+  });
+}
+
 main().catch((err) => {
   printLines({
     sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
     sampleChars: 0,
     mode: realMode ? 'real' : 'mock',
     maxStage,
+    realStage: realStage || '',
     stage: STAGE,
     stageSequence: '',
     noAi: !realMode,

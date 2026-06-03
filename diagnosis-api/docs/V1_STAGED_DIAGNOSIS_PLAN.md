@@ -148,6 +148,7 @@ No real AI API tests are required for the first implementation pass.
 - Default mode reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, does not require `DEEPSEEK_API_KEY`, does not send network requests, and prints `mode=mock`, `noAi=true`, `realCall=false`.
 - Mock mode supports `--max-stage=basic`, `--max-stage=advanced`, and `--max-stage=final` for serial basic -> advanced -> final smoke coverage.
 - Real mode remains limited to basic unless a separate confirmation step is added.
+- `--real-stage=advanced --confirm-real-stage=advanced` is available for a future single-stage real advanced smoke. It uses a mock basicReport dependency and must still be run only after manual approval.
 - Logs must include only sample source, sample length, mode, maxStage, stage sequence, stage, stageReached, decision, promptVersion, model, fallback, latency, AI flags, and report/diagnostics existence; do not print full sample text or full report content.
 - Real mode requires explicit `--real` plus all guards set temporarily in the shell: `DEEPSEEK_API_KEY`, `ENABLE_DIAGNOSIS_V1=true`, `ENABLE_V1_STAGED_RUNNER=true`, and `ENABLE_V1_REAL_PROMPTS=true`.
 - `--real --max-stage=advanced` and `--real --max-stage=final` must stop with `advanced/final real smoke requires a separate confirmation step.`
