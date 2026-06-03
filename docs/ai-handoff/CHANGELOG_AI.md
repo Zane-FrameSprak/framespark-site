@@ -7,6 +7,7 @@
 - 2026-06-03: Added V1 staged commit 2 skeleton: mock `v1StageRunner` with no-AI staged runner tests. Still not connected to production routes or legacy pipeline.
 - 2026-06-03: Added future `ENABLE_V1_STAGED_RUNNER=false` switch and no-AI branch-condition checks. The staged runner is still not connected to `diagnosisPipeline`.
 - 2026-06-03: Gated the no-AI staged runner inside `diagnosisPipeline` behind `ENABLE_DIAGNOSIS_V1 && ENABLE_V1_STAGED_RUNNER`; defaults remain false and legacy fallback remains.
+- 2026-06-03: Added V1 basic, advanced, and final stage prompt drafts plus static prompt tests. They are not wired to runner or aiClient.
 - 2026-06-02: Public unfinished product areas were frozen for launch posture: talent copy says not open, development project pages are `noindex`, and project detail URLs were removed from sitemap.
 - 2026-06-02: Homepage platform cards gained unavailable-state prompts, and project cards now show a "details in design" prompt instead of navigating from the homepage.
 - 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.
