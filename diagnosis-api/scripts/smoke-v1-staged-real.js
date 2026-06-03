@@ -20,6 +20,7 @@ const STAGES = ['basic', 'advanced', 'final'];
 const realMode = process.argv.includes('--real');
 const realStage = parseRealStage();
 const realStageConfirmed = parseConfirmRealStage();
+const smokeMinimal = process.argv.includes('--smoke-minimal');
 const maxStage = parseMaxStage();
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const samplePath = resolve(scriptDir, '../dev-samples/v1-staged-smoke-short-synopsis.txt');
@@ -63,6 +64,18 @@ async function main() {
     return;
   }
 
+  if (realStage === 'advanced' && !smokeMinimal) {
+    printGuardFailure({
+      startedAt,
+      mode: 'real',
+      realCall: false,
+      noAi: true,
+      error: 'real advanced smoke requires --smoke-minimal after timeout.'
+    });
+    process.exitCode = 1;
+    return;
+  }
+
   if (realMode && maxStage !== 'basic') {
     printGuardFailure({
       startedAt,
@@ -90,7 +103,8 @@ async function main() {
     }
   }
 
-  const sampleText = await readSmokeSample();
+  const fullSampleText = await readSmokeSample();
+  const sampleText = smokeMinimal ? buildMinimalSmokeText(fullSampleText) : fullSampleText;
   const payload = {
     text: sampleText,
     materialHint: {
@@ -118,6 +132,7 @@ async function main() {
     mode: realMode ? 'real' : 'mock',
     maxStage,
     realStage: realStage || '',
+    smokeMinimal,
     noAi: !realMode,
     realCall: realMode,
     stage: finalResult?.stage || STAGE,
@@ -135,7 +150,9 @@ async function main() {
 
 async function runStages(payload) {
   if (realMode && realStage === 'advanced') {
-    const basicReport = await generateMockStageReport('basic', payload);
+    const basicReport = smokeMinimal
+      ? buildMinimalBasicReport()
+      : await generateMockStageReport('basic', payload);
     const reportV1 = await generateRealAdvancedReport(payload, basicReport);
     return [{ stage: 'advanced', reportV1 }];
   }
@@ -218,6 +235,37 @@ function getMissingRealGuards() {
 
 async function readSmokeSample() {
   return readFile(samplePath, 'utf8');
+}
+
+function buildMinimalSmokeText(value) {
+  const normalized = String(value || '').replace(/\s+/g, '');
+  return normalized.slice(0, 420);
+}
+
+function buildMinimalBasicReport() {
+  return {
+    stage: 'basic',
+    material_type: 'synopsis',
+    primary_material_type: 'synopsis',
+    maturity_level: 'B',
+    material_summary: 'Smoke-only minimal basic summary.',
+    story_core: {
+      premise: 'A young archivist confronts a buried weather-station record.',
+      protagonist: 'A young archivist.',
+      conflict: 'A demolition deadline pressures him to decide whether to surface old evidence.',
+      emotional_drive: 'He wants to understand his family loss without inventing blame.',
+      theme_or_question: 'How should a town keep painful public memory?'
+    },
+    strengths: [{ title: 'Story chain exists', detail: 'There is a protagonist, pressure, investigation, and choice.' }],
+    main_problems: [{ title: 'Needs sharper consequence', severity: 'medium', detail: 'The final public action needs clearer stakes.' }],
+    priority_revisions: [{ priority: 1, action: 'Clarify the final choice.', reason: 'Advanced smoke needs a concise dependency.' }],
+    next_step: { label: 'Enter advanced smoke', detail: 'Use this as a minimal dependency only.' },
+    stageDecisionHints: {
+      passed: true,
+      reason: 'Minimal smoke dependency only.',
+      recommendedAction: 'continue_advanced'
+    }
+  };
 }
 
 async function mockRequest(stage = 'basic') {
@@ -347,6 +395,7 @@ function printGuardFailure({ startedAt, mode, realCall, noAi, error = '', missin
     mode,
     maxStage,
     realStage: realStage || '',
+    smokeMinimal,
     stage: STAGE,
     stageSequence: '',
     noAi,
@@ -371,6 +420,7 @@ main().catch((err) => {
     mode: realMode ? 'real' : 'mock',
     maxStage,
     realStage: realStage || '',
+    smokeMinimal,
     stage: STAGE,
     stageSequence: '',
     noAi: !realMode,

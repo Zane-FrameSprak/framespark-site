@@ -149,12 +149,14 @@ No real AI API tests are required for the first implementation pass.
 - Mock mode supports `--max-stage=basic`, `--max-stage=advanced`, and `--max-stage=final` for serial basic -> advanced -> final smoke coverage.
 - Real mode remains limited to basic unless a separate confirmation step is added.
 - `--real-stage=advanced --confirm-real-stage=advanced` is available for a future single-stage real advanced smoke. It uses a mock basicReport dependency and must still be run only after manual approval.
+- After the first real advanced smoke timed out, real advanced now also requires `--smoke-minimal`. This trims the smoke sample and uses a minimal mock basicReport only for smoke validation.
 - Logs must include only sample source, sample length, mode, maxStage, stage sequence, stage, stageReached, decision, promptVersion, model, fallback, latency, AI flags, and report/diagnostics existence; do not print full sample text or full report content.
 - Real mode requires explicit `--real` plus all guards set temporarily in the shell: `DEEPSEEK_API_KEY`, `ENABLE_DIAGNOSIS_V1=true`, `ENABLE_V1_STAGED_RUNNER=true`, and `ENABLE_V1_REAL_PROMPTS=true`.
 - `--real --max-stage=advanced` and `--real --max-stage=final` must stop with `advanced/final real smoke requires a separate confirmation step.`
 - Real mode must not print API keys, full sample text, full reports, or raw model responses.
 - Real mode should be run only after manual approval with a short internal sample.
 - First basic-stage real smoke succeeded once with no fallback; quality review is still out of scope for that check.
+- First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`; minimal advanced smoke has not been executed yet.
 
 ## Next Implementation Order
 

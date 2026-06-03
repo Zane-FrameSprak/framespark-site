@@ -57,7 +57,8 @@ Updated by: Codex
 - First guarded `--real` basic smoke has succeeded once with no fallback; next do not jump to public upload.
 - Mock `--max-stage=advanced` and `--max-stage=final` are available for serial staged smoke. Real advanced/final remains blocked.
 - Protected real advanced parameters are available, but not executed: `--real --real-stage=advanced --confirm-real-stage=advanced`.
-- Next recommended step: explicitly approve one real advanced smoke if needed; do not run final real smoke yet.
+- First real advanced smoke timed out. Protected minimal mode is now required for the next real advanced attempt.
+- Next recommended step: explicitly approve one real advanced minimal smoke if needed; do not run final real smoke yet.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.

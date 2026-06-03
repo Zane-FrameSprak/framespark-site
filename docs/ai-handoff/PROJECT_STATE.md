@@ -128,6 +128,7 @@ V1 staged architecture direction:
 - The smoke script now prints a safer summary including stage, stageReached, decision, promptVersion, model, fallback, and latency without full text or full reports.
 - The smoke script now supports mock-only `--max-stage=advanced` and `--max-stage=final` serial checks. Advanced/final real smoke is still blocked pending separate confirmation.
 - The smoke script now has protected `--real-stage=advanced --confirm-real-stage=advanced` parameters for a future single-stage real advanced smoke. It has not been executed yet.
+- First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`. The smoke script now requires `--smoke-minimal` for real advanced and uses a shorter smoke input plus minimal mock basicReport.
 - User registration/login, project database, and talent-platform features are outside the current V1 smoke scope.
 
 ## Route / Guard / Router Risk
