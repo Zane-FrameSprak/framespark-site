@@ -115,6 +115,7 @@ Do not promise commercial value, financing value, or production feasibility.
 - Only `ENABLE_DIAGNOSIS_V1=true` plus `ENABLE_V1_STAGED_RUNNER=true` may enter the future staged runner branch.
 - Rollout order: internal/dev -> V1 D0 -> staged runner -> limited internal smoke -> consider replacing legacy default.
 - Keep legacy fallback until frontend, logs, review tools, and internal eval are migrated.
+- The initial pipeline integration remains gated and uses the no-AI mock runner. It must not be treated as a real diagnosis engine.
 
 ## Test Checklist
 

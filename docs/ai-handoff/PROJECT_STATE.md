@@ -118,6 +118,7 @@ V1 staged architecture direction:
 - V1 staged commit 1 adds pure gatekeeper and stage-decision skeletons plus no-AI tests. These are not connected to production routes or legacy pipeline behavior.
 - V1 staged commit 2 adds a mock `v1StageRunner` and no-AI staged runner tests. It is still not connected to production routes or legacy pipeline behavior.
 - `ENABLE_V1_STAGED_RUNNER` now exists as a future pipeline switch and defaults to false. The staged runner is still not connected to production pipeline behavior.
+- The staged runner branch is now gated inside `diagnosisPipeline` by both `ENABLE_DIAGNOSIS_V1` and `ENABLE_V1_STAGED_RUNNER`. Both defaults remain false, so legacy behavior is unchanged.
 
 ## Route / Guard / Router Risk
 

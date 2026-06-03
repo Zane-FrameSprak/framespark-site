@@ -2,6 +2,7 @@ import { config } from '../config.js';
 import { generateDiagnosisReport, generateAdvancedReport, generateUnifiedDiagnosisV1 } from './aiClient.js';
 import { reportV1ToLegacyReport } from './reportV1Compat.js';
 import { buildFallbackReportV1 } from './reportV1Parser.js';
+import { runV1StagedDiagnosisMock } from './v1StageRunner.js';
 
 const ADVANCE_PREFIX = '可进入进阶诊断';
 const ADVANCED_TYPES = new Set(['short', 'feature', 'other']);
@@ -10,9 +11,11 @@ export async function runDiagnosisPipeline(payload) {
   return runDiagnosisPipelineWithEngines(payload, {
     generateBasic: generateDiagnosisReport,
     generateAdvanced: generateAdvancedReport,
-    generateV1: generateUnifiedDiagnosisV1
+    generateV1: generateUnifiedDiagnosisV1,
+    runStagedV1: runV1StagedDiagnosisMock
   }, {
-    enableDiagnosisV1: config.enableDiagnosisV1
+    enableDiagnosisV1: config.enableDiagnosisV1,
+    enableV1StagedRunner: config.enableV1StagedRunner
   });
 }
 
@@ -22,6 +25,10 @@ export async function runDiagnosisPipelineWithEngines(payload, engines, options 
   }
 
   try {
+    if (options.enableV1StagedRunner) {
+      return await runStagedV1Pipeline(payload, engines);
+    }
+
     const reportV1 = await engines.generateV1(payload);
     const legacyReport = reportV1ToLegacyReport(reportV1);
     return {
@@ -40,6 +47,22 @@ export async function runDiagnosisPipelineWithEngines(payload, engines, options 
       reportV1: buildFallbackReportV1(payload, legacyResult.finalReport, err)
     };
   }
+}
+
+async function runStagedV1Pipeline(payload, engines) {
+  const stagedResult = await engines.runStagedV1(payload);
+  const reportV1 = stagedResult?.reportV1 || {};
+  const legacyReport = reportV1ToLegacyReport(reportV1);
+
+  return {
+    internalStage: stagedResult?.diagnostics?.stageReached || reportV1.stage || 'basic',
+    diagnosisDepth: 'basic',
+    diagnosisEngine: 'v1-staged',
+    reportV1,
+    diagnostics: stagedResult?.diagnostics || null,
+    basicReport: legacyReport,
+    finalReport: legacyReport
+  };
 }
 
 async function runLegacyDiagnosisPipeline(payload, engines) {
