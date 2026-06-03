@@ -1,8 +1,27 @@
 import { evaluateV1Gatekeeper } from './v1Gatekeeper.js';
 import { decideV1Stage } from './v1StageDecision.js';
 import { REPORT_V1_SCHEMA_VERSION } from './reportV1Schema.js';
+import { config } from '../config.js';
+import { buildV1BasicDiagnosisMessages, V1_BASIC_PROMPT_VERSION } from '../prompts/v1BasicDiagnosis.js';
+import { buildV1AdvancedDiagnosisMessages, V1_ADVANCED_PROMPT_VERSION } from '../prompts/v1AdvancedDiagnosis.js';
+import { buildV1FinalDiagnosisMessages, V1_FINAL_PROMPT_VERSION } from '../prompts/v1FinalDiagnosis.js';
+import { ApiError } from '../utils/errors.js';
 
-export function runV1StagedDiagnosisMock(input = {}) {
+export async function runV1StagedDiagnosis(input = {}, deps = {}) {
+  const realPromptsEnabled = resolveRealPromptsEnabled(input, deps);
+
+  if (!realPromptsEnabled) {
+    return runV1StagedDiagnosisMock(input, { realPromptsEnabled: false });
+  }
+
+  if (typeof deps.generateV1StageReport !== 'function') {
+    throw new ApiError(500, 'V1_REAL_PROMPTS_NOT_CONFIGURED', 'V1 staged real prompts require an injected aiClient.');
+  }
+
+  return runV1StagedDiagnosisWithAi(input, deps);
+}
+
+export function runV1StagedDiagnosisMock(input = {}, options = {}) {
   const gate = evaluateV1Gatekeeper(input);
 
   if (gate.decision === 'stop_d0') {
@@ -11,7 +30,10 @@ export function runV1StagedDiagnosisMock(input = {}) {
       decision: 'stop_d0',
       stopReason: gate.reportV1.rejection_reason.message,
       reportV1: gate.reportV1,
-      decisions: [gate]
+      decisions: [gate],
+      usedMockRunner: true,
+      noAi: true,
+      realPromptsEnabled: Boolean(options.realPromptsEnabled)
     });
   }
 
@@ -39,7 +61,10 @@ export function runV1StagedDiagnosisMock(input = {}) {
         summary: '材料具备部分故事信息，但基础故事链条尚未成立。',
         nextStep: '先补清主角、目标、阻碍和结果。'
       }),
-      decisions
+      decisions,
+      usedMockRunner: true,
+      noAi: true,
+      realPromptsEnabled: Boolean(options.realPromptsEnabled)
     });
   }
 
@@ -63,7 +88,10 @@ export function runV1StagedDiagnosisMock(input = {}) {
         summary: '材料已经像一个故事，但结构、人物推进或类型完成度仍需加强。',
         nextStep: '优先整理结构转折、人物选择和关键场面。'
       }),
-      decisions
+      decisions,
+      usedMockRunner: true,
+      noAi: true,
+      realPromptsEnabled: Boolean(options.realPromptsEnabled)
     });
   }
 
@@ -81,11 +109,114 @@ export function runV1StagedDiagnosisMock(input = {}) {
       summary: '材料已完成 staged runner 的终极阶段模拟。',
       nextStep: '可考虑整理为项目档案，并进入帧火花内部进一步评估。'
     }),
-    decisions
+    decisions,
+    usedMockRunner: true,
+    noAi: true,
+    realPromptsEnabled: Boolean(options.realPromptsEnabled)
   });
 }
 
-function buildRunnerResult({ stageReached, decision, stopReason, reportV1, decisions }) {
+async function runV1StagedDiagnosisWithAi(input, deps) {
+  const gate = evaluateV1Gatekeeper(input);
+
+  if (gate.decision === 'stop_d0') {
+    return buildRunnerResult({
+      stageReached: 'D0',
+      decision: 'stop_d0',
+      stopReason: gate.reportV1.rejection_reason.message,
+      reportV1: gate.reportV1,
+      decisions: [gate],
+      usedMockRunner: false,
+      noAi: true,
+      realPromptsEnabled: true
+    });
+  }
+
+  const decisions = [gate];
+  const materialHint = normalizeMaterialHint(input.materialHint || input.metadata || {});
+
+  const basicReport = await deps.generateV1StageReport({
+    stage: 'basic',
+    promptVersion: V1_BASIC_PROMPT_VERSION,
+    messages: buildV1BasicDiagnosisMessages({ ...input, materialHint }),
+    payload: input,
+    metadata: materialHint
+  });
+  const basicDecision = decideV1Stage(extractDecisionInput('basic', basicReport));
+  decisions.push(basicDecision);
+
+  if (basicDecision.action === 'stop_basic') {
+    return buildRunnerResult({
+      stageReached: 'basic',
+      decision: basicDecision.action,
+      stopReason: basicDecision.reason,
+      reportV1: basicReport,
+      decisions,
+      usedMockRunner: false,
+      noAi: false,
+      realPromptsEnabled: true,
+      promptVersion: V1_BASIC_PROMPT_VERSION
+    });
+  }
+
+  const advancedReport = await deps.generateV1StageReport({
+    stage: 'advanced',
+    promptVersion: V1_ADVANCED_PROMPT_VERSION,
+    messages: buildV1AdvancedDiagnosisMessages({ ...input, materialHint, basicReport }),
+    payload: input,
+    metadata: materialHint
+  });
+  const advancedDecision = decideV1Stage(extractDecisionInput('advanced', advancedReport));
+  decisions.push(advancedDecision);
+
+  if (advancedDecision.action !== 'continue_final') {
+    return buildRunnerResult({
+      stageReached: 'advanced',
+      decision: advancedDecision.action,
+      stopReason: advancedDecision.reason,
+      reportV1: advancedReport,
+      decisions,
+      usedMockRunner: false,
+      noAi: false,
+      realPromptsEnabled: true,
+      promptVersion: V1_ADVANCED_PROMPT_VERSION
+    });
+  }
+
+  const finalReport = await deps.generateV1StageReport({
+    stage: 'final',
+    promptVersion: V1_FINAL_PROMPT_VERSION,
+    messages: buildV1FinalDiagnosisMessages({ ...input, materialHint, basicReport, advancedReport }),
+    payload: input,
+    metadata: materialHint
+  });
+  const finalDecision = decideV1Stage(extractDecisionInput('final', finalReport));
+  decisions.push(finalDecision);
+
+  return buildRunnerResult({
+    stageReached: 'final',
+    decision: finalDecision.action,
+    stopReason: finalDecision.reason,
+    reportV1: finalReport,
+    decisions,
+    usedMockRunner: false,
+    noAi: false,
+    realPromptsEnabled: true,
+    promptVersion: V1_FINAL_PROMPT_VERSION
+  });
+}
+
+function buildRunnerResult({
+  stageReached,
+  decision,
+  stopReason,
+  reportV1,
+  decisions,
+  usedMockRunner,
+  noAi,
+  realPromptsEnabled,
+  promptVersion = ''
+}) {
   return {
     ok: true,
     reportV1,
@@ -94,8 +225,10 @@ function buildRunnerResult({ stageReached, decision, stopReason, reportV1, decis
       stageReached,
       decision,
       stopReason,
-      usedMockRunner: true,
-      noAi: true,
+      usedMockRunner,
+      noAi,
+      realPromptsEnabled,
+      promptVersion,
       decisions: decisions.map((item) => ({
         stage: item.stage || item.currentStage,
         decision: item.decision || item.action,
@@ -103,6 +236,29 @@ function buildRunnerResult({ stageReached, decision, stopReason, reportV1, decis
       }))
     }
   };
+}
+
+function extractDecisionInput(stage, reportV1) {
+  const hints = reportV1?.diagnostics?.stageDecisionHints || reportV1?.stageDecisionHints || {};
+
+  return {
+    stage,
+    passed: typeof hints.passed === 'boolean' ? hints.passed : stage === 'final',
+    flags: {
+      storyLikely: hints.passed === true && stage === 'basic',
+      storyStands: hints.passed === true && stage === 'advanced'
+    }
+  };
+}
+
+function resolveRealPromptsEnabled(input, deps) {
+  if (typeof deps.enableV1RealPrompts === 'boolean') {
+    return deps.enableV1RealPrompts;
+  }
+  if (typeof input.enableV1RealPrompts === 'boolean') {
+    return input.enableV1RealPrompts;
+  }
+  return config.enableV1RealPrompts;
 }
 
 function buildStageReport({ stage, maturityLevel, materialHint, summary, nextStep }) {
@@ -164,4 +320,3 @@ function normalizeMaterialHint(value) {
 function normalizeString(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
-

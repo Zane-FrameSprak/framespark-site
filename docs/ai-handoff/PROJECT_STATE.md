@@ -121,6 +121,7 @@ V1 staged architecture direction:
 - The staged runner branch is now gated inside `diagnosisPipeline` by both `ENABLE_DIAGNOSIS_V1` and `ENABLE_V1_STAGED_RUNNER`. Both defaults remain false, so legacy behavior is unchanged.
 - V1 basic, advanced, and final stage prompt drafts now exist. They are not wired to `aiClient`, runner, pipeline, or production routes.
 - `aiClient.generateV1StageReport` now exists for future V1 staged prompts. It is mock-tested and not wired to runner or production pipeline yet.
+- `v1StageRunner` can now use injected stage AI calls only when `ENABLE_V1_REAL_PROMPTS=true`. The default remains mock/no-AI.
 
 ## Route / Guard / Router Risk
 

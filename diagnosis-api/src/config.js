@@ -19,6 +19,7 @@ export const config = {
   aiTimeoutMs: readNumber('AI_TIMEOUT_MS', 90000),
   enableDiagnosisV1: process.env.ENABLE_DIAGNOSIS_V1 === 'true',
   enableV1StagedRunner: process.env.ENABLE_V1_STAGED_RUNNER === 'true',
+  enableV1RealPrompts: process.env.ENABLE_V1_REAL_PROMPTS === 'true',
   enableDevTools: process.env.ENABLE_DEV_TOOLS === 'true',
   rateLimits: {
     diagnosisDailyLimit: readNumber('DIAGNOSIS_DAILY_LIMIT', 10),
