@@ -55,7 +55,8 @@ Updated by: Codex
 - `npm run smoke:v1-staged-real` runs a guarded mock-only basic-stage smoke. Do not run `--real` without explicit approval.
 - The guarded smoke now reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, a fictional internal short synopsis sample.
 - First guarded `--real` basic smoke has succeeded once with no fallback; next do not jump to public upload.
-- Next recommended step: review the enhanced smoke summary, then plan whether to test advanced/final with mock first.
+- Mock `--max-stage=advanced` and `--max-stage=final` are available for serial staged smoke. Real advanced/final remains blocked.
+- Next recommended step: review mock final output, then plan a separately confirmed real advanced smoke if needed.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.

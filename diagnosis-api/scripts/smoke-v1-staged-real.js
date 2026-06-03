@@ -6,14 +6,48 @@ import {
   V1_BASIC_PROMPT_VERSION,
   buildV1BasicDiagnosisMessages
 } from '../src/prompts/v1BasicDiagnosis.js';
+import {
+  V1_ADVANCED_PROMPT_VERSION,
+  buildV1AdvancedDiagnosisMessages
+} from '../src/prompts/v1AdvancedDiagnosis.js';
+import {
+  V1_FINAL_PROMPT_VERSION,
+  buildV1FinalDiagnosisMessages
+} from '../src/prompts/v1FinalDiagnosis.js';
 
 const STAGE = 'basic';
+const STAGES = ['basic', 'advanced', 'final'];
 const realMode = process.argv.includes('--real');
+const maxStage = parseMaxStage();
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const samplePath = resolve(scriptDir, '../dev-samples/v1-staged-smoke-short-synopsis.txt');
 
 async function main() {
   const startedAt = Date.now();
+
+  if (realMode && maxStage !== 'basic') {
+    printLines({
+      sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
+      sampleChars: 0,
+      mode: 'real',
+      maxStage,
+      noAi: true,
+      realCall: false,
+      stage: STAGE,
+      stageSequence: '',
+      stageReached: '',
+      decision: '',
+      promptVersion: '',
+      model: getModelName(),
+      fallback: false,
+      reportV1: false,
+      diagnostics: false,
+      latencyMs: Date.now() - startedAt,
+      error: 'advanced/final real smoke requires a separate confirmation step.'
+    });
+    process.exitCode = 1;
+    return;
+  }
 
   if (realMode) {
     const missing = getMissingRealGuards();
@@ -22,7 +56,9 @@ async function main() {
         sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
         sampleChars: 0,
         mode: 'real',
+        maxStage,
         stage: STAGE,
+        stageSequence: '',
         noAi: true,
         realCall: false,
         stageReached: '',
@@ -58,23 +94,19 @@ async function main() {
     }
   };
 
-  const messages = buildV1BasicDiagnosisMessages(payload);
-  const reportV1 = await generateV1StageReport({
-    stage: STAGE,
-    messages,
-    promptVersion: V1_BASIC_PROMPT_VERSION,
-    payload,
-    metadata: payload.materialHint,
-    ...(realMode ? {} : { requestFn: mockRequest })
-  });
+  const results = await runStages(payload);
+  const finalResult = results[results.length - 1];
+  const reportV1 = finalResult?.reportV1;
 
   printLines({
     sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
     sampleChars: sampleText.length,
     mode: realMode ? 'real' : 'mock',
+    maxStage,
     noAi: !realMode,
     realCall: realMode,
-    stage: STAGE,
+    stage: finalResult?.stage || STAGE,
+    stageSequence: results.map((item) => item.stage).join('>'),
     stageReached: getStageReached(reportV1),
     decision: getDecision(reportV1),
     promptVersion: getPromptVersion(reportV1),
@@ -84,6 +116,51 @@ async function main() {
     diagnostics: Boolean(reportV1?.diagnostics),
     latencyMs: Date.now() - startedAt
   });
+}
+
+async function runStages(payload) {
+  const stageSequence = STAGES.slice(0, STAGES.indexOf(maxStage) + 1);
+  const results = [];
+  let basicReport = null;
+  let advancedReport = null;
+
+  for (const stage of stageSequence) {
+    const stageInput = buildStageInput(stage, payload, basicReport, advancedReport);
+    const reportV1 = await generateV1StageReport({
+      stage,
+      messages: stageInput.messages,
+      promptVersion: stageInput.promptVersion,
+      payload,
+      metadata: payload.materialHint,
+      ...(realMode ? {} : { requestFn: () => mockRequest(stage) })
+    });
+
+    results.push({ stage, reportV1 });
+    if (stage === 'basic') basicReport = reportV1;
+    if (stage === 'advanced') advancedReport = reportV1;
+  }
+
+  return results;
+}
+
+function buildStageInput(stage, payload, basicReport, advancedReport) {
+  if (stage === 'advanced') {
+    return {
+      promptVersion: V1_ADVANCED_PROMPT_VERSION,
+      messages: buildV1AdvancedDiagnosisMessages({ ...payload, basicReport })
+    };
+  }
+  if (stage === 'final') {
+    return {
+      promptVersion: V1_FINAL_PROMPT_VERSION,
+      messages: buildV1FinalDiagnosisMessages({ ...payload, basicReport, advancedReport })
+    };
+  }
+
+  return {
+    promptVersion: V1_BASIC_PROMPT_VERSION,
+    messages: buildV1BasicDiagnosisMessages(payload)
+  };
 }
 
 function getMissingRealGuards() {
@@ -99,7 +176,12 @@ async function readSmokeSample() {
   return readFile(samplePath, 'utf8');
 }
 
-async function mockRequest() {
+async function mockRequest(stage = 'basic') {
+  const promptVersion = getStagePromptVersion(stage);
+  const maturityLevel = stage === 'final' ? 'A' : 'B';
+  const conversionStatus = stage === 'final' ? 'possible_after_revision' : 'not_applicable';
+  const recommendedAction = stage === 'final' ? 'complete_final' : `continue_${stage === 'basic' ? 'advanced' : 'final'}`;
+
   return JSON.stringify({
     material_type: 'synopsis',
     primary_material_type: 'synopsis',
@@ -107,8 +189,8 @@ async function mockRequest() {
     is_mixed_material: false,
     material_components: [],
     format_hint: 'short_film_like',
-    maturity_level: 'B',
-    material_summary: 'Mock basic smoke summary.',
+    maturity_level: maturityLevel,
+    material_summary: `Mock ${stage} smoke summary.`,
     story_core: {
       premise: 'A projectionist uses one last screening to face a shared memory.',
       protagonist: 'A young projectionist.',
@@ -137,24 +219,28 @@ async function mockRequest() {
       }
     ],
     next_step: {
-      label: 'Continue to basic revision',
-      detail: 'Tighten the protagonist goal, obstacle, and final action.'
+      label: stage === 'final' ? 'Prepare project file' : `Continue to ${stage} revision`,
+      detail: stage === 'final'
+        ? '整理项目档案，等待内部进一步评估。'
+        : 'Tighten the protagonist goal, obstacle, and final action.'
     },
     conversion_advice: {
-      status: 'not_applicable',
-      summary: 'Basic stage does not make project conversion judgments.',
-      recommended_action: ''
+      status: conversionStatus,
+      summary: stage === 'final'
+        ? 'Mock final smoke suggests only a restrained internal review path.'
+        : `${stage} stage does not make project conversion judgments.`,
+      recommended_action: stage === 'final' ? '整理项目档案，不承诺商业或制作结果。' : ''
     },
     rejection_reason: {
       code: 'OTHER',
       message: ''
     },
     diagnostics: {
-      promptVersion: V1_BASIC_PROMPT_VERSION,
+      promptVersion,
       stageDecisionHints: {
         passed: true,
         reason: 'The sample has a protagonist, pressure, event chain, and change direction.',
-        recommendedAction: 'continue_advanced'
+        recommendedAction
       }
     }
   });
@@ -178,11 +264,26 @@ function getDecision(reportV1) {
 }
 
 function getPromptVersion(reportV1) {
-  return reportV1?.diagnostics?.promptVersion || V1_BASIC_PROMPT_VERSION;
+  return reportV1?.diagnostics?.promptVersion || getStagePromptVersion(reportV1?.stage || STAGE);
 }
 
 function getModelName(includeRealModel = true) {
   return includeRealModel ? (process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash') : 'mock';
+}
+
+function getStagePromptVersion(stage) {
+  if (stage === 'advanced') return V1_ADVANCED_PROMPT_VERSION;
+  if (stage === 'final') return V1_FINAL_PROMPT_VERSION;
+  return V1_BASIC_PROMPT_VERSION;
+}
+
+function parseMaxStage() {
+  const arg = process.argv.find((item) => item.startsWith('--max-stage='));
+  const value = arg ? arg.split('=')[1] : 'basic';
+  if (STAGES.includes(value)) {
+    return value;
+  }
+  return 'basic';
 }
 
 main().catch((err) => {
@@ -190,7 +291,9 @@ main().catch((err) => {
     sampleSource: 'dev-samples/v1-staged-smoke-short-synopsis.txt',
     sampleChars: 0,
     mode: realMode ? 'real' : 'mock',
+    maxStage,
     stage: STAGE,
+    stageSequence: '',
     noAi: !realMode,
     realCall: realMode,
     stageReached: '',

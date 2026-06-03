@@ -126,6 +126,7 @@ V1 staged architecture direction:
 - `diagnosis-api/dev-samples/v1-staged-smoke-short-synopsis.txt` now exists as a fictional internal smoke sample. It is not real user material and is used by the smoke script without printing full text.
 - First guarded V1 basic `--real` smoke succeeded once against DeepSeek with `reportV1=true`, diagnostics present, and no fallback. This only proves the basic-stage link, not diagnosis quality.
 - The smoke script now prints a safer summary including stage, stageReached, decision, promptVersion, model, fallback, and latency without full text or full reports.
+- The smoke script now supports mock-only `--max-stage=advanced` and `--max-stage=final` serial checks. Advanced/final real smoke is still blocked pending separate confirmation.
 - User registration/login, project database, and talent-platform features are outside the current V1 smoke scope.
 
 ## Route / Guard / Router Risk

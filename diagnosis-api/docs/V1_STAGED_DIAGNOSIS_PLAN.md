@@ -146,9 +146,11 @@ No real AI API tests are required for the first implementation pass.
 
 - Default mode is mock only: `npm run smoke:v1-staged-real`.
 - Default mode reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, does not require `DEEPSEEK_API_KEY`, does not send network requests, and prints `mode=mock`, `noAi=true`, `realCall=false`.
-- The first smoke scope is basic stage only.
-- Logs must include only sample source, sample length, mode, stage, stageReached, decision, promptVersion, model, fallback, latency, AI flags, and report/diagnostics existence; do not print full sample text or full report content.
+- Mock mode supports `--max-stage=basic`, `--max-stage=advanced`, and `--max-stage=final` for serial basic -> advanced -> final smoke coverage.
+- Real mode remains limited to basic unless a separate confirmation step is added.
+- Logs must include only sample source, sample length, mode, maxStage, stage sequence, stage, stageReached, decision, promptVersion, model, fallback, latency, AI flags, and report/diagnostics existence; do not print full sample text or full report content.
 - Real mode requires explicit `--real` plus all guards set temporarily in the shell: `DEEPSEEK_API_KEY`, `ENABLE_DIAGNOSIS_V1=true`, `ENABLE_V1_STAGED_RUNNER=true`, and `ENABLE_V1_REAL_PROMPTS=true`.
+- `--real --max-stage=advanced` and `--real --max-stage=final` must stop with `advanced/final real smoke requires a separate confirmation step.`
 - Real mode must not print API keys, full sample text, full reports, or raw model responses.
 - Real mode should be run only after manual approval with a short internal sample.
 - First basic-stage real smoke succeeded once with no fallback; quality review is still out of scope for that check.
