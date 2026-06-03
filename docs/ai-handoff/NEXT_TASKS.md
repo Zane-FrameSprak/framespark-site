@@ -53,7 +53,8 @@ Updated by: Codex
 - `aiClient.generateV1StageReport` now exists and is mock-tested. It is not connected to runner or production pipeline yet.
 - `v1StageRunner` now supports injected stage AI calls behind `ENABLE_V1_REAL_PROMPTS=false`.
 - `npm run smoke:v1-staged-real` runs a guarded mock-only basic-stage smoke. Do not run `--real` without explicit approval.
-- Next recommended step: prepare one short internal sample and manually run the guarded `--real` smoke only after confirming key, switches, cost, and logging rules.
+- The guarded smoke now reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, a fictional internal short synopsis sample.
+- Next recommended step: manually run the guarded `--real` basic smoke only after confirming key, switches, cost, and logging rules.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.

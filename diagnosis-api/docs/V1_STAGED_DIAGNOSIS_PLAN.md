@@ -145,8 +145,9 @@ No real AI API tests are required for the first implementation pass.
 `scripts/smoke-v1-staged-real.js` is the first smoke harness for the real staged prompt path.
 
 - Default mode is mock only: `npm run smoke:v1-staged-real`.
-- Default mode does not require `DEEPSEEK_API_KEY`, does not send network requests, and prints `mode=mock`, `noAi=true`, `realCall=false`.
+- Default mode reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, does not require `DEEPSEEK_API_KEY`, does not send network requests, and prints `mode=mock`, `noAi=true`, `realCall=false`.
 - The first smoke scope is basic stage only.
+- Logs must include only sample source, sample length, mode, stage, AI flags, and report/diagnostics existence; do not print full sample text or full report content.
 - Real mode requires explicit `--real` plus all guards set temporarily in the shell: `DEEPSEEK_API_KEY`, `ENABLE_DIAGNOSIS_V1=true`, `ENABLE_V1_STAGED_RUNNER=true`, and `ENABLE_V1_REAL_PROMPTS=true`.
 - Real mode must not print API keys, full sample text, full reports, or raw model responses.
 - Real mode should be run only after manual approval with a short internal sample.
@@ -160,7 +161,7 @@ No real AI API tests are required for the first implementation pass.
 5. Draft basic, advanced, and final stage prompts without wiring them to runner.
 6. Add aiClient stage report wrapper with mock tests, without wiring it to runner.
 7. Allow `v1StageRunner` to use injected stage AI calls only when `ENABLE_V1_REAL_PROMPTS=true`.
-8. Add guarded staged smoke script with mock default and explicit real-mode protection.
+8. Add guarded staged smoke script with mock default, sample-file reading, and explicit real-mode protection.
 9. Add internal evaluation visibility.
 10. Run controlled real AI smoke tests.
 
