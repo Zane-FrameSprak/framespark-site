@@ -1,6 +1,6 @@
 # Architecture Map
 
-Last updated: 2026-05-29
+Last updated: 2026-06-03
 Updated by: ChatGPT via GitHub connector
 
 This file is the engineering map for AI coding agents. Keep it factual and concise.
@@ -181,6 +181,41 @@ Current V1 schema / compatibility:
 - `reportV1Compat.js`
 
 Do not enable V1 by default until route-level behavior, long materials, and real samples are stable.
+
+### V1 Staged Diagnosis Direction
+
+The future V1 mainline should be staged, not a single all-in-one run.
+
+Plan document:
+
+```text
+diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md
+```
+
+Target flow:
+
+```text
+upload / paste
+-> route parse
+-> guard hard rejection only
+-> materialRouter preliminary classification
+-> v1Gatekeeper
+-> D0 OR basic diagnosis
+-> advanced diagnosis only if basic passes
+-> final diagnosis only if advanced passes
+-> current-stage report
+```
+
+Planned modules:
+
+- `v1Gatekeeper`
+- `v1StageRunner`
+- `v1StageRouter`
+- `v1StageDecision`
+- `v1ReportAdapter`
+- `v1EvaluationHooks`
+
+Route / guard should keep hard rejection only: file too large, unsafe type, parse failure, empty text, severe mojibake, rate limit, or service safety limits. Information-poor, non-story, non-film-related, or low-maturity materials should produce V1 D0 after the staged boundary is implemented and tested.
 
 ## Route / Guard Layer
 

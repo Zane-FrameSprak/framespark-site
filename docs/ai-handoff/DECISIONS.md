@@ -1,6 +1,6 @@
 # Decision Log
 
-Last updated: 2026-05-29
+Last updated: 2026-06-03
 Updated by: ChatGPT via GitHub connector
 
 This file records important product and engineering decisions so future AI coding agents do not re-litigate settled choices without a reason.
@@ -136,3 +136,14 @@ The diagnosis backend is not yet proxied in production, the talent platform is n
 
 Impact:
 Diagnosis stays upload-disabled, talent copy stays not-open, and development project detail pages stay accessible but `noindex` and out of sitemap until public indexing is intentional.
+
+## 2026-06-03 — Make V1 diagnosis staged before it becomes the mainline
+
+Decision:
+Future diagnosis work should move toward a staged V1 architecture: D0 gatekeeper, basic diagnosis, advanced diagnosis, and final conversion advice. Stages should not all run by default.
+
+Reason:
+The current V1 path is a gated single AI call with compatibility mapping. It is useful for testing but does not match the product goal of stopping at the right maturity level.
+
+Impact:
+Keep `ENABLE_DIAGNOSIS_V1=false`. Keep legacy fallback. Add staged runner skeletons and no-AI tests before changing route, guard, or materialRouter behavior.

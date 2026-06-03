@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-01
+Last updated: 2026-06-03
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -107,6 +107,14 @@ Current diagnosis behavior:
 - When V1 is enabled, the pipeline tries `generateUnifiedDiagnosisV1` first.
 - If V1 fails, the code falls back to the legacy pipeline and builds a fallback `reportV1`.
 - API responses still preserve legacy fields: `basicReport`, `finalReport`, and `report`.
+
+V1 staged architecture direction:
+
+- Future diagnosis work should move toward a staged V1 mainline, documented in `diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md`.
+- V1 should not run every stage at once. It should stop at D0, basic, advanced, or final depending on stage decisions.
+- `ENABLE_DIAGNOSIS_V1` remains false. The new staged direction is a plan only; no business code has been changed for it yet.
+- Legacy fallback remains required until frontend, logs, review tooling, and internal evaluation are migrated.
+- Do not start this migration by changing route, guard, or materialRouter behavior. Add runner skeletons and no-AI tests first.
 
 ## Route / Guard / Router Risk
 

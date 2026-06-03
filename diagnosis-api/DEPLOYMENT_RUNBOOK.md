@@ -10,6 +10,7 @@ This is a manual runbook for production connection of `diagnosis-api`. It is not
 - `diagnosis-api` should use `127.0.0.1:8788`.
 - `ENABLE_DIAGNOSIS_V1` must remain `false`.
 - The public `/diagnosis/` page remains internal-test / public-upload-disabled.
+- V1 staged diagnosis is still a plan; do not enable it during deployment.
 
 ## Required env
 

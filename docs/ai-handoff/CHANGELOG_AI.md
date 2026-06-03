@@ -2,6 +2,7 @@
 
 ## Recent Summary
 
+- 2026-06-03: Added V1 staged diagnosis architecture plan. V1 future mainline is staged, not a single all-in-one run; no business code changed and `ENABLE_DIAGNOSIS_V1` remains false.
 - 2026-06-02: Public unfinished product areas were frozen for launch posture: talent copy says not open, development project pages are `noindex`, and project detail URLs were removed from sitemap.
 - 2026-06-02: Homepage platform cards gained unavailable-state prompts, and project cards now show a "details in design" prompt instead of navigating from the homepage.
 - 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.
@@ -15,6 +16,14 @@
 - 2026-05-29: Committed homepage hero compact animation (`94160f1`) and handoff update (`731040a`) — both pushed.
 
 ## 2026-06-01 (Codex — local session)
+
+### Diagnosis V1 Staged Plan
+
+- Added `diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md`.
+- Documented `v1Gatekeeper`, `v1StageRunner`, `v1StageRouter`, `v1StageDecision`, `v1ReportAdapter`, and `v1EvaluationHooks`.
+- Recorded route/guard hard-reject boundaries versus V1 D0 handling.
+- Recorded the no-AI test checklist for D0, basic, advanced, final, and legacy fallback.
+- No diagnosis business code was changed. `ENABLE_DIAGNOSIS_V1` remains false.
 
 ### Diagnosis API Production Plan
 
