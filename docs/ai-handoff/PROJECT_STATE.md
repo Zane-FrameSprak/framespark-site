@@ -115,6 +115,7 @@ V1 staged architecture direction:
 - `ENABLE_DIAGNOSIS_V1` remains false. The new staged direction is a plan only; no business code has been changed for it yet.
 - Legacy fallback remains required until frontend, logs, review tooling, and internal evaluation are migrated.
 - Do not start this migration by changing route, guard, or materialRouter behavior. Add runner skeletons and no-AI tests first.
+- V1 staged commit 1 adds pure gatekeeper and stage-decision skeletons plus no-AI tests. These are not connected to production routes or legacy pipeline behavior.
 
 ## Route / Guard / Router Risk
 

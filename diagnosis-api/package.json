@@ -28,6 +28,7 @@
     "test:dev-sample-runs": "node scripts/test-dev-sample-runs.js",
     "test:report-v1-compat": "node scripts/test-report-v1-compat.js",
     "test:report-v1-pipeline": "node scripts/test-report-v1-pipeline.js",
+    "test:v1-gatekeeper-decision": "node scripts/test-v1-gatekeeper-decision.js",
     "test:unified-v1-prompt": "node scripts/test-unified-v1-prompt.js",
     "logs:diagnosis": "node scripts/list-diagnosis-logs.js",
     "list:review-queue": "node scripts/list-review-queue.js",

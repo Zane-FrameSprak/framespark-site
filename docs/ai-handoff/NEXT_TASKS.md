@@ -45,6 +45,7 @@ Updated by: Codex
 - Treat staged V1 as the future mainline: D0 gatekeeper, basic diagnosis, advanced diagnosis, final conversion advice.
 - Current work is still planning only. Do not enable `ENABLE_DIAGNOSIS_V1=true`.
 - Next recommended implementation step: add staged runner skeleton and no-AI tests.
+- V1 commit 1 completed the pure gatekeeper / stage-decision skeleton. Next implementation step is `v1StageRunner` plus no-AI staged runner tests.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.
