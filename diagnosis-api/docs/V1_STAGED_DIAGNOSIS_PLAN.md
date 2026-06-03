@@ -146,7 +146,8 @@ No real AI API tests are required for the first implementation pass.
 3. Add stage decision tests.
 4. Wire V1 runner behind new internal-only switches.
 5. Draft basic, advanced, and final stage prompts without wiring them to runner.
-6. Add internal evaluation visibility.
-7. Run controlled real AI smoke tests.
+6. Add aiClient stage report wrapper with mock tests, without wiring it to runner.
+7. Add internal evaluation visibility.
+8. Run controlled real AI smoke tests.
 
 Do not start by changing route, guard, or materialRouter behavior. Their boundaries should be frozen by tests first.

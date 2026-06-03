@@ -26,6 +26,8 @@ const MATERIAL_FORMS = new Set([
   'reject'
 ]);
 
+const V1_STAGES = new Set(['basic', 'advanced', 'final']);
+
 export function hasAiProvider() {
   return Boolean(config.deepseekApiKey);
 }
@@ -53,6 +55,44 @@ export async function generateUnifiedDiagnosisV1(payload) {
     throw new ApiError(500, 'AI_NOT_CONFIGURED', 'AI 服务尚未配置。');
   }
   return generateReportV1(payload, buildUnifiedDiagnosisV1Messages);
+}
+
+export async function generateV1StageReport({
+  stage,
+  messages,
+  promptVersion = '',
+  payload = {},
+  metadata = {},
+  requestFn
+} = {}) {
+  const normalizedStage = normalizeV1Stage(stage);
+  if (!normalizedStage) {
+    throw new ApiError(400, 'V1_STAGE_INVALID', '不支持的 V1 诊断阶段。');
+  }
+  if (!Array.isArray(messages) || messages.length === 0) {
+    throw new ApiError(400, 'V1_STAGE_MESSAGES_REQUIRED', 'V1 阶段诊断缺少 messages。');
+  }
+  if (!requestFn && !hasAiProvider()) {
+    throw new ApiError(500, 'AI_NOT_CONFIGURED', 'AI 服务尚未配置。');
+  }
+
+  const request = requestFn || makeRequest;
+  const requestPayload = { ...payload, stage: normalizedStage, promptVersion, metadata };
+
+  let raw;
+  try {
+    const content = await request(messages, { temperature: 0.2 });
+    raw = extractJson(content);
+    return normalizeReportV1(normalizeV1StageRaw(raw, requestPayload), requestPayload);
+  } catch (err) {
+    if (err instanceof ApiError && err.code === 'AI_REQUEST_TIMEOUT') {
+      throw err;
+    }
+    const retryMessages = buildV1StageRetryMessages(messages, normalizedStage);
+    const content = await request(retryMessages, { temperature: 0.1 });
+    raw = extractJson(content);
+    return normalizeReportV1(normalizeV1StageRaw(raw, requestPayload), requestPayload);
+  }
 }
 
 export async function classifyMaterialForm(input) {
@@ -213,6 +253,66 @@ function buildV1RetryMessages(originalMessages) {
       ].join('\n')
     }
   ];
+}
+
+function buildV1StageRetryMessages(originalMessages, stage) {
+  return [
+    ...originalMessages,
+    {
+      role: 'assistant',
+      content: '抱歉，我需要重新输出。'
+    },
+    {
+      role: 'user',
+      content: [
+        '请严格只输出合法 JSON 对象，不要包含任何说明文字、markdown 代码块或其他格式。',
+        `stage 必须为 ${stage}。`,
+        '必须包含字段：stage、maturity_level、summary、core、strengths、problems、suggestions、nextStep、stageDecisionHints。'
+      ].join('\n')
+    }
+  ];
+}
+
+function normalizeV1StageRaw(raw, payload = {}) {
+  const input = raw && typeof raw === 'object' ? raw : {};
+  const stage = normalizeV1Stage(input.stage || payload.stage) || 'basic';
+  const materialType = input.primary_material_type ||
+    input.material_type ||
+    payload.metadata?.primary_material_type ||
+    payload.materialRouting?.primary_material_type ||
+    payload.material_type ||
+    'synopsis';
+
+  return {
+    schema_version: 'diagnosis-report-v1',
+    stage,
+    material_type: materialType,
+    primary_material_type: materialType,
+    secondary_material_types: Array.isArray(input.secondary_material_types) ? input.secondary_material_types : [],
+    is_mixed_material: typeof input.is_mixed_material === 'boolean' ? input.is_mixed_material : false,
+    material_components: Array.isArray(input.material_components) ? input.material_components : [],
+    format_hint: input.format_hint || 'unknown',
+    maturity_level: input.maturity_level || 'C',
+    material_summary: input.material_summary || input.summary || '已完成当前阶段诊断。',
+    story_core: input.story_core || input.core || '',
+    strengths: input.strengths || [],
+    main_problems: input.main_problems || input.problems || [],
+    priority_revisions: input.priority_revisions || input.suggestions || [],
+    next_step: input.next_step || input.nextStep || '建议继续补充和修订材料。',
+    conversion_advice: input.conversion_advice || { status: 'not_applicable', summary: '', recommended_action: '' },
+    rejection_reason: input.rejection_reason || { code: 'OTHER', message: '' },
+    diagnostics: {
+      ...(input.diagnostics && typeof input.diagnostics === 'object' ? input.diagnostics : {}),
+      stage,
+      promptVersion: payload.promptVersion || '',
+      stageDecisionHints: input.stageDecisionHints || null
+    }
+  };
+}
+
+function normalizeV1Stage(value) {
+  const stage = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return V1_STAGES.has(stage) ? stage : '';
 }
 
 function buildMaterialClassificationMessages({ text, userSelectedType, targetFormat }) {

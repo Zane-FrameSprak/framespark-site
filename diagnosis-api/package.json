@@ -33,6 +33,7 @@
     "test:v1-pipeline-staged-branch": "node scripts/test-v1-pipeline-staged-branch.js",
     "test:v1-pipeline-staged-integration": "node scripts/test-v1-pipeline-staged-integration.js",
     "test:v1-stage-prompts": "node scripts/test-v1-stage-prompts.js",
+    "test:v1-stage-ai-client": "node scripts/test-v1-stage-ai-client.js",
     "test:unified-v1-prompt": "node scripts/test-unified-v1-prompt.js",
     "logs:diagnosis": "node scripts/list-diagnosis-logs.js",
     "list:review-queue": "node scripts/list-review-queue.js",

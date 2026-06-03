@@ -50,7 +50,8 @@ Updated by: Codex
 - `ENABLE_V1_STAGED_RUNNER=false` is now documented and tested as the future staged branch gate.
 - Staged runner is now wired into `diagnosisPipeline` behind explicit switches, but still uses the no-AI mock runner.
 - V1 stage prompt drafts now exist for basic, advanced, and final. They are not connected to runner or AI calls.
-- Next recommended step: add aiClient stage-call wrapper and mock tests while keeping real prompts disabled.
+- `aiClient.generateV1StageReport` now exists and is mock-tested. It is not connected to runner or production pipeline yet.
+- Next recommended step: wire runner to injected stage AI calls behind `ENABLE_V1_REAL_PROMPTS=false`.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.
