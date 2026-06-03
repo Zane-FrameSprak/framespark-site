@@ -116,6 +116,7 @@ V1 staged architecture direction:
 - Legacy fallback remains required until frontend, logs, review tooling, and internal evaluation are migrated.
 - Do not start this migration by changing route, guard, or materialRouter behavior. Add runner skeletons and no-AI tests first.
 - V1 staged commit 1 adds pure gatekeeper and stage-decision skeletons plus no-AI tests. These are not connected to production routes or legacy pipeline behavior.
+- V1 staged commit 2 adds a mock `v1StageRunner` and no-AI staged runner tests. It is still not connected to production routes or legacy pipeline behavior.
 
 ## Route / Guard / Router Risk
 
