@@ -59,8 +59,8 @@ Updated by: Codex
 - Protected real advanced parameters are available, but not executed: `--real --real-stage=advanced --confirm-real-stage=advanced`.
 - First real advanced smoke timed out. Protected minimal mode is now required for the next real advanced attempt.
 - Minimal real advanced smoke succeeded once. Do not treat it as full advanced quality validation.
-- Protected real final parameters are available, but not executed: `--real --real-stage=final --confirm-real-stage=final --smoke-minimal`.
-- Next recommended step: explicitly approve one real final minimal smoke if needed; do not run full-input advanced smoke without a separate plan.
+- Minimal real final smoke succeeded once. Do not treat it as full final quality validation.
+- Next recommended step: plan full-input advanced smoke or staged runner evaluation hooks; do not reopen public upload or deploy `/api/diagnosis`.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
 - Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.

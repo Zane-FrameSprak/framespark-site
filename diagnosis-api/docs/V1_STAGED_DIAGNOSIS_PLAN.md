@@ -159,7 +159,7 @@ No real AI API tests are required for the first implementation pass.
 - First basic-stage real smoke succeeded once with no fallback; quality review is still out of scope for that check.
 - First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`; minimal advanced smoke has not been executed yet.
 - Minimal real advanced smoke succeeded once with a 420-character smoke sample, minimal mock basicReport, `reportV1=true`, diagnostics present, and `fallback=false`. This proves only the minimal advanced link, not full-input advanced quality.
-- Final stage has not been verified with real AI; protected minimal final parameters exist but have not been executed.
+- Minimal real final smoke succeeded once with a 420-character smoke sample, minimal mock basicReport and advancedReport, `reportV1=true`, diagnostics present, stageReached `final`, prompt version `v1-final-2026-06`, model `deepseek-v4-flash`, and `fallback=false`. This proves only the minimal final link, not full final diagnosis quality.
 
 ## Next Implementation Order
 
