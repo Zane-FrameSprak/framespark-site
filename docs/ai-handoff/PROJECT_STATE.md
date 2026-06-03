@@ -122,6 +122,7 @@ V1 staged architecture direction:
 - V1 basic, advanced, and final stage prompt drafts now exist. They are not wired to `aiClient`, runner, pipeline, or production routes.
 - `aiClient.generateV1StageReport` now exists for future V1 staged prompts. It is mock-tested and not wired to runner or production pipeline yet.
 - `v1StageRunner` can now use injected stage AI calls only when `ENABLE_V1_REAL_PROMPTS=true`. The default remains mock/no-AI.
+- `diagnosis-api/scripts/smoke-v1-staged-real.js` now exists as a guarded smoke harness. Default mode is mock/no-AI; real mode requires explicit `--real` plus temporary key and three V1 switches.
 
 ## Route / Guard / Router Risk
 

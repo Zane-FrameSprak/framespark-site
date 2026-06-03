@@ -36,6 +36,7 @@
     "test:v1-stage-ai-client": "node scripts/test-v1-stage-ai-client.js",
     "test:v1-staged-runner-real-prompts-gate": "node scripts/test-v1-staged-runner-real-prompts-gate.js",
     "test:unified-v1-prompt": "node scripts/test-unified-v1-prompt.js",
+    "smoke:v1-staged-real": "node scripts/smoke-v1-staged-real.js",
     "logs:diagnosis": "node scripts/list-diagnosis-logs.js",
     "list:review-queue": "node scripts/list-review-queue.js",
     "samples:new": "node scripts/create-sample-test-run.js"

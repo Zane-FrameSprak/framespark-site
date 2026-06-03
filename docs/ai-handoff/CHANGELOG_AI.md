@@ -10,6 +10,7 @@
 - 2026-06-03: Added V1 basic, advanced, and final stage prompt drafts plus static prompt tests. They are not wired to runner or aiClient.
 - 2026-06-03: Added `generateV1StageReport` in aiClient plus mock tests. It is not wired to runner or production pipeline yet.
 - 2026-06-03: Gated real V1 staged prompts in `v1StageRunner` behind `ENABLE_V1_REAL_PROMPTS=false` and injected stage AI calls. No real AI was run.
+- 2026-06-03: Added guarded V1 staged smoke script. Default run is mock/no-AI; real mode requires explicit `--real` and temporary V1 switches.
 - 2026-06-02: Public unfinished product areas were frozen for launch posture: talent copy says not open, development project pages are `noindex`, and project detail URLs were removed from sitemap.
 - 2026-06-02: Homepage platform cards gained unavailable-state prompts, and project cards now show a "details in design" prompt instead of navigating from the homepage.
 - 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.
