@@ -47,6 +47,7 @@ Updated by: Codex
 - Next recommended implementation step: add staged runner skeleton and no-AI tests.
 - V1 commit 1 completed the pure gatekeeper / stage-decision skeleton.
 - V1 commit 2 completed the mock staged runner skeleton and no-AI staged runner tests.
+- `ENABLE_V1_STAGED_RUNNER=false` is now documented and tested as the future staged branch gate.
 - Next recommended step: review the V1 skeleton, then plan how to wire it into `diagnosisPipeline` behind explicit switches.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
 - Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.

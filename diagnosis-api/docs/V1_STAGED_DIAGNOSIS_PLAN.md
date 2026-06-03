@@ -7,6 +7,7 @@ V1 diagnosis should become the future mainline architecture, but it must be stag
 Current constraints:
 
 - Keep `ENABLE_DIAGNOSIS_V1=false`.
+- Keep `ENABLE_V1_STAGED_RUNNER=false`.
 - Keep legacy fallback.
 - Keep the public upload entry closed.
 - Public upload copy only promises TXT, DOCX, and pasted text.
@@ -110,7 +111,8 @@ Do not promise commercial value, financing value, or production feasibility.
 
 - Keep `ENABLE_DIAGNOSIS_V1=false`.
 - Add `ENABLE_V1_D0` only after D0 boundaries are tested.
-- Add `ENABLE_V1_STAGED_RUNNER` only after runner tests pass.
+- `ENABLE_V1_STAGED_RUNNER` exists as a future switch and remains false.
+- Only `ENABLE_DIAGNOSIS_V1=true` plus `ENABLE_V1_STAGED_RUNNER=true` may enter the future staged runner branch.
 - Rollout order: internal/dev -> V1 D0 -> staged runner -> limited internal smoke -> consider replacing legacy default.
 - Keep legacy fallback until frontend, logs, review tools, and internal eval are migrated.
 
