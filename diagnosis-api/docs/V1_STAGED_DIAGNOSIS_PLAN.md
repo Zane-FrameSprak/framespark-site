@@ -157,6 +157,8 @@ No real AI API tests are required for the first implementation pass.
 - Real mode should be run only after manual approval with a short internal sample.
 - First basic-stage real smoke succeeded once with no fallback; quality review is still out of scope for that check.
 - First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`; minimal advanced smoke has not been executed yet.
+- Minimal real advanced smoke succeeded once with a 420-character smoke sample, minimal mock basicReport, `reportV1=true`, diagnostics present, and `fallback=false`. This proves only the minimal advanced link, not full-input advanced quality.
+- Final stage has not been verified with real AI.
 
 ## Next Implementation Order
 

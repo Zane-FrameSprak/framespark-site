@@ -129,6 +129,8 @@ V1 staged architecture direction:
 - The smoke script now supports mock-only `--max-stage=advanced` and `--max-stage=final` serial checks. Advanced/final real smoke is still blocked pending separate confirmation.
 - The smoke script now has protected `--real-stage=advanced --confirm-real-stage=advanced` parameters for a future single-stage real advanced smoke. It has not been executed yet.
 - First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`. The smoke script now requires `--smoke-minimal` for real advanced and uses a shorter smoke input plus minimal mock basicReport.
+- Minimal real advanced smoke succeeded once with `reportV1=true`, diagnostics present, prompt version `v1-advanced-2026-06`, model `deepseek-v4-flash`, and `fallback=false`. This does not validate full-input advanced quality.
+- Final stage has not been verified with real AI.
 - User registration/login, project database, and talent-platform features are outside the current V1 smoke scope.
 
 ## Route / Guard / Router Risk

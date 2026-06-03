@@ -16,6 +16,7 @@
 - 2026-06-03: Extended V1 staged smoke to support mock-only `--max-stage=advanced` and `--max-stage=final`. Real advanced/final smoke remains blocked pending separate confirmation.
 - 2026-06-03: Added protected single-stage real advanced smoke parameters using a mock basicReport dependency. Real advanced smoke has not been executed.
 - 2026-06-03: First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`; added `--smoke-minimal` requirement to shrink smoke input before any next real advanced attempt.
+- 2026-06-03: Minimal real advanced smoke succeeded once with reportV1 and diagnostics present and fallback=false. Final real smoke is still unverified.
 - 2026-06-02: Public unfinished product areas were frozen for launch posture: talent copy says not open, development project pages are `noindex`, and project detail URLs were removed from sitemap.
 - 2026-06-02: Homepage platform cards gained unavailable-state prompts, and project cards now show a "details in design" prompt instead of navigating from the homepage.
 - 2026-06-01: Mobile homepage optimization (`0eede24`) and subpage footer sync (`35e4ae1`) were pushed and deployed to Tencent Cloud by local sudo rsync.
