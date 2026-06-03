@@ -40,37 +40,37 @@ async function main() {
     return;
   }
 
-  if (realStage && realStage !== 'advanced') {
+  if (realStage && !['advanced', 'final'].includes(realStage)) {
     printGuardFailure({
       startedAt,
       mode: 'real',
       realCall: false,
       noAi: true,
-      error: 'Only --real-stage=advanced is supported in this smoke step.'
+      error: 'Only --real-stage=advanced or --real-stage=final is supported in this smoke step.'
     });
     process.exitCode = 1;
     return;
   }
 
-  if (realStage === 'advanced' && realStageConfirmed !== 'advanced') {
+  if (realStage && realStageConfirmed !== realStage) {
     printGuardFailure({
       startedAt,
       mode: 'real',
       realCall: false,
       noAi: true,
-      error: '--real-stage=advanced requires --confirm-real-stage=advanced.'
+      error: `--real-stage=${realStage} requires --confirm-real-stage=${realStage}.`
     });
     process.exitCode = 1;
     return;
   }
 
-  if (realStage === 'advanced' && !smokeMinimal) {
+  if (realStage && !smokeMinimal) {
     printGuardFailure({
       startedAt,
       mode: 'real',
       realCall: false,
       noAi: true,
-      error: 'real advanced smoke requires --smoke-minimal after timeout.'
+      error: `real ${realStage} smoke requires --smoke-minimal.`
     });
     process.exitCode = 1;
     return;
@@ -157,6 +157,13 @@ async function runStages(payload) {
     return [{ stage: 'advanced', reportV1 }];
   }
 
+  if (realMode && realStage === 'final') {
+    const basicReport = buildMinimalBasicReport();
+    const advancedReport = buildMinimalAdvancedReport();
+    const reportV1 = await generateRealFinalReport(payload, basicReport, advancedReport);
+    return [{ stage: 'final', reportV1 }];
+  }
+
   const stageSequence = STAGES.slice(0, STAGES.indexOf(maxStage) + 1);
   const results = [];
   let basicReport = null;
@@ -197,6 +204,17 @@ async function generateRealAdvancedReport(payload, basicReport) {
   const stageInput = buildStageInput('advanced', payload, basicReport, null);
   return generateV1StageReport({
     stage: 'advanced',
+    messages: stageInput.messages,
+    promptVersion: stageInput.promptVersion,
+    payload,
+    metadata: payload.materialHint
+  });
+}
+
+async function generateRealFinalReport(payload, basicReport, advancedReport) {
+  const stageInput = buildStageInput('final', payload, basicReport, advancedReport);
+  return generateV1StageReport({
+    stage: 'final',
     messages: stageInput.messages,
     promptVersion: stageInput.promptVersion,
     payload,
@@ -264,6 +282,37 @@ function buildMinimalBasicReport() {
       passed: true,
       reason: 'Minimal smoke dependency only.',
       recommendedAction: 'continue_advanced'
+    }
+  };
+}
+
+function buildMinimalAdvancedReport() {
+  return {
+    stage: 'advanced',
+    material_type: 'synopsis',
+    primary_material_type: 'synopsis',
+    maturity_level: 'B',
+    material_summary: 'Smoke-only minimal advanced summary.',
+    story_core: {
+      premise: 'A weather-station archive story with a clear public-memory conflict.',
+      protagonist: 'A young archivist.',
+      conflict: 'He must decide how to surface old evidence before demolition.',
+      emotional_drive: 'He wants truth without false certainty.',
+      theme_or_question: 'How can private grief become public responsibility?'
+    },
+    strengths: [{ title: 'Structure direction', detail: 'The material has setup, investigation, pressure, and public action.' }],
+    main_problems: [{ title: 'Final stakes', severity: 'medium', detail: 'The final institutional consequence needs sharper definition.' }],
+    priority_revisions: [{ priority: 1, action: 'Define the project file focus.', reason: 'Final smoke needs concise conversion context.' }],
+    next_step: { label: 'Enter final smoke', detail: 'Use this as a minimal dependency only.' },
+    conversion_advice: {
+      status: 'not_applicable',
+      summary: 'Advanced smoke dependency only.',
+      recommended_action: ''
+    },
+    stageDecisionHints: {
+      passed: true,
+      reason: 'Minimal smoke dependency only.',
+      recommendedAction: 'continue_final'
     }
   };
 }

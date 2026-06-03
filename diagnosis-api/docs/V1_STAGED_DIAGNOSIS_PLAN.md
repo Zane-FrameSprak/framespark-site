@@ -150,6 +150,7 @@ No real AI API tests are required for the first implementation pass.
 - Real mode remains limited to basic unless a separate confirmation step is added.
 - `--real-stage=advanced --confirm-real-stage=advanced` is available for a future single-stage real advanced smoke. It uses a mock basicReport dependency and must still be run only after manual approval.
 - After the first real advanced smoke timed out, real advanced now also requires `--smoke-minimal`. This trims the smoke sample and uses a minimal mock basicReport only for smoke validation.
+- `--real-stage=final --confirm-real-stage=final --smoke-minimal` is available for a future single-stage real final smoke. It uses minimal mock basicReport and advancedReport dependencies and must still be run only after manual approval.
 - Logs must include only sample source, sample length, mode, maxStage, stage sequence, stage, stageReached, decision, promptVersion, model, fallback, latency, AI flags, and report/diagnostics existence; do not print full sample text or full report content.
 - Real mode requires explicit `--real` plus all guards set temporarily in the shell: `DEEPSEEK_API_KEY`, `ENABLE_DIAGNOSIS_V1=true`, `ENABLE_V1_STAGED_RUNNER=true`, and `ENABLE_V1_REAL_PROMPTS=true`.
 - `--real --max-stage=advanced` and `--real --max-stage=final` must stop with `advanced/final real smoke requires a separate confirmation step.`
@@ -158,7 +159,7 @@ No real AI API tests are required for the first implementation pass.
 - First basic-stage real smoke succeeded once with no fallback; quality review is still out of scope for that check.
 - First real advanced smoke stopped with `AI_REQUEST_TIMEOUT`; minimal advanced smoke has not been executed yet.
 - Minimal real advanced smoke succeeded once with a 420-character smoke sample, minimal mock basicReport, `reportV1=true`, diagnostics present, and `fallback=false`. This proves only the minimal advanced link, not full-input advanced quality.
-- Final stage has not been verified with real AI.
+- Final stage has not been verified with real AI; protected minimal final parameters exist but have not been executed.
 
 ## Next Implementation Order
 
