@@ -147,3 +147,25 @@ The current V1 path is a gated single AI call with compatibility mapping. It is 
 
 Impact:
 Keep `ENABLE_DIAGNOSIS_V1=false`. Keep legacy fallback. Add staged runner skeletons and no-AI tests before changing route, guard, or materialRouter behavior.
+
+## 2026-06-04 — Launch the black-gold public site first
+
+Decision:
+Use the current black-gold public website as the June 8 launch version. Do not add a light theme before launch.
+
+Reason:
+The current visual system has been checked on production and is sufficient for launch readiness. Theme expansion would add visual QA risk before launch.
+
+Impact:
+Only P0/P1 static-site fixes should be made before launch.
+
+## 2026-06-04 — Keep unfinished product systems closed for launch
+
+Decision:
+Do not open public diagnosis upload, user registration/login, talent-platform functions, project-library functions, or `/api/diagnosis` production access before the June 8 launch.
+
+Reason:
+The public site is currently a brand display plus internal-test preview site. Diagnosis V1 smoke tests are encouraging, but they do not mean the public product flow is ready.
+
+Impact:
+The diagnosis page stays as an internal-test notice. `/api/diagnosis` remains undeployed/unproxied. User-system and talent-platform work resume only after launch as separate tasks.

@@ -233,3 +233,16 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Public site positioning is currently brand display plus internal-test preview. Diagnosis, talent, and project areas are not open product flows.
 - Development project pages remain accessible as lightweight project files, but are marked `noindex` and removed from sitemap until their public status is firmer.
 - Home platform cards now use unavailable-state prompts instead of opening real product flows; project cards show a light "details in design" prompt instead of navigating from the homepage.
+
+## Public Website Launch Readiness (2026-06-04)
+
+- The Tencent Cloud production site is now the black-gold public website for launch readiness.
+- Current positioning: brand display site plus internal-test preview site.
+- Home, diagnosis, talent, legal, and 404 pages have been manually checked with no obvious P0/P1 issues.
+- The public diagnosis page remains an internal-test notice page: no upload controls, no `diagnosis/app.js`, and no `/api/diagnosis` reference.
+- The talent page remains in preparing / not-open state.
+- Project detail pages remain `noindex`; `sitemap.xml` does not include `projects/` URLs.
+- Static CSS/JS references use `v=20260608` for cache busting; Quark old-cache behavior has been verified as resolved.
+- Production webroot exposure check passed: no `.git`, docs, internal, backend, or scripts directories exposed; `.user.ini` is preserved.
+- `site.webmanifest` MIME remains a server configuration todo and is not a launch blocker.
+- Diagnosis V1 basic, advanced minimal, and final minimal real smoke checks succeeded, but V1 is not connected to the public entry.

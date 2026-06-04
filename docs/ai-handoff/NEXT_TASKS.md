@@ -126,3 +126,12 @@ Updated by: Codex
 - Do not enable `ENABLE_DIAGNOSIS_V1=true` in default or production settings yet.
 - Do not rely only on synthetic AI-generated samples for quality validation.
 - Do not implement real talent-platform matching/recruiting features yet.
+
+## Launch Window — 2026-06-08
+
+- Before June 8, keep the public site frozen except for P0/P1 fixes.
+- Do final manual observation on the Tencent Cloud production site, including mobile browsers and common share/open paths.
+- If a P0/P1 public-site issue appears, fix only the affected static files and deploy with the verified sudo rsync flow.
+- Do not add new public-site features before launch.
+- Do not reopen diagnosis upload, talent platform, project details, registration/login, `/api/diagnosis`, V1 public routing, or internal-console work before launch.
+- After June 8, resume planning for V1 diagnosis evaluation, internal control console, user system, and backend deployment as separate tasks.

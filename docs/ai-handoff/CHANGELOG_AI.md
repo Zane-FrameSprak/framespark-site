@@ -208,3 +208,15 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Each `create_file` or `update_file` call creates a separate commit through GitHub's contents API.
 - If a single combined docs commit is preferred later, squash or reorganize from a local checkout.
 - Local uncommitted files on the user's machine may still differ from GitHub, especially home hero animation changes.
+
+## 2026-06-04
+
+### Public Website Launch Readiness
+
+- Tencent Cloud production now has the black-gold public website launch state.
+- Static CSS/JS references on public pages now use `v=20260608` and have been deployed.
+- Quark browser old-cache behavior was verified as resolved after the static asset version update.
+- The public diagnosis page no longer loads the legacy `diagnosis/app.js` script.
+- Diagnosis remains internal-test only: no upload entrance and no `/api/diagnosis` reference on the public page.
+- Project pages remain `noindex`; sitemap does not include project URLs.
+- No backend, Nginx, SSL, diagnosis-api, user-system, or V1 public-entry changes were made.
