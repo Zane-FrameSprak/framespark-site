@@ -234,6 +234,7 @@ function normalizeDiagnosisResult(raw, now) {
   const input = raw && typeof raw === 'object' ? raw : {};
   const createdAt = input.createdAt || now.toISOString();
   const resultId = slugify(input.resultId) || `result-${createdAt.replace(/[-:.TZ]/g, '').slice(0, 14)}-${Math.random().toString(36).slice(2, 7)}`;
+  const v1Summary = normalizeV1Summary(input);
   return {
     resultId,
     sampleId: sanitizeText(input.sampleId, 120),
@@ -249,6 +250,7 @@ function normalizeDiagnosisResult(raw, now) {
     summary: sanitizeText(input.summary, 2000),
     core: sanitizeText(input.core, 3000),
     nextStep: sanitizeText(input.nextStep, 2000),
+    ...v1Summary,
     report: input.report && typeof input.report === 'object' ? input.report : null,
     materialRouting: input.materialRouting && typeof input.materialRouting === 'object' ? input.materialRouting : null,
     stats: input.stats && typeof input.stats === 'object' ? input.stats : null,
@@ -272,7 +274,66 @@ function buildResultIndexRecord(result) {
     summary: result.summary,
     core: result.core,
     nextStep: result.nextStep,
+    hasReportV1: result.hasReportV1,
+    v1StageReached: result.v1StageReached,
+    v1Decision: result.v1Decision,
+    v1PromptVersion: result.v1PromptVersion,
+    v1Model: result.v1Model,
+    v1Fallback: result.v1Fallback,
+    v1LatencyMs: result.v1LatencyMs,
+    v1MaturityLevel: result.v1MaturityLevel,
+    v1Stage: result.v1Stage,
+    v1NextStep: result.v1NextStep,
+    v1StopReason: result.v1StopReason,
+    v1StageStatus: result.v1StageStatus,
     resultPath: result.resultPath
+  };
+}
+
+function normalizeV1Summary(input) {
+  const reportV1 = input.reportV1 && typeof input.reportV1 === 'object' ? input.reportV1 : null;
+  const diagnostics = {
+    ...(reportV1?.diagnostics && typeof reportV1.diagnostics === 'object' ? reportV1.diagnostics : {}),
+    ...(input.diagnostics && typeof input.diagnostics === 'object' ? input.diagnostics : {})
+  };
+  const nextStep = reportV1?.next_step && typeof reportV1.next_step === 'object' ? reportV1.next_step : null;
+  const rejection = reportV1?.rejection_reason && typeof reportV1.rejection_reason === 'object' ? reportV1.rejection_reason : null;
+
+  return {
+    hasReportV1: Boolean(input.hasReportV1 || reportV1),
+    v1StageReached: sanitizeText(input.v1StageReached || diagnostics.stageReached || reportV1?.stage, 64),
+    v1Decision: sanitizeText(
+      input.v1Decision
+      || diagnostics.decision
+      || diagnostics.stageDecisionHints?.recommendedAction
+      || reportV1?.stageDecisionHints?.recommendedAction,
+      120
+    ),
+    v1PromptVersion: sanitizeText(input.v1PromptVersion || diagnostics.promptVersion, 120),
+    v1Model: sanitizeText(input.v1Model || diagnostics.model, 120),
+    v1Fallback: input.v1Fallback === true || diagnostics.fallback === true,
+    v1LatencyMs: readOptionalNumber(input.v1LatencyMs ?? diagnostics.latencyMs),
+    v1MaturityLevel: sanitizeText(input.v1MaturityLevel || reportV1?.maturity_level, 64),
+    v1Stage: sanitizeText(input.v1Stage || reportV1?.stage, 64),
+    v1NextStep: sanitizeText(input.v1NextStep || nextStep?.summary || nextStep?.action || nextStep?.label || reportV1?.nextStep, 500),
+    v1StopReason: sanitizeText(input.v1StopReason || diagnostics.stopReason || rejection?.message || rejection?.code, 500),
+    v1StageStatus: normalizeV1StageStatus(input.v1StageStatus || diagnostics.stageStatus || reportV1?.stageStatus, diagnostics, reportV1)
+  };
+}
+
+function normalizeV1StageStatus(value, diagnostics, reportV1) {
+  if (value && typeof value === 'object') {
+    return {
+      basic: sanitizeText(value.basic, 64),
+      advanced: sanitizeText(value.advanced, 64),
+      final: sanitizeText(value.final, 64)
+    };
+  }
+  const reached = sanitizeText(diagnostics.stageReached || reportV1?.stage, 64);
+  return {
+    basic: reached === 'basic' ? 'reached' : '',
+    advanced: reached === 'advanced' ? 'reached' : '',
+    final: reached === 'final' ? 'reached' : ''
   };
 }
 
@@ -342,6 +403,11 @@ function readRatio(value) {
 function readTextLength(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? Math.floor(number) : fallback;
+}
+
+function readOptionalNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? Math.round(number) : null;
 }
 
 async function resolveRunId(root, date, customName) {
@@ -574,6 +640,12 @@ function buildResultsMarkdown(results) {
       `- materialForm：${result.materialForm}`,
       `- diagnosisDepth：${result.diagnosisDepth}`,
       `- diagnosisId：${result.diagnosisId || '无'}`,
+      `- hasReportV1：${result.hasReportV1 ? 'true' : 'false'}`,
+      `- v1StageReached：${result.v1StageReached || '无'}`,
+      `- v1Decision：${result.v1Decision || '无'}`,
+      `- v1PromptVersion：${result.v1PromptVersion || '无'}`,
+      `- v1Model：${result.v1Model || '无'}`,
+      `- v1Fallback：${result.v1Fallback ? 'true' : 'false'}`,
       `- 结果路径：${result.resultPath}`,
       '',
       '### summary',

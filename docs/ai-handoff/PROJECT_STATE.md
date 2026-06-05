@@ -246,3 +246,12 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Production webroot exposure check passed: no `.git`, docs, internal, backend, or scripts directories exposed; `.user.ini` is preserved.
 - `site.webmanifest` MIME remains a server configuration todo and is not a launch blocker.
 - Diagnosis V1 basic, advanced minimal, and final minimal real smoke checks succeeded, but V1 is not connected to the public entry.
+
+## Internal V1 Diagnostics Summary State (2026-06-05)
+
+- Internal V1 diagnostics integration phase 1 is implemented for dev sample runs.
+- `diagnosis-api` dev sample run results now preserve V1 summary fields such as stage reached, decision, prompt version, model, fallback, latency, maturity, stage, next step, stop reason, and stage status.
+- Full `reportV1` bodies are not stored in sample run results; this phase stores only summary fields for internal review.
+- Legacy sample run fields remain intact for existing internal tooling.
+- No internal UI changes were made in this phase, and no service was started.
+- No real AI smoke or diagnosis run was executed for this change.

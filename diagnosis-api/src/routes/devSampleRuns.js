@@ -258,6 +258,7 @@ async function runSampleDiagnosisTest(runId, sampleId, requestedType) {
   });
 
   const report = result.finalReport || {};
+  const v1Summary = buildV1DiagnosticsSummary(result);
   return {
     resultId: `${sample.sampleId}-${new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)}`,
     sampleId: sample.sampleId,
@@ -273,9 +274,73 @@ async function runSampleDiagnosisTest(runId, sampleId, requestedType) {
     summary: report.summary || '',
     core: report.core || '',
     nextStep: report.nextStep || '',
+    ...v1Summary,
     report,
     materialRouting,
     stats: guard.stats,
     source: parsed.source
   };
+}
+
+function buildV1DiagnosticsSummary(result = {}) {
+  const reportV1 = result.reportV1 && typeof result.reportV1 === 'object' ? result.reportV1 : null;
+  const diagnostics = {
+    ...(reportV1?.diagnostics && typeof reportV1.diagnostics === 'object' ? reportV1.diagnostics : {}),
+    ...(result.diagnostics && typeof result.diagnostics === 'object' ? result.diagnostics : {})
+  };
+  const nextStep = reportV1?.next_step && typeof reportV1.next_step === 'object' ? reportV1.next_step : null;
+  const rejection = reportV1?.rejection_reason && typeof reportV1.rejection_reason === 'object' ? reportV1.rejection_reason : null;
+
+  return {
+    hasReportV1: Boolean(reportV1),
+    v1StageReached: readV1Text(diagnostics.stageReached || reportV1?.stage),
+    v1Decision: readV1Text(
+      diagnostics.decision
+      || diagnostics.stageDecisionHints?.recommendedAction
+      || reportV1?.stageDecisionHints?.recommendedAction
+    ),
+    v1PromptVersion: readV1Text(diagnostics.promptVersion),
+    v1Model: readV1Text(diagnostics.model),
+    v1Fallback: readV1Boolean(diagnostics.fallback),
+    v1LatencyMs: readV1Number(diagnostics.latencyMs),
+    v1MaturityLevel: readV1Text(reportV1?.maturity_level),
+    v1Stage: readV1Text(reportV1?.stage),
+    v1NextStep: readV1Text(nextStep?.summary || nextStep?.action || nextStep?.label || reportV1?.nextStep),
+    v1StopReason: readV1Text(
+      diagnostics.stopReason
+      || rejection?.message
+      || rejection?.code
+    ),
+    v1StageStatus: buildV1StageStatus(diagnostics, reportV1)
+  };
+}
+
+function buildV1StageStatus(diagnostics, reportV1) {
+  const stageStatus = diagnostics.stageStatus || reportV1?.stageStatus;
+  if (stageStatus && typeof stageStatus === 'object') {
+    return {
+      basic: readV1Text(stageStatus.basic),
+      advanced: readV1Text(stageStatus.advanced),
+      final: readV1Text(stageStatus.final)
+    };
+  }
+  const reached = readV1Text(diagnostics.stageReached || reportV1?.stage);
+  return {
+    basic: reached === 'basic' ? 'reached' : '',
+    advanced: reached === 'advanced' ? 'reached' : '',
+    final: reached === 'final' ? 'reached' : ''
+  };
+}
+
+function readV1Text(value) {
+  return typeof value === 'string' ? value.trim().slice(0, 300) : '';
+}
+
+function readV1Boolean(value) {
+  return value === true;
+}
+
+function readV1Number(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? Math.round(number) : null;
 }

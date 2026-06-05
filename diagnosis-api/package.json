@@ -26,6 +26,7 @@
     "test:diagnosis-depth": "node scripts/test-diagnosis-depth.js",
     "test:review-queue": "node scripts/test-list-review-queue.js",
     "test:dev-sample-runs": "node scripts/test-dev-sample-runs.js",
+    "test:dev-sample-run-v1-summary": "node scripts/test-dev-sample-run-v1-summary.js",
     "test:report-v1-compat": "node scripts/test-report-v1-compat.js",
     "test:report-v1-pipeline": "node scripts/test-report-v1-pipeline.js",
     "test:v1-gatekeeper-decision": "node scripts/test-v1-gatekeeper-decision.js",

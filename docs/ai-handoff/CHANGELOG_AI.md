@@ -220,3 +220,13 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Diagnosis remains internal-test only: no upload entrance and no `/api/diagnosis` reference on the public page.
 - Project pages remain `noindex`; sitemap does not include project URLs.
 - No backend, Nginx, SSL, diagnosis-api, user-system, or V1 public-entry changes were made.
+
+## 2026-06-05
+
+### Internal V1 Diagnostics Summary
+
+- Added dev sample run storage for V1 diagnostics summary fields.
+- The change stores V1 summary metadata only and does not store full `reportV1` bodies.
+- Existing legacy sample run fields remain unchanged.
+- Added a no-AI regression test for V1 summary storage, missing diagnostics, fallback flags, and full reportV1 exclusion.
+- No internal UI, public site, production route, deployment, or real AI execution was changed.

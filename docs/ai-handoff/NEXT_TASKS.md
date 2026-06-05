@@ -135,3 +135,10 @@ Updated by: Codex
 - Do not add new public-site features before launch.
 - Do not reopen diagnosis upload, talent platform, project details, registration/login, `/api/diagnosis`, V1 public routing, or internal-console work before launch.
 - After June 8, resume planning for V1 diagnosis evaluation, internal control console, user system, and backend deployment as separate tasks.
+
+## Next — Internal V1 Diagnostics UI
+
+- Next internal step: update `internal/diagnosis-eval` to display saved V1 summary fields: stage reached, decision, prompt version, model, fallback, reportV1 presence, and errors.
+- Keep the first UI pass summary-only; do not build a full reportV1 detail page yet.
+- Do not run real AI from the internal eval page without explicit user confirmation.
+- Keep `internal/` local-only and excluded from Tencent Cloud webroot.
