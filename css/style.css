@@ -913,11 +913,25 @@ svg {
     min-width: 0;
     font-weight: 400;
     overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: rgba(201, 168, 117, 0.45);
 }
 
 .footer__contact a:hover,
 .footer__contact a:focus-visible {
     color: var(--gold);
+}
+
+.footer__contact a:hover strong,
+.footer__contact a:focus-visible strong {
+    text-decoration-color: rgba(229, 199, 143, 0.9);
+}
+
+.footer__contact a:focus-visible {
+    outline: 1px solid rgba(229, 199, 143, 0.58);
+    outline-offset: 4px;
 }
 
 .footer__bottom {
