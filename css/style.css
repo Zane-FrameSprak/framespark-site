@@ -2214,14 +2214,14 @@ svg {
 
 @media (min-width: 981px) {
     :root {
-        --pad-x: clamp(20px, 4.4vw, 70px);
-        --section-y: clamp(72px, 8.4vw, 116px);
+        --pad-x: clamp(22px, 6vw, 96px);
+        --section-y: clamp(64px, 7.4vw, 102px);
     }
 
     .nav__inner {
-        max-width: 1320px;
-        min-height: 66px;
-        gap: 24px;
+        max-width: 1180px;
+        min-height: 64px;
+        gap: 22px;
     }
 
     .intro {
@@ -2234,14 +2234,14 @@ svg {
     }
 
     .home-kicker__inner {
-        max-width: 1320px;
-        height: 48px;
+        max-width: 1180px;
+        height: 46px;
     }
 
     .section-head {
-        max-width: 1320px;
-        margin-bottom: 16px;
-        gap: 18px;
+        max-width: 1180px;
+        margin-bottom: 14px;
+        gap: 16px;
     }
 
     .section-head h2 {
@@ -2253,7 +2253,7 @@ svg {
     .ecosystem-grid,
     .footer__inner,
     .footer__bottom {
-        max-width: 1320px;
+        max-width: 1180px;
     }
 
     .project-marquee {
@@ -2262,11 +2262,11 @@ svg {
     }
 
     .project-reel {
-        gap: clamp(18px, 1.8vw, 28px);
+        gap: clamp(16px, 1.5vw, 24px);
     }
 
     .project-card {
-        width: clamp(250px, 18.5vw, 330px);
+        width: clamp(232px, 16.4vw, 300px);
     }
 
     .project-card__body {
@@ -2289,13 +2289,13 @@ svg {
     }
 
     .platforms {
-        gap: 20px;
+        gap: 18px;
     }
 
     .platform-card {
-        min-height: 250px;
-        padding: clamp(22px, 2.5vw, 34px);
-        grid-template-rows: auto auto minmax(84px, auto) 30px auto auto auto;
+        min-height: 228px;
+        padding: clamp(20px, 2.1vw, 30px);
+        grid-template-rows: auto auto minmax(72px, auto) 28px auto auto auto;
     }
 
     .platform-card__meta {
@@ -2307,7 +2307,7 @@ svg {
     }
 
     .platform-card h2 {
-        font-size: clamp(28px, 3.4vw, 44px);
+        font-size: clamp(26px, 3vw, 40px);
     }
 
     .platform-card__en,
@@ -2317,7 +2317,7 @@ svg {
 
     .platform-card__text {
         font-size: 14px;
-        line-height: 1.85;
+        line-height: 1.78;
     }
 
     .platform-card__action {
@@ -2325,16 +2325,16 @@ svg {
     }
 
     .ecosystem-grid article {
-        min-height: 168px;
-        padding: 28px 26px;
+        min-height: 150px;
+        padding: 24px 22px;
     }
 
     .ecosystem-grid span {
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
 
     .ecosystem-grid h3 {
-        font-size: 20px;
+        font-size: 19px;
     }
 
     .principle {
@@ -2343,17 +2343,22 @@ svg {
     }
 
     .footer__inner {
-        padding-top: 34px;
-        padding-bottom: 24px;
+        padding-top: 30px;
+        padding-bottom: 22px;
     }
 
     .subpage-hero {
-        padding-top: clamp(82px, 10vw, 140px);
-        padding-bottom: clamp(56px, 7vw, 92px);
+        padding-top: clamp(72px, 8.5vw, 120px);
+        padding-bottom: clamp(50px, 6vw, 82px);
+    }
+
+    .subpage-hero__inner,
+    .subpage-section__inner {
+        max-width: 960px;
     }
 
     .subpage-hero h1 {
-        font-size: clamp(38px, 5.4vw, 72px);
+        font-size: clamp(36px, 4.8vw, 64px);
     }
 
     .subpage-lead {
@@ -2362,29 +2367,29 @@ svg {
     }
 
     .subpage-section {
-        padding-top: clamp(56px, 7vw, 92px);
-        padding-bottom: clamp(56px, 7vw, 92px);
+        padding-top: clamp(50px, 6vw, 82px);
+        padding-bottom: clamp(50px, 6vw, 82px);
     }
 
     .placeholder-card {
-        min-height: 200px;
-        padding: 30px 28px;
+        min-height: 180px;
+        padding: 26px 24px;
     }
 
     .project-detail__hero {
-        padding-top: clamp(64px, 8vw, 112px);
-        padding-bottom: clamp(56px, 7vw, 92px);
+        padding-top: clamp(58px, 7vw, 96px);
+        padding-bottom: clamp(50px, 6vw, 82px);
     }
 
     .project-detail__hero-inner {
-        max-width: 1100px;
-        grid-template-columns: minmax(240px, 350px) minmax(0, 1fr);
-        gap: clamp(32px, 5vw, 72px);
+        max-width: 980px;
+        grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+        gap: clamp(28px, 4vw, 58px);
     }
 
     .project-panel {
-        min-height: 210px;
-        padding: clamp(26px, 3.4vw, 38px);
+        min-height: 188px;
+        padding: clamp(22px, 2.8vw, 32px);
     }
 }
 
