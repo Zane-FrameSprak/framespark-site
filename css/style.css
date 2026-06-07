@@ -2212,6 +2212,182 @@ svg {
     transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.32s ease, background 0.32s ease;
 }
 
+@media (min-width: 981px) {
+    :root {
+        --pad-x: clamp(20px, 4.4vw, 70px);
+        --section-y: clamp(72px, 8.4vw, 116px);
+    }
+
+    .nav__inner {
+        max-width: 1320px;
+        min-height: 66px;
+        gap: 24px;
+    }
+
+    .intro {
+        padding-top: clamp(14px, 1.5vw, 20px);
+        padding-bottom: clamp(14px, 1.5vw, 20px);
+    }
+
+    .intro h1 {
+        font-size: clamp(28px, 3.5vw, 48px);
+    }
+
+    .home-kicker__inner {
+        max-width: 1320px;
+        height: 48px;
+    }
+
+    .section-head {
+        max-width: 1320px;
+        margin-bottom: 16px;
+        gap: 18px;
+    }
+
+    .section-head h2 {
+        font-size: clamp(26px, 3.5vw, 42px);
+    }
+
+    .project-marquee,
+    .platforms,
+    .ecosystem-grid,
+    .footer__inner,
+    .footer__bottom {
+        max-width: 1320px;
+    }
+
+    .project-marquee {
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    .project-reel {
+        gap: clamp(18px, 1.8vw, 28px);
+    }
+
+    .project-card {
+        width: clamp(250px, 18.5vw, 330px);
+    }
+
+    .project-card__body {
+        min-height: 112px;
+        padding: 18px 18px 20px;
+    }
+
+    .project-card__status {
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+    .project-card h3 {
+        font-size: clamp(17px, 1.2vw, 20px);
+    }
+
+    .platform-section {
+        padding-top: clamp(24px, 2.6vw, 34px);
+        padding-bottom: clamp(26px, 2.8vw, 38px);
+    }
+
+    .platforms {
+        gap: 20px;
+    }
+
+    .platform-card {
+        min-height: 250px;
+        padding: clamp(22px, 2.5vw, 34px);
+        grid-template-rows: auto auto minmax(84px, auto) 30px auto auto auto;
+    }
+
+    .platform-card__meta {
+        margin-bottom: 16px;
+    }
+
+    .platform-card__num {
+        margin-bottom: 14px;
+    }
+
+    .platform-card h2 {
+        font-size: clamp(28px, 3.4vw, 44px);
+    }
+
+    .platform-card__en,
+    .platform-card__text {
+        margin-top: 12px;
+    }
+
+    .platform-card__text {
+        font-size: 14px;
+        line-height: 1.85;
+    }
+
+    .platform-card__action {
+        margin-top: 14px;
+    }
+
+    .ecosystem-grid article {
+        min-height: 168px;
+        padding: 28px 26px;
+    }
+
+    .ecosystem-grid span {
+        margin-bottom: 20px;
+    }
+
+    .ecosystem-grid h3 {
+        font-size: 20px;
+    }
+
+    .principle {
+        padding-top: clamp(28px, 3.4vw, 44px);
+        padding-bottom: clamp(28px, 3.4vw, 44px);
+    }
+
+    .footer__inner {
+        padding-top: 34px;
+        padding-bottom: 24px;
+    }
+
+    .subpage-hero {
+        padding-top: clamp(82px, 10vw, 140px);
+        padding-bottom: clamp(56px, 7vw, 92px);
+    }
+
+    .subpage-hero h1 {
+        font-size: clamp(38px, 5.4vw, 72px);
+    }
+
+    .subpage-lead {
+        margin-top: 24px;
+        font-size: clamp(15px, 1.45vw, 17px);
+    }
+
+    .subpage-section {
+        padding-top: clamp(56px, 7vw, 92px);
+        padding-bottom: clamp(56px, 7vw, 92px);
+    }
+
+    .placeholder-card {
+        min-height: 200px;
+        padding: 30px 28px;
+    }
+
+    .project-detail__hero {
+        padding-top: clamp(64px, 8vw, 112px);
+        padding-bottom: clamp(56px, 7vw, 92px);
+    }
+
+    .project-detail__hero-inner {
+        max-width: 1100px;
+        grid-template-columns: minmax(240px, 350px) minmax(0, 1fr);
+        gap: clamp(32px, 5vw, 72px);
+    }
+
+    .project-panel {
+        min-height: 210px;
+        padding: clamp(26px, 3.4vw, 38px);
+    }
+}
+
 @media (max-width: 980px) {
     .nav__tagline {
         display: none;
