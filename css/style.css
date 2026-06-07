@@ -876,13 +876,47 @@ svg {
 }
 
 .footer__contact {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    justify-items: end;
+    gap: 7px;
+    min-width: min(360px, 100%);
     text-align: right;
     font-family: var(--font-sans);
     color: rgba(201, 168, 117, 0.82);
     letter-spacing: 0.06em;
+}
+
+.footer__contact-title {
+    margin: 0 0 2px;
+    color: var(--ink-muted);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+}
+
+.footer__contact a {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 10px;
+    color: rgba(201, 168, 117, 0.86);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.footer__contact a span {
+    color: var(--ink-muted);
+    font-size: 12px;
+}
+
+.footer__contact a strong {
+    min-width: 0;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+.footer__contact a:hover,
+.footer__contact a:focus-visible {
+    color: var(--gold);
 }
 
 .footer__bottom {
@@ -2226,6 +2260,7 @@ svg {
     }
 
     .footer__contact {
+        justify-items: start;
         text-align: left;
     }
 
