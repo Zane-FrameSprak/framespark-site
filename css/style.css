@@ -877,10 +877,11 @@ svg {
 
 .footer__contact {
     display: grid;
-    justify-items: end;
-    gap: 7px;
-    min-width: min(360px, 100%);
-    text-align: right;
+    justify-items: start;
+    gap: 8px;
+    min-width: min(340px, 100%);
+    margin-right: clamp(12px, 2vw, 32px);
+    text-align: left;
     font-family: var(--font-sans);
     color: rgba(201, 168, 117, 0.82);
     letter-spacing: 0.06em;
@@ -895,9 +896,9 @@ svg {
 
 .footer__contact a {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
     align-items: baseline;
-    gap: 10px;
+    gap: 12px;
     color: rgba(201, 168, 117, 0.86);
     font-size: 13px;
     text-decoration: none;
@@ -2260,7 +2261,7 @@ svg {
     }
 
     .footer__contact {
-        justify-items: start;
+        margin-right: 0;
         text-align: left;
     }
 
