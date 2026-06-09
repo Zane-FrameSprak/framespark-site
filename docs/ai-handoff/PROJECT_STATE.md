@@ -270,5 +270,8 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - V1 Patch 2 is implemented: the basic prompt now requires material-grounded judgments, uncertainty labeling for inference, no unsupported atonement/theme elevation, concrete suggestions, and concrete `nextStep`.
 - V1 Patch 2 real regression is now recorded in `docs/diagnosis/V1_PATCH2_REAL_REGRESSION_2026-06-09.md`: Sample 01 no longer showed fixed atonement wording in checked fields, Sample 02 showed concrete-suggestion signals with one JSON retry, and Sample 03 remained `stop_d0 / LOW_INFORMATION`.
 - Patch 2 regression used 3 DeepSeek V4-flash requests total. No full report, full sample text, key, advanced/final prompt, public site, production API, or deployment path changed.
+- V1 advanced small test is now recorded in `docs/diagnosis/V1_ADVANCED_SAMPLE_REVIEW_2026-06-09.md`: Sample 01 and Sample 02 reached advanced with 2 total DeepSeek V4-flash requests, `fallback=false`, and no JSON retry; Sample 03 stayed `stop_d0 / LOW_INFORMATION` and made no advanced AI call.
+- The advanced review document is summary-only for human review. It does not include full sample text, full reportV1 bodies, raw provider responses, keys, scores, or final quality judgments.
+- No code, prompt source, public site, production API, internal UI, or deployment path changed during the advanced small test.
 - Project-level agent rules now exist in `AGENTS.md`, with a FrameSpark-specific target-mode Skill at `.agents/skills/framespark-target-mode/SKILL.md`. Future Codex/Agent tasks should use these as the stable operating boundary before relying on repeated long prompts.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.

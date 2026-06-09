@@ -152,6 +152,9 @@ Updated by: Codex
 - Patch 1 is complete: D0/basic boundary and `nextStep` stability now have no-AI regression coverage. Next code-facing step should be Patch 2 only after approval: basic prompt fidelity and suggestion specificity.
 - Patch 2 real-AI regression is complete and documented. Next work should be manual review of `docs/diagnosis/V1_PATCH2_REAL_REGRESSION_2026-06-09.md` plus the existing V1 basic review worksheet.
 - Do not run a larger real-AI batch until the manual review notes decide whether Patch 2 is sufficient or needs another prompt pass.
+- V1 advanced small test review is now prepared in `docs/diagnosis/V1_ADVANCED_SAMPLE_REVIEW_2026-06-09.md`. Next work should be manual scoring and reviewer notes for Sample 01 and Sample 02 advanced outputs, plus confirmation that Sample 03 should remain D0.
+- Do not run final-stage tests, full-input advanced batches, or larger real-AI batches until the advanced review notes are filled.
+- Do not treat the AI stage decisions in the advanced worksheet as product approval or public-readiness approval.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
