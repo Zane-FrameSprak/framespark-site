@@ -261,4 +261,5 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - V1 report quality now has an internal scoring standard: `docs/diagnosis/V1_EVAL_STANDARD.md`.
 - A 3-sample V1 basic internal evaluation batch was created on 2026-06-09. Review todo: `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`.
 - The V1 basic review document now contains human-review summaries for all three 2026-06-09 sample runs, including metadata, concise AI judgment notes, suggestion notes, and reviewer focus points. Scores and final judgments are intentionally left blank for manual review.
+- The V1 basic review document has been localized into a Chinese-first worksheet for non-programmer manual review. It keeps necessary technical fields with Chinese explanations and does not include full report bodies or full sample text.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.

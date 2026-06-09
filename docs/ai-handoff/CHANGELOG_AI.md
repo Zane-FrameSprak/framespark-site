@@ -8,6 +8,7 @@
 - 2026-06-09: Added `docs/diagnosis/V1_EVAL_STANDARD.md` for internal V1 report quality scoring, stage gates, fallback handling, and manual review criteria. No code, AI run, or deployment changed.
 - 2026-06-09: Ran three non-private V1 basic sample runs for internal review. Total DeepSeek V4-flash calls: 4; sample 03 used one JSON retry; all three saved `hasReportV1=true`, `stageReached=basic`, and `fallback=false`. Added `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md` for manual scoring.
 - 2026-06-09: Prepared human-review summaries for the three V1 basic sample runs in `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`. Scores and final reviewer decisions remain blank; no real AI, code, public site, or deployment work changed.
+- 2026-06-09: Localized the V1 basic sample review into a Chinese-first manual worksheet and added a short Chinese quick-review note to `V1_EVAL_STANDARD.md`. No real AI, code, sample-run data, public site, or deployment work changed.
 - 2026-06-03: Added V1 staged diagnosis architecture plan. V1 future mainline is staged, not a single all-in-one run; no business code changed and `ENABLE_DIAGNOSIS_V1` remains false.
 - 2026-06-03: Added V1 staged commit 1 skeleton: pure gatekeeper and stage-decision modules with no-AI tests. Not connected to routes or production pipeline.
 - 2026-06-03: Added V1 staged commit 2 skeleton: mock `v1StageRunner` with no-AI staged runner tests. Still not connected to production routes or legacy pipeline.

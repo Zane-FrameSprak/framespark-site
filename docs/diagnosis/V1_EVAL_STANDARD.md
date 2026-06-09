@@ -2,7 +2,17 @@
 
 Last updated: 2026-06-09
 
-This document defines the internal review standard for V1 diagnosis reports. It is for sample-run evaluation, prompt iteration, and release gating. It is not product copy and does not mean V1 is ready for public users.
+This document defines the internal review standard for V1 diagnosis reports. It is for sample-run evaluation, prompt iteration, and release gating. It is not product copy and does not authorize public use.
+
+## 中文快速评审说明
+
+人工先不用看完所有技术项，先判断三件事：
+
+1. AI 有没有看懂故事：它有没有抓住主角、目标、阻碍、关键选择和故事变化。
+2. AI 有没有乱编：它有没有补出样本里没有的人物动机、剧情、结果或承诺。
+3. AI 的建议有没有实际帮助：建议是不是能指导作者下一步修改，而不是空泛鼓励。
+
+如果这三项里有明显问题，先在人工评审表里写备注，不要急着给后续阶段做判断。
 
 ## Purpose
 

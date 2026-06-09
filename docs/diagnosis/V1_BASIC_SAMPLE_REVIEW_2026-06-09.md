@@ -1,209 +1,212 @@
-# V1 Basic Sample Review Todo - 2026-06-09
+# V1 基础诊断样本人工评审表 - 2026-06-09
 
-Purpose: create a small internal review queue for V1 basic-stage quality scoring using `docs/diagnosis/V1_EVAL_STANDARD.md`.
+用途：给人工评审 3 个 V1 基础诊断样本用。请根据 `docs/diagnosis/V1_EVAL_STANDARD.md` 的标准判断，不要只看系统是否跑完。
 
-Scope:
+本表只放摘要，不放完整 AI 报告，不放完整样本文本，不替评审人打分。
 
-- Three fictional, non-private, short internal samples.
-- V1 basic stage only.
-- No public entry, no deployment, no user material, and no report body review in this file.
+## 先看这几个技术字段
 
-## Run Summary
+- `stage` = 当前诊断阶段。本批都是 `basic`，意思是只看“这是不是一个故事”。
+- `decision` = 系统建议下一步。它只是系统输出，不等于人工同意。
+- `promptVersion` = 提示词版本，用来追踪是哪一版提示词产生的结果。
+- `model` = 使用的模型。本批是 `deepseek-v4-flash`。
+- `fallback` = 是否进入兜底。`false` 表示没有走兜底。
+- `latency` = 本次耗时，单位毫秒。
+- `JSON retry` = 第一次输出格式不合格后是否重试。重试不等于内容一定有问题，但需要人工留意。
 
-| Sample | Run ID | Type | Calls | JSON retry | hasReportV1 | stageReached | decision | promptVersion | model | fallback | latencyMs |
-| --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | ---: |
-| 01 | `2026-06-09-v1-basic-sample-01` | Realist short | 1 | no | true | basic | Enter advanced diagnosis; focus on detail logic and emotional setup for short format. | v1-basic-2026-06 | deepseek-v4-flash | false | 8573 |
-| 02 | `2026-06-09-v1-basic-sample-02` | Fantasy / genre short | 1 | no | true | basic | Enter advanced diagnosis; evaluate character growth, plot structure, and theme expression. | v1-basic-2026-06 | deepseek-v4-flash | false | 7307 |
-| 03 | `2026-06-09-v1-basic-sample-03` | Unclear project concept | 2 | yes | true | basic | Complete character setup and story outline first, then return for basic diagnosis. | v1-basic-2026-06 | deepseek-v4-flash | false | 12827 |
+## 三个样本总览
 
-## Manual Scoring Template
+| 样本 | Run ID | 样本类型 | stage | decision 摘要 | JSON retry | fallback | latency |
+| --- | --- | --- | --- | --- | --- | --- | ---: |
+| 01 | `2026-06-09-v1-basic-sample-01` | 现实题材短片梗概 | basic | 建议后续重点看细节逻辑和情感铺垫 | 否 | false | 8573ms |
+| 02 | `2026-06-09-v1-basic-sample-02` | 奇幻类型短片梗概 | basic | 建议后续看人物成长、情节结构、主题表达 | 否 | false | 7307ms |
+| 03 | `2026-06-09-v1-basic-sample-03` | 成熟度较低的概念 | basic | 建议先补人物设定和故事大纲 | 是，1 次 | false | 12827ms |
 
-Score each dimension from 1 to 5 using `V1_EVAL_STANDARD.md`.
+---
 
-### Sample 01 - `2026-06-09-v1-basic-sample-01`
+## 样本 01
 
-Run metadata:
+样本编号：`2026-06-09-v1-basic-sample-01`
 
-- Stage / decision / promptVersion / model / fallback / latency: basic / Enter advanced diagnosis; focus on detail logic and emotional setup for short format. / v1-basic-2026-06 / deepseek-v4-flash / false / 8573ms
-- JSON retry: no
+样本类型：现实题材短片梗概。
 
-AI core judgment summary:
+系统判断它处于什么阶段：
 
-- Identifies the material as a short story centered on retired dispatcher Lao Zhao's final workday.
-- Reads the event chain as a conflict between rule enforcement and personal compassion.
-- Frames the boy's old ticket as the trigger that changes Lao Zhao's choice.
-- Interprets the core as farewell, atonement, and a form of passing something on.
-- Notes the story movement from rule-breaking decision to consequence and new life direction.
+- `stage`: basic，基础诊断阶段。
+- `decision`: 系统建议后续重点看细节逻辑和情感铺垫。
+- `promptVersion`: v1-basic-2026-06。
+- `model`: deepseek-v4-flash。
+- `fallback`: false，没有进入兜底。
+- `latency`: 8573ms。
+- `JSON retry`: 否。
 
-AI main suggestion summary:
+系统认为这个故事主要问题是什么：
 
-- Focus later review on detail logic around Lao Zhao's decision.
-- Check whether the emotional setup is sufficient for the short format.
-- Use the next stage to examine whether the human-choice turn is causally convincing.
-- Keep the basic-stage review separate from deeper structure diagnosis.
+- AI 看到了一个退休调度员在最后一天值班时面对规则和人情的选择。
+- AI 把旧车票理解为改变人物决定的触发点。
+- AI 认为故事核心和告别、赎回、传承有关。
+- AI 看到了从违规选择到承担后果，再到人物重新出发的故事运动。
 
-Possible human-check focus:
+系统给了哪些建议：
 
-- Whether the report invents motivation beyond the provided synopsis.
-- Whether the "atonement" reading is supported by the material.
-- Whether the short-film format note is specific enough to be useful.
-- Whether the missing `nextStep` field should count as a P1 issue.
-- Whether the decision wording overreaches beyond basic-stage scope.
+- 后续要检查老赵做出关键选择的细节逻辑是否成立。
+- 后续要检查情感铺垫是否足够支撑短片体量。
+- 后续要看“规则”和“人情”的冲突是否有足够说服力。
+- 基础阶段暂时不展开深层结构分析。
 
-| Dimension | Score | Reviewer notes |
-| --- | --- | --- |
-| Core problem recognition |  |  |
-| Material faithfulness |  |  |
-| Hallucination control |  |  |
-| Actionability |  |  |
-| Stage separation |  |  |
-| Creative context fit |  |  |
-| User-pleasing risk |  |  |
-| Sensitive or forbidden claims |  |  |
-| User-readiness |  |  |
-| Human review need |  |  |
+我作为人工评审需要重点看什么：
 
-P0 findings:
+- AI 是否真的看懂了故事核心。
+- AI 是否把“赎回”“传承”等含义说得过满。
+- AI 是否乱补了样本里没有写明的人物动机。
+- AI 的建议是否具体到能指导下一轮修改。
+- `nextStep` 为空是否影响使用。
 
-P1 findings:
+可能的问题：
 
-P2 findings:
+- “赎回”“传承”这类概括可能需要人工确认是否有依据。
+- 建议偏向下一阶段，可能需要判断是否越过了基础诊断边界。
+- 对情感铺垫的提醒有用，但还不够具体。
 
-Manual decision:
+人工打分区：
 
-- [ ] stop
-- [ ] rerun
-- [ ] revise prompt
-- [ ] continue to advanced test
-- [ ] archive as passing reference
+- 有没有看懂故事：__ / 5
+- 有没有乱编：__ / 5
+- 建议有没有用：__ / 5
+- 是否应该继续进入下一阶段：是 / 否 / 不确定
+- 我的备注：
 
-### Sample 02 - `2026-06-09-v1-basic-sample-02`
+---
 
-Run metadata:
+## 样本 02
 
-- Stage / decision / promptVersion / model / fallback / latency: basic / Enter advanced diagnosis; evaluate character growth, plot structure, and theme expression. / v1-basic-2026-06 / deepseek-v4-flash / false / 7307ms
-- JSON retry: no
+样本编号：`2026-06-09-v1-basic-sample-02`
 
-AI core judgment summary:
+样本类型：奇幻类型短片梗概。
 
-- Identifies the material as a fantasy / genre short about young postman A Qing.
-- Reads the central action as delivering a letter to save a sick sister.
-- Notes the prophecy, mountain route, and stone-chicken trap as the main fantasy mechanism.
-- Frames the ending around recognizing the trap and leaving the village.
-- Keeps the basic focus mostly on whether a clear story carrier and event chain exist.
+系统判断它处于什么阶段：
 
-AI main suggestion summary:
+- `stage`: basic，基础诊断阶段。
+- `decision`: 系统建议后续看人物成长、情节结构和主题表达。
+- `promptVersion`: v1-basic-2026-06。
+- `model`: deepseek-v4-flash。
+- `fallback`: false，没有进入兜底。
+- `latency`: 7307ms。
+- `JSON retry`: 否。
 
-- Use later review to examine character growth.
-- Use later review to examine plot structure.
-- Use later review to examine theme expression.
-- Check whether the fantasy mechanism supports the protagonist's choice rather than remaining only a device.
+系统认为这个故事主要问题是什么：
 
-Possible human-check focus:
+- AI 看到了年轻邮差阿青为了妹妹送信的主线。
+- AI 抓住了预言、山路循环、石鸡陷阱这些奇幻机制。
+- AI 认为故事的主要动作是识破陷阱并离开村庄。
+- AI 把这个样本识别成有主角、有目标、有阻碍、有转折的故事。
 
-- Whether the report distinguishes story recognition from advanced genre diagnosis.
-- Whether it stays faithful to the sample's rule system and conflict.
-- Whether the suggestions are too broad for direct prompt improvement.
-- Whether the missing `nextStep` field should count as a P1 issue.
-- Whether model language implies certainty where the sample leaves ambiguity.
+系统给了哪些建议：
 
-| Dimension | Score | Reviewer notes |
-| --- | --- | --- |
-| Core problem recognition |  |  |
-| Material faithfulness |  |  |
-| Hallucination control |  |  |
-| Actionability |  |  |
-| Stage separation |  |  |
-| Creative context fit |  |  |
-| User-pleasing risk |  |  |
-| Sensitive or forbidden claims |  |  |
-| User-readiness |  |  |
-| Human review need |  |  |
+- 后续要看人物成长是否成立。
+- 后续要看情节结构是否顺。
+- 后续要看主题表达是否清楚。
+- 后续要看奇幻机制是否真正推动主角选择。
 
-P0 findings:
+我作为人工评审需要重点看什么：
 
-P1 findings:
+- AI 是否准确理解了预言和石鸡机制。
+- AI 是否把类型设定和人物目标连接起来了。
+- AI 是否只是说了泛泛的“人物、结构、主题”。
+- AI 是否保持在基础诊断范围内。
+- `nextStep` 为空是否影响使用。
 
-P2 findings:
+可能的问题：
 
-Manual decision:
+- 建议方向正确与否需要人工判断，不能只看表述是否顺。
+- “人物成长、结构、主题”比较大，需要确认是否足够可执行。
+- 奇幻设定如果被误读，后续判断会偏。
 
-- [ ] stop
-- [ ] rerun
-- [ ] revise prompt
-- [ ] continue to advanced test
-- [ ] archive as passing reference
+人工打分区：
 
-### Sample 03 - `2026-06-09-v1-basic-sample-03`
+- 有没有看懂故事：__ / 5
+- 有没有乱编：__ / 5
+- 建议有没有用：__ / 5
+- 是否应该继续进入下一阶段：是 / 否 / 不确定
+- 我的备注：
 
-Run metadata:
+---
 
-- Stage / decision / promptVersion / model / fallback / latency: basic / Complete character setup and story outline first, then return for basic diagnosis. / v1-basic-2026-06 / deepseek-v4-flash / false / 12827ms
-- JSON retry: yes, one retry
+## 样本 03
 
-AI core judgment summary:
+样本编号：`2026-06-09-v1-basic-sample-03`
 
-- Identifies the material as an unclear project concept rather than a fully formed story.
-- Reads the red tie as a symbol of order, fear, and social control.
-- Notes that the protagonist identity is unstable between possible roles.
-- Recognizes a possible escape-from-city direction but marks the story as not yet shaped.
-- Treats the material as needing setup work before deeper basic-stage evaluation.
+样本类型：成熟度较低的概念。
 
-AI main suggestion summary:
+系统判断它处于什么阶段：
 
-- Define the protagonist before another diagnosis pass.
-- Build a clearer story outline.
-- Clarify the world rule around the red tie and infection label.
-- Turn the symbolic premise into a concrete chain of events.
-- Return to basic-stage evaluation after the material has a more stable story form.
+- `stage`: basic，基础诊断阶段。
+- `decision`: 系统建议先补人物设定和故事大纲。
+- `promptVersion`: v1-basic-2026-06。
+- `model`: deepseek-v4-flash。
+- `fallback`: false，没有进入兜底。
+- `latency`: 12827ms。
+- `JSON retry`: 是，第一次格式不合格后重试 1 次。
 
-Possible human-check focus:
+系统认为这个故事主要问题是什么：
 
-- Whether the report should have stopped earlier as D0 instead of returning a basic-stage result.
-- Whether symbolic interpretation exceeds what the concept supports.
-- Whether the decision is useful enough without a populated `nextStep`.
-- Whether the JSON retry should trigger closer schema review.
-- Whether this sample should be used to test low-maturity material handling.
+- AI 认为这个材料更像概念，还不是完整故事。
+- AI 看到了“红领带”作为秩序、恐惧、控制的象征。
+- AI 注意到主角身份还不稳定，可能是外卖员，也可能是小学生。
+- AI 看到了逃出城市的可能方向，但认为故事还没有成型。
+- AI 认为现在需要先补人物和故事线。
 
-| Dimension | Score | Reviewer notes |
-| --- | --- | --- |
-| Core problem recognition |  |  |
-| Material faithfulness |  |  |
-| Hallucination control |  |  |
-| Actionability |  |  |
-| Stage separation |  |  |
-| Creative context fit |  |  |
-| User-pleasing risk |  |  |
-| Sensitive or forbidden claims |  |  |
-| User-readiness |  |  |
-| Human review need |  |  |
+系统给了哪些建议：
 
-P0 findings:
+- 先明确主角是谁。
+- 补一版更清楚的故事大纲。
+- 解释清楚红领带、感染标签和世界规则之间的关系。
+- 把象征性设定变成具体事件链。
+- 材料更稳定后再做基础诊断。
 
-P1 findings:
+我作为人工评审需要重点看什么：
 
-P2 findings:
+- 这个样本是否应该停在 D0，而不是进入 basic。
+- AI 对“红领带”的象征解释有没有过度发挥。
+- AI 是否准确指出了材料成熟度不足。
+- JSON retry 是否提示格式稳定性还要关注。
+- `nextStep` 为空是否影响使用。
 
-Manual decision:
+可能的问题：
 
-- [ ] stop
-- [ ] rerun
-- [ ] revise prompt
-- [ ] continue to advanced test
-- [ ] archive as passing reference
+- 系统把它标成 basic，但内容上可能更像“信息不足”的早期概念。
+- 象征解读可能比样本本身更完整，需要人工核对。
+- 如果未来给真实用户看，这类结果可能需要更直接告诉用户先补什么。
 
-## Batch Decision
+人工打分区：
 
-Reviewer:
+- 有没有看懂故事：__ / 5
+- 有没有乱编：__ / 5
+- 建议有没有用：__ / 5
+- 是否应该继续进入下一阶段：是 / 否 / 不确定
+- 我的备注：
 
-Date:
+---
 
-Overall notes:
+## 本批人工结论区
 
-Should V1 proceed to advanced tests?
+评审人：
 
-- [ ] no
-- [ ] only after prompt revision
-- [ ] yes, with another small non-private batch
+日期：
 
-Do not proceed to final-stage or public-entry work from this document alone.
+总体备注：
+
+这一批是否还需要补跑样本：
+
+- [ ] 需要
+- [ ] 不需要
+- [ ] 不确定
+
+下一步建议由人工填写：
+
+- [ ] 暂停，先改提示词
+- [ ] 先补 D0 / basic 边界
+- [ ] 继续做小批量 basic 评审
+- [ ] 规划 advanced 样本评审
+
+注意：本表不能单独作为对外展示、开放上传或接入公网 API 的依据。
