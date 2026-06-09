@@ -191,3 +191,14 @@ The 3-sample V1 basic review found no P0, but Sample 03 is a P1 boundary issue: 
 
 Impact:
 Next work should be a Plan for diagnosis-api / prompt changes only. Do not modify prompt source, D0 gatekeeper, pipeline, public upload, or `/api/diagnosis` before that Plan is approved.
+
+## 2026-06-09 — Use AGENTS.md as the project-level agent rule entry
+
+Decision:
+Use root `AGENTS.md` as the primary project-level operating rules for Codex and other coding agents. Use `.agents/skills/framespark-target-mode/SKILL.md` for concise target-mode tasks.
+
+Reason:
+FrameSpark tasks repeatedly require the same boundaries: risk classification, stop conditions, AI-call limits, commit/push/deploy policy, public-site boundaries, V1 diagnosis boundaries, internal-tool boundaries, and privacy rules. Keeping them in the repository reduces repeated long prompts and cross-agent drift.
+
+Impact:
+Future tasks can specify only the concrete target, allowed files, forbidden files, and checks. Agents should follow `AGENTS.md` first, then the relevant handoff files and task-specific instructions.

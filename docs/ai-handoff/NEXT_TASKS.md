@@ -37,6 +37,7 @@ Updated by: Codex
 
 - Review the new FrameSpark workflow skills after first use and keep them short.
 - Keep reports short: result, files, checks, risk, commit, next step.
+- Use `AGENTS.md` plus `.agents/skills/framespark-target-mode/SKILL.md` as the default project-level operating rules for future target-mode tasks.
 - Diagnosis regression Skill remains deferred.
 
 ## Next — Diagnosis V1
