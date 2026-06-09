@@ -143,6 +143,7 @@ Updated by: Codex
 - A minimal real V1 sample-run link check has confirmed the path from DeepSeek V4-flash output to sample-run summary fields and both internal pages.
 - Use `docs/diagnosis/V1_EVAL_STANDARD.md` before judging V1 report quality.
 - Next V1 evaluation step: run 3 to 5 non-private samples through basic only, manually score them with the standard, then decide whether to proceed to advanced or final full-input tests.
+- Current next action: manually score `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`; do not run a larger batch before the manual review is complete.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.

@@ -259,4 +259,5 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - A minimal real V1 sample-run link check succeeded on 2026-06-09: DeepSeek V4-flash produced a basic-stage V1 summary, sample-run storage preserved the V1 summary fields, and both internal pages can read the saved fields.
 - The link check used a fictional non-private short sample and did not expose the full AI report or full sample text in output.
 - V1 report quality now has an internal scoring standard: `docs/diagnosis/V1_EVAL_STANDARD.md`.
+- A 3-sample V1 basic internal evaluation batch was created on 2026-06-09. Review todo: `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.
