@@ -256,4 +256,6 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - `internal/diagnosis-eval` now displays the saved V1 summary fields in result cards.
 - `internal/admin-console` now has a V1 evaluation summary area that reads dev sample run summary fields when the local dev API is available.
 - The internal UI remains summary-only: it does not show full `reportV1` bodies or full sample text.
-- No service was started and no real AI smoke or diagnosis run was executed for these UI changes.
+- A minimal real V1 sample-run link check succeeded on 2026-06-09: DeepSeek V4-flash produced a basic-stage V1 summary, sample-run storage preserved the V1 summary fields, and both internal pages can read the saved fields.
+- The link check used a fictional non-private short sample and did not expose the full AI report or full sample text in output.
+- No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.
