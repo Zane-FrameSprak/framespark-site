@@ -260,4 +260,5 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The link check used a fictional non-private short sample and did not expose the full AI report or full sample text in output.
 - V1 report quality now has an internal scoring standard: `docs/diagnosis/V1_EVAL_STANDARD.md`.
 - A 3-sample V1 basic internal evaluation batch was created on 2026-06-09. Review todo: `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`.
+- The V1 basic review document now contains human-review summaries for all three 2026-06-09 sample runs, including metadata, concise AI judgment notes, suggestion notes, and reviewer focus points. Scores and final judgments are intentionally left blank for manual review.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.

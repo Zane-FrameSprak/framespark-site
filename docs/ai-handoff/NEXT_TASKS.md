@@ -144,6 +144,7 @@ Updated by: Codex
 - Use `docs/diagnosis/V1_EVAL_STANDARD.md` before judging V1 report quality.
 - Next V1 evaluation step: run 3 to 5 non-private samples through basic only, manually score them with the standard, then decide whether to proceed to advanced or final full-input tests.
 - Current next action: manually score `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`; do not run a larger batch before the manual review is complete.
+- The review file already has concise summaries for the three 2026-06-09 basic sample runs. Next work should be manual scoring only; do not add more sample runs or real AI calls until those scores and reviewer notes are recorded.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
