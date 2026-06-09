@@ -253,5 +253,6 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - `diagnosis-api` dev sample run results now preserve V1 summary fields such as stage reached, decision, prompt version, model, fallback, latency, maturity, stage, next step, stop reason, and stage status.
 - Full `reportV1` bodies are not stored in sample run results; this phase stores only summary fields for internal review.
 - Legacy sample run fields remain intact for existing internal tooling.
-- No internal UI changes were made in this phase, and no service was started.
-- No real AI smoke or diagnosis run was executed for this change.
+- `internal/diagnosis-eval` now displays the saved V1 summary fields in result cards.
+- The internal UI remains summary-only: it does not show full `reportV1` bodies or full sample text.
+- No service was started and no real AI smoke or diagnosis run was executed for this UI change.

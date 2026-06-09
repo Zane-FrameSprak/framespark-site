@@ -2,6 +2,7 @@
 
 ## Recent Summary
 
+- 2026-06-09: Updated `internal/diagnosis-eval` result cards to show saved V1 diagnostics summary fields only. No full reportV1 body, full sample text, real AI run, service start, public site change, or diagnosis-api change.
 - 2026-06-03: Added V1 staged diagnosis architecture plan. V1 future mainline is staged, not a single all-in-one run; no business code changed and `ENABLE_DIAGNOSIS_V1` remains false.
 - 2026-06-03: Added V1 staged commit 1 skeleton: pure gatekeeper and stage-decision modules with no-AI tests. Not connected to routes or production pipeline.
 - 2026-06-03: Added V1 staged commit 2 skeleton: mock `v1StageRunner` with no-AI staged runner tests. Still not connected to production routes or legacy pipeline.

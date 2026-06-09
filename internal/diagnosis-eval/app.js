@@ -382,6 +382,7 @@
       return;
     }
     resultList.innerHTML = results.map(function (result) {
+      var v1Summary = renderV1Summary(result);
       return [
         '<article class="result-card">',
         '<strong>' + escapeHtml(result.sampleName || result.sampleId || result.resultId) + '</strong>',
@@ -395,9 +396,87 @@
         '</p>',
         '<p>' + escapeHtml(result.summary || '无 summary') + '</p>',
         '<p class="meta">nextStep：' + escapeHtml(result.nextStep || '无') + '</p>',
+        v1Summary,
         '</article>'
       ].join('');
     }).join('');
+  }
+
+  function renderV1Summary(result) {
+    var fields = readV1SummaryFields(result || {});
+    var hasAnyV1Field = Object.keys(fields).some(function (key) {
+      return fields[key] !== '';
+    });
+    var fallback = fields.v1Fallback === true;
+    var chipItems = [
+      fields.v1StageReached || fields.v1Stage || '',
+      fields.v1Decision || '',
+      fallback ? 'fallback' : (fields.hasReportV1 === true ? 'no fallback' : ''),
+      fields.v1Model || ''
+    ].filter(Boolean);
+    var chipText = chipItems.length ? chipItems.join(' / ') : '未记录';
+    var rows = [
+      ['hasReportV1', formatBooleanField(fields.hasReportV1)],
+      ['v1StageReached', fields.v1StageReached],
+      ['v1Decision', fields.v1Decision],
+      ['v1PromptVersion', fields.v1PromptVersion],
+      ['v1Model', fields.v1Model],
+      ['v1Fallback', formatBooleanField(fields.v1Fallback)],
+      ['v1LatencyMs', fields.v1LatencyMs === '' ? '' : String(fields.v1LatencyMs) + ' ms'],
+      ['v1MaturityLevel', fields.v1MaturityLevel],
+      ['v1Stage', fields.v1Stage],
+      ['v1NextStep', fields.v1NextStep],
+      ['v1StopReason', fields.v1StopReason]
+    ];
+
+    return [
+      '<section class="v1-summary" data-empty="' + String(!hasAnyV1Field) + '" data-fallback="' + String(fallback) + '">',
+      '<div class="v1-summary__head">',
+      '<span class="v1-summary__title">V1 摘要</span>',
+      '<span class="v1-summary__chip' + (fallback ? ' v1-summary__chip--danger' : '') + '">V1: ' + escapeHtml(chipText) + '</span>',
+      '</div>',
+      '<dl class="v1-summary__grid">',
+      rows.map(function (row) {
+        return [
+          '<div>',
+          '<dt>' + escapeHtml(row[0]) + '</dt>',
+          '<dd>' + escapeHtml(emptyText(row[1])) + '</dd>',
+          '</div>'
+        ].join('');
+      }).join(''),
+      '</dl>',
+      '</section>'
+    ].join('');
+  }
+
+  function readV1SummaryFields(result) {
+    return {
+      hasReportV1: result.hasReportV1 === true ? true : (result.hasReportV1 === false ? false : ''),
+      v1StageReached: cleanField(result.v1StageReached),
+      v1Decision: cleanField(result.v1Decision),
+      v1PromptVersion: cleanField(result.v1PromptVersion),
+      v1Model: cleanField(result.v1Model),
+      v1Fallback: result.v1Fallback === true ? true : (result.v1Fallback === false ? false : ''),
+      v1LatencyMs: typeof result.v1LatencyMs === 'number' ? result.v1LatencyMs : '',
+      v1MaturityLevel: cleanField(result.v1MaturityLevel),
+      v1Stage: cleanField(result.v1Stage),
+      v1NextStep: cleanField(result.v1NextStep),
+      v1StopReason: cleanField(result.v1StopReason)
+    };
+  }
+
+  function cleanField(value) {
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  function formatBooleanField(value) {
+    if (value === true) return '是';
+    if (value === false) return '否';
+    return '';
+  }
+
+  function emptyText(value) {
+    return value === '' || value == null ? '未记录' : value;
   }
 
   async function ensureCurrentRun() {

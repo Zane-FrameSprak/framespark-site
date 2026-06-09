@@ -138,7 +138,7 @@ Updated by: Codex
 
 ## Next — Internal V1 Diagnostics UI
 
-- Next internal step: update `internal/diagnosis-eval` to display saved V1 summary fields: stage reached, decision, prompt version, model, fallback, reportV1 presence, and errors.
-- Keep the first UI pass summary-only; do not build a full reportV1 detail page yet.
+- `internal/diagnosis-eval` now displays saved V1 summary fields: reportV1 presence, stage reached, decision, prompt version, model, fallback, latency, maturity, stage, next step, and stop reason.
+- Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
