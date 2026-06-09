@@ -150,8 +150,8 @@ Updated by: Codex
 - Next diagnosis work should be a Plan for modifying D0 gatekeeper / material maturity handling, basic prompt specificity, `nextStep` stability, and JSON schema stability. Do not modify `diagnosis-api` or prompt source files before that Plan is approved.
 - Regression target after any future code/prompt change: Sample 03 should return D0 or a clear supplement-material result; Sample 01 should avoid unsupported "atonement" interpretation; Sample 02 should produce more specific suggestions.
 - Patch 1 is complete: D0/basic boundary and `nextStep` stability now have no-AI regression coverage. Next code-facing step should be Patch 2 only after approval: basic prompt fidelity and suggestion specificity.
-- Patch 2 is complete at prompt/test level. Next recommended step is a real-AI regression on the 3 existing non-private basic samples once `DEEPSEEK_API_KEY` is available locally.
-- If a real AI regression is requested, keep it to the 3 existing non-private basic samples and do not output full sample text or full reportV1 bodies.
+- Patch 2 real-AI regression is complete and documented. Next work should be manual review of `docs/diagnosis/V1_PATCH2_REAL_REGRESSION_2026-06-09.md` plus the existing V1 basic review worksheet.
+- Do not run a larger real-AI batch until the manual review notes decide whether Patch 2 is sufficient or needs another prompt pass.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
