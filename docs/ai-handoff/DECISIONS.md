@@ -180,3 +180,14 @@ The public site is currently a brand display plus internal-test preview site. Di
 
 Impact:
 The diagnosis page stays as an internal-test notice. `/api/diagnosis` remains undeployed/unproxied. User-system and talent-platform work resume only after launch as separate tasks.
+
+## 2026-06-09 — Do not open V1 MVP before D0/basic boundary fixes
+
+Decision:
+Do not expose V1 diagnosis as an MVP until the D0 / basic boundary, `nextStep` stability, basic prompt specificity, and over-interpretation controls are planned and addressed.
+
+Reason:
+The 3-sample V1 basic review found no P0, but Sample 03 is a P1 boundary issue: low-maturity material returned `stage=basic` and must not move to advanced. Sample 01 also shows mild over-interpretation risk, and Sample 02 shows generic suggestion risk.
+
+Impact:
+Next work should be a Plan for diagnosis-api / prompt changes only. Do not modify prompt source, D0 gatekeeper, pipeline, public upload, or `/api/diagnosis` before that Plan is approved.

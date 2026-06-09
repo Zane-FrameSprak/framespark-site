@@ -262,4 +262,6 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - A 3-sample V1 basic internal evaluation batch was created on 2026-06-09. Review todo: `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`.
 - The V1 basic review document now contains human-review summaries for all three 2026-06-09 sample runs, including metadata, concise AI judgment notes, suggestion notes, and reviewer focus points. Scores and final judgments are intentionally left blank for manual review.
 - The V1 basic review document has been localized into a Chinese-first worksheet for non-programmer manual review. It keeps necessary technical fields with Chinese explanations and does not include full report bodies or full sample text.
+- Zane's review assistant conclusions are now recorded: no P0 in the 3-sample batch, Sample 03 is a P1 D0/basic boundary issue and must not move to advanced, and V1 basic is usable for controlled review but not ready for MVP exposure.
+- `docs/diagnosis/V1_PROMPT_REVISION_PLAN_2026-06-09.md` records the next planning targets: D0 gatekeeper / maturity detection, basic prompt specificity, stage decision / `nextStep`, and JSON schema stability.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.

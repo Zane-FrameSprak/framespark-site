@@ -146,6 +146,8 @@ Updated by: Codex
 - Current next action: manually score `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`; do not run a larger batch before the manual review is complete.
 - The review file already has concise summaries for the three 2026-06-09 basic sample runs. Next work should be manual scoring only; do not add more sample runs or real AI calls until those scores and reviewer notes are recorded.
 - The review worksheet is now Chinese-first and intended for non-programmer product review. Fill only the manual score fields and notes; do not treat the current summaries as model self-scoring.
+- Next diagnosis work should be a Plan for modifying D0 gatekeeper / material maturity handling, basic prompt specificity, `nextStep` stability, and JSON schema stability. Do not modify `diagnosis-api` or prompt source files before that Plan is approved.
+- Regression target after any future code/prompt change: Sample 03 should return D0 or a clear supplement-material result; Sample 01 should avoid unsupported "atonement" interpretation; Sample 02 should produce more specific suggestions.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
