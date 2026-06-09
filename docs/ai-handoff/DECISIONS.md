@@ -82,6 +82,17 @@ Synthetic samples tend to be cleaner and more pattern-like than real submissions
 Impact:
 Use synthetic samples to catch breakage and classification drift. Use real story materials for product-quality judgment.
 
+## 2026-06-09 — Evaluate V1 reports with an internal scoring standard before promotion
+
+Decision:
+Use `docs/diagnosis/V1_EVAL_STANDARD.md` as the required internal scoring standard for V1 report quality before promoting any stage or considering user-facing trials.
+
+Reason:
+Successful smoke tests prove that the pipeline can return and store summaries, but they do not prove report quality, material faithfulness, or user-readiness.
+
+Impact:
+Future V1 sample runs should be manually scored across the documented dimensions. Basic-stage batches should pass the standard before advanced or final full-input tests are treated as meaningful.
+
 ## 2026-05-29 — Use AI handoff files as the cross-agent source of truth
 
 Decision:

@@ -141,6 +141,8 @@ Updated by: Codex
 - `internal/diagnosis-eval` now displays saved V1 summary fields: reportV1 presence, stage reached, decision, prompt version, model, fallback, latency, maturity, stage, next step, and stop reason.
 - `internal/admin-console` now shows a V1 evaluation summary area from dev sample run summary fields when available.
 - A minimal real V1 sample-run link check has confirmed the path from DeepSeek V4-flash output to sample-run summary fields and both internal pages.
+- Use `docs/diagnosis/V1_EVAL_STANDARD.md` before judging V1 report quality.
+- Next V1 evaluation step: run 3 to 5 non-private samples through basic only, manually score them with the standard, then decide whether to proceed to advanced or final full-input tests.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.

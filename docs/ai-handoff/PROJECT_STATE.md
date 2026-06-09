@@ -258,4 +258,5 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The internal UI remains summary-only: it does not show full `reportV1` bodies or full sample text.
 - A minimal real V1 sample-run link check succeeded on 2026-06-09: DeepSeek V4-flash produced a basic-stage V1 summary, sample-run storage preserved the V1 summary fields, and both internal pages can read the saved fields.
 - The link check used a fictional non-private short sample and did not expose the full AI report or full sample text in output.
+- V1 report quality now has an internal scoring standard: `docs/diagnosis/V1_EVAL_STANDARD.md`.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.

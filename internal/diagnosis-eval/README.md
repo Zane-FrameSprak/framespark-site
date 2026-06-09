@@ -4,6 +4,8 @@
 
 它属于 FrameSpark 内部控制台体系，不是官网功能，不进入官网导航，不面向公开用户。
 
+V1 报告质量评测使用 `docs/diagnosis/V1_EVAL_STANDARD.md`。不要仅凭 smoke 成功判断报告可用性。
+
 ## 1. 启动后端 dev API（终端 1）
 
 工作台依赖后端 dev-only API。默认情况下该 API 关闭，必须显式开启：
