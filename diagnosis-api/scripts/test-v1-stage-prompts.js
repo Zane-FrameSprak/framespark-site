@@ -62,6 +62,16 @@ for (const testCase of cases) {
     assert.match(content, /stageDecisionHints/, `${testCase.name} stageDecisionHints`);
     assert.match(content, /promptVersion:/, `${testCase.name} promptVersion in user content`);
 
+    if (testCase.name === 'basic prompt shape') {
+      assert.match(content, /可见的人物、行为、道具、事件、规则或结尾方向/, 'basic material evidence constraint');
+      assert.match(content, /不得把材料未明确写出/, 'basic no unsupported facts');
+      assert.match(content, /可能.*看起来像.*需要进一步确认/, 'basic uncertainty wording');
+      assert.match(content, /赎罪 \/ atonement/, 'basic atonement over-interpretation guard');
+      assert.match(content, /缺什么、为什么影响 basic 判断、下一步怎么补/, 'basic specific suggestion shape');
+      assert.match(content, /避免只写“人物成长”“情节结构”“主题表达”/, 'basic generic suggestion guard');
+      assert.match(content, /nextStep 必须是具体动作/, 'basic concrete nextStep');
+    }
+
     for (const forbidden of testCase.forbidden) {
       assert.equal(content.includes(forbidden), false, `${testCase.name} forbidden ${forbidden}`);
     }
@@ -92,4 +102,3 @@ function makePayload() {
 function flattenMessages(messages) {
   return messages.map((message) => String(message.content || '')).join('\n');
 }
-

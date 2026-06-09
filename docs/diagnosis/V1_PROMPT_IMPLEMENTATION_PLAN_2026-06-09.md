@@ -299,3 +299,22 @@ Local sample regression, no real AI:
 - Sample 03: gatekeeper returns `stop_d0` with `LOW_INFORMATION` and supplement-material `nextStep`.
 
 Patch 1 does not judge report quality and does not replace manual review. Patch 2 remains the place for basic prompt fidelity and suggestion specificity.
+
+## J. Patch 2 Result - 2026-06-09
+
+Changed areas:
+
+- `v1BasicDiagnosis.js`: tightened basic prompt instructions so core judgments must be grounded in visible material facts.
+- `v1BasicDiagnosis.js`: added explicit uncertainty rules. If the model infers motive, theme, relationship, or ending, it must mark the claim as possible or needing confirmation.
+- `v1BasicDiagnosis.js`: added an over-interpretation guard against turning unsupported "atonement / 赎罪", rescue, inheritance, or similar elevated themes into fixed conclusions.
+- `v1BasicDiagnosis.js`: required concrete suggestions that identify what is missing, why it affects basic judgment, and how to revise next.
+- `test-v1-stage-prompts.js`: now checks that the basic prompt contains grounding, uncertainty, over-interpretation, specific-suggestion, and concrete-nextStep constraints.
+
+Regression status:
+
+- No real AI was run for Patch 2 because the local environment did not have `DEEPSEEK_API_KEY`.
+- No-AI prompt tests passed.
+- Patch 1 no-AI D0/basic tests still pass; Sample 03-style low-maturity material remains covered by D0 regression.
+- Advanced and final prompts were not changed.
+
+Patch 2 does not judge final report quality. A future real-AI regression can use the existing three non-private samples when a key is available, with full report bodies and full sample text kept out of logs.
