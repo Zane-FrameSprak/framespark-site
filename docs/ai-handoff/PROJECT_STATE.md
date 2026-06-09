@@ -260,9 +260,9 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The link check used a fictional non-private short sample and did not expose the full AI report or full sample text in output.
 - V1 report quality now has an internal scoring standard: `docs/diagnosis/V1_EVAL_STANDARD.md`.
 - A 3-sample V1 basic internal evaluation batch was created on 2026-06-09. Review todo: `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`.
-- The V1 basic review document now contains human-review summaries for all three 2026-06-09 sample runs, including metadata, concise AI judgment notes, suggestion notes, and reviewer focus points. Scores and final judgments are intentionally left blank for manual review.
-- The V1 basic review document has been localized into a Chinese-first worksheet for non-programmer manual review. It keeps necessary technical fields with Chinese explanations and does not include full report bodies or full sample text.
-- Zane's review assistant conclusions are now recorded: no P0 in the 3-sample batch, Sample 03 is a P1 D0/basic boundary issue and must not move to advanced, and V1 basic is usable for controlled review but not ready for MVP exposure.
+- The V1 basic review document now contains neutral human-review summaries for all three 2026-06-09 sample runs, including metadata, concise AI judgment summaries, suggestion summaries, and reviewer focus points.
+- Scores and final quality decisions are intentionally blank for manual review; the worksheet does not include full report bodies or full sample text.
+- The current sample-review material is for human evaluation only. It does not authorize public upload, production `/api/diagnosis`, or broader V1 exposure.
 - `docs/diagnosis/V1_PROMPT_REVISION_PLAN_2026-06-09.md` records the next planning targets: D0 gatekeeper / maturity detection, basic prompt specificity, stage decision / `nextStep`, and JSON schema stability.
 - `docs/diagnosis/V1_PROMPT_IMPLEMENTATION_PLAN_2026-06-09.md` now maps those targets to concrete candidate files after read-only inspection. It recommends Patch 1 for D0/basic boundary plus nextStep, Patch 2 for basic prompt fidelity/specificity, and Patch 3 for tests/schema only if needed.
 - Project-level agent rules now exist in `AGENTS.md`, with a FrameSpark-specific target-mode Skill at `.agents/skills/framespark-target-mode/SKILL.md`. Future Codex/Agent tasks should use these as the stable operating boundary before relying on repeated long prompts.

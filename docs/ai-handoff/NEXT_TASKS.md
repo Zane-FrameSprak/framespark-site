@@ -145,8 +145,8 @@ Updated by: Codex
 - Use `docs/diagnosis/V1_EVAL_STANDARD.md` before judging V1 report quality.
 - Next V1 evaluation step: run 3 to 5 non-private samples through basic only, manually score them with the standard, then decide whether to proceed to advanced or final full-input tests.
 - Current next action: manually score `docs/diagnosis/V1_BASIC_SAMPLE_REVIEW_2026-06-09.md`; do not run a larger batch before the manual review is complete.
-- The review file already has concise summaries for the three 2026-06-09 basic sample runs. Next work should be manual scoring only; do not add more sample runs or real AI calls until those scores and reviewer notes are recorded.
-- The review worksheet is now Chinese-first and intended for non-programmer product review. Fill only the manual score fields and notes; do not treat the current summaries as model self-scoring.
+- The review file has neutral summaries for the three 2026-06-09 basic sample runs. Next work should be manual scoring only; do not add more sample runs or real AI calls until those scores and reviewer notes are recorded.
+- Treat the worksheet as preparation material, not model self-scoring and not a final quality decision.
 - Next diagnosis work should be a Plan for modifying D0 gatekeeper / material maturity handling, basic prompt specificity, `nextStep` stability, and JSON schema stability. Do not modify `diagnosis-api` or prompt source files before that Plan is approved.
 - Regression target after any future code/prompt change: Sample 03 should return D0 or a clear supplement-material result; Sample 01 should avoid unsupported "atonement" interpretation; Sample 02 should produce more specific suggestions.
 - Current next action: wait for review-assistant approval of `docs/diagnosis/V1_PROMPT_IMPLEMENTATION_PLAN_2026-06-09.md`. After approval, implement Patch 1 only: D0/basic boundary and nextStep, with no-AI regression tests first.
