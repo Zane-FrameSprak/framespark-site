@@ -15,8 +15,13 @@
     trafficError: '',
     analyticsReports: null,
     analyticsStatus: 'loading',
-    analyticsError: ''
+    analyticsError: '',
+    v1EvalSummary: null,
+    v1EvalStatus: 'loading',
+    v1EvalError: ''
   };
+
+  var DEV_SAMPLE_RUNS_API = 'http://127.0.0.1:8787/api/dev/sample-runs';
 
   var trafficSeriesLabels = {
     allRequests: '全部请求',
@@ -80,6 +85,7 @@
       initVisibleSeries();
       await loadTrafficSummary();
       await loadAnalyticsSummary();
+      await loadV1EvalSummary();
       setupChartTooltip();
       setupChartResize();
       setupChartControls();
@@ -152,6 +158,7 @@
     renderShortcuts();
     renderReminders();
     renderStats();
+    renderV1EvalSummary();
     renderLegend();
     renderAnalytics();
     drawChart();
@@ -294,6 +301,222 @@
         }
       });
     });
+  }
+
+  async function loadV1EvalSummary() {
+    state.v1EvalStatus = 'loading';
+    state.v1EvalError = '';
+    renderV1EvalLoadingState();
+    try {
+      var listResponse = await fetchJson(DEV_SAMPLE_RUNS_API);
+      var runs = Array.isArray(listResponse.runs) ? listResponse.runs : [];
+      var detailedRuns = await Promise.all(runs.slice(0, 25).map(fetchSampleRunDetail));
+      state.v1EvalSummary = buildV1EvalSummary(detailedRuns.filter(Boolean));
+      state.v1EvalStatus = 'ready';
+      state.v1EvalError = '';
+    } catch (err) {
+      state.v1EvalSummary = null;
+      state.v1EvalStatus = 'error';
+      state.v1EvalError = err.message || '读取 V1 评测摘要失败。';
+    }
+  }
+
+  async function fetchSampleRunDetail(run) {
+    if (!run || !run.runId) return null;
+    try {
+      var response = await fetchJson(DEV_SAMPLE_RUNS_API + '/' + encodeURIComponent(run.runId));
+      return response.run || run;
+    } catch (err) {
+      return run;
+    }
+  }
+
+  function renderV1EvalLoadingState() {
+    var badge = document.getElementById('v1EvalStatusBadge');
+    if (badge) {
+      badge.textContent = '正在读取 V1 评测摘要...';
+      badge.dataset.state = 'loading';
+    }
+    setText('v1EvalSource', '正在读取 dev sample runs...');
+  }
+
+  function buildV1EvalSummary(runs) {
+    var results = [];
+    (runs || []).forEach(function (run) {
+      (Array.isArray(run.results) ? run.results : []).forEach(function (result) {
+        results.push({
+          runId: run.runId,
+          createdAt: result.createdAt || run.createdAt || '',
+          hasReportV1: result.hasReportV1 === true,
+          v1StageReached: cleanText(result.v1StageReached),
+          v1Decision: cleanText(result.v1Decision),
+          v1PromptVersion: cleanText(result.v1PromptVersion),
+          v1Model: cleanText(result.v1Model),
+          v1Fallback: result.v1Fallback === true,
+          v1LatencyMs: typeof result.v1LatencyMs === 'number' ? result.v1LatencyMs : null,
+          v1MaturityLevel: cleanText(result.v1MaturityLevel),
+          v1Stage: cleanText(result.v1Stage),
+          v1NextStep: cleanText(result.v1NextStep),
+          v1StopReason: cleanText(result.v1StopReason)
+        });
+      });
+    });
+
+    var v1Results = results.filter(function (item) { return item.hasReportV1; });
+    var stageCounts = {};
+    v1Results.forEach(function (item) {
+      var key = item.v1StageReached || item.v1Stage || '未记录';
+      stageCounts[key] = (stageCounts[key] || 0) + 1;
+    });
+    var latest = v1Results.slice().sort(function (a, b) {
+      return Date.parse(b.createdAt || '') - Date.parse(a.createdAt || '');
+    })[0] || null;
+
+    return {
+      sampleRunCount: (runs || []).length,
+      v1SampleRunCount: countRunsWithV1(runs),
+      resultCount: results.length,
+      hasReportV1Count: v1Results.length,
+      stageCounts: stageCounts,
+      fallbackCount: v1Results.filter(function (item) { return item.v1Fallback; }).length,
+      latest: latest
+    };
+  }
+
+  function countRunsWithV1(runs) {
+    return (runs || []).filter(function (run) {
+      return (Array.isArray(run.results) ? run.results : []).some(function (result) {
+        return result.hasReportV1 === true;
+      });
+    }).length;
+  }
+
+  function renderV1EvalSummary() {
+    renderV1EvalBadge();
+    renderV1EvalCards();
+    renderV1StageDistribution();
+    renderV1LatestRun();
+    renderV1EvalSource();
+  }
+
+  function renderV1EvalBadge() {
+    var badge = document.getElementById('v1EvalStatusBadge');
+    if (!badge) return;
+    badge.textContent = getV1EvalBadgeText();
+    badge.dataset.state = state.v1EvalStatus;
+  }
+
+  function getV1EvalBadgeText() {
+    if (state.v1EvalStatus === 'loading') return '读取 V1 评测摘要...';
+    if (state.v1EvalStatus === 'error') return '暂无 V1 评测数据。';
+    if (!state.v1EvalSummary || !state.v1EvalSummary.hasReportV1Count) return '暂无 V1 评测数据。';
+    return '已读取 V1 摘要。';
+  }
+
+  function renderV1EvalCards() {
+    var root = document.getElementById('v1EvalCards');
+    if (!root) return;
+    var summary = state.v1EvalSummary || {};
+    var ready = state.v1EvalStatus === 'ready' && summary.hasReportV1Count;
+    var total = Number(summary.resultCount || 0);
+    var v1Count = Number(summary.hasReportV1Count || 0);
+    var ratio = total ? Math.round((v1Count / total) * 100) + '%' : '未记录';
+    var cards = [
+      { label: 'sample runs', value: summary.sampleRunCount },
+      { label: 'V1 sample runs', value: summary.v1SampleRunCount },
+      { label: 'hasReportV1', value: v1Count, note: ratio },
+      { label: 'fallback', value: summary.fallbackCount, warning: Number(summary.fallbackCount || 0) > 0 }
+    ];
+    root.innerHTML = cards.map(function (card) {
+      var value = card.value == null || card.value === '' ? '未记录' : String(card.value);
+      return [
+        '<article class="v1-eval-card' + (ready ? '' : ' is-empty') + (card.warning ? ' is-warning' : '') + '">',
+        '<span>' + escapeHtml(card.label) + '</span>',
+        '<strong>' + escapeHtml(value) + '</strong>',
+        '<small>' + escapeHtml(card.note || (ready ? '已记录' : '暂无 V1 评测数据')) + '</small>',
+        '</article>'
+      ].join('');
+    }).join('');
+  }
+
+  function renderV1StageDistribution() {
+    var root = document.getElementById('v1StageDistribution');
+    if (!root) return;
+    var summary = state.v1EvalSummary || {};
+    var counts = summary.stageCounts || {};
+    var keys = Object.keys(counts);
+    if (state.v1EvalStatus !== 'ready' || !keys.length) {
+      root.innerHTML = '<p class="panel-hint">stageReached 分布：暂无 V1 评测数据。</p>';
+      return;
+    }
+    root.innerHTML = [
+      '<div class="v1-stage-distribution__head">',
+      '<strong>stageReached 分布</strong>',
+      '<span>final / advanced / basic / D0</span>',
+      '</div>',
+      '<div class="v1-stage-tags">',
+      keys.sort().map(function (key) {
+        return '<span>' + escapeHtml(key) + '：' + escapeHtml(String(counts[key])) + '</span>';
+      }).join(''),
+      '</div>'
+    ].join('');
+  }
+
+  function renderV1LatestRun() {
+    var root = document.getElementById('v1LatestRun');
+    if (!root) return;
+    var latest = state.v1EvalSummary && state.v1EvalSummary.latest;
+    if (state.v1EvalStatus !== 'ready' || !latest) {
+      root.innerHTML = '<p class="panel-hint">最近一次 V1 run：未记录。</p>';
+      return;
+    }
+    var fallback = latest.v1Fallback === true;
+    root.innerHTML = [
+      '<article class="v1-latest-run__card' + (fallback ? ' is-warning' : '') + '">',
+      '<div>',
+      '<span>最近一次 V1 run</span>',
+      '<strong>V1: ' + escapeHtml([
+        latest.v1StageReached || latest.v1Stage || '未记录',
+        latest.v1Decision || '未记录',
+        fallback ? 'fallback' : 'no fallback',
+        latest.v1Model || '未记录'
+      ].join(' / ')) + '</strong>',
+      '</div>',
+      '<dl>',
+      renderV1LatestField('runId', latest.runId),
+      renderV1LatestField('stage', latest.v1StageReached || latest.v1Stage),
+      renderV1LatestField('decision', latest.v1Decision),
+      renderV1LatestField('promptVersion', latest.v1PromptVersion),
+      renderV1LatestField('model', latest.v1Model),
+      renderV1LatestField('fallback', fallback ? '是' : '否'),
+      renderV1LatestField('latencyMs', latest.v1LatencyMs == null ? '' : String(latest.v1LatencyMs) + ' ms'),
+      renderV1LatestField('maturity', latest.v1MaturityLevel),
+      renderV1LatestField('nextStep', latest.v1NextStep),
+      renderV1LatestField('stopReason', latest.v1StopReason),
+      '</dl>',
+      '</article>'
+    ].join('');
+  }
+
+  function renderV1LatestField(label, value) {
+    return [
+      '<div>',
+      '<dt>' + escapeHtml(label) + '</dt>',
+      '<dd>' + escapeHtml(value == null || value === '' ? '未记录' : value) + '</dd>',
+      '</div>'
+    ].join('');
+  }
+
+  function renderV1EvalSource() {
+    if (state.v1EvalStatus === 'error') {
+      setText('v1EvalSource', '来源：dev sample runs 未连接或暂无可读接口。' + (state.v1EvalError ? ' ' + state.v1EvalError : ''));
+      return;
+    }
+    if (state.v1EvalStatus === 'loading') {
+      setText('v1EvalSource', '正在读取 dev sample runs...');
+      return;
+    }
+    setText('v1EvalSource', '来源：127.0.0.1:8787 dev sample runs，只读摘要字段。');
   }
 
   function renderLegend() {
@@ -1170,6 +1393,10 @@
       severity: 'warning',
       daysLeft: null
     }]);
+  }
+
+  function cleanText(value) {
+    return typeof value === 'string' ? value.trim() : '';
   }
 
   function escapeHtml(value) {

@@ -65,6 +65,21 @@
           </section>
         </div>
 
+        <section class="panel v1-eval-panel">
+          <div class="section-head section-head--inline">
+            <div>
+              <p class="eyebrow">V1 EVALUATION</p>
+              <h2>V1 评测摘要</h2>
+              <p class="mock-badge" id="v1EvalStatusBadge">正在读取 V1 评测摘要...</p>
+            </div>
+            <p class="panel-hint">只展示 sample run 摘要字段，不展示完整报告或样本文本。</p>
+          </div>
+          <div id="v1EvalCards" class="v1-eval-cards" aria-label="V1 评测核心摘要"></div>
+          <div id="v1StageDistribution" class="v1-stage-distribution" aria-label="V1 stageReached 分布"></div>
+          <div id="v1LatestRun" class="v1-latest-run" aria-label="最近一次 V1 结果"></div>
+          <p class="panel-hint" id="v1EvalSource" role="status"></p>
+        </section>
+
         <section class="panel traffic-panel">
           <div class="section-head section-head--inline">
             <div>

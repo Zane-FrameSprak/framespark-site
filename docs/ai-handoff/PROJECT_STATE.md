@@ -254,5 +254,6 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Full `reportV1` bodies are not stored in sample run results; this phase stores only summary fields for internal review.
 - Legacy sample run fields remain intact for existing internal tooling.
 - `internal/diagnosis-eval` now displays the saved V1 summary fields in result cards.
+- `internal/admin-console` now has a V1 evaluation summary area that reads dev sample run summary fields when the local dev API is available.
 - The internal UI remains summary-only: it does not show full `reportV1` bodies or full sample text.
-- No service was started and no real AI smoke or diagnosis run was executed for this UI change.
+- No service was started and no real AI smoke or diagnosis run was executed for these UI changes.
