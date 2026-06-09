@@ -35,6 +35,21 @@ const STORY_HINT_PATTERNS = [
   /项目/
 ];
 
+const LOW_MATURITY_NEXT_STEP = '请先补充：主角是谁、主角想要什么、主要阻碍是什么、至少三个关键事件，以及结尾或状态变化方向。';
+
+const LOW_MATURITY_SUGGESTIONS = [
+  '明确主角或叙事承载者。',
+  '补充主角的目标、压力或主要阻碍。',
+  '补出至少三个关键事件，形成基本事件链。',
+  '写清结尾或人物状态变化方向。'
+];
+
+const PROTAGONIST_PATTERNS = [/主角/, /主人公/, /少年/, /女孩/, /男孩/, /老人/, /导演/, /邮差/, /调度员/, /外卖员/, /小学生/];
+const GOAL_PATTERNS = [/想要/, /为了/, /必须/, /决定/, /寻找/, /试图/, /逃出/, /完成/, /救/];
+const CONFLICT_PATTERNS = [/冲突/, /阻碍/, /危机/, /陷阱/, /秘密/, /感染/, /规则/, /追捕/, /惩罚/, /争议/];
+const EVENT_PATTERNS = [/发现/, /遇到/, /找到/, /烧/, /离开/, /回到/, /送/, /调查/, /公开/, /接受/];
+const OUTCOME_PATTERNS = [/最终/, /最后/, /结尾/, /结果/, /变化/, /离开/, /开启/, /重新/];
+
 export function evaluateV1Gatekeeper(input = {}) {
   const text = normalizeText(input.text);
   const materialHint = normalizeMaterialHint(input.materialHint || input.metadata || {});
@@ -76,6 +91,22 @@ export function evaluateV1Gatekeeper(input = {}) {
     });
   }
 
+  const lowMaturity = analyzeLowMaturity(text, materialHint);
+  if (lowMaturity.isLowMaturity) {
+    return buildD0Result({
+      code: 'LOW_INFORMATION',
+      message: '材料仍停留在概念或设定碎片阶段，当前不适合进入基础诊断。',
+      materialSummary: lowMaturity.materialSummary,
+      suggestions: LOW_MATURITY_SUGGESTIONS,
+      nextStep: LOW_MATURITY_NEXT_STEP,
+      materialType: 'idea_concept',
+      diagnostics: {
+        maturityReason: lowMaturity.reason,
+        maturitySignals: lowMaturity.signals
+      }
+    });
+  }
+
   return {
     decision: 'allow_basic',
     stage: 'gatekeeper',
@@ -90,7 +121,15 @@ export function evaluateV1Gatekeeper(input = {}) {
   };
 }
 
-function buildD0Result({ code, message, materialSummary, suggestions }) {
+function buildD0Result({
+  code,
+  message,
+  materialSummary,
+  suggestions,
+  nextStep = '建议补充故事信息后再诊断。',
+  materialType = 'non_story_material',
+  diagnostics = {}
+}) {
   return {
     decision: 'stop_d0',
     stage: 'D0',
@@ -98,8 +137,8 @@ function buildD0Result({ code, message, materialSummary, suggestions }) {
     reportV1: {
       schemaVersion: REPORT_V1_SCHEMA_VERSION,
       stage: 'D0',
-      material_type: 'non_story_material',
-      primary_material_type: 'non_story_material',
+      material_type: materialType,
+      primary_material_type: materialType,
       secondary_material_types: [],
       is_mixed_material: false,
       material_components: [],
@@ -109,7 +148,12 @@ function buildD0Result({ code, message, materialSummary, suggestions }) {
       strengths: [],
       main_problems: [message],
       priority_revisions: suggestions,
-      next_step: '建议补充故事信息后再诊断。',
+      next_step: {
+        label: '补充材料',
+        detail: nextStep,
+        summary: nextStep,
+        action: nextStep
+      },
       conversion_advice: {
         status: 'not_applicable',
         message: '当前阶段不适合项目转化判断。'
@@ -119,12 +163,13 @@ function buildD0Result({ code, message, materialSummary, suggestions }) {
         message
       },
       suggestions,
-      nextStep: '建议补充故事信息后再诊断。'
+      nextStep
     },
     diagnostics: {
       source: 'v1-gatekeeper',
       usesAi: false,
-      rejectionCode: code
+      rejectionCode: code,
+      ...diagnostics
     }
   };
 }
@@ -141,6 +186,7 @@ function normalizeMaterialHint(value) {
   return {
     material_type: normalizeString(value.material_type || value.materialType),
     primary_material_type: normalizeString(value.primary_material_type || value.primaryMaterialType),
+    materialForm: normalizeString(value.materialForm || value.material_form),
     pageType: normalizeString(value.pageType),
     confidence: value.confidence
   };
@@ -158,3 +204,44 @@ function hasStoryHint(text) {
   return STORY_HINT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+function analyzeLowMaturity(text, materialHint) {
+  const signals = {
+    protagonist: hasAny(text, PROTAGONIST_PATTERNS),
+    goal: hasAny(text, GOAL_PATTERNS),
+    conflict: hasAny(text, CONFLICT_PATTERNS),
+    event: hasAny(text, EVENT_PATTERNS),
+    outcome: hasAny(text, OUTCOME_PATTERNS),
+    unstableProtagonist: /主角.{0,16}(可能|也许|或|或者|也可能)|可能是.{1,24}(或|或者|也可能)/.test(text),
+    explicitlyUnformed: /(尚未|还没|没有|未).{0,10}(成型|形成|确定|完整)|故事尚未成型|还不是完整故事/.test(text),
+    conceptLanguage: /概念|设定|点子|想法|世界观|象征|隐喻|主题/.test(text)
+  };
+
+  const primaryType = materialHint.primary_material_type || materialHint.material_type || materialHint.materialForm || '';
+  const conceptHint = primaryType === 'idea_concept' || primaryType === 'concept';
+  const storySignalCount = ['protagonist', 'goal', 'conflict', 'event', 'outcome']
+    .filter((key) => signals[key]).length;
+
+  if ((signals.unstableProtagonist || signals.explicitlyUnformed) && (signals.conceptLanguage || conceptHint)) {
+    return {
+      isLowMaturity: true,
+      reason: 'unstable_protagonist_or_unformed_concept',
+      materialSummary: '材料包含故事概念或世界规则，但主角身份、事件链或成型程度仍不稳定。',
+      signals
+    };
+  }
+
+  if ((signals.conceptLanguage || conceptHint) && storySignalCount < 4) {
+    return {
+      isLowMaturity: true,
+      reason: 'concept_fragment_missing_story_chain',
+      materialSummary: '材料更接近概念或设定片段，缺少足够的人物目标、阻碍、事件链或变化方向。',
+      signals
+    };
+  }
+
+  return { isLowMaturity: false, reason: '', signals };
+}
+
+function hasAny(text, patterns) {
+  return patterns.some((pattern) => pattern.test(text));
+}

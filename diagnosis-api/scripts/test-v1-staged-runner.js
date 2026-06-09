@@ -14,6 +14,19 @@ const nonStoryText = [
   '若验收过程中出现争议，应由管理部门根据合同附件和付款节点进行复核。'
 ].join('');
 
+const lowMaturityConceptText = [
+  '一个末日世界里所有人必须戴红领带，不戴会被视为感染。',
+  '主角可能是外卖员，也可能是小学生，在废弃商场找到一条无色领带后想逃出城市。',
+  '这个想法主要是世界观和象征设定，故事尚未成型。'
+].join('');
+
+function assertHasNextStep(reportV1) {
+  assert.equal(typeof reportV1.nextStep, 'string');
+  assert.ok(reportV1.nextStep.trim().length > 0);
+  assert.equal(typeof reportV1.next_step, 'object');
+  assert.ok(reportV1.next_step.detail.trim().length > 0);
+}
+
 const cases = [
   {
     name: 'empty text => D0',
@@ -22,6 +35,7 @@ const cases = [
       assert.equal(result.diagnostics.stageReached, 'D0');
       assert.equal(result.diagnostics.decision, 'stop_d0');
       assert.equal(result.reportV1.maturity_level, 'D0');
+      assertHasNextStep(result.reportV1);
     }
   },
   {
@@ -38,6 +52,21 @@ const cases = [
       const result = runV1StagedDiagnosisMock({ text: nonStoryText });
       assert.equal(result.diagnostics.stageReached, 'D0');
       assert.equal(result.reportV1.rejection_reason.code, 'NON_STORY_MATERIAL');
+      assertHasNextStep(result.reportV1);
+    }
+  },
+  {
+    name: 'low-maturity concept => D0 and no advanced',
+    run() {
+      const result = runV1StagedDiagnosisMock({
+        text: lowMaturityConceptText,
+        materialHint: { primary_material_type: 'idea_concept' }
+      });
+      assert.equal(result.diagnostics.stageReached, 'D0');
+      assert.equal(result.diagnostics.decision, 'stop_d0');
+      assert.equal(result.reportV1.rejection_reason.code, 'LOW_INFORMATION');
+      assert.match(result.reportV1.nextStep, /主角|目标|阻碍|关键事件|结尾/);
+      assert.equal(result.diagnostics.decisions.some((item) => item.nextStage === 'advanced'), false);
     }
   },
   {
@@ -50,6 +79,7 @@ const cases = [
       assert.equal(result.diagnostics.stageReached, 'basic');
       assert.equal(result.diagnostics.decision, 'stop_basic');
       assert.equal(result.reportV1.stage, 'basic');
+      assertHasNextStep(result.reportV1);
     }
   },
   {
@@ -62,6 +92,7 @@ const cases = [
       assert.equal(result.diagnostics.stageReached, 'advanced');
       assert.equal(result.reportV1.stage, 'advanced');
       assert.equal(result.diagnostics.decisions.some((item) => item.decision === 'continue_advanced'), true);
+      assertHasNextStep(result.reportV1);
     }
   },
   {
@@ -74,6 +105,7 @@ const cases = [
       assert.equal(result.diagnostics.stageReached, 'final');
       assert.equal(result.diagnostics.decision, 'complete_final');
       assert.equal(result.reportV1.maturity_level, 'S');
+      assertHasNextStep(result.reportV1);
     }
   },
   {

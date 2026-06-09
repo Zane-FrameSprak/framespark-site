@@ -34,6 +34,8 @@ export function normalizeReportV1(raw, payload = {}) {
   normalized.schema_version = REPORT_V1_SCHEMA_VERSION;
   normalized.conversion_advice = normalizeConversionAdvice(normalized.conversion_advice);
   normalized.rejection_reason = normalizeRejectionReason(normalized.rejection_reason);
+  normalized.next_step = normalizeNextStep(normalized.next_step);
+  normalized.nextStep = normalized.next_step.detail;
   normalized.diagnostics = {
     ...normalizeDiagnostics(normalized.diagnostics),
     fallback: false
@@ -77,8 +79,11 @@ export function buildFallbackReportV1(payload = {}, legacyReport = {}, reason = 
     })),
     next_step: {
       label: '继续修订',
-      detail: textOrFallback(legacyReport.nextStep, DEFAULT_NEXT_STEP.detail)
+      detail: textOrFallback(legacyReport.nextStep, DEFAULT_NEXT_STEP.detail),
+      summary: textOrFallback(legacyReport.nextStep, DEFAULT_NEXT_STEP.detail),
+      action: textOrFallback(legacyReport.nextStep, DEFAULT_NEXT_STEP.detail)
     },
+    nextStep: textOrFallback(legacyReport.nextStep, DEFAULT_NEXT_STEP.detail),
     conversion_advice: {
       status: 'not_recommended',
       summary: '当前结果来自 V1 失败后的兼容兜底，不用于项目转化判断。',
@@ -160,16 +165,22 @@ function normalizeRevisions(values) {
 
 function normalizeNextStep(value) {
   if (typeof value === 'string') {
+    const detail = textOrFallback(value, DEFAULT_NEXT_STEP.detail);
     return {
       label: '下一步',
-      detail: textOrFallback(value, DEFAULT_NEXT_STEP.detail)
+      detail,
+      summary: detail,
+      action: detail
     };
   }
 
   const input = isPlainObject(value) ? value : {};
+  const detail = textOrFallback(input.detail || input.summary || input.action, DEFAULT_NEXT_STEP.detail);
   return {
     label: textOrFallback(input.label, DEFAULT_NEXT_STEP.label),
-    detail: textOrFallback(input.detail, DEFAULT_NEXT_STEP.detail)
+    detail,
+    summary: detail,
+    action: detail
   };
 }
 

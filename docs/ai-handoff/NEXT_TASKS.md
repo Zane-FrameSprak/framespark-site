@@ -149,7 +149,8 @@ Updated by: Codex
 - Treat the worksheet as preparation material, not model self-scoring and not a final quality decision.
 - Next diagnosis work should be a Plan for modifying D0 gatekeeper / material maturity handling, basic prompt specificity, `nextStep` stability, and JSON schema stability. Do not modify `diagnosis-api` or prompt source files before that Plan is approved.
 - Regression target after any future code/prompt change: Sample 03 should return D0 or a clear supplement-material result; Sample 01 should avoid unsupported "atonement" interpretation; Sample 02 should produce more specific suggestions.
-- Current next action: wait for review-assistant approval of `docs/diagnosis/V1_PROMPT_IMPLEMENTATION_PLAN_2026-06-09.md`. After approval, implement Patch 1 only: D0/basic boundary and nextStep, with no-AI regression tests first.
+- Patch 1 is complete: D0/basic boundary and `nextStep` stability now have no-AI regression coverage. Next code-facing step should be Patch 2 only after approval: basic prompt fidelity and suggestion specificity.
+- If a real AI regression is requested, keep it to the 3 existing non-private basic samples and do not output full sample text or full reportV1 bodies.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.

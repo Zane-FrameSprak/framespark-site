@@ -240,13 +240,17 @@ function buildRunnerResult({
 
 function extractDecisionInput(stage, reportV1) {
   const hints = reportV1?.diagnostics?.stageDecisionHints || reportV1?.stageDecisionHints || {};
+  const nextStep = extractNextStepText(reportV1);
 
   return {
     stage,
     passed: typeof hints.passed === 'boolean' ? hints.passed : stage === 'final',
+    maturityLevel: reportV1?.maturity_level || reportV1?.maturityLevel,
+    nextStep: hints.recommendedAction || hints.recommended_action || nextStep,
     flags: {
       storyLikely: hints.passed === true && stage === 'basic',
-      storyStands: hints.passed === true && stage === 'advanced'
+      storyStands: hints.passed === true && stage === 'advanced',
+      lowMaturity: hints.lowMaturity === true || hints.requiresSupplement === true
     }
   };
 }
@@ -263,6 +267,7 @@ function resolveRealPromptsEnabled(input, deps) {
 
 function buildStageReport({ stage, maturityLevel, materialHint, summary, nextStep }) {
   const materialType = materialHint.primary_material_type || materialHint.material_type || 'synopsis';
+  const safeNextStep = normalizeNextStepText(nextStep, stage);
 
   return {
     schemaVersion: REPORT_V1_SCHEMA_VERSION,
@@ -281,14 +286,54 @@ function buildStageReport({ stage, maturityLevel, materialHint, summary, nextSte
     story_core: 'Mock runner placeholder for staged V1 flow.',
     strengths: ['具备进入当前阶段评估的基础信息。'],
     main_problems: ['此为无 AI 骨架输出，不代表真实诊断结论。'],
-    priority_revisions: [nextStep],
-    next_step: nextStep,
+    priority_revisions: [safeNextStep],
+    next_step: {
+      label: '下一步',
+      detail: safeNextStep,
+      summary: safeNextStep,
+      action: safeNextStep
+    },
+    nextStep: safeNextStep,
     conversion_advice: {
       status: stage === 'final' ? 'possible_after_revision' : 'not_applicable',
       message: stage === 'final' ? '可考虑整理为项目档案，等待内部进一步评估。' : '当前阶段不做项目转化判断。'
     },
     rejection_reason: null
   };
+}
+
+function extractNextStepText(reportV1 = {}) {
+  if (typeof reportV1.nextStep === 'string' && reportV1.nextStep.trim()) {
+    return reportV1.nextStep.trim();
+  }
+
+  const nextStep = reportV1.next_step;
+  if (typeof nextStep === 'string' && nextStep.trim()) {
+    return nextStep.trim();
+  }
+  if (nextStep && typeof nextStep === 'object') {
+    return normalizeString(nextStep.detail || nextStep.summary || nextStep.action || nextStep.label);
+  }
+
+  return '';
+}
+
+function normalizeNextStepText(value, stage) {
+  const text = normalizeString(value);
+  if (text) {
+    return text;
+  }
+
+  if (stage === 'D0') {
+    return '请先补充主角、目标、阻碍、关键事件和结尾方向，再进行基础诊断。';
+  }
+  if (stage === 'basic') {
+    return '请根据基础诊断先确认故事链是否成立，再决定是否进入进阶诊断。';
+  }
+  if (stage === 'advanced') {
+    return '请先处理结构、人物选择和关键场面问题，再考虑终极诊断。';
+  }
+  return '请整理项目档案，并等待内部进一步评估。';
 }
 
 function normalizeOutcome(value) {

@@ -15,6 +15,12 @@ const nonStoryText = [
   '如发生争议，应先进行书面沟通，再按照合同约定提交仲裁机构处理。'
 ].join('');
 
+const lowMaturityConceptText = [
+  '一个末日世界里所有人必须戴红领带，不戴会被视为感染。',
+  '主角可能是外卖员，也可能是小学生，在废弃商场找到一条无色领带后想逃出城市。',
+  '这个想法主要是世界观和象征设定，故事尚未成型。'
+].join('');
+
 const cases = [
   {
     name: 'empty text => D0',
@@ -42,6 +48,20 @@ const cases = [
     }
   },
   {
+    name: 'low-maturity concept => D0 with supplement nextStep',
+    run() {
+      const result = evaluateV1Gatekeeper({
+        text: lowMaturityConceptText,
+        materialHint: { primary_material_type: 'idea_concept' }
+      });
+      assert.equal(result.decision, 'stop_d0');
+      assert.equal(result.reportV1.maturity_level, 'D0');
+      assert.equal(result.reportV1.rejection_reason.code, 'LOW_INFORMATION');
+      assert.match(result.reportV1.nextStep, /主角|目标|阻碍|关键事件|结尾/);
+      assert.match(result.reportV1.next_step.detail, /主角|目标|阻碍|关键事件|结尾/);
+    }
+  },
+  {
     name: 'normal story text => allow_basic',
     run() {
       const result = evaluateV1Gatekeeper({ text: storyText });
@@ -65,6 +85,26 @@ const cases = [
       assert.equal(decision.action, 'continue_advanced');
       assert.equal(decision.nextStage, 'advanced');
       assert.equal(decision.shouldContinue, true);
+    }
+  },
+  {
+    name: 'basic supplement nextStep => stop before advanced',
+    run() {
+      const decision = decideV1Stage({
+        stage: 'basic',
+        passed: true,
+        nextStep: '建议先补充人物设定和故事大纲，再返回进行基础诊断。'
+      });
+      assert.equal(decision.action, 'stop_basic');
+      assert.equal(decision.shouldContinue, false);
+    }
+  },
+  {
+    name: 'D0 maturity result => stop_d0',
+    run() {
+      const decision = decideV1Stage({ stage: 'basic', passed: true, maturityLevel: 'D0' });
+      assert.equal(decision.action, 'stop_d0');
+      assert.equal(decision.shouldContinue, false);
     }
   },
   {

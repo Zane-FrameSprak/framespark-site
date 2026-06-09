@@ -265,5 +265,7 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The current sample-review material is for human evaluation only. It does not authorize public upload, production `/api/diagnosis`, or broader V1 exposure.
 - `docs/diagnosis/V1_PROMPT_REVISION_PLAN_2026-06-09.md` records the next planning targets: D0 gatekeeper / maturity detection, basic prompt specificity, stage decision / `nextStep`, and JSON schema stability.
 - `docs/diagnosis/V1_PROMPT_IMPLEMENTATION_PLAN_2026-06-09.md` now maps those targets to concrete candidate files after read-only inspection. It recommends Patch 1 for D0/basic boundary plus nextStep, Patch 2 for basic prompt fidelity/specificity, and Patch 3 for tests/schema only if needed.
+- V1 Patch 1 is implemented: low-maturity concept fragments now stop at D0 in the V1 gatekeeper, stage decision blocks supplement-material basic results from advancing, and V1 outputs have stable `nextStep` fallbacks.
+- No real AI was run for Patch 1. No advanced/final prompts, public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.
 - Project-level agent rules now exist in `AGENTS.md`, with a FrameSpark-specific target-mode Skill at `.agents/skills/framespark-target-mode/SKILL.md`. Future Codex/Agent tasks should use these as the stable operating boundary before relying on repeated long prompts.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.

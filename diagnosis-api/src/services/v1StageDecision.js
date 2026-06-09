@@ -11,12 +11,18 @@ export function decideV1Stage(input = {}) {
   const score = Number.isFinite(input.score) ? input.score : null;
   const passed = typeof input.passed === 'boolean' ? input.passed : null;
   const flags = input.flags && typeof input.flags === 'object' ? input.flags : {};
+  const maturityLevel = normalizeString(input.maturityLevel || input.maturity_level).toUpperCase();
+  const nextStep = normalizeString(input.nextStep || input.next_step || input.recommendedAction || input.recommended_action);
 
-  if (stage === 'D0' || flags.d0 === true) {
+  if (stage === 'D0' || flags.d0 === true || maturityLevel === 'D0') {
     return buildDecision('stop_d0', stage, null, 'D0 materials stop before basic diagnosis.');
   }
 
   if (stage === 'basic') {
+    if (flags.lowMaturity === true || pointsToSupplementBeforeAdvanced(nextStep)) {
+      return buildDecision('stop_basic', stage, null, 'Basic diagnosis requests material supplementation before advanced.');
+    }
+
     if (passed === true || scoreAtLeast(score, 0.6) || flags.storyLikely === true) {
       return buildDecision('continue_advanced', stage, 'advanced', 'Basic diagnosis passed.');
     }
@@ -74,3 +80,14 @@ function scoreAtLeast(score, threshold) {
   return score !== null && score >= threshold;
 }
 
+function normalizeString(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function pointsToSupplementBeforeAdvanced(value) {
+  if (!value) {
+    return false;
+  }
+
+  return /补充|补清|补全|补写|信息不足|故事链|事件链|人物设定|故事大纲|尚未成型|先.*材料|再返回|再进行基础诊断/.test(value);
+}

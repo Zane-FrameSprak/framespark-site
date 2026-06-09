@@ -276,7 +276,26 @@ fallback nextStep：
 
 ## 执行门槛
 
-- 下一步必须由评审助手确认本 implementation plan。
-- 确认后才允许修改 `diagnosis-api`。
-- 真实 AI 回归必须再次单独确认。
+- Patch 1 has been implemented after target-mode approval: D0/basic boundary tightening plus stable `nextStep` fallback.
+- Patch 1 did not modify advanced or final prompts.
+- Patch 1 did not run real AI; verification used no-AI unit/script checks and local sample-file gatekeeper regression.
+- Real AI regression must still be separately confirmed before any new DeepSeek calls.
 - 公开上传入口、生产 `/api/diagnosis`、Nginx、SSL、systemd、用户系统、人才平台都不在本计划执行范围内。
+
+## I. Patch 1 Result - 2026-06-09
+
+Changed areas:
+
+- `v1Gatekeeper.js`: added low-maturity concept-fragment detection for materials with unstable protagonist, unformed concept language, or missing story-chain signals.
+- `v1StageDecision.js`: prevents `D0`, low-maturity, or "supplement material first" basic outputs from continuing into advanced.
+- `v1StageRunner.js`: ensures mock stage reports include both `next_step` and `nextStep`, and passes report maturity / next-step hints into stage decision.
+- `reportV1Parser.js`: normalizes `next_step` into stable `detail`, `summary`, `action`, and `nextStep` fields.
+- V1 no-AI tests now cover low-maturity D0 and nextStep presence.
+
+Local sample regression, no real AI:
+
+- Sample 01: gatekeeper still returns `allow_basic`.
+- Sample 02: gatekeeper still returns `allow_basic`.
+- Sample 03: gatekeeper returns `stop_d0` with `LOW_INFORMATION` and supplement-material `nextStep`.
+
+Patch 1 does not judge report quality and does not replace manual review. Patch 2 remains the place for basic prompt fidelity and suggestion specificity.

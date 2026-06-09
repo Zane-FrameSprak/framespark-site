@@ -19,6 +19,7 @@ import {
   normalizeReportV1ForCompat,
   reportV1ToLegacyReport
 } from '../src/services/reportV1Compat.js';
+import { normalizeReportV1 } from '../src/services/reportV1Parser.js';
 
 const c = {
   reset: '\x1b[0m',
@@ -247,6 +248,23 @@ const cases = [
       const seriesLike = reportV1ToLegacyReport({ ...base, format_hint: 'series_like' });
 
       assertDeepEqual(shortLike, seriesLike, 'legacy output');
+    }
+  },
+  {
+    name: 'parser supplies stable nextStep fallback when next_step is missing',
+    run() {
+      const normalized = normalizeReportV1({
+        material_type: 'idea_concept',
+        maturity_level: 'C',
+        material_summary: '一个早期故事概念。',
+        story_core: '主角和事件链仍需补充。',
+        next_step: {}
+      });
+
+      assertTruthy(normalized.nextStep.length > 0, 'nextStep fallback');
+      assertTruthy(normalized.next_step.detail.length > 0, 'next_step detail fallback');
+      assertEqual(normalized.next_step.summary, normalized.next_step.detail, 'next_step summary');
+      assertEqual(normalized.next_step.action, normalized.next_step.detail, 'next_step action');
     }
   }
 ];
