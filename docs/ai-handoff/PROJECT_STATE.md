@@ -100,6 +100,9 @@ Important modularity note:
 - Patch 5a adds the contract, enums, evidence validation, rewrite-risk validation, and compatibility mapping. It does not enable V1, change public routes, or deploy the API.
 - Patch 5b switches only the final prompt and final-stage normalization to the structured contract. It permits one targeted repair retry, then raises `V1_FINAL_OUTPUT_UNSAFE` for existing pipeline fallback.
 - Final timeouts are not retried. Basic, advanced, D0, legacy defaults, internal summary fields, public routes, and deployment state remain unchanged.
+- Patch 5c used exactly six DeepSeek V4-flash provider calls. Sample 01 and Sample 02 each first exhausted the one-repair path and returned controlled `V1_FINAL_OUTPUT_UNSAFE`, then each produced one accepted structured final result without retry.
+- Accepted Sample 01 output used motivation, causality, and ending-consequence blockers without unsupported atonement/redemption terms. Accepted Sample 02 output used rule and transition-setup blockers without a free-text rule or scene solution.
+- Sample 03 remains `stop_d0 / LOW_INFORMATION` with no AI call. The safety boundary worked, but provider compliance remains variable; this is not public-readiness approval.
 - The global schema remains `diagnosis-report-v1`; final structure version is `v1-final-structure-1`.
 - Public diagnosis upload and production `/api/diagnosis` remain closed.
 

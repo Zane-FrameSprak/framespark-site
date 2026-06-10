@@ -42,8 +42,8 @@ Updated by: Codex
 
 ## Next — Diagnosis V1
 
-- Patch 5b is complete with no-AI regression coverage.
-- Run Patch 5c with at most six DeepSeek V4-flash provider calls across Sample 01 and Sample 02; repair calls count toward the total. Keep Sample 03 as a no-AI D0 check.
+- Patch 5b and Patch 5c are complete. Review `docs/diagnosis/V1_FINAL_PATCH5C_REAL_REGRESSION_2026-06-10.md` before further final work.
+- Do not run another real batch automatically. First decide whether to improve provider compliance telemetry or prompt/schema ergonomics after the two initial controlled failures.
 - Do not enable V1 by default, deploy `/api/diagnosis`, or reopen public upload based on these patches.
 
 - Use `diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md` as the current V1 architecture plan.

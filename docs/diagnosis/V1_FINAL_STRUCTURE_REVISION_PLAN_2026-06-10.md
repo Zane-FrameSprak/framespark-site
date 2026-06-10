@@ -44,4 +44,4 @@ Patch 5c has a total cap of six DeepSeek V4-flash provider calls, including repa
 
 - Patch 5a completed: contract, enums, strict validator, source-evidence matching, rewrite-risk checks, compatibility templates, and no-AI tests.
 - Patch 5b completed: final prompt now emits only the new structure; final normalization inherits basic/advanced context; one targeted repair retry and controlled unsafe failure are implemented; timeout remains no-retry.
-- Patch 5c remains pending and must stay within the six-call provider budget.
+- Patch 5c completed with exactly six provider calls. Sample 01 and Sample 02 each had one controlled two-call failure followed by one accepted one-call structured result. Sample 03 remained `stop_d0 / LOW_INFORMATION` without AI. Provider compliance is therefore not yet stable even though unsafe output was contained.
