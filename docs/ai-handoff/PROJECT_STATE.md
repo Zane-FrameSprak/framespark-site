@@ -284,6 +284,8 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Sample 03 was rechecked without AI and remains `stop_d0 / LOW_INFORMATION`.
 - V1 Final Patch 4 now constrains final output to diagnosis rather than story rewriting. Prompt version is `v1-final-2026-06-patch4`; it prohibits concrete plot beats, turns, scenes, dialogue, endings, motivations, and backstory proposals.
 - Patch 4 requires every final suggestion to use a diagnostic structure: problem, impact, modification direction, and material needed. It keeps Patch 3 guards and does not change schema, basic, advanced, gatekeeper, public entry, or deployment state.
-- Patch 4 has local no-AI prompt regression coverage only. No real-AI Patch 4b regression has been run yet.
+- Patch 4b real regression is recorded in `docs/diagnosis/V1_FINAL_PATCH4B_REAL_REGRESSION_2026-06-10.md`. Sample 01 / 02 each used three final-stage DeepSeek V4-flash calls; all six returned `complete_final`, had no JSON retry or fallback, and used the required four-part diagnostic suggestion format.
+- Patch 4b preserved the Patch 3 guards, but did not reliably stop story rewriting. Both samples still received concrete experience, foreshadowing, scene-expression, rule-mechanism, or character-background proposals across all three runs.
+- Sample 03 was rechecked without AI and remains `stop_d0 / LOW_INFORMATION`. No code, prompt, schema, public entry, or deployment state changed during Patch 4b.
 - Project-level agent rules now exist in `AGENTS.md`, with a FrameSpark-specific target-mode Skill at `.agents/skills/framespark-target-mode/SKILL.md`. Future Codex/Agent tasks should use these as the stable operating boundary before relying on repeated long prompts.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.
