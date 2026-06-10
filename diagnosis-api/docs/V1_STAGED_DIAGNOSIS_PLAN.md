@@ -100,13 +100,11 @@ Checks:
 
 Question: is it worth moving toward project conversion?
 
-Output should stay restrained:
+Final now uses the structured `v1-final-structure-1` contract. The model returns only blocker types, exact source evidence, impact codes, controlled revision directions, controlled missing-material types, a controlled next action, and a generation-risk self-check. It no longer returns free-text suggestions or rewrites story content.
 
-- consider preparing a project file
-- consider FrameSpark internal review
-- consider future talent-platform collaboration
+The server validates strict keys, enums, lengths, source evidence, and rewrite-risk signals. It then derives legacy problems, suggestions, next step, and conversion fields through fixed templates. A failed final output receives one targeted repair request only; a second failure becomes `V1_FINAL_OUTPUT_UNSAFE` for pipeline fallback. Timeouts are not retried.
 
-Do not promise commercial value, financing value, or production feasibility.
+Do not promise commercial value, financing value, production feasibility, selection, or platform results.
 
 ## Switch Strategy
 
@@ -173,5 +171,7 @@ No real AI API tests are required for the first implementation pass.
 8. Add guarded staged smoke script with mock default, sample-file reading, and explicit real-mode protection.
 9. Add internal evaluation visibility.
 10. Run controlled real AI smoke tests.
+11. Patch 5a added the structured final contract and validator without changing the prompt.
+12. Patch 5b switched the final prompt and runner context, added one repair retry, and preserved legacy fallback and response fields.
 
 Do not start by changing route, guard, or materialRouter behavior. Their boundaries should be frozen by tests first.

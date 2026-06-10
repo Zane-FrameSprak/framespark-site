@@ -59,7 +59,9 @@ for (const testCase of cases) {
 
     const content = flattenMessages(testCase.messages);
     assert.match(content, /只输出 JSON 对象/, `${testCase.name} JSON-only`);
-    assert.match(content, /stageDecisionHints/, `${testCase.name} stageDecisionHints`);
+    if (testCase.name !== 'final prompt shape') {
+      assert.match(content, /stageDecisionHints/, `${testCase.name} stageDecisionHints`);
+    }
     assert.match(content, /promptVersion:/, `${testCase.name} promptVersion in user content`);
 
     if (testCase.name === 'basic prompt shape') {
@@ -73,25 +75,17 @@ for (const testCase of cases) {
     }
 
     if (testCase.name === 'final prompt shape') {
-      assert.match(content, /材料没有充分支撑时.*不得把推测写成确定结论/, 'final material grounding');
-      assert.match(content, /不得替作者编造新的过去经历、隐藏动机、人物关系或结局事实/, 'final no invented revision facts');
-      assert.match(content, /不得用具体虚构情节替作者填空/, 'final no fictional rewrite examples');
-      assert.match(content, /只能做诊断，不能替作者写作/, 'final diagnosis-not-rewrite boundary');
-      assert.match(content, /不得设计具体剧情桥段、新转折、具体场景方案、具体台词、具体结局、人物新动机/, 'final no plot scene dialogue ending rewrite');
-      assert.match(content, /不得变成具体剧情方案/, 'final direction not plot solution');
-      assert.match(content, /烧信转折需要补充触发原因、角色选择压力和后果/, 'final diagnostic example');
-      assert.match(content, /材料正文没有原样出现这些词.*任何输出字段都不得使用这些词/, 'final high-interpretation hard guard');
-      assert.match(content, /recommendedAction 必须为 "complete_final"/, 'final stage closure action');
-      assert.match(content, /不得输出 continue_final/, 'final no continue_final');
-      assert.match(content, /maturity_level 为 B 或 C 时.*修改后再评估/, 'final B/C nextStep');
-      assert.match(content, /不得把“整理项目档案”作为核心下一步/, 'final project-file demotion');
-      assert.match(content, /故事核心修改：/, 'final story revision category');
-      assert.match(content, /材料补充：/, 'final material supplement category');
-      assert.match(content, /项目整理：.*最低优先级/, 'final project organization category');
-      assert.match(content, /类别前不得添加数字、序号或其他文字/, 'final category prefix stability');
-      assert.match(content, /问题：……；影响：……；修改方向：……；需要补充的材料：……/, 'final diagnostic suggestion structure');
-      assert.match(content, /不得省略“问题 \/ 影响 \/ 修改方向 \/ 需要补充的材料”中的任何一项/, 'final required diagnostic fields');
-      assert.match(content, /不得承诺可拍摄、可商业化、可融资、可投递/, 'final promise guard');
+      assert.match(content, /最终诊断归纳 \+ 下一步材料补强清单/, 'final positioning');
+      assert.match(content, /不得输出 suggestions/, 'final no suggestions');
+      assert.match(content, /顶层必须且只能包含 stage、maturity_level、final_assessment/, 'final strict top-level');
+      assert.match(content, /v1-final-structure-1/, 'final structure version');
+      assert.match(content, /evidence_from_material.*逐字来自材料正文/, 'final exact evidence');
+      assert.match(content, /revision_direction.*只能是/, 'final controlled directions');
+      assert.match(content, /missing_materials.*只能是/, 'final controlled missing materials');
+      assert.match(content, /forbidden_generation_check/, 'final self check');
+      assert.match(content, /服务端会独立复核/, 'final server validation authority');
+      assert.match(content, /不得生成具体桥段、转折、场景、台词、结局、人物动机/, 'final no content writing');
+      assert.match(content, /不得承诺拍摄、入选、商业化、融资/, 'final promise guard');
     }
 
     for (const forbidden of testCase.forbidden) {

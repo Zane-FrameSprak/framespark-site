@@ -54,13 +54,16 @@ const cases = [
       const calls = [];
       const result = await runV1StagedDiagnosis({ text: storyText }, {
         enableV1RealPrompts: true,
-        generateV1StageReport: async ({ stage, promptVersion }) => {
-          calls.push(stage);
+        generateV1StageReport: async ({ stage, promptVersion, context }) => {
+          calls.push({ stage, context });
           return makeStageReport(stage, promptVersion, true);
         }
       });
 
-      assert.deepEqual(calls, ['basic', 'advanced', 'final']);
+      assert.deepEqual(calls.map(item => item.stage), ['basic', 'advanced', 'final']);
+      assert.equal(calls[2].context.sourceText, storyText);
+      assert.equal(calls[2].context.basicReport.stage, 'basic');
+      assert.equal(calls[2].context.advancedReport.stage, 'advanced');
       assert.equal(result.diagnostics.stageReached, 'final');
       assert.equal(result.diagnostics.usedMockRunner, false);
       assert.equal(result.diagnostics.noAi, false);
@@ -132,4 +135,3 @@ function makeStageReport(stage, promptVersion, passed) {
     }
   };
 }
-

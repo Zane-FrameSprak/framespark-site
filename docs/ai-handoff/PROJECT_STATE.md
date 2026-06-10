@@ -98,6 +98,8 @@ Important modularity note:
 - Patch 4b confirmed that prompt-only prohibitions cannot reliably prevent concrete story writing in final output.
 - The approved replacement is a structured `final_assessment` contract with server-side validation and template-derived legacy fields.
 - Patch 5a adds the contract, enums, evidence validation, rewrite-risk validation, and compatibility mapping. It does not enable V1, change public routes, or deploy the API.
+- Patch 5b switches only the final prompt and final-stage normalization to the structured contract. It permits one targeted repair retry, then raises `V1_FINAL_OUTPUT_UNSAFE` for existing pipeline fallback.
+- Final timeouts are not retried. Basic, advanced, D0, legacy defaults, internal summary fields, public routes, and deployment state remain unchanged.
 - The global schema remains `diagnosis-report-v1`; final structure version is `v1-final-structure-1`.
 - Public diagnosis upload and production `/api/diagnosis` remain closed.
 

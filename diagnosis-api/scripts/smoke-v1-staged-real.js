@@ -177,7 +177,14 @@ async function runStages(payload) {
       promptVersion: stageInput.promptVersion,
       payload,
       metadata: payload.materialHint,
-      ...(realMode ? {} : { requestFn: () => mockRequest(stage) })
+      ...(stage === 'final' ? {
+        context: {
+          sourceText: payload.text,
+          basicReport,
+          advancedReport
+        }
+      } : {}),
+      ...(realMode ? {} : { requestFn: () => mockRequest(stage, payload) })
     });
 
     results.push({ stage, reportV1 });
@@ -218,7 +225,12 @@ async function generateRealFinalReport(payload, basicReport, advancedReport) {
     messages: stageInput.messages,
     promptVersion: stageInput.promptVersion,
     payload,
-    metadata: payload.materialHint
+    metadata: payload.materialHint,
+    context: {
+      sourceText: payload.text,
+      basicReport,
+      advancedReport
+    }
   });
 }
 
@@ -317,11 +329,43 @@ function buildMinimalAdvancedReport() {
   };
 }
 
-async function mockRequest(stage = 'basic') {
+async function mockRequest(stage = 'basic', payload = {}) {
+  if (stage === 'final') {
+    const evidence = String(payload.text || '').replace(/\s+/g, '').slice(0, 24);
+    return JSON.stringify({
+      stage: 'final',
+      maturity_level: 'B',
+      final_assessment: {
+        structure_version: 'v1-final-structure-1',
+        core_blockers: [
+          {
+            id: 'mock-causal-gap',
+            blocker_type: 'causal_gap',
+            problem_summary: '关键选择与前序事件之间的因果依据仍不充分。',
+            evidence_from_material: [evidence],
+            impact_code: 'causal_clarity',
+            impact_summary: '现有材料不足以稳定判断关键选择的成立过程。',
+            revision_direction: ['clarify_existing_causality'],
+            missing_materials: ['choice_basis', 'consequence']
+          }
+        ],
+        next_step: {
+          action: 'revise_then_reassess',
+          focus_blocker_ids: ['mock-causal-gap']
+        },
+        forbidden_generation_check: {
+          passed: true,
+          risk_types: [],
+          note: 'Mock output contains diagnostic fields only.'
+        }
+      }
+    });
+  }
+
   const promptVersion = getStagePromptVersion(stage);
-  const maturityLevel = stage === 'final' ? 'A' : 'B';
-  const conversionStatus = stage === 'final' ? 'possible_after_revision' : 'not_applicable';
-  const recommendedAction = stage === 'final' ? 'complete_final' : `continue_${stage === 'basic' ? 'advanced' : 'final'}`;
+  const maturityLevel = 'B';
+  const conversionStatus = 'not_applicable';
+  const recommendedAction = `continue_${stage === 'basic' ? 'advanced' : 'final'}`;
 
   return JSON.stringify({
     material_type: 'synopsis',
@@ -360,17 +404,13 @@ async function mockRequest(stage = 'basic') {
       }
     ],
     next_step: {
-      label: stage === 'final' ? 'Prepare project file' : `Continue to ${stage} revision`,
-      detail: stage === 'final'
-        ? '整理项目档案，等待内部进一步评估。'
-        : 'Tighten the protagonist goal, obstacle, and final action.'
+      label: `Continue to ${stage} revision`,
+      detail: 'Tighten the protagonist goal, obstacle, and final action.'
     },
     conversion_advice: {
       status: conversionStatus,
-      summary: stage === 'final'
-        ? 'Mock final smoke suggests only a restrained internal review path.'
-        : `${stage} stage does not make project conversion judgments.`,
-      recommended_action: stage === 'final' ? '整理项目档案，不承诺商业或制作结果。' : ''
+      summary: `${stage} stage does not make project conversion judgments.`,
+      recommended_action: ''
     },
     rejection_reason: {
       code: 'OTHER',

@@ -39,3 +39,9 @@ The global V1 schema version and legacy response fields remain stable. Existing 
 3. Patch 5c: run limited real regression for Sample 01 and Sample 02, with Sample 03 checked by the no-AI D0 gatekeeper.
 
 Patch 5c has a total cap of six DeepSeek V4-flash provider calls, including repair calls. A sample stops after three consecutive serious failures. Passing Patch 5c does not authorize public upload, production API deployment, or MVP opening.
+
+## Implementation Status
+
+- Patch 5a completed: contract, enums, strict validator, source-evidence matching, rewrite-risk checks, compatibility templates, and no-AI tests.
+- Patch 5b completed: final prompt now emits only the new structure; final normalization inherits basic/advanced context; one targeted repair retry and controlled unsafe failure are implemented; timeout remains no-retry.
+- Patch 5c remains pending and must stay within the six-call provider budget.

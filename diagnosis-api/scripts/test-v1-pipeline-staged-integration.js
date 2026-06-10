@@ -6,6 +6,7 @@
  */
 
 import { runDiagnosisPipelineWithEngines } from '../src/services/diagnosisPipeline.js';
+import { ApiError } from '../src/utils/errors.js';
 
 const cases = [
   {
@@ -106,7 +107,7 @@ const cases = [
           throw new Error('one-shot V1 should not run');
         },
         runStagedV1: async () => {
-          throw new Error('STAGED_RUNNER_FAILED');
+          throw new ApiError(422, 'V1_FINAL_OUTPUT_UNSAFE', 'unsafe final output');
         }
       }, {
         enableDiagnosisV1: true,
@@ -116,7 +117,7 @@ const cases = [
       assertEqual(result.diagnosisEngine, 'legacy-fallback', 'diagnosisEngine');
       assertEqual(result.finalReport.summary, '旧链路兜底报告。', 'legacy summary');
       assertEqual(result.reportV1.diagnostics.fallback, true, 'fallback flag');
-      assertEqual(result.reportV1.diagnostics.fallback_reason, 'STAGED_RUNNER_FAILED', 'fallback reason');
+      assertEqual(result.reportV1.diagnostics.fallback_reason, 'V1_FINAL_OUTPUT_UNSAFE', 'fallback reason');
     }
   }
 ];
@@ -223,4 +224,3 @@ function assertTruthy(value, label) {
     throw new Error(`${label} expected truthy value`);
   }
 }
-

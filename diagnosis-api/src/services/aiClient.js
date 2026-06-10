@@ -7,6 +7,10 @@ import { buildUnifiedDiagnosisV1Messages } from '../prompts/unifiedDiagnosisV1.j
 import { ApiError } from '../utils/errors.js';
 import { extractJson, isCriticallyMissing, normalizeReport, validateFields } from './reportParser.js';
 import { normalizeReportV1 } from './reportV1Parser.js';
+import {
+  isFinalOutputValidationError,
+  normalizeV1FinalAssessment
+} from './v1FinalAssessment.js';
 
 const ADVANCED_BUILDERS = {
   short:   buildAdvancedShortDiagnosisMessages,
@@ -63,6 +67,7 @@ export async function generateV1StageReport({
   promptVersion = '',
   payload = {},
   metadata = {},
+  context = {},
   requestFn
 } = {}) {
   const normalizedStage = normalizeV1Stage(stage);
@@ -77,7 +82,16 @@ export async function generateV1StageReport({
   }
 
   const request = requestFn || makeRequest;
-  const requestPayload = { ...payload, stage: normalizedStage, promptVersion, metadata };
+  const requestPayload = { ...payload, stage: normalizedStage, promptVersion, metadata, context };
+
+  if (normalizedStage === 'final') {
+    return generateV1FinalStageReport({
+      messages,
+      promptVersion,
+      requestPayload,
+      request
+    });
+  }
 
   let raw;
   try {
@@ -93,6 +107,45 @@ export async function generateV1StageReport({
     raw = extractJson(content);
     return normalizeReportV1(normalizeV1StageRaw(raw, requestPayload), requestPayload);
   }
+}
+
+async function generateV1FinalStageReport({ messages, promptVersion, requestPayload, request }) {
+  let activeMessages = messages;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const content = await request(activeMessages, { temperature: attempt === 0 ? 0.1 : 0 });
+      const raw = extractJson(content);
+      const report = normalizeReportV1(normalizeV1StageRaw(raw, requestPayload), requestPayload);
+      report.diagnostics = {
+        ...report.diagnostics,
+        stage: 'final',
+        promptVersion,
+        model: config.deepseekModel,
+        finalRetryCount: attempt,
+        jsonRetry: attempt > 0,
+        fallback: false
+      };
+      return report;
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'AI_REQUEST_TIMEOUT') {
+        throw error;
+      }
+      if (!isRepairableFinalError(error)) {
+        throw error;
+      }
+      if (attempt === 1) {
+        throw new ApiError(
+          422,
+          'V1_FINAL_OUTPUT_UNSAFE',
+          'V1 final 输出在一次修复后仍未通过结构或安全校验。'
+        );
+      }
+      activeMessages = buildV1FinalRepairMessages(messages, error.code);
+    }
+  }
+
+  throw new ApiError(422, 'V1_FINAL_OUTPUT_UNSAFE', 'V1 final 输出未通过结构或安全校验。');
 }
 
 export async function classifyMaterialForm(input) {
@@ -273,9 +326,39 @@ function buildV1StageRetryMessages(originalMessages, stage) {
   ];
 }
 
+function buildV1FinalRepairMessages(originalMessages, errorCode) {
+  return [
+    ...originalMessages,
+    {
+      role: 'assistant',
+      content: '上一次输出未通过服务端校验。'
+    },
+    {
+      role: 'user',
+      content: [
+        `校验错误代码：${String(errorCode || 'V1_FINAL_STRUCTURE_INVALID')}`,
+        '请重新生成一次，并严格只输出合法 JSON 对象。',
+        '顶层只能包含 stage、maturity_level、final_assessment。',
+        'final_assessment 必须使用 v1-final-structure-1 的严格字段与允许枚举。',
+        'evidence_from_material 必须逐字来自材料正文。',
+        '不得输出 suggestions 或任何具体桥段、场景、台词、结局、动机、背景、规则答案。',
+        '这是唯一一次修复机会。'
+      ].join('\n')
+    }
+  ];
+}
+
 function normalizeV1StageRaw(raw, payload = {}) {
   const input = raw && typeof raw === 'object' ? raw : {};
   const stage = normalizeV1Stage(input.stage || payload.stage) || 'basic';
+  if (stage === 'final') {
+    return normalizeV1FinalAssessment(input, {
+      sourceText: payload.context?.sourceText || payload.text || '',
+      basicReport: payload.context?.basicReport,
+      advancedReport: payload.context?.advancedReport,
+      materialType: payload.metadata?.primary_material_type || payload.material_type
+    });
+  }
   const materialType = input.primary_material_type ||
     input.material_type ||
     payload.metadata?.primary_material_type ||
@@ -308,6 +391,12 @@ function normalizeV1StageRaw(raw, payload = {}) {
       stageDecisionHints: input.stageDecisionHints || null
     }
   };
+}
+
+function isRepairableFinalError(error) {
+  return isFinalOutputValidationError(error) || (
+    error instanceof ApiError && error.code === 'AI_RESPONSE_INVALID'
+  );
 }
 
 function normalizeV1Stage(value) {

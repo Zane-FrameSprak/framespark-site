@@ -188,7 +188,12 @@ async function runV1StagedDiagnosisWithAi(input, deps) {
     promptVersion: V1_FINAL_PROMPT_VERSION,
     messages: buildV1FinalDiagnosisMessages({ ...input, materialHint, basicReport, advancedReport }),
     payload: input,
-    metadata: materialHint
+    metadata: materialHint,
+    context: {
+      sourceText: input.text,
+      basicReport,
+      advancedReport
+    }
   });
   const finalDecision = decideV1Stage(extractDecisionInput('final', finalReport));
   decisions.push(finalDecision);
