@@ -93,6 +93,14 @@ Important modularity note:
 
 ## Diagnosis System State
 
+### V1 Final Structure Revision (2026-06-10)
+
+- Patch 4b confirmed that prompt-only prohibitions cannot reliably prevent concrete story writing in final output.
+- The approved replacement is a structured `final_assessment` contract with server-side validation and template-derived legacy fields.
+- Patch 5a adds the contract, enums, evidence validation, rewrite-risk validation, and compatibility mapping. It does not enable V1, change public routes, or deploy the API.
+- The global schema remains `diagnosis-report-v1`; final structure version is `v1-final-structure-1`.
+- Public diagnosis upload and production `/api/diagnosis` remain closed.
+
 The following diagnosis V1 commits are on GitHub:
 
 - `4e47d9b` — `feat: add diagnosis report v1 schema compatibility layer`

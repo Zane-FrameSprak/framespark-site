@@ -28,6 +28,7 @@ export function normalizeReportV1(raw, payload = {}) {
     next_step: normalizeNextStep(source.next_step),
     conversion_advice: normalizeConversionAdvice(source.conversion_advice),
     rejection_reason: normalizeRejectionReason(source.rejection_reason),
+    final_assessment: normalizeFinalAssessment(source.final_assessment),
     diagnostics: normalizeDiagnostics(source.diagnostics)
   });
 
@@ -203,6 +204,10 @@ function normalizeRejectionReason(value) {
 
 function normalizeDiagnostics(value) {
   return isPlainObject(value) ? { ...value } : {};
+}
+
+function normalizeFinalAssessment(value) {
+  return isPlainObject(value) ? value : undefined;
 }
 
 function normalizeObjectArray(values) {

@@ -43,6 +43,9 @@ export function normalizeReportV1ForCompat(reportV1 = {}) {
   normalized.strengths = Array.isArray(normalized.strengths) ? normalized.strengths : [];
   normalized.main_problems = Array.isArray(normalized.main_problems) ? normalized.main_problems : [];
   normalized.priority_revisions = Array.isArray(normalized.priority_revisions) ? normalized.priority_revisions : [];
+  normalized.final_assessment = isPlainObject(normalized.final_assessment)
+    ? normalized.final_assessment
+    : undefined;
 
   return normalized;
 }

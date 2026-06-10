@@ -42,6 +42,10 @@ Updated by: Codex
 
 ## Next — Diagnosis V1
 
+- Complete Patch 5b: switch only the final prompt to `final_assessment`, pass basic/advanced context into final normalization, and enforce one targeted repair retry followed by controlled fallback.
+- After all no-AI regressions pass, run Patch 5c with at most six DeepSeek V4-flash provider calls across Sample 01 and Sample 02; keep Sample 03 as a no-AI D0 check.
+- Do not enable V1 by default, deploy `/api/diagnosis`, or reopen public upload based on these patches.
+
 - Use `diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md` as the current V1 architecture plan.
 - Treat staged V1 as the future mainline: D0 gatekeeper, basic diagnosis, advanced diagnosis, final conversion advice.
 - Current work is still planning only. Do not enable `ENABLE_DIAGNOSIS_V1=true`.
