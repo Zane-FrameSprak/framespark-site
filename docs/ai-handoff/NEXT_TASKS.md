@@ -159,7 +159,8 @@ Updated by: Codex
 - Do not rerun final, modify the final prompt, or expand the batch until the reviewer records whether the observed issues require a prompt or schema follow-up.
 - Do not treat `possible_after_revision`, `continue_final`, or “整理项目档案” as approval to open public diagnosis or deploy `/api/diagnosis`.
 - Review `docs/diagnosis/V1_FINAL_PATCH3B_REAL_REGRESSION_2026-06-10.md`. Patch 3b real regression is complete: unsupported high-interpretation terms, `continue_final`, unclear nextStep, and project-organization priority were stable across three runs per sample.
-- Do not run more Patch 3b retries. The remaining issue is concrete plot/content-writing suggestions in both samples; plan that constraint separately before changing the final prompt again.
+- Patch 4 prompt and local tests now address the remaining concrete plot/content-writing tendency. Review `docs/diagnosis/V1_FINAL_PATCH4_PLAN_2026-06-10.md` before any real regression.
+- Do not run more Patch 3b retries. If separately authorized, Patch 4b should use only Sample 01 / 02 final outputs and verify diagnostic structure without concrete plot, scene, dialogue, ending, or motivation writing.
 - Keep basic, advanced, gatekeeper, public entry, production `/api/diagnosis`, and deployment state unchanged.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.

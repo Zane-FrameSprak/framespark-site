@@ -20,12 +20,16 @@ const messages = buildV1FinalDiagnosisMessages({
 
 const content = messages.map((message) => String(message.content || '')).join('\n');
 
-assert.equal(V1_FINAL_PROMPT_VERSION, 'v1-final-2026-06-patch3b');
+assert.equal(V1_FINAL_PROMPT_VERSION, 'v1-final-2026-06-patch4');
 assert.match(content, /不得把推测写成确定结论/);
 assert.match(content, /可能存在，但需要材料确认/);
 assert.match(content, /不得替作者编造新的过去经历、隐藏动机、人物关系或结局事实/);
 assert.match(content, /不得用具体虚构情节替作者填空/);
 assert.match(content, /让作者自行选择具体内容/);
+assert.match(content, /只能做诊断，不能替作者写作/);
+assert.match(content, /不得设计具体剧情桥段、新转折、具体场景方案、具体台词、具体结局、人物新动机/);
+assert.match(content, /不得使用“可以让主角……”“可以安排……”“可以设定……”/);
+assert.match(content, /烧信转折需要补充触发原因、角色选择压力和后果/);
 assert.match(content, /材料正文没有原样出现这些词/);
 assert.match(content, /任何输出字段都不得使用这些词/);
 assert.match(content, /recommendedAction 必须为 "complete_final"/);
@@ -39,6 +43,10 @@ assert.match(content, /材料补充：/);
 assert.match(content, /项目整理：/);
 assert.match(content, /最低优先级辅助建议/);
 assert.match(content, /类别前不得添加数字、序号或其他文字/);
+assert.match(content, /格式固定为：“类别：问题：……；影响：……；修改方向：……；需要补充的材料：……”/);
+assert.match(content, /“修改方向”只能说明要补强的叙事功能/);
+assert.match(content, /不得变成具体剧情方案/);
+assert.match(content, /不得替作者写出这些信息的具体内容/);
 assert.match(content, /不得承诺可拍摄、可商业化、可融资、可投递/);
 assert.doesNotMatch(content, /保证拍摄|保证入选|保证融资|必然商业成功/);
 

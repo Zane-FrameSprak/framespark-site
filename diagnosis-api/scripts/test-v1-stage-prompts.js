@@ -76,6 +76,10 @@ for (const testCase of cases) {
       assert.match(content, /材料没有充分支撑时.*不得把推测写成确定结论/, 'final material grounding');
       assert.match(content, /不得替作者编造新的过去经历、隐藏动机、人物关系或结局事实/, 'final no invented revision facts');
       assert.match(content, /不得用具体虚构情节替作者填空/, 'final no fictional rewrite examples');
+      assert.match(content, /只能做诊断，不能替作者写作/, 'final diagnosis-not-rewrite boundary');
+      assert.match(content, /不得设计具体剧情桥段、新转折、具体场景方案、具体台词、具体结局、人物新动机/, 'final no plot scene dialogue ending rewrite');
+      assert.match(content, /不得变成具体剧情方案/, 'final direction not plot solution');
+      assert.match(content, /烧信转折需要补充触发原因、角色选择压力和后果/, 'final diagnostic example');
       assert.match(content, /材料正文没有原样出现这些词.*任何输出字段都不得使用这些词/, 'final high-interpretation hard guard');
       assert.match(content, /recommendedAction 必须为 "complete_final"/, 'final stage closure action');
       assert.match(content, /不得输出 continue_final/, 'final no continue_final');
@@ -85,6 +89,8 @@ for (const testCase of cases) {
       assert.match(content, /材料补充：/, 'final material supplement category');
       assert.match(content, /项目整理：.*最低优先级/, 'final project organization category');
       assert.match(content, /类别前不得添加数字、序号或其他文字/, 'final category prefix stability');
+      assert.match(content, /问题：……；影响：……；修改方向：……；需要补充的材料：……/, 'final diagnostic suggestion structure');
+      assert.match(content, /不得省略“问题 \/ 影响 \/ 修改方向 \/ 需要补充的材料”中的任何一项/, 'final required diagnostic fields');
       assert.match(content, /不得承诺可拍摄、可商业化、可融资、可投递/, 'final promise guard');
     }
 

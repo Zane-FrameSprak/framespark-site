@@ -282,5 +282,8 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Sample 01 did not emit “赎罪 / 救赎 / atonement / redemption” in any of the three Patch 3b runs. Sample 02 consistently focused on the stone-chicken rules and letter-burning turn, although conversion status varied once.
 - Both samples still produced concrete plot/content-writing suggestions in all three runs. Patch 3b fixed the named stage-closure and over-interpretation issues in this batch, but did not fully stabilize the prohibition against filling in story facts for the author.
 - Sample 03 was rechecked without AI and remains `stop_d0 / LOW_INFORMATION`.
+- V1 Final Patch 4 now constrains final output to diagnosis rather than story rewriting. Prompt version is `v1-final-2026-06-patch4`; it prohibits concrete plot beats, turns, scenes, dialogue, endings, motivations, and backstory proposals.
+- Patch 4 requires every final suggestion to use a diagnostic structure: problem, impact, modification direction, and material needed. It keeps Patch 3 guards and does not change schema, basic, advanced, gatekeeper, public entry, or deployment state.
+- Patch 4 has local no-AI prompt regression coverage only. No real-AI Patch 4b regression has been run yet.
 - Project-level agent rules now exist in `AGENTS.md`, with a FrameSpark-specific target-mode Skill at `.agents/skills/framespark-target-mode/SKILL.md`. Future Codex/Agent tasks should use these as the stable operating boundary before relying on repeated long prompts.
 - No public site, production API, Nginx, SSL, systemd, database, or public upload entry changed.
