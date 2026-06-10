@@ -1,75 +1,122 @@
-# V1 Advanced Sample Review Worksheet - 2026-06-09
+# V1 Advanced 人工评审表 - 2026-06-09
 
-Purpose: prepare the first V1 advanced small test for human review.
+用途：把 3 个 V1 sample run 的 advanced 小测结果整理给评审助手判断质量。
 
-Scope:
+阅读规则：
 
-- Samples: `2026-06-09-v1-basic-sample-01`, `2026-06-09-v1-basic-sample-02`, `2026-06-09-v1-basic-sample-03`.
-- Real AI was used only for Sample 01 and Sample 02 advanced-stage checks.
-- Sample 03 was checked only at the gatekeeper boundary and did not enter advanced.
-- Full sample text is not included here.
-- Full `reportV1` body is not included here.
-- API key or raw provider response is not included here.
-- This worksheet records technical observations only. It does not score, approve, or reject the reports.
+- 本文件只做人工评审准备，不替评审助手打分。
+- 不包含完整样本文本。
+- 不包含完整 `reportV1` 正文。
+- 不包含 API key、原始模型响应或内部密钥信息。
+- 不给“通过 / 不通过”结论。
+- 不判断是否可以公开上线、是否达到产品化程度、是否可以开放诊断入口。
+- 评审时请对照 `docs/diagnosis/V1_EVAL_STANDARD.md`。
 
-## Summary
+## 本轮概览
 
-| Sample | Real AI calls | stage reached | decision | promptVersion | model | fallback | latency | JSON retry |
-| --- | ---: | --- | --- | --- | --- | --- | ---: | --- |
-| 01 | 1 | advanced | proceed_to_ultimate | v1-advanced-2026-06 | deepseek-v4-flash | false | 11503ms | No |
-| 02 | 1 | advanced | revise stone-chicken rules and burned-letter setup before final diagnosis | v1-advanced-2026-06 | deepseek-v4-flash | false | 15224ms | No |
-| 03 | 0 | D0 | stop_d0 / LOW_INFORMATION | n/a | n/a | false | 0ms | No |
+| 样本 | 本轮处理 | 阶段结果 | 模型 | fallback | JSON retry | 耗时 |
+| --- | --- | --- | --- | --- | --- | ---: |
+| Sample 01 | 进入 advanced | advanced | deepseek-v4-flash | false | 无 | 11503ms |
+| Sample 02 | 进入 advanced | advanced | deepseek-v4-flash | false | 无 | 15224ms |
+| Sample 03 | 只做 D0 边界确认 | stop_d0 / LOW_INFORMATION | 未调用 | false | 无 | 0ms |
 
-Total DeepSeek requests: 2.
+技术字段说明：
+
+- `advanced`：进阶诊断阶段，核心问题是“这个故事能不能成立”。
+- `fallback=false`：没有退回旧链路或兼容兜底。
+- `JSON retry=无`：模型输出第一次就被解析成功，没有因为 JSON 格式错误重试。
+- `LOW_INFORMATION`：材料信息不足，不应该进入 basic 或 advanced。
+
+---
 
 ## Sample 01
 
-Run ID: `2026-06-09-v1-basic-sample-01`
+### 1. 样本编号
 
-Technical summary:
+- Run ID：`2026-06-09-v1-basic-sample-01`
+- 本轮阶段：advanced
+- Prompt 版本：`v1-advanced-2026-06`
+- 模型：`deepseek-v4-flash`
+- fallback：false
+- JSON retry：无
+- 耗时：11503ms
 
-- `stageReached`: advanced
-- `decision`: proceed_to_ultimate
-- `promptVersion`: v1-advanced-2026-06
-- `model`: deepseek-v4-flash
-- `fallback`: false
-- `latency`: 11503ms
-- `JSON retry`: no
-- `nextStep`: present
+### 2. Advanced 阶段结果摘要
 
-AI report observation summary:
+- 系统进入了 advanced 阶段，没有触发 fallback。
+- 系统给出的阶段判断为：`proceed_to_ultimate`。
+- 这里的 `proceed_to_ultimate` 只代表模型输出的阶段建议，不代表 Codex 或评审助手已经同意进入 final。
+- 当前记录只说明链路跑通和摘要字段可读，不说明质量已经达标。
 
-- Reached advanced-stage output without fallback.
-- The checked fields were more specific than the earlier basic-stage summary.
-- The checked fields included stage decision and next-step signals.
-- No obvious fabrication risk was detected in the checked summary fields.
-- No obvious over-interpretation or generic-advice-only risk was detected in the checked summary fields.
+### 3. 系统认为故事的核心问题是什么
 
-Human review focus:
+- 系统把这个样本当作一个已经具备故事运动的短片材料。
+- 系统关注点从 basic 的“是不是故事”，推进到 advanced 的“结构、人物变化和主题表达是否足够支撑下一阶段”。
+- 系统认为需要检查故事判断是否有足够材料支撑，而不是只停留在情节复述。
+- 系统在摘要字段中显示，它试图识别更深一层的故事成立问题。
 
-- Whether `proceed_to_ultimate` is supported by the private full advanced report.
-- Whether the advanced diagnosis stays grounded in visible story material.
-- Whether the output is materially more useful than the basic-stage report.
-- Whether any theme, character arc, or structural judgment goes beyond the material.
-- Whether the stage decision should be kept, rewritten, or constrained before future final-stage tests.
+### 4. 系统给出的具体建议摘要
 
-Scoring:
+- 检查 advanced 阶段判断是否真正被材料支持。
+- 检查人物变化、主题表达、结构判断是否仍然贴着材料。
+- 检查输出是否比 basic 更能指导下一步修改。
+- 检查是否存在从材料中推不出来的主题、人物弧线或结构判断。
+- 检查是否应该保留、改写或约束 `proceed_to_ultimate` 这个阶段判断。
 
-| Dimension | Score | Notes |
+### 5. 与 basic 相比是否更深入
+
+观察记录：
+
+- 与 basic 相比，已检查摘要字段显示出更多 advanced 阶段信号。
+- 摘要字段显示 advanced 输出不只是重复“有主角、有事件、有选择”。
+- 摘要字段出现了阶段判断和下一步信号。
+- 这些观察不等于质量结论，需要评审助手看私有完整报告后判断。
+
+### 6. 人工重点检查问题
+
+- AI 是否真的看懂了这个故事的核心冲突。
+- `proceed_to_ultimate` 是否过早，是否有讨好式推进风险。
+- advanced 是否保持材料忠实，没有补出材料里没有的动机、结局或主题。
+- 建议是否具体到能指导作者修改，而不是抽象地说“加强结构 / 加强人物”。
+- 是否需要修改 advanced prompt，让它更谨慎地给出继续 final 的判断。
+
+### 7. 疑似乱编 / 过度解释 / 泛泛建议证据
+
+当前摘要字段观察：
+
+- 明显乱编：未在已检查摘要字段中发现。
+- 过度解释：未在已检查摘要字段中发现，但 `proceed_to_ultimate` 需要人工重点看是否过早。
+- 泛泛建议：未在已检查摘要字段中发现“只有空泛建议”的信号。
+
+注意：以上只是摘要字段检查，不等于完整报告没有问题。
+
+### 8. 评审助手待判断项
+
+| 待判断项 | 评审结论 | 备注 |
 | --- | --- | --- |
-| Core problem recognition | __ / 5 |  |
-| Material faithfulness | __ / 5 |  |
-| Hallucination control | __ / 5 |  |
-| Actionability | __ / 5 |  |
-| Stage separation | __ / 5 |  |
-| Creative context fit | __ / 5 |  |
-| User-pleasing risk | __ / 5 |  |
-| Sensitive or forbidden claims | __ / 5 |  |
-| User-readiness | __ / 5 |  |
-| Human review need | __ / 5 |  |
-| Reviewer stage decision | stop / rerun / revise prompt / continue / archive |  |
+| 是否看懂故事 | 待评审 |  |
+| 是否忠实材料 | 待评审 |  |
+| 是否建议具体 | 待评审 |  |
+| 是否值得继续 final 小测 | 待评审 |  |
+| 是否需要修改 advanced prompt | 待评审 |  |
 
-Reviewer notes:
+### 9. 评分空表
+
+| 维度 | 分数 | 备注 |
+| --- | --- | --- |
+| 核心问题识别 | __ / 5 |  |
+| 材料忠实度 | __ / 5 |  |
+| 幻觉控制 | __ / 5 |  |
+| 建议可执行性 | __ / 5 |  |
+| 阶段边界 | __ / 5 |  |
+| 创作语境适配 | __ / 5 |  |
+| 讨好用户风险 | __ / 5 |  |
+| 敏感或禁止承诺 | __ / 5 |  |
+| 用户可读性 | __ / 5 |  |
+| 人工复核必要性 | __ / 5 |  |
+| 评审阶段决策 | stop / rerun / revise prompt / continue / archive |  |
+
+评审备注：
 
 -
 
@@ -77,52 +124,92 @@ Reviewer notes:
 
 ## Sample 02
 
-Run ID: `2026-06-09-v1-basic-sample-02`
+### 1. 样本编号
 
-Technical summary:
+- Run ID：`2026-06-09-v1-basic-sample-02`
+- 本轮阶段：advanced
+- Prompt 版本：`v1-advanced-2026-06`
+- 模型：`deepseek-v4-flash`
+- fallback：false
+- JSON retry：无
+- 耗时：15224ms
 
-- `stageReached`: advanced
-- `decision`: revise the stone-chicken rules and burned-letter turning point setup before final diagnosis.
-- `promptVersion`: v1-advanced-2026-06
-- `model`: deepseek-v4-flash
-- `fallback`: false
-- `latency`: 15224ms
-- `JSON retry`: no
-- `nextStep`: present
+### 2. Advanced 阶段结果摘要
 
-AI report observation summary:
+- 系统进入了 advanced 阶段，没有触发 fallback。
+- 系统给出的阶段判断摘要为：需要先完善石鸡规则和烧信转折的铺垫，再考虑 final。
+- 这个判断比单纯说“加强结构 / 加强人物”更接近样本里的具体机制。
+- 当前记录只说明 advanced 摘要字段具备可评审信息，不说明质量已经达标。
 
-- Reached advanced-stage output without fallback.
-- The checked fields were more specific than the earlier basic-stage summary.
-- The decision references concrete story mechanics rather than only broad categories.
-- No obvious fabrication risk was detected in the checked summary fields.
-- No obvious over-interpretation or generic-advice-only risk was detected in the checked summary fields.
+### 3. 系统认为故事的核心问题是什么
 
-Human review focus:
+- 系统关注故事能否成立，而不是只判断它是不是故事。
+- 系统把“石鸡规则”和“烧信转折”视为需要重点检查的机制。
+- 系统认为 fantasy 设定、人物行动和关键转折之间的因果关系需要更清楚。
+- 系统把进入 final 前的主要问题放在规则铺垫和转折支撑上。
 
-- Whether the stone-chicken rule diagnosis is faithful to the material.
-- Whether the burned-letter turning point advice is specific and actionable.
-- Whether advanced-stage structure, character, tension, theme, and genre checks are separated clearly.
-- Whether the output avoids inventing rules not present in the material.
-- Whether the stage decision should require another advanced pass before any final-stage test.
+### 4. 系统给出的具体建议摘要
 
-Scoring:
+- 完善石鸡规则，让它不仅是设定名词，而是能推动选择和行动。
+- 补强烧信转折的前置铺垫，避免关键转折显得突然。
+- 检查规则、人物目标和故事结果之间的因果链条。
+- 检查 fantasy 机制是否真正服务人物选择。
+- 在这些问题清楚前，不直接把样本当作 final 阶段材料。
 
-| Dimension | Score | Notes |
+### 5. 与 basic 相比是否更深入
+
+观察记录：
+
+- Basic 阶段主要识别主角、目标、阻碍、预言、山路循环和石鸡机制。
+- Advanced 摘要进一步指向规则如何成立、转折如何铺垫、机制如何支撑人物行动。
+- 摘要字段显示它没有只停留在“人物成长 / 结构完整 / 主题表达”这类大词。
+- 这些观察不等于质量结论，需要评审助手看私有完整报告后判断。
+
+### 6. 人工重点检查问题
+
+- AI 对石鸡规则的理解是否忠实材料。
+- AI 对烧信转折的诊断是否抓住真实问题，而不是误读情节。
+- 建议是否足够具体，能指导作者下一步补什么、改什么。
+- advanced 是否清楚区分了结构、人物、张力、主题、类型完成度。
+- 是否需要修改 advanced prompt，让它更稳定地产生这种具体机制层面的建议。
+
+### 7. 疑似乱编 / 过度解释 / 泛泛建议证据
+
+当前摘要字段观察：
+
+- 明显乱编：未在已检查摘要字段中发现。
+- 过度解释：未在已检查摘要字段中发现，但需人工确认模型是否发明了石鸡规则以外的设定。
+- 泛泛建议：摘要字段中出现具体机制词，未发现“只有空泛建议”的信号。
+
+注意：以上只是摘要字段检查，不等于完整报告没有问题。
+
+### 8. 评审助手待判断项
+
+| 待判断项 | 评审结论 | 备注 |
 | --- | --- | --- |
-| Core problem recognition | __ / 5 |  |
-| Material faithfulness | __ / 5 |  |
-| Hallucination control | __ / 5 |  |
-| Actionability | __ / 5 |  |
-| Stage separation | __ / 5 |  |
-| Creative context fit | __ / 5 |  |
-| User-pleasing risk | __ / 5 |  |
-| Sensitive or forbidden claims | __ / 5 |  |
-| User-readiness | __ / 5 |  |
-| Human review need | __ / 5 |  |
-| Reviewer stage decision | stop / rerun / revise prompt / continue / archive |  |
+| 是否看懂故事 | 待评审 |  |
+| 是否忠实材料 | 待评审 |  |
+| 是否建议具体 | 待评审 |  |
+| 是否值得继续 final 小测 | 待评审 |  |
+| 是否需要修改 advanced prompt | 待评审 |  |
 
-Reviewer notes:
+### 9. 评分空表
+
+| 维度 | 分数 | 备注 |
+| --- | --- | --- |
+| 核心问题识别 | __ / 5 |  |
+| 材料忠实度 | __ / 5 |  |
+| 幻觉控制 | __ / 5 |  |
+| 建议可执行性 | __ / 5 |  |
+| 阶段边界 | __ / 5 |  |
+| 创作语境适配 | __ / 5 |  |
+| 讨好用户风险 | __ / 5 |  |
+| 敏感或禁止承诺 | __ / 5 |  |
+| 用户可读性 | __ / 5 |  |
+| 人工复核必要性 | __ / 5 |  |
+| 评审阶段决策 | stop / rerun / revise prompt / continue / archive |  |
+
+评审备注：
 
 -
 
@@ -130,59 +217,31 @@ Reviewer notes:
 
 ## Sample 03
 
-Run ID: `2026-06-09-v1-basic-sample-03`
+### 1. 样本编号
 
-Technical summary:
+- Run ID：`2026-06-09-v1-basic-sample-03`
 
-- `stageReached`: D0
-- `decision`: stop_d0
-- `rejectionCode`: LOW_INFORMATION
-- `fallback`: false
-- `latency`: 0ms
-- `JSON retry`: no
-- Real AI call: no
+### 2. 边界结果
 
-Observation summary:
+- gatekeeper 仍然返回 `stop_d0 / LOW_INFORMATION`。
+- 未进入 advanced。
+- 未调用 advanced prompt。
+- 未调用真实 AI。
+- fallback：false。
 
-- Sample 03 remained at D0 and did not enter advanced.
-- The gatekeeper outcome stayed `LOW_INFORMATION`.
-- No advanced prompt was called for this sample.
-- No fallback was triggered.
-- This preserves the Patch 1 boundary for low-information material.
+### 3. 说明
 
-Human review focus:
+- 这是符合预期的边界行为。
+- Sample 03 当前只适合按 D0 / 信息不足材料来评审。
+- 不应拿它和 Sample 01 / 02 一样做 advanced 质量判断。
+- 如后续要重新评测，需要先扩充材料或单独评审 D0 文案。
 
-- Whether `LOW_INFORMATION` is the correct boundary for this material.
-- Whether future review should use D0 scoring rather than advanced scoring for this sample.
-- Whether the material needs a separate supplement-material path.
-- Whether reviewer notes should feed back into gatekeeper language.
-- Whether any future rerun should remain no-advanced unless the material is expanded.
+---
 
-Scoring:
+## 给评审助手的总提醒
 
-| Dimension | Score | Notes |
-| --- | --- | --- |
-| Core problem recognition | __ / 5 |  |
-| Material faithfulness | __ / 5 |  |
-| Hallucination control | __ / 5 |  |
-| Actionability | __ / 5 |  |
-| Stage separation | __ / 5 |  |
-| Creative context fit | __ / 5 |  |
-| User-pleasing risk | __ / 5 |  |
-| Sensitive or forbidden claims | __ / 5 |  |
-| User-readiness | __ / 5 |  |
-| Human review need | __ / 5 |  |
-| Reviewer stage decision | stop / rerun / revise prompt / continue / archive |  |
-
-Reviewer notes:
-
--
-
-## Conclusion
-
-- The advanced small test completed within the 6-call budget using 2 real DeepSeek requests.
-- Sample 01 and Sample 02 reached advanced with `fallback=false` and no JSON retry.
-- Sample 03 remained `stop_d0 / LOW_INFORMATION` and made no real AI call.
-- No full `reportV1`, full sample text, API key, or raw provider response was recorded.
-- No code, prompt source, public site, production API, Nginx, SSL, systemd, internal UI, or deployment path changed.
-- This file does not approve public diagnosis exposure, final-stage expansion, or a larger batch run.
+- 本轮只证明 Sample 01 / 02 的 advanced 小测有可读摘要，不能证明 advanced prompt 已经稳定。
+- Sample 01 的 `proceed_to_ultimate` 需要重点判断是否过早。
+- Sample 02 的机制层建议需要重点判断是否真的忠实材料。
+- Sample 03 继续停在 D0，是本轮期望边界。
+- 请不要基于本文件直接做公开上线、产品化、开放上传或部署判断。

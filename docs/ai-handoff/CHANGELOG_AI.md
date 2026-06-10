@@ -3,6 +3,7 @@
 ## Recent Summary
 
 - 2026-06-09: Prepared `docs/diagnosis/V1_ADVANCED_SAMPLE_REVIEW_2026-06-09.md` for human review. Sample 01 and Sample 02 reached advanced using 2 total DeepSeek V4-flash requests with `fallback=false` and no JSON retry; Sample 03 remained `stop_d0 / LOW_INFORMATION` with no advanced AI call. No full sample text, full report bodies, keys, raw provider responses, code, public site, or deployment changes were added.
+- 2026-06-10: Reworked `docs/diagnosis/V1_ADVANCED_SAMPLE_REVIEW_2026-06-09.md` into a Chinese-first human review worksheet for advanced output review. It keeps Sample 01 / 02 observations, Sample 03 D0 boundary notes, blank scoring tables, and reviewer decision prompts. No real AI, code, prompt source, public site, or deployment work changed.
 - 2026-06-09: Updated `internal/diagnosis-eval` result cards to show saved V1 diagnostics summary fields only. No full reportV1 body, full sample text, real AI run, service start, public site change, or diagnosis-api change.
 - 2026-06-09: Added a summary-only V1 evaluation area to `internal/admin-console` using dev sample run summary fields. No real AI run, service start, public site change, or diagnosis-api change.
 - 2026-06-09: Ran one minimal real V1 sample-run link verification. DeepSeek V4-flash required two calls because JSON retry was triggered, then saved V1 summary fields with fallback=false; diagnosis-eval and admin-console can read the saved summary. No public site, production API, or deployment change.
