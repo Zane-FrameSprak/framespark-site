@@ -155,6 +155,9 @@ Updated by: Codex
 - V1 advanced small test review is now prepared as a Chinese-first worksheet in `docs/diagnosis/V1_ADVANCED_SAMPLE_REVIEW_2026-06-09.md`. Next work should be manual scoring and reviewer notes for Sample 01 and Sample 02 advanced outputs, plus confirmation that Sample 03 should remain D0.
 - Do not run final-stage tests, full-input advanced batches, or larger real-AI batches until the advanced review notes are filled.
 - Do not treat the AI stage decisions in the advanced worksheet as product approval or public-readiness approval.
+- V1 final small test review is prepared in `docs/diagnosis/V1_FINAL_SAMPLE_REVIEW_2026-06-10.md`. Next work should be human review of maturity restraint, conversion-language safety, Sample 01 over-interpretation signals, and final-stage decision formatting.
+- Do not rerun final, modify the final prompt, or expand the batch until the reviewer records whether the observed issues require a prompt or schema follow-up.
+- Do not treat `possible_after_revision`, `continue_final`, or “整理项目档案” as approval to open public diagnosis or deploy `/api/diagnosis`.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
