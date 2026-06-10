@@ -72,6 +72,22 @@ for (const testCase of cases) {
       assert.match(content, /nextStep 必须是具体动作/, 'basic concrete nextStep');
     }
 
+    if (testCase.name === 'final prompt shape') {
+      assert.match(content, /材料没有充分支撑时.*不得把推测写成确定结论/, 'final material grounding');
+      assert.match(content, /不得替作者编造新的过去经历、隐藏动机、人物关系或结局事实/, 'final no invented revision facts');
+      assert.match(content, /不得用具体虚构情节替作者填空/, 'final no fictional rewrite examples');
+      assert.match(content, /材料正文没有原样出现这些词.*任何输出字段都不得使用这些词/, 'final high-interpretation hard guard');
+      assert.match(content, /recommendedAction 必须为 "complete_final"/, 'final stage closure action');
+      assert.match(content, /不得输出 continue_final/, 'final no continue_final');
+      assert.match(content, /maturity_level 为 B 或 C 时.*修改后再评估/, 'final B/C nextStep');
+      assert.match(content, /不得把“整理项目档案”作为核心下一步/, 'final project-file demotion');
+      assert.match(content, /故事核心修改：/, 'final story revision category');
+      assert.match(content, /材料补充：/, 'final material supplement category');
+      assert.match(content, /项目整理：.*最低优先级/, 'final project organization category');
+      assert.match(content, /类别前不得添加数字、序号或其他文字/, 'final category prefix stability');
+      assert.match(content, /不得承诺可拍摄、可商业化、可融资、可投递/, 'final promise guard');
+    }
+
     for (const forbidden of testCase.forbidden) {
       assert.equal(content.includes(forbidden), false, `${testCase.name} forbidden ${forbidden}`);
     }

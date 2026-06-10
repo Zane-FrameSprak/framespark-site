@@ -158,6 +158,8 @@ Updated by: Codex
 - V1 final small test review is prepared in `docs/diagnosis/V1_FINAL_SAMPLE_REVIEW_2026-06-10.md`. Next work should be human review of maturity restraint, conversion-language safety, Sample 01 over-interpretation signals, and final-stage decision formatting.
 - Do not rerun final, modify the final prompt, or expand the batch until the reviewer records whether the observed issues require a prompt or schema follow-up.
 - Do not treat `possible_after_revision`, `continue_final`, or “整理项目档案” as approval to open public diagnosis or deploy `/api/diagnosis`.
+- Review `docs/diagnosis/V1_FINAL_PATCH3_REGRESSION_2026-06-10.md`. Patch 3 improved stage closure and nextStep priority, but `patch3b` still needs a separately authorized two-call real regression because the previous task reached its 4-call limit.
+- The next real regression, if approved, should only verify that Sample 01 / 02 no longer contain unsupported high-interpretation terms or invented replacement facts. Do not change basic, advanced, gatekeeper, public entry, or deployment state.
 - Keep this first UI pass summary-only; do not build a full reportV1 detail page yet.
 - Do not run real AI from the internal eval page without explicit user confirmation.
 - Keep `internal/` local-only and excluded from Tencent Cloud webroot.
