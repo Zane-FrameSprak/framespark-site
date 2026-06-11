@@ -261,6 +261,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Before any installation, manually verify env/auth file type and ownership, data permissions, the actual npm path, active Nginx location conflicts, static Beta method restrictions and previous-release/config backups.
 - The next allowed action is a server read-only precheck. No SSH deployment command, installer, package install, symlink switch, service start/restart, Nginx reload, real AI call or public route opening is authorized.
 
+## Diagnosis Beta Server Read-only Precheck (2026-06-11)
+
+- Repository baseline was freshly verified at full SHA `efd9b46f6d5d1a566a38e94b796ecac471edf27c` with local `HEAD` equal to `origin/main`.
+- Tencent Cloud has Node `v20.20.2`, npm `10.8.2`, curl, and an available port `8788`; analytics remains on loopback port `8787`.
+- The diagnosis service infrastructure is not yet present: no dedicated user, `/srv/framespark/diagnosis-api`, release/current structure, production env, external data directory, Basic Auth file, or systemd unit exists.
+- Active Nginx contains the existing `/api/analytics/` proxy and static-site locations only. No Beta page, diagnosis/feedback API, public health/readiness, wildcard CORS or diagnosis port conflict was found.
+- The public webroot still contains only the frozen diagnosis page and does not contain Beta assets, diagnosis-api or internal directories.
+- The server may advance only to repository-side deployment configuration draft generation. No resource creation, server write, service action, Nginx reload, AI call or public opening is authorized.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

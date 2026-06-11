@@ -140,6 +140,10 @@ Updated by: Codex
 - The next permitted operation is a server read-only precheck of users, paths, permissions, ports, runtime binaries, existing units, active Nginx locations and webroot isolation.
 - Do not run the systemd/Nginx installer drafts during that precheck; they are not dry-run commands and can mutate service state.
 - Resolve the documented execution gates first: env/auth regular-file ownership, data directory mode, npm binary path, active Nginx conflicts, Beta static method restrictions, previous release and config backup.
+- The server read-only precheck is complete. Use `docs/diagnosis/DIAGNOSIS_BETA_SERVER_READONLY_PRECHECK_2026-06-11.md` as the evidence record.
+- Next, prepare repository-only deployment configuration drafts for the missing dedicated user, release/current layout, env/data/auth permissions, hardened systemd unit and three authenticated `^~` Nginx locations.
+- Ensure the future `/diagnosis/beta/` location takes precedence over the existing static-resource regex location and define the exact no-trailing-slash behavior.
+- Keep the next phase draft-only: do not create server resources, run installers, start services, reload Nginx, call AI or expose Beta/API routes.
 - Obtain human legal review for the updated privacy policy, terms, external AI processing disclosure, retention language, and copyright/authorization wording.
 - Prepare the server release directory, dedicated no-login service user, `/etc/framespark/diagnosis-api.env`, `/var/lib/framespark-diagnosis`, and Nginx Basic Auth file under a separate approved deployment task.
 - Verify the systemd and Nginx drafts manually; do not execute them as part of normal static-site deployment.
