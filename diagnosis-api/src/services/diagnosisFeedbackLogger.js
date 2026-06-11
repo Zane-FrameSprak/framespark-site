@@ -1,11 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { config } from '../config.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const API_ROOT = path.resolve(__dirname, '../..');
-const FEEDBACK_DIR = path.join(API_ROOT, 'logs', 'diagnosis', 'review-queue', 'user-feedback');
+const FEEDBACK_DIR = path.join(config.dataDir, 'diagnosis', 'user-feedback');
 
 const ALLOWED_FEEDBACK_TYPES = new Set(['understanding_wrong']);
 
@@ -73,8 +70,9 @@ export async function logDiagnosisFeedback(rawPayload) {
   const jsonPath = path.join(FEEDBACK_DIR, `${entry.id}.json`);
   const mdPath = path.join(FEEDBACK_DIR, `${entry.id}.md`);
 
-  await fs.writeFile(jsonPath, JSON.stringify(entry, null, 2), 'utf8');
-  await fs.writeFile(mdPath, buildFeedbackMarkdown(entry), 'utf8');
+  await fs.writeFile(jsonPath, JSON.stringify(entry, null, 2), { encoding: 'utf8', mode: 0o600 });
+  await fs.writeFile(mdPath, buildFeedbackMarkdown(entry), { encoding: 'utf8', mode: 0o600 });
+  await cleanupExpiredFeedback();
 
   return {
     id: entry.id,
@@ -99,6 +97,7 @@ function buildFeedbackEntry(raw) {
   return {
     id,
     createdAt,
+    expiresAt: addDays(createdAt, config.metadataRetentionDays),
     diagnosisId,
     feedbackType,
     areas,
@@ -187,7 +186,31 @@ function guessDiagnosisLogPath(diagnosisId) {
   const match = String(diagnosisId).match(/^(\d{4})(\d{2})(\d{2})/);
   if (!match) return '';
   const [, year, month, day] = match;
-  return `logs/diagnosis/by-date/${year}-${month}-${day}/${diagnosisId}.json`;
+  return `diagnosis/metadata/by-date/${year}-${month}-${day}/${diagnosisId}.json`;
+}
+
+export async function cleanupExpiredFeedback() {
+  let entries;
+  try {
+    entries = await fs.readdir(FEEDBACK_DIR, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw error;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
+    const jsonPath = path.join(FEEDBACK_DIR, entry.name);
+    try {
+      const record = JSON.parse(await fs.readFile(jsonPath, 'utf8'));
+      if (!isExpired(record.expiresAt)) continue;
+      await fs.unlink(jsonPath);
+      const mdPath = jsonPath.replace(/\.json$/, '.md');
+      await fs.rm(mdPath, { force: true });
+    } catch {
+      // Keep malformed records for manual inspection.
+    }
+  }
 }
 
 function makeId(createdAt) {
@@ -197,5 +220,16 @@ function makeId(createdAt) {
 }
 
 function toRelativePath(fullPath) {
-  return path.relative(API_ROOT, fullPath).split(path.sep).join('/');
+  return path.relative(config.dataDir, fullPath).split(path.sep).join('/');
+}
+
+function addDays(iso, days) {
+  const date = new Date(iso);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString();
+}
+
+function isExpired(value) {
+  const timestamp = Date.parse(value || '');
+  return Number.isFinite(timestamp) && timestamp <= Date.now();
 }

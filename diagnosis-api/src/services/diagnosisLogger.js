@@ -1,242 +1,169 @@
+import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { config } from '../config.js';
 import { diagnosisVersions } from '../config/diagnosisVersion.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const API_ROOT = path.resolve(__dirname, '../..');
-const LOG_ROOT = path.join(API_ROOT, 'logs', 'diagnosis');
-const INDEX_PATH = path.join(LOG_ROOT, 'index.json');
-const REVIEW_QUEUES = {
-  'high-potential': '高潜项目',
-  boundary: '边界样本',
-  warning: '异常警告'
-};
-const REVIEW_DIRS = ['high-potential', 'boundary', 'warning', 'error'];
+const METADATA_ROOT = path.join(config.dataDir, 'diagnosis', 'metadata');
+const REVIEW_ROOT = path.join(config.dataDir, 'diagnosis', 'review-consent');
+const INDEX_PATH = path.join(METADATA_ROOT, 'index.json');
 
-export async function logDiagnosisResult({ mode, materialType, materialRouting, inputMode, parsed, stats, result }) {
+export async function logDiagnosisResult(input) {
   try {
-    const entry = buildLogEntry({ mode, materialType, materialRouting, inputMode, parsed, stats, result });
-    const logPath = await writeLogEntry(entry);
-    await updateIndex(entry, logPath);
-    await writeReviewSummaries(entry, logPath);
+    const entry = buildMetadataEntry(input);
+    const metadataPath = await writeMetadataEntry(entry);
+    await updateIndex(entry, metadataPath);
+    if (input.reviewConsent) {
+      await writeRetainedReview(entry, input);
+    }
+    await cleanupExpiredDiagnosisData();
     return entry;
-  } catch (err) {
-    console.warn('[diagnosis-logger] failed to write diagnosis log:', err.message);
+  } catch (error) {
+    console.warn('[diagnosis-logger] metadata write failed:', error.code || error.name || 'UNKNOWN');
     return null;
   }
 }
 
-function buildLogEntry({ mode, materialType, materialRouting, inputMode, parsed, stats, result }) {
+function buildMetadataEntry({ mode, betaIdentity, materialType, materialRouting, inputMode, stats, result, reviewConsent }) {
   const createdAt = new Date().toISOString();
-  const id = makeId(createdAt);
-  const basicReport = result.basicReport || null;
-  const advancedReport = result.internalStage === 'advanced' ? result.finalReport : null;
-  const finalReport = result.finalReport || null;
-  const warnings = collectWarnings([basicReport, advancedReport, finalReport]);
-  const basicNextStep = getNextStep(basicReport);
-  const advancedNextStep = getNextStep(advancedReport);
-  const finalNextStep = getNextStep(finalReport);
-  const tags = buildTags({
-    mode,
-    internalStage: result.internalStage,
-    warnings,
-    finalNextStep
-  });
-
+  const diagnostics = result?.diagnostics || result?.reportV1?.diagnostics || {};
   return {
-    id,
+    id: makeId(createdAt),
     createdAt,
+    expiresAt: addDays(createdAt, config.metadataRetentionDays),
+    betaIdentityHash: hashIdentity(betaIdentity),
     materialType,
-    inputMode: normalizeInputMode(inputMode),
-    materialRouting: normalizeMaterialRouting(materialRouting, materialType),
-    originalFileName: parsed.source?.filename || '',
-    charCount: stats.charCount || 0,
-    internalStage: result.internalStage,
-    mode,
-    hasAdvancedReport: Boolean(advancedReport),
-    basicNextStep,
-    advancedNextStep,
-    finalNextStep,
-    warnings,
-    tags,
-    model: mode === 'ai' ? config.deepseekModel : null,
-    versions: buildVersions(mode),
-    finalReport,
-    basicReportSummary: summarizeReport(basicReport),
-    advancedReportSummary: advancedReport ? summarizeReport(advancedReport) : null
+    materialForm: materialRouting?.materialForm || 'unknown',
+    targetFormat: materialRouting?.targetFormat || 'unknown',
+    inputMode: inputMode === 'file_upload' ? 'file_upload' : 'pasted_text',
+    charCount: Number(stats?.charCount || 0),
+    stage: result?.internalStage || result?.reportV1?.stage || 'unknown',
+    diagnosisEngine: result?.diagnosisEngine || mode,
+    decision: diagnostics.decision || diagnostics.stageDecisionHints?.recommendedAction || null,
+    promptVersion: diagnostics.promptVersion || null,
+    model: mode === 'ai' ? config.deepseekModel : 'mock',
+    fallback: result?.diagnosisEngine === 'legacy-fallback' || diagnostics.fallback === true,
+    providerCalls: Number.isInteger(diagnostics.providerCalls) ? diagnostics.providerCalls : null,
+    reviewConsent: Boolean(reviewConsent),
+    versions: diagnosisVersions
   };
 }
 
-function buildVersions(mode) {
-  return {
-    ...diagnosisVersions,
-    modelId: mode === 'ai' ? config.deepseekModel : 'mock'
-  };
-}
-
-function normalizeInputMode(inputMode) {
-  return inputMode === 'pasted_text' ? 'pasted_text' : 'file_upload';
-}
-
-async function writeLogEntry(entry) {
+async function writeMetadataEntry(entry) {
   const date = entry.createdAt.slice(0, 10);
-  const dir = path.join(LOG_ROOT, 'by-date', date);
-  const filename = `${entry.id}.json`;
-  const fullPath = path.join(dir, filename);
+  const dir = path.join(METADATA_ROOT, 'by-date', date);
+  const fullPath = path.join(dir, `${entry.id}.json`);
   await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(fullPath, JSON.stringify(entry, null, 2), 'utf8');
-  return toLogRelativePath(fullPath);
+  await fs.writeFile(fullPath, JSON.stringify(entry, null, 2), { encoding: 'utf8', mode: 0o600 });
+  return path.relative(config.dataDir, fullPath).split(path.sep).join('/');
 }
 
-async function updateIndex(entry, logPath) {
-  await fs.mkdir(LOG_ROOT, { recursive: true });
-  const index = await readIndex();
+async function writeRetainedReview(entry, { parsed, result }) {
   const record = {
     id: entry.id,
     createdAt: entry.createdAt,
-    materialType: entry.materialType,
-    originalFileName: entry.originalFileName,
-    charCount: entry.charCount,
-    internalStage: entry.internalStage,
-    finalNextStep: entry.finalNextStep,
-    tags: entry.tags,
-    logPath
+    expiresAt: addDays(entry.createdAt, config.reviewRetentionDays),
+    betaIdentityHash: entry.betaIdentityHash,
+    material: {
+      inputMode: entry.inputMode,
+      sourceType: parsed?.source?.type || 'unknown',
+      text: String(parsed?.text || '')
+    },
+    reportV1: result?.reportV1 || null
   };
-  const nextIndex = [record, ...index.filter(item => item.id !== entry.id)];
-  await fs.writeFile(INDEX_PATH, JSON.stringify(nextIndex, null, 2), 'utf8');
-}
-
-async function readIndex() {
-  try {
-    const raw = await fs.readFile(INDEX_PATH, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (err) {
-    if (err.code === 'ENOENT') return [];
-    throw err;
-  }
-}
-
-async function writeReviewSummaries(entry, logPath) {
-  await Promise.all(
-    REVIEW_DIRS.map(name => fs.mkdir(path.join(LOG_ROOT, 'review-queue', name), { recursive: true }))
+  await fs.mkdir(REVIEW_ROOT, { recursive: true });
+  await fs.writeFile(
+    path.join(REVIEW_ROOT, `${entry.id}.json`),
+    JSON.stringify(record, null, 2),
+    { encoding: 'utf8', mode: 0o600 }
   );
-
-  const summaryTags = entry.tags.filter(tag => tag in REVIEW_QUEUES);
-  await Promise.all(summaryTags.map(tag => writeReviewSummary(entry, logPath, tag)));
 }
 
-async function writeReviewSummary(entry, logPath, tag) {
-  const dir = path.join(LOG_ROOT, 'review-queue', tag);
-  const fullPath = path.join(dir, `${entry.id}.md`);
-  const lines = [
-    `# ${entry.originalFileName || entry.id}`,
-    '',
-    `createdAt: ${entry.createdAt}`,
-    `materialType: ${entry.materialType}`,
-    `internalStage: ${entry.internalStage}`,
-    `finalNextStep: ${entry.finalNextStep || '无'}`,
-    '',
-    `分类原因：${getReviewReason(tag)}`,
-    '',
-    `原始 JSON 日志路径：${logPath}`,
-    ''
-  ];
-  await fs.writeFile(fullPath, lines.join('\n'), 'utf8');
+async function updateIndex(entry, metadataPath) {
+  await fs.mkdir(METADATA_ROOT, { recursive: true });
+  const index = await readJsonArray(INDEX_PATH);
+  const record = {
+    id: entry.id,
+    createdAt: entry.createdAt,
+    expiresAt: entry.expiresAt,
+    stage: entry.stage,
+    decision: entry.decision,
+    fallback: entry.fallback,
+    reviewConsent: entry.reviewConsent,
+    metadataPath
+  };
+  const next = [record, ...index.filter(item => item.id !== entry.id && !isExpired(item.expiresAt))];
+  await fs.writeFile(INDEX_PATH, JSON.stringify(next, null, 2), { encoding: 'utf8', mode: 0o600 });
 }
 
-function buildTags({ mode, internalStage, warnings, finalNextStep }) {
-  const tags = [];
-  const nextStep = String(finalNextStep || '');
+export async function cleanupExpiredDiagnosisData() {
+  await Promise.all([
+    cleanupDirectory(path.join(METADATA_ROOT, 'by-date')),
+    cleanupDirectory(REVIEW_ROOT)
+  ]);
+  await cleanupExpiredIndex();
+}
 
-  if (internalStage === 'basic') tags.push('basic-stop');
-  if (internalStage === 'advanced') tags.push('advanced');
-  if (nextStep.startsWith('可进入下一阶段评估')) tags.push('high-potential');
-  if (
-    nextStep.includes('需要大改') ||
-    nextStep.includes('需要结构性重写') ||
-    nextStep.includes('需要重新开发')
-  ) {
-    tags.push('needs-rewrite');
+async function cleanupExpiredIndex() {
+  const index = await readJsonArray(INDEX_PATH);
+  const active = index.filter(item => !isExpired(item.expiresAt));
+  if (active.length === index.length) return;
+  await fs.writeFile(INDEX_PATH, JSON.stringify(active, null, 2), { encoding: 'utf8', mode: 0o600 });
+}
+
+async function cleanupDirectory(root) {
+  let entries;
+  try {
+    entries = await fs.readdir(root, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw error;
   }
-  if (nextStep.includes('建议补充材料')) tags.push('supplement');
-  if (warnings.length > 0) tags.push('warning');
-  if (nextStep.includes('建议继续打磨')) tags.push('boundary');
-  if (mode === 'mock') tags.push('mock');
 
-  return tags;
-}
-
-function collectWarnings(reports) {
-  const warnings = [];
-  for (const report of reports) {
-    if (Array.isArray(report?._warnings)) {
-      warnings.push(...report._warnings.map(item => String(item || '').trim()).filter(Boolean));
+  for (const entry of entries) {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      await cleanupDirectory(fullPath);
+      continue;
+    }
+    if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
+    try {
+      const record = JSON.parse(await fs.readFile(fullPath, 'utf8'));
+      if (isExpired(record.expiresAt)) await fs.unlink(fullPath);
+    } catch {
+      // Keep malformed files for manual inspection; never delete unknown data automatically.
     }
   }
-  return [...new Set(warnings)];
 }
 
-function summarizeReport(report) {
-  if (!report) return null;
-  return {
-    summary: String(report.summary || '').trim(),
-    nextStep: getNextStep(report)
-  };
+async function readJsonArray(file) {
+  try {
+    const parsed = JSON.parse(await fs.readFile(file, 'utf8'));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
 }
 
-function getNextStep(report) {
-  return String(report?.nextStep || '').trim();
+function hashIdentity(value) {
+  const identity = String(value || 'unknown');
+  return crypto.createHash('sha256').update(identity).digest('hex').slice(0, 20);
+}
+
+function addDays(iso, days) {
+  const date = new Date(iso);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString();
+}
+
+function isExpired(value) {
+  const timestamp = Date.parse(value || '');
+  return Number.isFinite(timestamp) && timestamp <= Date.now();
 }
 
 function makeId(createdAt) {
   const timestamp = createdAt.replace(/[-:.]/g, '').replace('T', '-').replace('Z', '');
-  const random = Math.random().toString(36).slice(2, 8);
+  const random = crypto.randomBytes(4).toString('hex');
   return `${timestamp}-${random}`;
-}
-
-function toLogRelativePath(fullPath) {
-  return path.relative(API_ROOT, fullPath).split(path.sep).join('/');
-}
-
-function getReviewReason(tag) {
-  const reasons = {
-    'high-potential': 'finalNextStep 以「可进入下一阶段评估」开头。',
-    boundary: 'finalNextStep 包含「建议继续打磨」，适合作为边界样本复查。',
-    warning: '诊断报告包含 parser 或格式 warning。'
-  };
-  return reasons[tag] || REVIEW_QUEUES[tag] || tag;
-}
-
-function normalizeMaterialRouting(materialRouting, materialType) {
-  if (!materialRouting || typeof materialRouting !== 'object') {
-    return {
-      userSelectedType: materialType,
-      targetFormat: materialType === 'short' || materialType === 'feature' ? materialType : 'unknown',
-      materialForm: 'unknown',
-      effectiveDiagnosisType: materialType,
-      reason: '',
-      notice: '',
-      classificationSource: 'local',
-      localMaterialForm: 'unknown',
-      aiMaterialForm: null,
-      classificationReason: ''
-    };
-  }
-
-  return {
-    userSelectedType: materialRouting.userSelectedType || 'other',
-    targetFormat: materialRouting.targetFormat || 'unknown',
-    materialForm: materialRouting.materialForm || 'unknown',
-    effectiveDiagnosisType: materialRouting.effectiveDiagnosisType || materialType || 'other',
-    reason: materialRouting.reason || '',
-    notice: materialRouting.notice || '',
-    classificationSource: materialRouting.classificationSource || 'local',
-    localMaterialForm: materialRouting.localMaterialForm || materialRouting.materialForm || 'unknown',
-    aiMaterialForm: materialRouting.aiMaterialForm || null,
-    classificationReason: materialRouting.classificationReason || materialRouting.reason || ''
-  };
 }

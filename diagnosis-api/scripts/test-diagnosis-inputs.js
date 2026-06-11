@@ -42,7 +42,7 @@ const cases = [
         body: { inputMode: 'file_upload', text: '' }
       });
       assertEqual(input.inputMode, 'file_upload', 'inputMode');
-      assertEqual(input.parsed.source.filename, 'sample.txt', 'filename');
+      assertEqual(input.parsed.source.filename, undefined, 'filename is not retained');
       assertEqual(input.parsed.source.type, 'txt', 'source.type');
       assertTruthy(input.parsed.text.includes('逆光档案'), 'parsed.text');
     }
@@ -59,7 +59,7 @@ const cases = [
         body: { inputMode: 'pasted_text', text: featureSynopsis }
       });
       assertEqual(input.inputMode, 'file_upload', 'inputMode');
-      assertEqual(input.parsed.source.filename, 'priority.txt', 'filename');
+      assertEqual(input.parsed.source.filename, undefined, 'filename is not retained');
       assertTruthy(input.parsed.text.includes('文件内容优先'), 'file text wins');
     }
   },
@@ -70,7 +70,7 @@ const cases = [
         body: { inputMode: 'pasted_text', text: featureSynopsis }
       });
       assertEqual(input.inputMode, 'pasted_text', 'inputMode');
-      assertEqual(input.parsed.source.filename, 'pasted-text', 'filename');
+      assertEqual(input.parsed.source.filename, undefined, 'filename is not retained');
       assertEqual(input.parsed.source.type, 'pasted_text', 'source.type');
 
       const routing = await routeMaterial({

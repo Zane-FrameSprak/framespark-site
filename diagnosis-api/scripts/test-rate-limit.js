@@ -34,8 +34,8 @@ const cases = [
       assertEqual(first.nextCalled, true, 'first.nextCalled');
       assertEqual(second.nextCalled, true, 'second.nextCalled');
       assertEqual(third.statusCode, 429, 'third.statusCode');
-      assertEqual(third.body.error, 'RATE_LIMIT_EXCEEDED', 'third.body.error');
-      assertEqual(third.body.message, '今日诊断次数已达上限，请明天再试。', 'third.body.message');
+      assertEqual(third.body.error.code, 'RATE_LIMIT_EXCEEDED', 'third.body.error.code');
+      assertEqual(third.body.error.message, '今日诊断次数已达上限，请明天再试。', 'third.body.error.message');
     }
   },
   {
@@ -53,8 +53,8 @@ const cases = [
 
       assertEqual(first.nextCalled, true, 'first.nextCalled');
       assertEqual(second.statusCode, 429, 'second.statusCode');
-      assertEqual(second.body.error, 'FEEDBACK_RATE_LIMIT_EXCEEDED', 'second.body.error');
-      assertEqual(second.body.message, '今日反馈提交次数已达上限，请稍后再试。', 'second.body.message');
+      assertEqual(second.body.error.code, 'FEEDBACK_RATE_LIMIT_EXCEEDED', 'second.body.error.code');
+      assertEqual(second.body.error.message, '今日反馈提交次数已达上限，请稍后再试。', 'second.body.error.message');
     }
   },
   {

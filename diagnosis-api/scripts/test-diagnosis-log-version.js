@@ -62,22 +62,20 @@ try {
 
   assertTruthy(entry, 'entry');
   assertTruthy(entry.id, 'entry.id');
-  assertEqual(entry.mode, 'mock', 'entry.mode');
-  assertEqual(entry.model, null, 'entry.model');
-  assertTruthy(entry.materialRouting, 'entry.materialRouting');
+  assertEqual(entry.model, 'mock', 'entry.model');
+  assertEqual(entry.materialForm, 'concept', 'entry.materialForm');
   assertTruthy(entry.versions, 'entry.versions');
   assertEqual(entry.versions.diagnosisSystemVersion, diagnosisVersions.diagnosisSystemVersion, 'diagnosisSystemVersion');
   assertEqual(entry.versions.promptVersion, diagnosisVersions.promptVersion, 'promptVersion');
   assertEqual(entry.versions.routerVersion, diagnosisVersions.routerVersion, 'routerVersion');
   assertEqual(entry.versions.reportParserVersion, diagnosisVersions.reportParserVersion, 'reportParserVersion');
-  assertEqual(entry.versions.modelId, 'mock', 'modelId');
-
-  const logPath = path.join(API_ROOT, 'logs', 'diagnosis', 'by-date', entry.createdAt.slice(0, 10), `${entry.id}.json`);
+  const logPath = path.join(API_ROOT, 'logs', 'diagnosis', 'metadata', 'by-date', entry.createdAt.slice(0, 10), `${entry.id}.json`);
   const saved = JSON.parse(await fs.readFile(logPath, 'utf8'));
-  assertEqual(saved.versions.modelId, 'mock', 'saved.modelId');
-  assertEqual(saved.finalReport.summary, 'summary', 'saved.finalReport.summary');
+  assertEqual(saved.model, 'mock', 'saved.model');
+  assertEqual(saved.finalReport, undefined, 'saved.finalReport');
+  assertEqual(saved.originalFileName, undefined, 'saved.originalFileName');
 
-  console.log(`${ok} ${c.bold}诊断日志包含 versions 字段，且不影响既有日志字段${c.reset}`);
+  console.log(`${ok} ${c.bold}诊断日志仅保存脱敏元数据和 versions 字段${c.reset}`);
 } catch (err) {
   failed += 1;
   console.log(`${fail} ${c.bold}诊断日志版本字段测试失败${c.reset}`);

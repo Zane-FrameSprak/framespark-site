@@ -12,7 +12,7 @@ const MIN_CHARS_BY_FORM = {
   unknown: 300
 };
 
-export function validateScriptText(text, materialRoutingOrType) {
+export function validateScriptText(text, materialRoutingOrType, options = {}) {
   const stats = getTextStats(text);
   const materialRouting = normalizeMaterialRouting(materialRoutingOrType);
   const minimumChars = MIN_CHARS_BY_FORM[materialRouting.materialForm] || config.minTextChars;
@@ -21,7 +21,7 @@ export function validateScriptText(text, materialRoutingOrType) {
     throw new ApiError(400, 'FILE_EMPTY', '文件内容为空，请上传可读取的剧本或故事材料。');
   }
 
-  if (materialRouting.materialForm === 'reject' || materialRouting.effectiveDiagnosisType === 'reject') {
+  if (!options.allowD0 && (materialRouting.materialForm === 'reject' || materialRouting.effectiveDiagnosisType === 'reject')) {
     throw new ApiError(
       400,
       'MATERIAL_REJECTED',
@@ -29,7 +29,7 @@ export function validateScriptText(text, materialRoutingOrType) {
     );
   }
 
-  if (stats.charCount < minimumChars) {
+  if (!options.allowD0 && stats.charCount < minimumChars) {
     throw new ApiError(
       400,
       'FILE_TOO_SHORT',
@@ -39,8 +39,8 @@ export function validateScriptText(text, materialRoutingOrType) {
 
   if (stats.charCount > config.maxTextChars) {
     throw new ApiError(
-      400,
-      'FILE_TOO_LONG',
+      413,
+      'TEXT_TOO_LONG',
       `当前文本约 ${stats.charCount} 字，超过第一版 MVP 支持范围，请先拆分材料。`
     );
   }

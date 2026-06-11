@@ -11,6 +11,7 @@ import {
   isFinalOutputValidationError,
   normalizeV1FinalAssessment
 } from './v1FinalAssessment.js';
+import { consumeGlobalProviderCall } from './providerUsageStore.js';
 
 const ADVANCED_BUILDERS = {
   short:   buildAdvancedShortDiagnosisMessages,
@@ -68,6 +69,7 @@ export async function generateV1StageReport({
   payload = {},
   metadata = {},
   context = {},
+  providerBudget,
   requestFn
 } = {}) {
   const normalizedStage = normalizeV1Stage(stage);
@@ -81,8 +83,12 @@ export async function generateV1StageReport({
     throw new ApiError(500, 'AI_NOT_CONFIGURED', 'AI 服务尚未配置。');
   }
 
-  const request = requestFn || makeRequest;
   const requestPayload = { ...payload, stage: normalizedStage, promptVersion, metadata, context };
+  const baseRequest = requestFn || makeRequest;
+  const request = async (requestMessages, options) => {
+    providerBudget?.consumeCall();
+    return baseRequest(requestMessages, { ...options, signal: payload.signal });
+  };
 
   if (normalizedStage === 'final') {
     return generateV1FinalStageReport({
@@ -101,6 +107,9 @@ export async function generateV1StageReport({
   } catch (err) {
     if (err instanceof ApiError && err.code === 'AI_REQUEST_TIMEOUT') {
       throw err;
+    }
+    if (providerBudget && !providerBudget.consumeGeneralRepair()) {
+      throw new ApiError(422, 'V1_STAGE_OUTPUT_INVALID', 'V1 stage output failed validation.');
     }
     const retryMessages = buildV1StageRetryMessages(messages, normalizedStage);
     const content = await request(retryMessages, { temperature: 0.1 });
@@ -153,9 +162,11 @@ export async function classifyMaterialForm(input) {
     throw new ApiError(500, 'AI_NOT_CONFIGURED', 'AI 服务尚未配置。');
   }
 
+  input.providerBudget?.consumeCall();
   const content = await makeRequest(buildMaterialClassificationMessages(input), {
     temperature: 0.1,
-    maxTokens: 240
+    maxTokens: 240,
+    signal: input.signal
   });
   const raw = extractJson(content);
   const keys = Object.keys(raw || {});
@@ -181,13 +192,13 @@ async function generateReport(payload, buildMessagesFn) {
 
   let raw;
   try {
-    const content = await makeRequest(messages);
+    const content = await makeRequest(messages, { signal: payload.signal });
     raw = extractJson(content);
   } catch (err) {
     if (err instanceof ApiError && err.code !== 'AI_REQUEST_TIMEOUT') {
       // Parse failed — retry once with explicit JSON instruction
       const retryMessages = buildRetryMessages(messages);
-      const content = await makeRequest(retryMessages);
+      const content = await makeRequest(retryMessages, { signal: payload.signal });
       raw = extractJson(content);
     } else {
       throw err;
@@ -197,7 +208,7 @@ async function generateReport(payload, buildMessagesFn) {
   // If parse succeeded but critical fields are missing, retry once
   if (isCriticallyMissing(raw)) {
     const retryMessages = buildRetryMessages(messages);
-    const content = await makeRequest(retryMessages);
+    const content = await makeRequest(retryMessages, { signal: payload.signal });
     raw = extractJson(content);
   }
 
@@ -214,7 +225,7 @@ async function generateReportV1(payload, buildMessagesFn) {
 
   let raw;
   try {
-    const content = await makeRequest(messages);
+    const content = await makeRequest(messages, { signal: payload.signal });
     raw = extractJson(content);
     return normalizeReportV1(raw, payload);
   } catch (err) {
@@ -222,14 +233,18 @@ async function generateReportV1(payload, buildMessagesFn) {
       throw err;
     }
     const retryMessages = buildV1RetryMessages(messages);
-    const content = await makeRequest(retryMessages);
+    const content = await makeRequest(retryMessages, { signal: payload.signal });
     raw = extractJson(content);
     return normalizeReportV1(raw, payload);
   }
 }
 
 async function makeRequest(messages, options = {}) {
+  await consumeGlobalProviderCall();
   const controller = new AbortController();
+  const abortFromRequest = () => controller.abort();
+  if (options.signal?.aborted) controller.abort();
+  options.signal?.addEventListener('abort', abortFromRequest, { once: true });
   const timeout = setTimeout(function () {
     controller.abort();
   }, config.aiTimeoutMs);
@@ -256,10 +271,7 @@ async function makeRequest(messages, options = {}) {
     });
 
     if (!response.ok) {
-      const message = data && data.error && data.error.message
-        ? data.error.message
-        : 'AI 诊断请求失败。';
-      throw new ApiError(response.status, 'AI_REQUEST_FAILED', message);
+      throw new ApiError(response.status, 'AI_REQUEST_FAILED', 'AI 诊断请求失败。');
     }
 
     return data && data.choices && data.choices[0] && data.choices[0].message
@@ -273,6 +285,7 @@ async function makeRequest(messages, options = {}) {
     throw new ApiError(502, 'AI_REQUEST_FAILED', 'AI 诊断请求失败，请稍后再试。');
   } finally {
     clearTimeout(timeout);
+    options.signal?.removeEventListener('abort', abortFromRequest);
   }
 }
 

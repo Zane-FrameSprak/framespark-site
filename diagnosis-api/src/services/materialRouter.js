@@ -14,12 +14,20 @@ const FORM_TYPES = new Set([
 ]);
 const CLEAR_LOCAL_FORMS = new Set(['reject', 'full_script', 'worldbuilding', 'character_bio']);
 
-export async function routeMaterial({ userSelectedType, text, originalFileName = '', classifier = classifyMaterialForm }) {
+export async function routeMaterial({
+  userSelectedType,
+  text,
+  originalFileName = '',
+  signal,
+  providerBudget,
+  useAiClassification = true,
+  classifier = classifyMaterialForm
+}) {
   const normalizedUserType = normalizeUserSelectedType(userSelectedType);
   const targetFormat = detectTargetFormat(normalizedUserType, text, originalFileName);
   const localAnalysis = detectMaterialFormByRules(text);
 
-  if (!shouldUseAiClassification({ localAnalysis, text, userSelectedType: normalizedUserType, targetFormat })) {
+  if (!useAiClassification || !shouldUseAiClassification({ localAnalysis, text, userSelectedType: normalizedUserType, targetFormat })) {
     return buildRoutingResult({
       userSelectedType: normalizedUserType,
       targetFormat,
@@ -27,7 +35,9 @@ export async function routeMaterial({ userSelectedType, text, originalFileName =
       reason: localAnalysis.reason,
       localAnalysis,
       classificationSource: 'local',
-      classificationReason: localAnalysis.reason
+      classificationReason: useAiClassification
+        ? localAnalysis.reason
+        : `V1 staged production uses local pre-classification: ${localAnalysis.reason}`
     });
   }
 
@@ -36,7 +46,9 @@ export async function routeMaterial({ userSelectedType, text, originalFileName =
       text,
       userSelectedType: normalizedUserType,
       targetFormat,
-      localMaterialForm: localAnalysis.materialForm
+      localMaterialForm: localAnalysis.materialForm,
+      signal,
+      providerBudget
     });
     const aiMaterialForm = normalizeMaterialForm(aiAnalysis?.materialForm);
     if (!aiMaterialForm) {

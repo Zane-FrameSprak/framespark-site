@@ -6,11 +6,12 @@ export function createDailyRateLimit(options) {
     errorCode,
     message,
     store = new Map(),
-    now = () => new Date()
+    now = () => new Date(),
+    keyFn = getClientIpKey
   } = options;
 
   return function dailyRateLimit(req, res, next) {
-    const clientKey = getClientKey(req);
+    const clientKey = keyFn(req);
     const dateKey = now().toISOString().slice(0, 10);
     const key = `${dateKey}:${clientKey}`;
     const currentCount = store.get(key) || 0;
@@ -18,8 +19,10 @@ export function createDailyRateLimit(options) {
     if (currentCount >= limit) {
       res.status(429).json({
         ok: false,
-        error: errorCode,
-        message
+        error: {
+          code: errorCode,
+          message
+        }
       });
       return;
     }
@@ -29,9 +32,43 @@ export function createDailyRateLimit(options) {
   };
 }
 
-function getClientKey(req) {
-  const forwardedFor = String(req.headers?.['x-forwarded-for'] || '')
-    .split(',')[0]
-    .trim();
-  return forwardedFor || req.ip || req.socket?.remoteAddress || 'unknown';
+export function createConcurrencyLimit(options = {}) {
+  const limit = Number.isFinite(options.limit) && options.limit > 0 ? options.limit : 2;
+  let active = 0;
+
+  return function concurrencyLimit(req, res, next) {
+    if (active >= limit) {
+      res.status(503).json({
+        ok: false,
+        error: {
+          code: 'SERVICE_BUSY',
+          message: '当前内测请求较多，请稍后再试。'
+        }
+      });
+      return;
+    }
+
+    active += 1;
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      active = Math.max(0, active - 1);
+    };
+    res.once('finish', release);
+    res.once('close', release);
+    next();
+  };
+}
+
+export function getClientIpKey(req) {
+  return req.ip || req.socket?.remoteAddress || 'unknown';
+}
+
+export function getBetaIdentityKey(req) {
+  return req.betaIdentity || 'anonymous';
+}
+
+export function getGlobalKey() {
+  return 'global';
 }

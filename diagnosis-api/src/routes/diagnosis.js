@@ -8,6 +8,8 @@ import { hasAiProvider } from '../services/aiClient.js';
 import { runDiagnosisPipeline } from '../services/diagnosisPipeline.js';
 import { buildMockDiagnosisReport } from '../services/mockDiagnosis.js';
 import { logDiagnosisResult } from '../services/diagnosisLogger.js';
+import { buildPublicDiagnosisResponse } from '../services/publicDiagnosisResponse.js';
+import { createProviderCallBudget } from '../services/providerCallBudget.js';
 import { ApiError } from '../utils/errors.js';
 
 const upload = multer({
@@ -23,20 +25,31 @@ export const diagnosisRouter = express.Router();
 diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
   try {
     const userSelectedType = normalizeMaterialType(req.body.materialType);
+    const reviewConsent = req.body.reviewConsent === 'true';
+    const providerBudget = createProviderCallBudget({
+      maxCalls: config.providerCallLimitPerDiagnosis,
+      maxGeneralRepairs: 1
+    });
     const input = await resolveDiagnosisInput(req);
     const { parsed, inputMode } = input;
+    const allowV1D0 = config.enableDiagnosisV1 && config.enableV1StagedRunner;
     const materialRouting = await routeMaterial({
       userSelectedType,
       text: parsed.text,
-      originalFileName: parsed.source?.filename
+      originalFileName: parsed.source?.filename,
+      signal: req.diagnosisSignal,
+      providerBudget,
+      useAiClassification: !allowV1D0
     });
 
-    if (materialRouting.effectiveDiagnosisType === 'reject') {
+    if (materialRouting.effectiveDiagnosisType === 'reject' && !allowV1D0) {
       throw new ApiError(400, 'MATERIAL_REJECTED', materialRouting.reason);
     }
 
-    const guard = validateScriptText(parsed.text, materialRouting);
-    const materialType = materialRouting.effectiveDiagnosisType;
+    const guard = validateScriptText(parsed.text, materialRouting, { allowD0: allowV1D0 });
+    const materialType = materialRouting.effectiveDiagnosisType === 'reject'
+      ? 'other'
+      : materialRouting.effectiveDiagnosisType;
     const payload = {
       text: parsed.text,
       materialType,
@@ -44,9 +57,12 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       targetFormat: materialRouting.targetFormat,
       materialForm: materialRouting.materialForm,
       materialRouting,
+      materialHint: buildMaterialHint(materialRouting),
       inputMode,
       stats: guard.stats,
-      source: parsed.source
+      source: parsed.source,
+      signal: req.diagnosisSignal,
+      providerBudget
     };
 
     const mode = hasAiProvider() ? 'ai' : 'mock';
@@ -65,35 +81,22 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
 
     const logEntry = await logDiagnosisResult({
       mode,
+      betaIdentity: req.betaIdentity,
       materialType,
       materialRouting,
       inputMode,
       parsed,
       stats: guard.stats,
-      result
+      result,
+      reviewConsent
     });
 
-    res.json({
-      ok: true,
-      mode,
+    res.json(buildPublicDiagnosisResponse({
       diagnosisId: logEntry?.id || null,
-      internalStage: result.internalStage,
-      diagnosisDepth: getDiagnosisDepth(result),
-      diagnosisEngine: result.diagnosisEngine || null,
-      materialType,
-      userSelectedType,
-      targetFormat: materialRouting.targetFormat,
-      materialForm: materialRouting.materialForm,
-      effectiveDiagnosisType: materialRouting.effectiveDiagnosisType,
       inputMode,
-      materialRouting,
-      source: parsed.source,
       stats: guard.stats,
-      reportV1: result.reportV1 || null,
-      basicReport: result.basicReport,
-      finalReport: result.finalReport,
-      report: result.finalReport  // backward compat for existing frontend
-    });
+      result
+    }));
   } catch (err) {
     next(err);
   }
@@ -104,6 +107,18 @@ export function getDiagnosisDepth(result) {
     return 'advanced';
   }
   return 'basic';
+}
+
+function buildMaterialHint(materialRouting) {
+  const rejected = materialRouting.effectiveDiagnosisType === 'reject';
+  const materialType = rejected ? 'non_story_material' : materialRouting.materialForm;
+  return {
+    material_type: materialType,
+    primary_material_type: materialType,
+    secondary_material_types: [],
+    is_mixed_material: false,
+    material_components: []
+  };
 }
 
 function normalizeMaterialType(value) {
@@ -125,7 +140,6 @@ export async function resolveDiagnosisInput(req) {
       inputMode: 'pasted_text',
       parsed: {
         source: {
-          filename: 'pasted-text',
           type: 'pasted_text'
         },
         text

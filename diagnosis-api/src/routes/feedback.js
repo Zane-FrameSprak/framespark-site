@@ -19,14 +19,13 @@ feedbackRouter.post('/', async (req, res, next) => {
     try {
       logResult = await logDiagnosisFeedback(body);
     } catch (err) {
-      console.warn('[diagnosis-feedback] failed to write feedback log:', err.message);
+      console.warn('[diagnosis-feedback] failed to write feedback log:', err.code || err.name || 'UNKNOWN');
     }
 
     res.json({
       ok: true,
       feedbackId: logResult?.id || null,
-      saved: Boolean(logResult),
-      linkedDiagnosisLogPath: logResult?.linkedDiagnosisLogPath || ''
+      saved: Boolean(logResult)
     });
   } catch (err) {
     next(err);

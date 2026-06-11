@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
-const INDEX_PATH = path.join(ROOT, 'logs', 'diagnosis', 'index.json');
+const INDEX_PATH = path.join(ROOT, 'logs', 'diagnosis', 'metadata', 'index.json');
 const DEFAULT_LIMIT = 20;
 
 async function main() {
@@ -21,12 +21,11 @@ async function main() {
   for (const item of recent) {
     console.log([
       item.createdAt || '-',
-      `type=${item.materialType || '-'}`,
-      `stage=${item.internalStage || '-'}`,
-      `next=${item.finalNextStep || '-'}`,
-      `file=${item.originalFileName || '-'}`,
-      `tags=${Array.isArray(item.tags) ? item.tags.join(',') : '-'}`,
-      `log=${item.logPath || '-'}`
+      `stage=${item.stage || '-'}`,
+      `decision=${item.decision || '-'}`,
+      `fallback=${item.fallback === true}`,
+      `review=${item.reviewConsent === true}`,
+      `log=${item.metadataPath || '-'}`
     ].join(' | '));
   }
 }

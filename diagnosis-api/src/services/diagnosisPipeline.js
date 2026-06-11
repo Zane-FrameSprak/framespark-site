@@ -1,21 +1,44 @@
 import { config } from '../config.js';
-import { generateDiagnosisReport, generateAdvancedReport, generateUnifiedDiagnosisV1 } from './aiClient.js';
+import {
+  generateDiagnosisReport,
+  generateAdvancedReport,
+  generateUnifiedDiagnosisV1,
+  generateV1StageReport
+} from './aiClient.js';
 import { reportV1ToLegacyReport } from './reportV1Compat.js';
 import { buildFallbackReportV1 } from './reportV1Parser.js';
-import { runV1StagedDiagnosisMock } from './v1StageRunner.js';
+import { createProviderCallBudget } from './providerCallBudget.js';
+import { runV1StagedDiagnosis } from './v1StageRunner.js';
+import { ApiError } from '../utils/errors.js';
 
 const ADVANCE_PREFIX = '可进入进阶诊断';
 const ADVANCED_TYPES = new Set(['short', 'feature', 'other']);
 
 export async function runDiagnosisPipeline(payload) {
+  const providerBudget = payload.providerBudget || createProviderCallBudget({
+    maxCalls: config.providerCallLimitPerDiagnosis,
+    maxGeneralRepairs: 1
+  });
+
   return runDiagnosisPipelineWithEngines(payload, {
     generateBasic: generateDiagnosisReport,
     generateAdvanced: generateAdvancedReport,
     generateV1: generateUnifiedDiagnosisV1,
-    runStagedV1: runV1StagedDiagnosisMock
+    runStagedV1: async stagedPayload => {
+      const stagedResult = await runV1StagedDiagnosis(stagedPayload, {
+        enableV1RealPrompts: config.enableV1RealPrompts,
+        generateV1StageReport: args => generateV1StageReport({ ...args, providerBudget })
+      });
+      stagedResult.diagnostics = {
+        ...stagedResult.diagnostics,
+        providerCalls: providerBudget.snapshot().calls
+      };
+      return stagedResult;
+    }
   }, {
     enableDiagnosisV1: config.enableDiagnosisV1,
-    enableV1StagedRunner: config.enableV1StagedRunner
+    enableV1StagedRunner: config.enableV1StagedRunner,
+    failClosedOnV1Error: config.failClosedOnV1Error
   });
 }
 
@@ -40,6 +63,9 @@ export async function runDiagnosisPipelineWithEngines(payload, engines, options 
       finalReport: legacyReport
     };
   } catch (err) {
+    if (options.failClosedOnV1Error) {
+      throw new ApiError(503, 'V1_DIAGNOSIS_FAILED', 'V1 diagnosis did not produce a safe public result.');
+    }
     const legacyResult = await runLegacyDiagnosisPipeline(payload, engines);
     return {
       ...legacyResult,

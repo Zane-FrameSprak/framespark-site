@@ -119,6 +119,37 @@ const cases = [
       assertEqual(result.reportV1.diagnostics.fallback, true, 'fallback flag');
       assertEqual(result.reportV1.diagnostics.fallback_reason, 'V1_FINAL_OUTPUT_UNSAFE', 'fallback reason');
     }
+  },
+  {
+    name: 'production fail-closed prevents legacy report exposure',
+    async run() {
+      let legacyCalled = false;
+      let error = null;
+      try {
+        await runDiagnosisPipelineWithEngines(makePayload(), {
+          generateBasic: async () => {
+            legacyCalled = true;
+            return makeLegacyReport();
+          },
+          generateAdvanced: async () => makeLegacyReport(),
+          generateV1: async () => {
+            throw new Error('one-shot V1 should not run');
+          },
+          runStagedV1: async () => {
+            throw new ApiError(422, 'V1_FINAL_OUTPUT_UNSAFE', 'unsafe final output');
+          }
+        }, {
+          enableDiagnosisV1: true,
+          enableV1StagedRunner: true,
+          failClosedOnV1Error: true
+        });
+      } catch (caught) {
+        error = caught;
+      }
+
+      assertEqual(error?.code, 'V1_DIAGNOSIS_FAILED', 'error.code');
+      assertEqual(legacyCalled, false, 'legacy called');
+    }
   }
 ];
 
