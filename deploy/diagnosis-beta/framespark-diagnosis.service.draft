@@ -1,0 +1,50 @@
+# DRAFT ONLY - review before copying to /etc/systemd/system/framespark-diagnosis.service
+# This file is not installed by repository tooling and does not authorize deployment.
+
+[Unit]
+Description=FrameSpark Diagnosis API Invite Beta
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=framespark-diagnosis
+Group=framespark-diagnosis
+WorkingDirectory=/srv/framespark/diagnosis-api/current
+EnvironmentFile=/etc/framespark/diagnosis-api.env
+Environment=HOST=127.0.0.1
+Environment=PORT=8788
+ExecStart=/usr/bin/npm start
+ExecStartPost=/usr/bin/curl --fail --retry 10 --retry-delay 1 http://127.0.0.1:8788/ready
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0077
+
+# Runtime hardening. The release tree is read-only; only the data directory is writable.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/framespark-diagnosis
+
+# Journald must receive metadata and error codes only. The application must not log
+# complete submitted material, complete reports, provider responses, or credentials.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=framespark-diagnosis
+
+# /health and /ready are local checks only. Do not proxy either path through Nginx.
+
+[Install]
+WantedBy=multi-user.target

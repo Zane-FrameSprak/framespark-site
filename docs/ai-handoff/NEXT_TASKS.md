@@ -144,6 +144,10 @@ Updated by: Codex
 - Next, prepare repository-only deployment configuration drafts for the missing dedicated user, release/current layout, env/data/auth permissions, hardened systemd unit and three authenticated `^~` Nginx locations.
 - Ensure the future `/diagnosis/beta/` location takes precedence over the existing static-resource regex location and define the exact no-trailing-slash behavior.
 - Keep the next phase draft-only: do not create server resources, run installers, start services, reload Nginx, call AI or expose Beta/API routes.
+- Review the five repository drafts under `deploy/diagnosis-beta/` using `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_DRAFT_REVIEW_2026-06-11.md`.
+- Resolve systemd effective env/hardening, Basic Auth ownership/mode, Nginx alias/symlink behavior, no-trailing-slash policy, active-config merge and rollback checksum questions before producing any execution runbook.
+- Treat `BETA_IDENTITY_HEADER` and `LOG_REDACTION_REQUIRED` as documented contracts, not runtime-configurable enforcement, unless a separate business-code task wires and tests them.
+- Do not remove the unconditional safety exits from the command drafts during review.
 - Obtain human legal review for the updated privacy policy, terms, external AI processing disclosure, retention language, and copyright/authorization wording.
 - Prepare the server release directory, dedicated no-login service user, `/etc/framespark/diagnosis-api.env`, `/var/lib/framespark-diagnosis`, and Nginx Basic Auth file under a separate approved deployment task.
 - Verify the systemd and Nginx drafts manually; do not execute them as part of normal static-site deployment.

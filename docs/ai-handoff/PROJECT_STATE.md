@@ -270,6 +270,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The public webroot still contains only the frozen diagnosis page and does not contain Beta assets, diagnosis-api or internal directories.
 - The server may advance only to repository-side deployment configuration draft generation. No resource creation, server write, service action, Nginx reload, AI call or public opening is authorized.
 
+## Diagnosis Beta Deployment Configuration Drafts (2026-06-11)
+
+- Repository-only drafts now exist under `deploy/diagnosis-beta/` for the systemd unit, authenticated Nginx locations, production env placeholders, deployment commands and rollback commands.
+- The shell drafts exit unconditionally before their command bodies and are not executable deployment tooling. They exist only for line-by-line review.
+- The drafts preserve the frozen public `/diagnosis/`, existing `/api/analytics/`, loopback `8788`, versioned release/current layout, external env/data paths and three consistently authenticated Beta locations.
+- The env draft contains `DEEPSEEK_API_KEY=REPLACE_ME` only. The documented Beta header and log-redaction env names are deployment-contract notes; the application does not currently read them dynamically.
+- Open review gates include auth-file ownership/mode, systemd effective environment and hardening compatibility, Nginx alias/symlink behavior, exact no-trailing-slash handling, active-config merge safety and rollback checksum values.
+- The next allowed phase is configuration draft review only. No server connection, resource creation, deployment, Nginx reload, service action, real AI call or public opening is authorized.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

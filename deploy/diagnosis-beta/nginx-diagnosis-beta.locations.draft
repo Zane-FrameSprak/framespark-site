@@ -1,0 +1,73 @@
+# DRAFT LOCATION FRAGMENT ONLY.
+# Manually review and merge into the existing HTTPS framespark.cn server block.
+# Never overwrite the complete site config with this file.
+# Keep the existing public /diagnosis/ page and /api/analytics/ location unchanged.
+# Do not expose /health, /ready, /api/dev/, the release tree, env, logs, or data.
+# CORS remains application-controlled by ALLOWED_ORIGINS=https://framespark.cn.
+# Do not add Access-Control-Allow-Origin *.
+
+# Do not expose an unauthenticated no-trailing-slash alias.
+location = /diagnosis/beta {
+    return 404;
+}
+
+# ^~ is required so the existing static-resource regex location cannot bypass auth.
+location ^~ /diagnosis/beta/ {
+    auth_basic "FrameSpark diagnosis beta";
+    auth_basic_user_file /etc/nginx/framespark-diagnosis-beta.htpasswd;
+
+    limit_except GET {
+        deny all;
+    }
+
+    alias /srv/framespark/diagnosis-api/current/beta-site/;
+    index index.html;
+    autoindex off;
+    disable_symlinks if_not_owner from=/srv/framespark/diagnosis-api/current/beta-site/;
+}
+
+location ^~ /api/diagnosis/ {
+    auth_basic "FrameSpark diagnosis beta";
+    auth_basic_user_file /etc/nginx/framespark-diagnosis-beta.htpasswd;
+
+    limit_except POST {
+        deny all;
+    }
+
+    proxy_pass http://127.0.0.1:8788/api/diagnosis/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Origin $http_origin;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Framespark-Beta-User $remote_user;
+
+    client_max_body_size 5m;
+    proxy_connect_timeout 10s;
+    proxy_read_timeout 240s;
+    proxy_send_timeout 240s;
+}
+
+location ^~ /api/diagnosis-feedback/ {
+    auth_basic "FrameSpark diagnosis beta";
+    auth_basic_user_file /etc/nginx/framespark-diagnosis-beta.htpasswd;
+
+    limit_except POST {
+        deny all;
+    }
+
+    proxy_pass http://127.0.0.1:8788/api/diagnosis-feedback/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Origin $http_origin;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Framespark-Beta-User $remote_user;
+
+    client_max_body_size 64k;
+    proxy_connect_timeout 10s;
+    proxy_read_timeout 30s;
+    proxy_send_timeout 30s;
+}
