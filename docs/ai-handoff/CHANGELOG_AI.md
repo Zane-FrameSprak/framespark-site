@@ -254,3 +254,19 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Existing legacy sample run fields remain unchanged.
 - Added a no-AI regression test for V1 summary storage, missing diagnostics, fallback flags, and full reportV1 exclusion.
 - No internal UI, public site, production route, deployment, or real AI execution was changed.
+
+## 2026-06-10
+
+### Diagnosis MVP Productionization Baseline
+
+- Added invitation-Beta UI source under `diagnosis-api/beta-site/` for pasted text, TXT, and DOCX with privacy consent, product failure states, and public-result rendering. It is outside the static webroot and is not publicly routed.
+- Removed the obsolete tracked `diagnosis/app.js` so a future static rsync cannot re-expose the retired public upload/API client.
+- Added a public diagnosis DTO and public error mapping so internal V1 diagnostics, raw reports, model/prompt metadata, retries, fallback state, and internal paths are not exposed.
+- Replaced the production staged branch's mock injection with the injectable real staged runner behind existing disabled-by-default V1 switches and fail-closed production checks.
+- Added provider call budgeting, a persistent daily provider cap, account/IP/global/concurrency limits, request deadlines, origin checks, and trusted Beta identity handling.
+- Hardened TXT/DOCX parsing and changed default product limits to 5 MB and 20,000 characters while preserving D0 for parseable low-information material.
+- Reworked diagnosis logging to metadata-only by default, explicit review-consent retention, hashed identities, external data paths, restricted file modes, and expiry cleanup.
+- Updated invitation-Beta privacy/terms copy and production deployment/runbook drafts for port `8788`, release symlinks, a dedicated service user, Basic Auth, `/ready`, and rollback.
+- Added no-AI production-safety tests. No real AI, server command, deployment, public API exposure, or public upload restoration was performed.
+- Pre-commit blockers were corrected: legal meta no longer describes the pages as placeholders, the diagnosis-depth test now verifies the frozen public page and isolated Beta client, and deployment scripts no longer mutate an immutable release or skip partial Nginx-location audits.
+- Added no-AI DOCX archive safety, retention cleanup, and local HTTP integration coverage for public DTO redaction, access guards, rate limits, upload rejection, and fail-closed errors.

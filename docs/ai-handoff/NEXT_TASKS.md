@@ -5,6 +5,7 @@ Updated by: Codex
 
 ## Now
 
+- Review the local MVP productionization changes as separate commits; do not enable the Beta route or deploy the API during commit preparation.
 - **Keep low-token workflow active** — routine low-risk tasks should proceed in goal mode within allowed scope and report briefly.
 - **Use terminal scripts for read-only checks** where possible to reduce Codex / Claude token use.
 - **Use the verified sudo rsync deploy template** for Tencent Cloud; GitHub push still does not update production.
@@ -131,6 +132,18 @@ Updated by: Codex
 - Do not enable `ENABLE_DIAGNOSIS_V1=true` in default or production settings yet.
 - Do not rely only on synthetic AI-generated samples for quality validation.
 - Do not implement real talent-platform matching/recruiting features yet.
+
+## Next - Invitation Diagnosis Beta Production Gate (2026-06-10)
+
+- Review the MVP productionization diff and complete the full no-AI regression suite.
+- Obtain human legal review for the updated privacy policy, terms, external AI processing disclosure, retention language, and copyright/authorization wording.
+- Prepare the server release directory, dedicated no-login service user, `/etc/framespark/diagnosis-api.env`, `/var/lib/framespark-diagnosis`, and Nginx Basic Auth file under a separate approved deployment task.
+- Verify the systemd and Nginx drafts manually; do not execute them as part of normal static-site deployment.
+- Run local protected-route and public DTO checks before any server change.
+- After explicit approval, deploy behind authentication, verify `/ready`, authentication, rate limits, redacted logs, retention cleanup, and rollback while keeping the public preview page unchanged.
+- Only after the protected deployment passes, run 1-3 production smoke diagnoses using fictional material and a separately approved real-AI budget.
+- Keep `/diagnosis/beta/` undiscoverable and `/api/diagnosis/` unavailable until access isolation, legal review, production smoke, and rollback rehearsal all pass.
+- Invitation Beta approval is a separate decision; completion of repository code does not authorize opening it.
 
 ## Launch Window — 2026-06-08
 

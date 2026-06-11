@@ -202,3 +202,25 @@ FrameSpark tasks repeatedly require the same boundaries: risk classification, st
 
 Impact:
 Future tasks can specify only the concrete target, allowed files, forbidden files, and checks. Agents should follow `AGENTS.md` first, then the relevant handoff files and task-specific instructions.
+
+## 2026-06-10 — Use a separate invitation-only diagnosis Beta
+
+Decision:
+Keep the public `/diagnosis/` page as a preview. Any first MVP trial must use an unlinked `/diagnosis/beta/` path protected by Nginx Basic Auth and API-side trusted identity/origin checks.
+
+Reason:
+The diagnosis engine has passed staged quality observation, but production access control, privacy review, quotas, logging, deployment, and rollback still require controlled verification.
+
+Impact:
+Do not restore public upload controls or expose `/api/diagnosis/` without the protected deployment gate and a separate release decision.
+
+## 2026-06-10 — Fail closed and minimize diagnosis data
+
+Decision:
+Production diagnosis must reject unsafe V1 output or runner failure rather than present a legacy fallback as a successful user report. Store only redacted metadata by default; full material/report retention requires explicit review consent and expires after 14 days.
+
+Reason:
+Fallback success can hide safety failures, while unnecessary storage of creative materials creates avoidable privacy and copyright risk.
+
+Impact:
+The public DTO excludes internal diagnostics and raw reports. Production readiness requires the real staged runner, all safety switches, external data storage, access isolation, and strict quotas before the service is considered ready.

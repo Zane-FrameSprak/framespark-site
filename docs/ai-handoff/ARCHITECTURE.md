@@ -282,6 +282,26 @@ Review scripts:
 
 Current V1 limitation: logs are still mostly legacy-oriented and should later record `reportV1` fields more explicitly.
 
+### Invitation Beta Logging and Public Contract (2026-06-10)
+
+The MVP Beta uses a stricter public boundary than the historical development flow:
+
+```text
+protected Beta request
+-> strict paste/TXT/DOCX parser
+-> local material hint + V1 D0 gate
+-> real staged V1 runner behind three switches
+-> publicDiagnosisResponse DTO
+-> metadata-only log
+```
+
+- `publicDiagnosisResponse.js` is the only user-facing result contract. Raw `reportV1`, provider diagnostics, prompt/model/retry/fallback fields, and internal paths stay server-side.
+- Production V1 errors are fail-closed. Unsafe final output and staged-runner failures return controlled errors instead of a legacy fallback report.
+- `diagnosisLogger.js` writes metadata under `/var/lib/framespark-diagnosis/diagnosis/metadata`; optional review-consent records use a separate 14-day directory. Default logs do not store the source filename, full material, or full report.
+- `providerUsageStore.js` persists the global provider-call daily cap. Initial account/IP/request limits are process-local and are suitable only for the planned single-instance invitation Beta; multi-instance deployment requires a shared limiter.
+- Beta assets live under `diagnosis-api/beta-site/`, outside public static deployment. `/diagnosis/beta/`, `/api/diagnosis/`, and feedback are intended to share Nginx Basic Auth protection through an authenticated alias/proxy. Nginx forwards the authenticated username; the API rejects missing production identity and disallowed origins.
+- The production runtime target is `/srv/framespark/diagnosis-api/releases/<commit>` with a `current` symlink, a dedicated service user, env under `/etc/framespark`, data under `/var/lib`, and `127.0.0.1:8788`.
+
 ## Deployment Notes
 
 - `.github/workflows/pages.yml` deploys static site files to GitHub Pages.

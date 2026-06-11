@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-03
+Last updated: 2026-06-10
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -238,6 +238,20 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Do not push unless explicitly asked.
 - Prefer updating `js/site-data.js` for public-site content changes before editing HTML structure.
 
+## Diagnosis MVP Productionization Baseline (2026-06-10)
+
+- The repository now contains invitation-only Beta source under `diagnosis-api/beta-site/`; the existing public `/diagnosis/` preview page remains unchanged and does not link to it. Future Nginx may expose the source as protected `/diagnosis/beta/` only after authentication is active.
+- The retired public client `diagnosis/app.js` has been removed from the repository to prevent it returning during a later static rsync.
+- The Beta path is designed to be protected by Nginx Basic Auth. The API additionally requires a trusted `X-Framespark-Beta-User` identity in production and only accepts configured origins.
+- Production startup is fail-closed: the real staged runner, three V1 switches, API key, loopback host, port `8788`, `/var/lib/framespark-diagnosis`, dev-tools-off, and safety limits must validate before readiness.
+- Public diagnosis responses now use a dedicated DTO. Internal fields such as raw `reportV1`, prompt version, model, fallback, retry, provider routing, and latency are not returned to the Beta UI.
+- V1 unsafe output or staged-runner failure is not presented as a successful legacy report in production fail-closed mode.
+- Upload parsing is limited to pasted text, TXT, and DOCX with extension/MIME checks, UTF-8 checks, DOCX ZIP checks, 5 MB upload size, and 20,000-character product limit. PDF/OCR remains unsupported.
+- Default logging stores only hashed identity and run metadata for 30 days. Full material/report retention requires separate review consent, is stored outside webroot, and expires after 14 days.
+- Provider usage has a persistent daily cap; diagnosis requests also have account, IP, global, and concurrency limits for the initial single-instance Beta.
+- Privacy and terms pages now include invitation-Beta disclosures, but still require human legal review before release.
+- No diagnosis backend, Beta Nginx route, Basic Auth account, systemd unit, or public API has been deployed. No real AI was run for this implementation.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
@@ -253,6 +267,7 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Current positioning: brand display site plus internal-test preview site.
 - Home, diagnosis, talent, legal, and 404 pages have been manually checked with no obvious P0/P1 issues.
 - The public diagnosis page remains an internal-test notice page: no upload controls, no `diagnosis/app.js`, and no `/api/diagnosis` reference.
+- MVP pre-commit blocker fixes are present locally: legal meta alignment, frozen-page regression coverage, immutable-release deployment checks, partial Nginx-location auditing, DOCX safety tests, retention cleanup tests, and local HTTP integration tests. They are not committed, pushed, deployed, or publicly enabled.
 - The talent page remains in preparing / not-open state.
 - Project detail pages remain `noindex`; `sitemap.xml` does not include `projects/` URLs.
 - Static CSS/JS references use `v=20260608` for cache busting; Quark old-cache behavior has been verified as resolved.
