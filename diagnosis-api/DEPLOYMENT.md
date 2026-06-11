@@ -1,57 +1,57 @@
-# Diagnosis API Production Plan
+# Diagnosis API Invite Beta Deployment Plan
 
-This is a deployment plan only. Do not reopen the public diagnosis upload entry until the API is deployed and verified.
-
-Before production execution, read `DEPLOYMENT_RUNBOOK.md`.
-
-Script drafts live in `diagnosis-api/scripts/`; review them before any server execution.
+This repository contains the production baseline only. It does not authorize deployment or public access. Read `DEPLOYMENT_RUNBOOK.md` before any server change.
 
 ## Runtime
 
-- Service name: `framespark-diagnosis.service`
-- Working directory: `/tmp/framespark-site/diagnosis-api` or a dedicated release directory
-- Host: `127.0.0.1`
-- Port: `8788`
-- Reason for `8788`: analytics-api already uses `127.0.0.1:8787`
-- Env file suggestion: `/home/ubuntu/framespark-diagnosis.env`
-- Start command: `npm start`
+- Service: `framespark-diagnosis.service`
+- User/group: dedicated no-login `framespark-diagnosis`
+- Releases: `/srv/framespark/diagnosis-api/releases/<commit>`
+- Current release: `/srv/framespark/diagnosis-api/current`
+- Env: `/etc/framespark/diagnosis-api.env`, mode `0600`
+- Writable data: `/var/lib/framespark-diagnosis`
+- Bind: `127.0.0.1:8788`; analytics remains on `8787`
+- Start: `npm start`
 
-## Required Environment
+Install production dependencies inside the versioned release before promoting the `current` symlink. The systemd installer only verifies the prepared release and must not mutate it through `current`.
 
-- `HOST=127.0.0.1`
-- `PORT=8788`
-- `DEEPSEEK_API_KEY=` must be set in production
-- `DEEPSEEK_BASE_URL=https://api.deepseek.com`
-- `DEEPSEEK_MODEL=deepseek-v4-flash`
-- `AI_TIMEOUT_MS=90000`
-- `MAX_UPLOAD_MB=10`
-- `MIN_TEXT_CHARS=800`
-- `MAX_TEXT_CHARS=80000`
-- `ENABLE_DIAGNOSIS_V1=false`
-- `ENABLE_DEV_TOOLS=false`
-- `DIAGNOSIS_DAILY_LIMIT` and `DIAGNOSIS_FEEDBACK_DAILY_LIMIT` may be set for production traffic
+Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 
-## Nginx Reverse Proxy
+## Invite Beta Boundary
 
-- Public path: `/api/diagnosis/`
-- Local target: `http://127.0.0.1:8788/api/diagnosis/`
-- `client_max_body_size` should match `MAX_UPLOAD_MB`
-- `proxy_read_timeout` should allow long AI requests
-- Do not reuse port `8787`
-- Keep analytics proxy separate at `/api/analytics/`
+- Keep public `/diagnosis/` as the upload-disabled preview.
+- Keep Beta source under `diagnosis-api/beta-site/`, outside the static webroot and existing public-site rsync scope.
+- Protect `/diagnosis/beta/`, `/api/diagnosis/` and `/api/diagnosis-feedback/` with Nginx Basic Auth.
+- Nginx must overwrite `X-Framespark-Beta-User` with `$remote_user`.
+- Nginx must overwrite `X-Forwarded-For` with `$remote_addr`; do not preserve a client-supplied forwarding chain.
+- Do not expose `/health` or `/ready` publicly; use them from localhost.
+- Do not enable `ENABLE_DEV_TOOLS` in production.
 
-## Public Upload Recovery Conditions
+## Limits
 
-Only restore public upload controls after all are true:
+- File: TXT/DOCX only, 5 MB compressed, 20 MB DOCX expansion ceiling.
+- Text: 20,000 non-whitespace characters maximum; short or low-information material can return D0.
+- Request deadline: 210 seconds; Nginx read timeout: 240 seconds.
+- Per diagnosis: at most five provider calls, including one shared normal repair and one final safety repair.
+- Initial Beta quota: account 3/day, IP 6/day, global 20 diagnoses/day, global 100 provider calls/day, concurrency 2.
 
-- systemd service is running
-- local `GET /health` is OK
-- HTTPS `/api/diagnosis` smoke test returns JSON
-- rate limit behavior is verified
-- error responses are understandable
-- privacy and upload copy are aligned
-- TXT/DOCX/paste support is clear, and PDF support is not promised unless separately implemented
+## Data Handling
 
-## Current Format Note
+- Default logs contain metadata only and expire after 30 days.
+- Original filename, full material and full report are not saved by default.
+- Explicit human-review consent allows access-controlled host storage outside the webroot for at most 14 days.
+- Logs and API responses must not contain API keys, raw provider responses or internal diagnostics.
 
-The public parser currently supports TXT, DOCX, and pasted text. PDF support is not part of the current public parser and must not be promised before implementation, tests, and copy alignment. Internal dev parsing may support text PDF samples, but that is not public support.
+## Reverse Proxy
+
+- API target: `http://127.0.0.1:8788/api/diagnosis/`
+- Feedback target: `http://127.0.0.1:8788/api/diagnosis-feedback/`
+- `client_max_body_size 5m`
+- `proxy_read_timeout 240s`
+- Keep `/api/analytics/` separate and unchanged.
+- Serve `/diagnosis/beta/` from `/srv/framespark/diagnosis-api/current/beta-site/` with an authenticated Nginx `alias`; never copy it into `/www/wwwroot/framespark.cn/diagnosis/` before protection exists.
+- Review `scripts/install-diagnosis-nginx-proxy.sh`; it prints a snippet and never blind-edits Nginx.
+
+## Open Gates
+
+Do not deploy or enable the Beta page until local tests, legal review, service installation, authenticated proxy, readiness, rate limits, metadata-only logging, rollback and 1-3 fictional production smoke runs pass.

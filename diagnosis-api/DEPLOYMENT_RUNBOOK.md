@@ -1,118 +1,70 @@
-# Diagnosis API Deployment Runbook
+# Diagnosis API Invite Beta Runbook
 
 ## Purpose
 
-This is a manual runbook for production connection of `diagnosis-api`. It is not an automatic deployment script. Do not reopen the public diagnosis upload entry while following this runbook.
+Manual runbook for a protected diagnosis Beta. It is not an automatic deployment instruction and does not authorize public upload.
 
-## Current production constraints
+## Preflight
 
-- `analytics-api` already uses `127.0.0.1:8787`.
-- `diagnosis-api` should use `127.0.0.1:8788`.
-- `ENABLE_DIAGNOSIS_V1` must remain `false`.
-- The public `/diagnosis/` page remains internal-test / public-upload-disabled.
-- V1 staged diagnosis is still a plan; do not enable it during deployment.
+- Approved commit is on `origin/main`; worktree is clean.
+- Node/npm are available and `127.0.0.1:8788` is free; analytics still owns `8787`.
+- Dedicated no-login user `framespark-diagnosis` exists.
+- Release directory exists at `/srv/framespark/diagnosis-api/releases/<commit>` and `current` points to it.
+- `/etc/framespark/diagnosis-api.env` exists with mode `0600`.
+- `/var/lib/framespark-diagnosis` is owned by the service user and is not under the webroot.
+- Basic Auth file `/etc/nginx/framespark-diagnosis-beta.htpasswd` exists outside Git.
+- Beta source exists at `/srv/framespark/diagnosis-api/current/beta-site/` and is not present in the public static webroot.
+- Public `/diagnosis/` still contains no upload control or API reference.
 
-## Required env
+## Required Production Env
 
-Use an environment file outside the repository, for example `/home/ubuntu/framespark-diagnosis.env`.
-
-- `HOST=127.0.0.1`
-- `PORT=8788`
-- `DEEPSEEK_API_KEY=` production required; never commit it to Git.
-- `DEEPSEEK_BASE_URL=https://api.deepseek.com`
-- `DEEPSEEK_MODEL=deepseek-v4-flash`
-- `AI_TIMEOUT_MS=90000`
-- `MAX_UPLOAD_MB=10`
-- `MIN_TEXT_CHARS=800`
-- `MAX_TEXT_CHARS=80000`
-- `ENABLE_DIAGNOSIS_V1=false`
+- `NODE_ENV=production`, `HOST=127.0.0.1`, `PORT=8788`
+- `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_MODEL`
+- `ENABLE_DIAGNOSIS_V1=true`
+- `ENABLE_V1_STAGED_RUNNER=true`
+- `ENABLE_V1_REAL_PROMPTS=true`
 - `ENABLE_DEV_TOOLS=false`
-- `DIAGNOSIS_DAILY_LIMIT=`
-- `DIAGNOSIS_FEEDBACK_DAILY_LIMIT=`
+- `FAIL_CLOSED_ON_V1_ERROR=true`
+- `REQUIRE_BETA_IDENTITY=true`
+- `ALLOWED_ORIGINS=https://framespark.cn`, `TRUST_PROXY=loopback`
+- `MAX_UPLOAD_MB=5`, `MAX_DOCX_EXPANDED_MB=20`, `MAX_TEXT_CHARS=20000`
+- `AI_TIMEOUT_MS=90000`, `REQUEST_TIMEOUT_MS=210000`
+- `DIAGNOSIS_DATA_DIR=/var/lib/framespark-diagnosis`
+- Retention, account/IP/global/provider/concurrency limits from `.env.example`
 
-## Preflight checks
+Never print or commit the env file.
 
-- Local `main` and `origin/main` are in sync.
-- SSH to the Tencent Cloud server works.
-- Port `8788` is free.
-- Port `8787` is still used by `analytics-api`.
-- `/tmp/framespark-site` exists on the server.
-- `diagnosis-api` dependencies are installed.
-- `/home/ubuntu/framespark-diagnosis.env` exists and is not in Git.
-- Public upload controls are still disabled.
-- Public copy only promises TXT/DOCX/paste.
+## Installation Order
 
-## Script drafts
+1. Create `/srv/framespark/diagnosis-api/releases/<commit>`, install dependencies there with `npm ci --omit=dev`, and run the full no-AI suite before treating the release as immutable.
+2. Confirm the prepared release contains `package-lock.json` and `node_modules`, then atomically point `current` to it; do not install dependencies through the `current` link.
+3. Review, then run `install-diagnosis-systemd.sh`; it only verifies the prepared release and installs the service definition. Confirm `/health` and `/ready` locally.
+4. Run `install-diagnosis-nginx-proxy.sh` as an audit only. It reports each Beta/API location as present or missing and never edits Nginx.
+5. Confirm the active site-config path, back it up manually, compare every existing location with the canonical snippet, and add only missing locations without changing analytics.
+6. Run the panel Nginx config test. Reload only after it passes.
+7. Add the authenticated Nginx alias from `/diagnosis/beta/` to the release's `beta-site/`; never copy these files into the public webroot.
+8. Verify anonymous access receives authentication and authenticated access serves the Beta page/API.
 
-Script drafts are available under `diagnosis-api/scripts/`. They must be reviewed before execution.
+## Verification
 
-- `install-diagnosis-systemd.sh`: checks env, port, directory, installs dependencies, then creates and starts `framespark-diagnosis.service`.
-- `install-diagnosis-nginx-proxy.sh`: checks service health, backs up the known Nginx config, then prints the manual `/api/diagnosis/` location. It intentionally does not blind-insert Nginx config.
-- `uninstall-diagnosis-service.sh`: stops and disables the systemd service. It does not delete env, source, or Nginx config.
+- Local: `/health` returns liveness; `/ready` returns HTTP 200.
+- Public preview remains closed; Beta page requires authentication.
+- Unsupported files, oversized files, overlong text, bad origin and missing Beta identity fail before AI.
+- A client-supplied `X-Forwarded-For` value cannot change the API's effective IP because Nginx overwrites it.
+- D0 returns a user result rather than an internal error for low-information material.
+- Public success JSON contains no `reportV1`, model, prompt version, latency, retry or fallback fields.
+- A final unsafe result returns controlled failure and no legacy report.
+- Metadata logs contain no original filename, full material or full report.
+- Run 1-3 fictional production smoke cases only after explicit real-AI approval.
 
-Recommended order:
+## Rollback
 
-1. Create `/home/ubuntu/framespark-diagnosis.env` manually.
-2. Review and run the systemd script.
-3. Confirm `curl http://127.0.0.1:8788/health`.
-4. Review Nginx proxy snippet and apply manually.
-5. Run `nginx -t`, then reload only if it passes.
-6. Run internal smoke checks.
-7. Keep public upload controls disabled until all restore gates pass.
+1. Disable all three Beta Nginx locations (`/diagnosis/beta/`, `/api/diagnosis/`, `/api/diagnosis-feedback/`) or block their authentication access first.
+2. Test and reload Nginx.
+3. Point `/srv/framespark/diagnosis-api/current` to the previous release.
+4. Restart `framespark-diagnosis.service` and verify local readiness.
+5. Preserve env and data; do not delete review-consent records outside the retention process.
 
-## systemd plan
+## Stop Conditions
 
-- Service name: `framespark-diagnosis.service`
-- User: `ubuntu`
-- Working directory: `/tmp/framespark-site/diagnosis-api`
-- Env file: `/home/ubuntu/framespark-diagnosis.env`
-- Command: `npm start`
-- Restart: `always`
-- Logs: `journalctl -u framespark-diagnosis.service -n 100 --no-pager`
-
-Do not write or install the service until the preflight checks pass.
-
-## Nginx proxy plan
-
-- Path: `/api/diagnosis/`
-- Proxy target: `http://127.0.0.1:8788/api/diagnosis/`
-- `client_max_body_size` should match `MAX_UPLOAD_MB=10`.
-- `proxy_read_timeout` must allow AI request latency.
-- Keep `/api/analytics/` separate and unchanged.
-- Run `nginx -t` first. Reload only after config test passes.
-
-Do not add the proxy until the local service health check passes.
-
-## Verification plan
-
-- Local health: `curl -s http://127.0.0.1:8788/health`
-- Confirm the available HTTPS API path before public testing.
-- Do not test with real user materials.
-- Prefer dry, mock, and rate-limit checks before any real AI smoke test.
-- Confirm `/api/diagnosis` returns JSON and no longer falls through to static HTML.
-
-## Stop conditions
-
-Stop if any of these happen:
-
-- Port `8788` is occupied.
-- Env is missing `DEEPSEEK_API_KEY`.
-- Local health does not pass.
-- `nginx -t` fails.
-- `/api/diagnosis` returns HTML.
-- The fix requires changing high-risk business files.
-- The fix requires restoring the public upload entry.
-- Public copy promises PDF before public parser support is implemented.
-
-## Public upload restore gates
-
-Only restore public upload controls after all are true:
-
-- `diagnosis-api` is running.
-- Health check is OK.
-- Nginx proxy is OK.
-- POST smoke test is OK.
-- Rate limit is OK.
-- Error copy is understandable.
-- Privacy and upload copy are OK.
-- Page copy is narrowed to TXT/DOCX/paste, or PDF support is separately implemented and tested.
+Stop on failed tests, missing env/auth, occupied port, readiness failure, Nginx test failure, HTML from the API, internal fields in public JSON, full content in default logs, unexpected provider-call count, fallback exposure, or any need to open the unprotected public page.
