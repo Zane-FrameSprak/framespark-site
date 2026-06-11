@@ -5,6 +5,8 @@ Updated by: Codex
 
 ## Now
 
+- Complete `docs/diagnosis/DIAGNOSIS_BETA_PRE_DEPLOY_CHECKLIST_2026-06-11.md` with named human owners and evidence before requesting any deployment task. Blank required items mean No-Go.
+- Treat deployment, the single authorized production AI smoke and invitation distribution as separate approvals; do not infer one approval from another.
 - Use `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_FIX_REVIEW_2026-06-11.md` to prepare the human confirmation and pre-deployment checklist. Re-lock full SHAs after a fresh fetch and attach target-host evidence before considering any execution task.
 - Keep the Diagnosis Beta deployment and rollback shell files as non-executable drafts with their unconditional safety exits. Do not connect to the server, apply Nginx/systemd, write credentials, run real AI, or open Beta/API routes in the checklist phase.
 - Review the local MVP productionization changes as separate commits; do not enable the Beta route or deploy the API during commit preparation.

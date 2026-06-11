@@ -296,6 +296,13 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Rollback verifies the analytics listener and active proxy configuration. Systemd hardening still requires exact target-host verification rather than broad weakening.
 - Both shell files remain non-executable drafts with unconditional status-64 exits. The next phase is human confirmation and pre-deployment checklist preparation only; no server action or public opening is authorized.
 
+## Diagnosis Beta Pre-deploy Checklist (2026-06-11)
+
+- `docs/diagnosis/DIAGNOSIS_BETA_PRE_DEPLOY_CHECKLIST_2026-06-11.md` now provides the human sign-off checklist for legal/privacy, invitation access, AI budget, server execution, Nginx/systemd review, rollback and first-day observation.
+- Deployment, one-call real-AI smoke and invitation distribution are separate Go/No-Go gates. Missing evidence or any unchecked required item defaults to No-Go.
+- The checklist requires a fresh full-SHA lock, independent reviewers, exact env/auth/data/release permissions, protected three-location routing, frozen public `/diagnosis/`, analytics preservation and rollback evidence.
+- This remains documentation only. No server connection, credential creation, configuration change, deployment, AI call or public opening has occurred.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
