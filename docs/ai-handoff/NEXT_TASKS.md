@@ -135,7 +135,11 @@ Updated by: Codex
 
 ## Next - Invitation Diagnosis Beta Production Gate (2026-06-10)
 
-- Review the MVP productionization diff and complete the full no-AI regression suite.
+- Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
+- Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.
+- The next permitted operation is a server read-only precheck of users, paths, permissions, ports, runtime binaries, existing units, active Nginx locations and webroot isolation.
+- Do not run the systemd/Nginx installer drafts during that precheck; they are not dry-run commands and can mutate service state.
+- Resolve the documented execution gates first: env/auth regular-file ownership, data directory mode, npm binary path, active Nginx conflicts, Beta static method restrictions, previous release and config backup.
 - Obtain human legal review for the updated privacy policy, terms, external AI processing disclosure, retention language, and copyright/authorization wording.
 - Prepare the server release directory, dedicated no-login service user, `/etc/framespark/diagnosis-api.env`, `/var/lib/framespark-diagnosis`, and Nginx Basic Auth file under a separate approved deployment task.
 - Verify the systemd and Nginx drafts manually; do not execute them as part of normal static-site deployment.

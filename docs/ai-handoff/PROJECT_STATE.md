@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-10
+Last updated: 2026-06-11
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -251,6 +251,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Provider usage has a persistent daily cap; diagnosis requests also have account, IP, global, and concurrency limits for the initial single-instance Beta.
 - Privacy and terms pages now include invitation-Beta disclosures, but still require human legal review before release.
 - No diagnosis backend, Beta Nginx route, Basic Auth account, systemd unit, or public API has been deployed. No real AI was run for this implementation.
+
+## Diagnosis Beta Deployment Dry-run Review (2026-06-11)
+
+- After a fresh `git fetch origin main`, local `HEAD` and `origin/main` both resolved to `5d12fb7c064e0d0a57bb4d8cfb60cbf2cd166cac` with a clean worktree.
+- The deployment candidate is no longer treated as a permanent pinned commit. Every server precheck or deployment must fetch again, require `HEAD == origin/main`, and record the current full SHA; a changed SHA requires renewed review.
+- The archived server plan is recorded in `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_PLAN_2026-06-10.md`; the repository-only audit is recorded in `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md`.
+- Release/current, dedicated-user, external env/data, loopback `8788`, Basic Auth and rollback directions match the MVP plan. The shell drafts pass syntax checks but were not executed.
+- Before any installation, manually verify env/auth file type and ownership, data permissions, the actual npm path, active Nginx location conflicts, static Beta method restrictions and previous-release/config backups.
+- The next allowed action is a server read-only precheck. No SSH deployment command, installer, package install, symlink switch, service start/restart, Nginx reload, real AI call or public route opening is authorized.
 
 ## Public Site Metadata State (2026-06-01)
 
