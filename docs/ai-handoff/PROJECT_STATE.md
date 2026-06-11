@@ -91,6 +91,13 @@ Important modularity note:
 - High-change public site areas are project cards, talent platform copy/status, and system/platform cards.
 - Do not rewrite the public site into a frontend framework unless explicitly requested.
 
+### Public Filing Footer (2026-06-11)
+
+- The public-site footer displays the MIIT filing number `沪ICP备2026021671号`.
+- Public security filing approval is complete. The footer now displays `沪公网安备31011502406316号` and links it to the official MPS filing query URL.
+- No local public-security filing icon exists in the repository, so the current implementation uses a text link and does not download an external asset.
+- This static compliance update does not deploy or open Diagnosis Beta, `/diagnosis/beta/`, or `/api/diagnosis/`.
+
 ## Diagnosis System State
 
 ### V1 Final Structure Revision (2026-06-10)
