@@ -148,6 +148,9 @@ Updated by: Codex
 - Resolve systemd effective env/hardening, Basic Auth ownership/mode, Nginx alias/symlink behavior, no-trailing-slash policy, active-config merge and rollback checksum questions before producing any execution runbook.
 - Treat `BETA_IDENTITY_HEADER` and `LOG_REDACTION_REQUIRED` as documented contracts, not runtime-configurable enforcement, unless a separate business-code task wires and tests them.
 - Do not remove the unconditional safety exits from the command drafts during review.
+- Use `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_REVIEW_2026-06-11.md` to create the next human confirmation and pre-deployment checklist.
+- Keep ten execution blockers open until revised drafts and evidence resolve them: full SHA-range review, unprivileged npm, isolated test data, idempotent user verification, permission/type checks, an enforced Nginx manual stop, hidden-file protection, transactional config rollback, analytics-backend verification and placeholder-key rejection.
+- Do not treat conditional draft approval as deployment approval. The shell safety exits must remain until a separate reviewed execution task.
 - Obtain human legal review for the updated privacy policy, terms, external AI processing disclosure, retention language, and copyright/authorization wording.
 - Prepare the server release directory, dedicated no-login service user, `/etc/framespark/diagnosis-api.env`, `/var/lib/framespark-diagnosis`, and Nginx Basic Auth file under a separate approved deployment task.
 - Verify the systemd and Nginx drafts manually; do not execute them as part of normal static-site deployment.

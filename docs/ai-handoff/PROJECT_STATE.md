@@ -279,6 +279,14 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Open review gates include auth-file ownership/mode, systemd effective environment and hardening compatibility, Nginx alias/symlink behavior, exact no-trailing-slash handling, active-config merge safety and rollback checksum values.
 - The next allowed phase is configuration draft review only. No server connection, resource creation, deployment, Nginx reload, service action, real AI call or public opening is authorized.
 
+## Diagnosis Beta Configuration Review (2026-06-11)
+
+- The configuration review is recorded in `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_REVIEW_2026-06-11.md` against repository baseline `fb86638499e3a817f7873a3c66acb40d4d62c579`.
+- Core systemd paths, loopback binding, restart policy and hardening direction pass draft review. All three Nginx Beta locations share Basic Auth and preserve the frozen public page and analytics location.
+- The env draft contains only the required placeholder key and approved production limits. The identity-header and log-redaction names remain documentation contracts, not dynamically read controls.
+- Execution is blocked pending full commit-range review, unprivileged dependency installation, isolated no-AI test data, idempotent user handling, post-install permission checks, a hard Nginx manual stop, hidden-file protection, transactional rollback config handling, real analytics-backend verification and independent placeholder rejection.
+- The next phase may prepare a human confirmation and pre-deployment checklist only. Deployment, server writes, credential creation, service actions, Nginx reload, real AI and public Beta/API exposure remain prohibited.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
