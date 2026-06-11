@@ -310,6 +310,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The checklist requires a fresh full-SHA lock, independent reviewers, exact env/auth/data/release permissions, protected three-location routing, frozen public `/diagnosis/`, analytics preservation and rollback evidence.
 - This remains documentation only. No server connection, credential creation, configuration change, deployment, AI call or public opening has occurred.
 
+## Diagnosis Beta Human Confirmation (2026-06-11)
+
+- User confirmation is recorded in `docs/diagnosis/DIAGNOSIS_BETA_HUMAN_CONFIRMATION_2026-06-11.md` for six decision areas: legal/privacy, external AI processing, retention, Basic Auth, AI cost controls and rollback window.
+- The user has a continuous 60-minute post-deployment observation window and can request immediate rollback when a red-light check fails.
+- A future controlled deployment must produce a red/yellow/green report. Any red light pauses the sequence and requires rollback when runtime or routing has changed.
+- A production real-AI smoke remains limited to one call using fictional short material. It is not authorized until deployment-time no-AI checks are green.
+- No access may be distributed to invited users until the 60-minute observation is complete with all applicable checks green and rollback validation passed.
+- The next permitted phase is controlled deployment execution planning only. No server connection, deployment, credential creation, AI call or public opening occurred in this documentation step.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

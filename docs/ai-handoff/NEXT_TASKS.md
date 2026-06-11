@@ -5,6 +5,8 @@ Updated by: Codex
 
 ## Now
 
+- Use `docs/diagnosis/DIAGNOSIS_BETA_HUMAN_CONFIRMATION_2026-06-11.md` as the decision baseline for the next controlled deployment execution plan. The plan must include a 60-minute observation period, red/yellow/green reporting, immediate red-light stop/rollback points and a separately authorized one-call fictional smoke.
+- Do not distribute Beta credentials until all applicable post-deployment checks remain green for the observation window and rollback verification passes.
 - Complete `docs/diagnosis/DIAGNOSIS_BETA_PRE_DEPLOY_CHECKLIST_2026-06-11.md` with named human owners and evidence before requesting any deployment task. Blank required items mean No-Go.
 - Treat deployment, the single authorized production AI smoke and invitation distribution as separate approvals; do not infer one approval from another.
 - Use `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_FIX_REVIEW_2026-06-11.md` to prepare the human confirmation and pre-deployment checklist. Re-lock full SHAs after a fresh fetch and attach target-host evidence before considering any execution task.
