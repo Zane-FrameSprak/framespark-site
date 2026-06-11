@@ -1,0 +1,94 @@
+.diagnosis-beta-consent {
+    display: grid;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid var(--line-soft);
+}
+
+.diagnosis-beta-consent legend {
+    padding: 0 8px;
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+}
+
+.diagnosis-beta-consent label {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    color: var(--ink-muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.diagnosis-beta-consent input {
+    margin-top: 3px;
+    accent-color: var(--gold);
+}
+
+.diagnosis-privacy a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+#diagnosisBetaStatus {
+    min-height: 22px;
+    margin-top: 14px;
+    color: var(--ink-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+#diagnosisBetaStatus[data-state="error"] {
+    color: #e3a28f;
+}
+
+#diagnosisBetaStatus[data-state="success"] {
+    color: var(--gold-bright);
+}
+
+.diagnosis-beta-id {
+    margin-top: 10px;
+    color: var(--ink-faint);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
+}
+
+.diagnosis-beta-issue {
+    padding: 14px 0;
+    border-top: 1px solid var(--line-soft);
+}
+
+.diagnosis-beta-issue:first-of-type {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.diagnosis-beta-issue h4 {
+    margin-bottom: 7px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.diagnosis-beta-issue p + p {
+    margin-top: 5px;
+}
+
+.diagnosis-beta-issue strong {
+    color: var(--gold);
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .diagnosis-beta-consent {
+        padding: 14px;
+    }
+}

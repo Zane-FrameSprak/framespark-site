@@ -30,8 +30,12 @@ const pipelineSource = fs.readFileSync(path.join(ROOT, 'diagnosis-api/src/servic
 assertIncludes(pipelineSource, "diagnosisDepth: 'basic'", 'pipeline basic depth');
 assertIncludes(pipelineSource, "diagnosisDepth: 'advanced'", 'pipeline advanced depth');
 
-const appSource = fs.readFileSync(path.join(ROOT, 'diagnosis/app.js'), 'utf8');
-assertIncludes(appSource, "['诊断深度', materialInfo.diagnosisDepth]", 'understanding row');
-assertIncludes(appSource, "return value === 'advanced' ? '深化评估' : '基础评估';", 'Chinese depth mapping');
+const publicDiagnosisSource = fs.readFileSync(path.join(ROOT, 'diagnosis/index.html'), 'utf8');
+assertEqual(publicDiagnosisSource.includes('type="file"'), false, 'public diagnosis upload control');
+assertEqual(publicDiagnosisSource.includes('diagnosis/app.js'), false, 'retired public diagnosis client');
+assertEqual(publicDiagnosisSource.includes('/api/diagnosis'), false, 'public diagnosis API reference');
+
+const betaAppSource = fs.readFileSync(path.join(ROOT, 'diagnosis-api/beta-site/app.js'), 'utf8');
+assertIncludes(betaAppSource, "fetch('/api/diagnosis/'", 'protected beta API client');
 
 console.log('diagnosis depth checks passed');
