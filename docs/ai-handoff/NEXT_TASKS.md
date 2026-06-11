@@ -5,6 +5,8 @@ Updated by: Codex
 
 ## Now
 
+- Use `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_FIX_REVIEW_2026-06-11.md` to prepare the human confirmation and pre-deployment checklist. Re-lock full SHAs after a fresh fetch and attach target-host evidence before considering any execution task.
+- Keep the Diagnosis Beta deployment and rollback shell files as non-executable drafts with their unconditional safety exits. Do not connect to the server, apply Nginx/systemd, write credentials, run real AI, or open Beta/API routes in the checklist phase.
 - Review the local MVP productionization changes as separate commits; do not enable the Beta route or deploy the API during commit preparation.
 - **Keep low-token workflow active** — routine low-risk tasks should proceed in goal mode within allowed scope and report briefly.
 - **Use terminal scripts for read-only checks** where possible to reduce Codex / Claude token use.

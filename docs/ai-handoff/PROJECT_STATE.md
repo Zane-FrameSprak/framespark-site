@@ -287,6 +287,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Execution is blocked pending full commit-range review, unprivileged dependency installation, isolated no-AI test data, idempotent user handling, post-install permission checks, a hard Nginx manual stop, hidden-file protection, transactional rollback config handling, real analytics-backend verification and independent placeholder rejection.
 - The next phase may prepare a human confirmation and pre-deployment checklist only. Deployment, server writes, credential creation, service actions, Nginx reload, real AI and public Beta/API exposure remain prohibited.
 
+## Diagnosis Beta Draft Blocker Fix Review (2026-06-11)
+
+- The ten configuration-review blockers are corrected at the repository-draft level and mapped to evidence in `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_FIX_REVIEW_2026-06-11.md`.
+- Candidate packaging now requires full approved-base-to-candidate review; npm lifecycle code and no-AI tests run as the unprivileged service identity with isolated fictional test data, then the release becomes root-owned and service-group-readable without runtime write access.
+- Service identity creation is idempotent. Env, auth, data and `current` paths have non-symlink and exact metadata checks, including non-empty provider-key and auth-file validation without printing content.
+- Nginx mutation is blocked by an explicit status-75 stop, the Beta alias rejects hidden paths, and rollback restores the active config if validation or reload fails.
+- Rollback verifies the analytics listener and active proxy configuration. Systemd hardening still requires exact target-host verification rather than broad weakening.
+- Both shell files remain non-executable drafts with unconditional status-64 exits. The next phase is human confirmation and pre-deployment checklist preparation only; no server action or public opening is authorized.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

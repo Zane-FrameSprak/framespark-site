@@ -5,6 +5,9 @@
 # Do not expose /health, /ready, /api/dev/, the release tree, env, logs, or data.
 # CORS remains application-controlled by ALLOWED_ORIGINS=https://framespark.cn.
 # Do not add Access-Control-Allow-Origin *.
+# The Basic Auth file must remain outside webroot at the exact path below,
+# as a regular non-symlink file owned by root and readable only by the
+# confirmed Nginx worker group (draft target mode: 0640). Never print it.
 
 # Do not expose an unauthenticated no-trailing-slash alias.
 location = /diagnosis/beta {
@@ -18,6 +21,12 @@ location ^~ /diagnosis/beta/ {
 
     limit_except GET {
         deny all;
+    }
+
+    # This prefix bypasses server-level regex locations, so reject dotfiles and
+    # hidden path segments locally without affecting normal HTML/CSS/JS assets.
+    if ($uri ~ "(^|/)\.") {
+        return 404;
     }
 
     alias /srv/framespark/diagnosis-api/current/beta-site/;

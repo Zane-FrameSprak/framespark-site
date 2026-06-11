@@ -24,6 +24,10 @@ KillSignal=SIGTERM
 UMask=0077
 
 # Runtime hardening. The release tree is read-only; only the data directory is writable.
+# Validate this exact set on the target host with systemd-analyze verify and a
+# local readiness check. If one directive blocks Node from reading current,
+# env, or data, remove only the confirmed incompatible directive and re-review;
+# never drop all hardening merely to make the service start.
 NoNewPrivileges=true
 PrivateTmp=true
 PrivateDevices=true
@@ -37,6 +41,10 @@ RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 CapabilityBoundingSet=
 AmbientCapabilities=
 ReadWritePaths=/var/lib/framespark-diagnosis
+
+# /var/lib/framespark-diagnosis must be a non-symlink directory owned by
+# framespark-diagnosis:framespark-diagnosis with draft target mode 0700. It is
+# outside webroot; consented full review records expire after at most 14 days.
 
 # Journald must receive metadata and error codes only. The application must not log
 # complete submitted material, complete reports, provider responses, or credentials.
