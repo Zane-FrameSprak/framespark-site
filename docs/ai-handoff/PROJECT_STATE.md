@@ -328,6 +328,14 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Active Nginx remained hash-identical to its pre-stage state. No Basic Auth, Beta/API/feedback/health route, public upload entry, or listener on `8788` exists; analytics remains on `127.0.0.1:8787`.
 - Current stop state: the user must add the provider key directly on the server using a non-echoing method. Service activation and all later stages require separate authorization.
 
+## Diagnosis Beta Production Dependency Audit Review (2026-06-12)
+
+- The Stage A moderate audit finding is documented in `docs/diagnosis/DIAGNOSIS_BETA_NPM_AUDIT_REVIEW_2026-06-12.md`.
+- It affects transitive production dependency `qs@6.15.1` through `express@4.22.2` and `body-parser@1.20.5`; patched version is `qs@6.15.2`.
+- The defect requires `qs.stringify` with non-default comma-array and encode-values-only options plus null/undefined array entries. Diagnosis API and its installed Express/body-parser paths use `qs.parse`, so the vulnerable operation is not reachable in the current application.
+- Classification for invitation Beta: unrelated to the current runtime path and not an independent deployment blocker. A separate patch-level lockfile update to `qs@6.15.2`, full no-AI regression, and a new immutable release are still recommended before or alongside activation.
+- No dependency, lockfile, code, server, service, key, Nginx route, AI call, or public Beta/API state changed during the review.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
