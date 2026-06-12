@@ -331,10 +331,11 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 ## Diagnosis Beta Production Dependency Audit Review (2026-06-12)
 
 - The Stage A moderate audit finding is documented in `docs/diagnosis/DIAGNOSIS_BETA_NPM_AUDIT_REVIEW_2026-06-12.md`.
-- It affects transitive production dependency `qs@6.15.1` through `express@4.22.2` and `body-parser@1.20.5`; patched version is `qs@6.15.2`.
+- The original finding affected transitive production dependency `qs@6.15.1` through `express@4.22.2` and `body-parser@1.20.5`.
 - The defect requires `qs.stringify` with non-default comma-array and encode-values-only options plus null/undefined array entries. Diagnosis API and its installed Express/body-parser paths use `qs.parse`, so the vulnerable operation is not reachable in the current application.
-- Classification for invitation Beta: unrelated to the current runtime path and not an independent deployment blocker. A separate patch-level lockfile update to `qs@6.15.2`, full no-AI regression, and a new immutable release are still recommended before or alongside activation.
-- No dependency, lockfile, code, server, service, key, Nginx route, AI call, or public Beta/API state changed during the review.
+- The repository lockfile now resolves `qs@6.15.2` without changing `package.json`, Express, body-parser, or business logic. Production audit reports zero vulnerabilities and all V1/MVP no-AI regression groups passed.
+- The installed Stage A immutable release was not modified and still predates the patch. A future separately authorized deployment must build a new release from the patched commit rather than mutate the existing release.
+- No server connection, service/key/Nginx change, real AI call, or public Beta/API opening occurred during the fix.
 
 ## Public Site Metadata State (2026-06-01)
 

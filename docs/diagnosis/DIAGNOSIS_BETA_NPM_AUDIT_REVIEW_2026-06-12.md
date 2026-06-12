@@ -4,17 +4,18 @@ Review date: 2026-06-12
 
 ## Scope
 
-This review analyzes the single moderate production dependency finding observed during Diagnosis Beta Stage A. It does not change dependencies, run `npm audit fix`, connect to the server, start the service, modify Nginx/systemd, call AI, or expose Beta/API routes.
+This review analyzes the single moderate production dependency finding observed during Diagnosis Beta Stage A and records its minimal repository fix. The fix updates only the transitive `qs` lockfile resolution. It does not run `npm audit fix`, connect to the server, mutate the installed Stage A release, start the service, modify Nginx/systemd, call AI, or expose Beta/API routes.
 
 ## Finding
 
 - Advisory: `GHSA-q8mj-m7cp-5q26` / `CVE-2026-8723`.
-- Package: `qs` version `6.15.1`.
+- Package before fix: `qs` version `6.15.1`.
+- Package after fix: `qs` version `6.15.2`.
 - Severity: moderate availability issue.
 - Affected range: `>=6.11.1 <=6.15.1`.
 - Patched version: `6.15.2`.
-- Production dependency: yes. `npm audit --omit=dev` reports one moderate finding across the production tree.
-- Dependency type: transitive. The application directly depends on `express`; the installed chain is `express@4.22.2 -> qs@6.15.1`, with `body-parser@1.20.5 -> qs@6.15.1` deduplicated to the same package.
+- Production dependency: yes. Before the fix, `npm audit --omit=dev` reported one moderate finding across the production tree; after the fix it reports zero findings.
+- Dependency type: transitive. The application directly depends on `express`; the updated chain is `express@4.22.2 -> qs@6.15.2`, with `body-parser@1.20.5 -> qs@6.15.2` deduplicated to the same package.
 - Both parent ranges are `~6.15.1`, so `6.15.2` is an allowed patch-level resolution. No major-version upgrade is required.
 
 Official advisory: <https://github.com/advisories/GHSA-q8mj-m7cp-5q26>
@@ -44,17 +45,22 @@ That combination synchronously throws `TypeError`. In a normal Express request b
 - Upload size/type checks, text limits, Origin checks, rate limits, and provider budgets do not directly mitigate this `qs.stringify` defect. They protect different input and abuse surfaces.
 - At review time, the service remains inactive/disabled and no Beta/API route is public, so there is no running remote attack surface for this package.
 
-## Compatibility And Recommendation
+## Repository Fix And Compatibility
 
-- Classification for invitation Beta: **与当前运行路径无关**. This finding does not by itself block the invitation-Beta deployment path because the required API is not called.
-- Recommended remediation is still to resolve `qs` to `6.15.2` in a separate reviewed dependency patch before or alongside service activation, then rerun `npm audit --omit=dev`, the four MVP no-AI suites, and rebuild a new immutable release.
-- The remediation is expected to be low compatibility risk: it is a patch release accepted by the existing Express/body-parser semver ranges. It does not require an Express major upgrade.
+- Classification for invitation Beta before the fix: **与当前运行路径无关**. The required API was not called, so the finding did not independently block the invitation-Beta path.
+- The repository now resolves `qs` to `6.15.2`. `diagnosis-api/package.json` was not changed and `qs` was not added as a direct dependency.
+- `diagnosis-api/package-lock.json` changed only the `qs` version, registry URL, and integrity value. Express remains `4.22.2` and body-parser remains `1.20.5`.
+- The remediation is low compatibility risk: it is a patch release accepted by the existing Express/body-parser `~6.15.1` ranges. It does not require an Express or body-parser major upgrade.
+- The installed Stage A immutable release still predates this repository fix and was not modified. A future separately authorized deployment must lock the new commit, build a new release, rerun production checks, and switch `current`; do not patch the existing release in place.
 - Do not use an unreviewed blanket `npm audit fix` on the installed locked release. Do not mutate the Stage A release in place.
 - If future code directly uses `qs.stringify`, add a regression test for null/undefined comma arrays and keep the package at or above `6.15.2`.
 
 ## Evidence
 
-- `npm audit --omit=dev --json`: one moderate finding, `qs@6.15.1`, fix available.
-- `npm ls qs --omit=dev --all`: `express@4.22.2 -> qs@6.15.1`; `body-parser@1.20.5 -> qs@6.15.1` deduplicated.
+- Before: `npm audit --omit=dev --json` reported one moderate finding for `qs@6.15.1`.
+- After: `npm audit --omit=dev --json` reports zero production vulnerabilities.
+- `npm ls qs --omit=dev --all`: `express@4.22.2 -> qs@6.15.2`; `body-parser@1.20.5 -> qs@6.15.2` deduplicated.
 - Static search: no project `qs` import or `qs.stringify`; installed Express/body-parser call only `qs.parse`.
-- `diagnosis-api/package.json` and `diagnosis-api/package-lock.json` SHA-256 values were unchanged before and after review.
+- `npm run check` passed.
+- All V1 no-AI suites passed, including gatekeeper/decision, staged runner and gates, stage prompts/client, final structure, unified V1 prompt, report compatibility/pipeline, and sample-run V1 summary.
+- MVP input, rate-limit, public DTO, fail-closed, upload validation, DOCX safety, retention, auth/origin, and HTTP integration tests passed.

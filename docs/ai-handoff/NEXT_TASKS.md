@@ -9,8 +9,8 @@ Updated by: Codex
 - The user must independently SSH and use `sudoedit /etc/framespark/diagnosis-api.env` or an equivalent non-echoing method to add `DEEPSEEK_API_KEY`; never send or print the key in chat, command arguments, Git, or logs.
 - After the key is safely present, require a new explicit authorization before `systemctl daemon-reload`, service enable/start, readiness checks, Basic Auth creation, Nginx changes, real AI smoke, or Beta/API opening.
 - Keep the current service inactive/disabled, port `8788` without a listener, public `/diagnosis/` frozen, and active Nginx unchanged until that authorization.
-- The moderate production dependency finding is reviewed in `docs/diagnosis/DIAGNOSIS_BETA_NPM_AUDIT_REVIEW_2026-06-12.md`: `qs@6.15.1` is present transitively but its vulnerable stringify path is not used by Diagnosis API.
-- Prepare a separate dependency patch resolving `qs` to `6.15.2`, rerun production audit and all MVP no-AI suites, and build a new immutable release. Do not run a blanket audit fix or mutate the installed Stage A release in place.
+- The moderate production dependency finding is fixed in the repository lockfile: `qs` now resolves transitively to `6.15.2`, production audit is clean, and V1/MVP no-AI regression passed. See `docs/diagnosis/DIAGNOSIS_BETA_NPM_AUDIT_REVIEW_2026-06-12.md`.
+- Before any service activation, create a new separately authorized immutable release from the patched commit and switch `current` only after checks pass. Do not mutate the installed Stage A release or use a blanket audit fix.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_HUMAN_CONFIRMATION_2026-06-11.md` as the decision baseline for the next controlled deployment execution plan. The plan must include a 60-minute observation period, red/yellow/green reporting, immediate red-light stop/rollback points and a separately authorized one-call fictional smoke.
 - Do not distribute Beta credentials until all applicable post-deployment checks remain green for the observation window and rollback verification passes.
