@@ -1,9 +1,15 @@
 # Next Tasks
 
-Last updated: 2026-06-03
+Last updated: 2026-06-12
 Updated by: Codex
 
 ## Now
+
+- Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.
+- The user must independently SSH and use `sudoedit /etc/framespark/diagnosis-api.env` or an equivalent non-echoing method to add `DEEPSEEK_API_KEY`; never send or print the key in chat, command arguments, Git, or logs.
+- After the key is safely present, require a new explicit authorization before `systemctl daemon-reload`, service enable/start, readiness checks, Basic Auth creation, Nginx changes, real AI smoke, or Beta/API opening.
+- Keep the current service inactive/disabled, port `8788` without a listener, public `/diagnosis/` frozen, and active Nginx unchanged until that authorization.
+- Review the one moderate production dependency audit finding before service activation; do not run an automatic dependency fix on the installed locked release.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_HUMAN_CONFIRMATION_2026-06-11.md` as the decision baseline for the next controlled deployment execution plan. The plan must include a 60-minute observation period, red/yellow/green reporting, immediate red-light stop/rollback points and a separately authorized one-call fictional smoke.
 - Do not distribute Beta credentials until all applicable post-deployment checks remain green for the observation window and rollback verification passes.

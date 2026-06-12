@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -318,6 +318,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - A production real-AI smoke remains limited to one call using fictional short material. It is not authorized until deployment-time no-AI checks are green.
 - No access may be distributed to invited users until the 60-minute observation is complete with all applicable checks green and rollback validation passed.
 - The next permitted phase is controlled deployment execution planning only. No server connection, deployment, credential creation, AI call or public opening occurred in this documentation step.
+
+## Diagnosis Beta Controlled Deployment Stage A (2026-06-12)
+
+- Stage A is recorded in `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md`; the filename follows the approved task while the document records the actual 2026-06-12 execution date.
+- Candidate `f4451587f31fc31c5d49b243f0faf76e28e273e0` is installed under `/srv/framespark/diagnosis-api/releases/` with an exact `current` symlink, a dedicated no-login user, external data directory, root-only non-secret env, and a verified systemd unit.
+- All four approved MVP no-AI test groups passed. The release is service-readable but not service-writable; temporary build/upload directories were removed.
+- The env intentionally omits the real DeepSeek key. The service is inactive and disabled; no `daemon-reload`, enable, start, restart, real AI request, or production health check occurred.
+- Active Nginx remained hash-identical to its pre-stage state. No Basic Auth, Beta/API/feedback/health route, public upload entry, or listener on `8788` exists; analytics remains on `127.0.0.1:8787`.
+- Current stop state: the user must add the provider key directly on the server using a non-echoing method. Service activation and all later stages require separate authorization.
 
 ## Public Site Metadata State (2026-06-01)
 
