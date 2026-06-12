@@ -346,6 +346,25 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Nginx hash, analytics `8787`, the public website, and the frozen `/diagnosis/` page remain unchanged. No functional Beta/API/feedback/health route, Basic Auth, real AI call, or invitation opening exists.
 - Current stop state: the user may add the provider key directly on the server using a non-echoing method. All service and routing actions still require separate authorization.
 
+## Diagnosis Beta Controlled Deployment Stage B0 (2026-06-12)
+
+- The production env key is present and non-empty with the required regular-file, `root:root`, mode `0600` boundary; no secret value was displayed.
+- The one authorized service start failed because the systemd `ExecStartPost` curl reached `/ready` before Node listened on `127.0.0.1:8788`; connection-refused was not retried by the current probe.
+- The red-light rule stopped the service immediately. It remains `inactive/disabled`, `8788` has no listener, and provider usage remains zero.
+- Nginx, analytics `8787`, the public website, and the frozen `/diagnosis/` page are unchanged. No Beta/API/feedback route or real AI call was introduced.
+- Stage B0 is paused pending a separately reviewed systemd readiness-probe correction and a separately authorized retry.
+- B0.1 removed the unit-level `ExecStartPost` in repository drafts and confirmed the application reaches local readiness and health on polling attempt 3 without a second startup error.
+- The post-start journal check then failed because this host rejected an ISO timestamp containing `T`; the approved rollback restored the original unit and stopped the service without a second attempt.
+- Final state remains `inactive/disabled`, no `8788` listener, zero provider calls, unchanged Nginx and frozen public Diagnosis. The corrected repository drafts are uncommitted.
+
+## Diagnosis Beta Controlled Deployment Stage B0.2 (2026-06-12)
+
+- The deployment draft now scopes startup-log checks by systemd InvocationID instead of a parsed time string; journal content is not printed.
+- The corrected unit passed static verification and one authorized start. Readiness succeeded on attempt 3, health succeeded, and the service is `active/running` while still `disabled`.
+- Port `8788` listens only on `127.0.0.1`; provider-call delta is zero, `NRestarts=0`, and the invocation journal has zero sensitive-keyword matches.
+- Analytics, the public website, frozen `/diagnosis/`, Nginx hash and absent Beta/API/feedback routes remain unchanged.
+- Stage B0.2 permits only separate Stage B1 planning/authorization. It does not open routes, authorize real AI, or distribute access.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

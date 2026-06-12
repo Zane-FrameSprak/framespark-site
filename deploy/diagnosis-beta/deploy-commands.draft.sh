@@ -160,12 +160,59 @@ server_prepare_draft() {
     /etc/systemd/system/framespark-diagnosis.service
   sudo systemd-analyze verify /etc/systemd/system/framespark-diagnosis.service
   sudo systemctl daemon-reload
-  sudo systemctl enable framespark-diagnosis.service
+  test "$(sudo systemctl is-enabled framespark-diagnosis.service 2>/dev/null || true)" = "disabled"
   sudo systemctl start framespark-diagnosis.service
 
-  # Health and readiness remain local only.
-  curl --fail http://127.0.0.1:8788/health
-  curl --fail http://127.0.0.1:8788/ready
+  # Readiness is an external deployment gate, not ExecStartPost. Poll for at
+  # most 30 seconds, reject exits/restarts, then check health. On failure stop
+  # the still-disabled service and require review before another start.
+  local ready=0
+  local deadline=$((SECONDS + 30))
+  while (( SECONDS < deadline )); do
+    if ! sudo systemctl is-active --quiet framespark-diagnosis.service; then
+      echo "Diagnosis service exited before readiness." >&2
+      break
+    fi
+    if [[ "$(sudo systemctl show framespark-diagnosis.service -p NRestarts --value)" != "0" ]]; then
+      echo "Diagnosis service restarted during readiness polling." >&2
+      break
+    fi
+    if curl --fail --silent --show-error --max-time 1 \
+      http://127.0.0.1:8788/ready >/dev/null; then
+      ready=1
+      break
+    fi
+    sleep 1
+  done
+  if [[ "${ready}" != "1" ]] || \
+    ! curl --fail --silent --show-error --max-time 2 \
+      http://127.0.0.1:8788/health >/dev/null; then
+    sudo systemctl stop framespark-diagnosis.service
+    echo "Diagnosis local readiness/health verification failed; service stopped." >&2
+    return 1
+  fi
+
+  # Read only this start invocation's journal. Do not depend on host-specific
+  # timestamp parsing and never print journal content during the safety check.
+  local invocation_id
+  local sensitive_matches
+  invocation_id="$(sudo systemctl show framespark-diagnosis.service \
+    --property=InvocationID --value)"
+  if [[ -z "${invocation_id}" ]]; then
+    sudo systemctl stop framespark-diagnosis.service
+    echo "Diagnosis service has no InvocationID; service stopped." >&2
+    return 1
+  fi
+  sensitive_matches="$(sudo journalctl \
+    "_SYSTEMD_INVOCATION_ID=${invocation_id}" --no-pager -o cat \
+    | grep -Eic \
+      'DEEPSEEK_API_KEY|Authorization|sk-[A-Za-z0-9_-]{8,}|material_summary|reportV1|用户材料|完整报告' \
+    || true)"
+  if [[ "${sensitive_matches}" != "0" ]]; then
+    sudo systemctl stop framespark-diagnosis.service
+    echo "Sensitive-content signal detected in the current service invocation; service stopped." >&2
+    return 1
+  fi
 
   # Create Basic Auth credentials through a separately reviewed secure process,
   # then install the result without printing its contents. Replace the Nginx

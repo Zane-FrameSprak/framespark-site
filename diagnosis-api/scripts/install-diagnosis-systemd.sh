@@ -91,7 +91,6 @@ Group=framespark-diagnosis
 WorkingDirectory=/srv/framespark/diagnosis-api/current
 EnvironmentFile=/etc/framespark/diagnosis-api.env
 ExecStart=/usr/bin/npm start
-ExecStartPost=/usr/bin/curl --fail --retry 10 --retry-delay 1 http://127.0.0.1:8788/ready
 Restart=on-failure
 RestartSec=5
 TimeoutStartSec=30
@@ -111,6 +110,34 @@ SERVICE
 systemctl daemon-reload
 systemctl enable "${SERVICE_NAME}"
 systemctl start "${SERVICE_NAME}"
+
+ready=0
+deadline=$((SECONDS + 30))
+while (( SECONDS < deadline )); do
+  if ! systemctl is-active --quiet "${SERVICE_NAME}"; then
+    echo "${SERVICE_NAME} exited before readiness." >&2
+    break
+  fi
+  if [[ "$(systemctl show "${SERVICE_NAME}" -p NRestarts --value)" != "0" ]]; then
+    echo "${SERVICE_NAME} restarted during readiness polling." >&2
+    break
+  fi
+  if curl --fail --silent --show-error --max-time 1 \
+    "http://127.0.0.1:${PORT}/ready" >/dev/null; then
+    ready=1
+    break
+  fi
+  sleep 1
+done
+
+if [[ "${ready}" != "1" ]] || \
+  ! curl --fail --silent --show-error --max-time 2 \
+    "http://127.0.0.1:${PORT}/health" >/dev/null; then
+  systemctl stop "${SERVICE_NAME}"
+  echo "Local readiness/health verification failed; ${SERVICE_NAME} stopped." >&2
+  exit 1
+fi
+
 systemctl status "${SERVICE_NAME}" --no-pager
 
 echo "Installed ${SERVICE_NAME}."

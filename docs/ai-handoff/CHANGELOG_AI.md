@@ -282,3 +282,27 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Added no-AI production-safety tests. No real AI, server command, deployment, public API exposure, or public upload restoration was performed.
 - Pre-commit blockers were corrected: legal meta no longer describes the pages as placeholders, the diagnosis-depth test now verifies the frozen public page and isolated Beta client, and deployment scripts no longer mutate an immutable release or skip partial Nginx-location audits.
 - Added no-AI DOCX archive safety, retention cleanup, and local HTTP integration coverage for public DTO redaction, access guards, rate limits, upload rejection, and fail-closed errors.
+
+## 2026-06-12
+
+### Diagnosis Beta Stage B0 Attempt
+
+- Verified the locked `current` and `previous` releases, env file security, non-empty provider-key presence, free port `8788`, healthy analytics `8787`, frozen public Diagnosis page, and unchanged Nginx hash.
+- Ran systemd static verification and daemon reload, then performed one authorized service start attempt.
+- The start failed at `ExecStartPost` because the local readiness curl received connection refused before Node began listening; the service was immediately stopped and remains inactive/disabled.
+- No provider call, diagnosis request, public route, Nginx change, sensitive log content, or listener on `8788` resulted from the attempt.
+- Recorded the red-light outcome in the Stage A/B deployment record. A systemd readiness-probe correction requires separate review before any retry.
+
+### Diagnosis Beta Stage B0.1 Readiness Correction
+
+- Removed the readiness `ExecStartPost` from the repository unit draft and added bounded external readiness/health polling to both deployment command paths.
+- Installed the corrected unit behind a verified backup and performed one authorized local-only start attempt. The application reached readiness on attempt 3 and passed health with no second startup error.
+- A later journal check used a timestamp format rejected by the host, so the approved failure handler restored the original unit and stopped the service. No second start was attempted.
+- Final state is inactive/disabled with no `8788` listener, zero provider calls, unchanged Nginx, healthy analytics/public site and no detected sensitive journal content.
+
+### Diagnosis Beta Stage B0.2 Local Runtime Validation
+
+- Replaced timestamp-based startup-log selection in the deployment draft with systemd InvocationID-scoped journal inspection.
+- Installed the corrected unit and performed one authorized local-only start. Readiness passed on attempt 3, health passed, and the service remains active/running but disabled.
+- Verified loopback-only `127.0.0.1:8788`, zero provider-call delta, zero restarts and zero sensitive-keyword matches in the invocation journal.
+- Analytics, public pages, frozen Diagnosis, Nginx hash and absent Beta/API/feedback routes remain unchanged. No diagnosis POST or real AI call occurred.

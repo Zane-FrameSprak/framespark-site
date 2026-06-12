@@ -15,7 +15,6 @@ EnvironmentFile=/etc/framespark/diagnosis-api.env
 Environment=HOST=127.0.0.1
 Environment=PORT=8788
 ExecStart=/usr/bin/npm start
-ExecStartPost=/usr/bin/curl --fail --retry 10 --retry-delay 1 http://127.0.0.1:8788/ready
 Restart=on-failure
 RestartSec=5
 TimeoutStartSec=30
@@ -52,7 +51,9 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=framespark-diagnosis
 
-# /health and /ready are local checks only. Do not proxy either path through Nginx.
+# /health and /ready are local checks only. Deployment tooling must poll them
+# after systemctl start; do not run readiness as ExecStartPost and do not proxy
+# either path through Nginx.
 
 [Install]
 WantedBy=multi-user.target

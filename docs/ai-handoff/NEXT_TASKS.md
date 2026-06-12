@@ -149,6 +149,10 @@ Updated by: Codex
 
 ## Next - Invitation Diagnosis Beta Production Gate (2026-06-10)
 
+- Stage B0.2 completed the local service gate using InvocationID-scoped journal checks. The service is active/running but disabled, local health/readiness pass, `8788` is loopback-only, and provider-call delta is zero.
+- The next permitted action is a separate Stage B1 plan and explicit authorization. Do not create credentials, change/reload Nginx, expose Beta/API/feedback, execute diagnosis requests or call real AI without that gate.
+- Keep monitoring scope explicit: B0.2 validates local runtime only and does not authorize invited-user access or MVP opening.
+
 - Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
 - Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.
 - The next permitted operation is a server read-only precheck of users, paths, permissions, ports, runtime binaries, existing units, active Nginx locations and webroot isolation.

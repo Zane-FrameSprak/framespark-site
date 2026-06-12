@@ -126,3 +126,147 @@ Stage A2 replaced only the inactive immutable release selected by `current`. It 
 ### Stage A2 Stop Conclusion
 
 **可以安全写入秘密。** This conclusion authorizes only the user's separate server-side, non-echoing key entry. It does not authorize daemon reload, service activation, Basic Auth creation, Nginx changes, real-AI smoke, invitation distribution, or Beta/API opening. Each remains a separate explicit approval gate.
+
+## Stage B0 - Service Load And Local Readiness Attempt (2026-06-12)
+
+Stage B0 was limited to loading and starting the existing systemd unit, local health/readiness checks, and boundary verification. No Nginx configuration, public route, provider request, diagnosis request, or real AI call was allowed.
+
+### Pre-start Verification
+
+- `current` still resolved to release `683dea7fa98848cc40829b825cf4209692b7abe4`; `previous` still resolved to `f4451587f31fc31c5d49b243f0faf76e28e273e0`.
+- The env remained a non-symlink regular file owned by `root:root` with mode `0600`. The provider key was confirmed present and non-empty without displaying its value.
+- Port `8788` was free; analytics remained on `127.0.0.1:8787`.
+- Active Nginx remained at SHA-256 `49f693bf8a461c136e3c72965b47c497e56820faa607617139ce41725a10b4d4` with no Diagnosis Beta/API/feedback/health/readiness location.
+- The public home and frozen `/diagnosis/` pages returned HTTP 200; the Diagnosis page had no upload, retired script, or API reference.
+
+### Start Result And Controlled Stop
+
+- `systemd-analyze verify` passed for the Diagnosis unit. Existing host warnings concerned `tat_agent` and `snapd`, not this service.
+- `systemctl daemon-reload` completed, then the one authorized start attempt failed in `ExecStartPost`.
+- The readiness probe attempted `http://127.0.0.1:8788/ready` before Node had begun listening and received connection refused. The current curl command did not retry connection-refused failures, so systemd marked the start failed.
+- The service was immediately stopped under the red-light rule. Final state is `inactive/disabled`, with no listener on `8788`.
+- No `/health` or `/ready` success result was obtained; no second start was attempted.
+
+### Boundary And Sensitive-data Verification
+
+- Provider usage remained zero and no provider usage file was created.
+- The limited startup journal contained no key, Authorization value, submitted material, complete report, or provider response signal.
+- Nginx hash and routes remained unchanged; the public Diagnosis API path still resolves to the existing static 404 response rather than a functional API.
+- Analytics, the public website, and the frozen `/diagnosis/` page remained healthy.
+
+### Stage B0 Traffic Lights
+
+1. `current` / `previous`: **Green**.
+2. Env security state: **Green**.
+3. systemd verify: **Green**.
+4. Service start: **Red** - `ExecStartPost` readiness race caused startup failure.
+5. Health: **Red** - not reached successfully.
+6. Readiness: **Red** - connection refused during the startup probe.
+7. Port `8788` loopback-only: **Yellow** - no unsafe bind occurred, but the service is stopped and no listener remains.
+8. Provider calls remain zero: **Green**.
+9. Startup journal contains no detected sensitive content: **Green**.
+10. Analytics, public website, and frozen Diagnosis page: **Green**.
+11. Nginx unchanged and Beta/API unopened: **Green**.
+12. Final service state: **stopped (`inactive/disabled`)**.
+
+### Stage B0 Stop Conclusion
+
+**必须暂停修复。** Do not enter Stage B1. A separate reviewed systemd-only change must make the startup readiness probe tolerate the application startup window, for example by using an appropriate connection-refused retry strategy or a reviewed readiness helper. The unit must then pass static review before one separately authorized B0 retry. Do not change Nginx, open Beta/API routes, or run a real-AI smoke as part of that correction.
+
+## Stage B0.1 - Readiness Race Correction And Controlled Retest (2026-06-12)
+
+### Root-cause Confirmation And Repository Correction
+
+- Read-only inspection confirmed the installed unit used the expected npm path, release working directory, env file and hardening. The service identity could read the release and write the data directory; `8788` was free.
+- The failed B0 journal contained only the immediate `ExecStartPost` connection-refused result. It contained no Node startup, permission, module, env parsing or port-conflict error.
+- The repository systemd draft now removes `ExecStartPost`. The Beta deployment draft performs a bounded external readiness poll after start, and the legacy systemd installer uses the same pattern to avoid recreating the race.
+- The external gate waits at most 30 seconds, checks that the service remains active with zero restarts, polls local `/ready`, then verifies local `/health`; failure stops the service.
+
+### Server Unit Installation And Start Evidence
+
+- Original unit SHA-256: `f2ffef048851252dd10aa129ca4b2bb270fb9bcaf4bb805628934489cf51fb5e`.
+- Corrected unit SHA-256: `1c3168f8109778debd0d83577e36a31e55fae8f00698f3ebf2950b4b8473e674`.
+- Backup: `/etc/framespark/backups/systemd/framespark-diagnosis.service.pre-b0.1-20260612-161812`, `root:root`, mode `0600`.
+- The corrected unit passed `systemd-analyze verify`, was loaded while the service remained disabled, and received one authorized start attempt.
+- The application became ready on polling attempt 3. `/ready` returned a valid success response, then `/health` returned a valid success response. The journal confirmed the application listened on `127.0.0.1:8788` during this attempt.
+- No second application startup error was observed. This confirms the original B0 service failure was caused by the unit-level readiness race.
+
+### Verification Harness Failure And Rollback
+
+- A later journal-redaction check supplied an ISO-8601 timestamp with `T` to this host's `journalctl --since`; `journalctl` rejected that timestamp format.
+- The unexpected verification-command failure triggered the approved rollback even though application readiness and health had passed.
+- No second start was attempted. The original unit was restored, `daemon-reload` completed, and the service returned to `inactive/disabled` with no listener on `8788`.
+- Upload staging was removed. The corrected repository drafts remain uncommitted for review.
+
+### Boundary Verification
+
+- Provider usage remained zero; no provider usage file was created.
+- The seven journal lines from the B0.1 window contained no detected key, Authorization value, material, complete report or provider response signal.
+- Analytics remained on `127.0.0.1:8787`; the public home and frozen `/diagnosis/` returned HTTP 200 with no upload or API reference.
+- Active Nginx remained SHA-256 `49f693bf8a461c136e3c72965b47c497e56820faa607617139ce41725a10b4d4`; no Beta/API/feedback/health/readiness location was added.
+
+### Stage B0.1 Traffic Lights
+
+1. Root cause limited to the `ExecStartPost` race: **Green** - corrected unit reached ready/health without another application error.
+2. Repository unit correction: **Green**.
+3. systemd verify: **Green**.
+4. Service active/running: **Red for final state** - it ran successfully during verification, then rollback stopped it.
+5. Readiness: **Green during the single attempt**.
+6. Health: **Green during the single attempt**.
+7. Port `8788` loopback-only: **Green during the attempt**; final state has no listener.
+8. Provider calls remain zero: **Green**.
+9. Journal contains no detected sensitive content: **Green**.
+10. Analytics, public website and frozen Diagnosis page: **Green**.
+11. Nginx unchanged and Beta/API unopened: **Green**.
+12. Final service state: **stopped (`inactive/disabled`)**, original unit restored.
+
+### Stage B0.1 Stop Conclusion
+
+**必须暂停，不允许进入 Stage B1。** The readiness-race correction itself is validated, but the final active-service acceptance state was not retained because the verification harness failed and correctly rolled back. Before a separately authorized single B0 retry, change only the operator-side journal time argument to the host-compatible `YYYY-MM-DD HH:MM:SS` form, reinstall the already-reviewed corrected unit, and repeat the same bounded checks. Do not change application code, env, Nginx, access routes or provider behavior.
+
+## Stage B0.2 - Invocation-scoped Log Check And Complete Local Validation (2026-06-12)
+
+### Repository And Unit Preparation
+
+- The deployment command draft now obtains the non-empty systemd `InvocationID` after start and reads only `_SYSTEMD_INVOCATION_ID=<id>` journal entries. It counts sensitive signals without printing journal content and no longer depends on timestamp parsing.
+- The corrected unit remains free of `ExecStartPost`; both deployment command paths use a bounded external readiness/health gate.
+- Shell syntax checks and `git diff --check` passed before server installation.
+- The restored old unit was backed up to `/etc/framespark/backups/systemd/framespark-diagnosis.service.pre-b0.2-20260612-163826` before installing the corrected unit.
+- Installed corrected unit SHA-256: `1c3168f8109778debd0d83577e36a31e55fae8f00698f3ebf2950b4b8473e674`, `root:root`, mode `0644`, regular file.
+- `systemd-analyze verify` passed; the existing unrelated `tat_agent` and `snapd` host warnings remained unchanged. The service remained disabled.
+
+### Single Start And Local Validation
+
+- Exactly one B0.2 start was performed. The service reached readiness on polling attempt 3, within the 30-second limit, then `/health` returned a valid success response.
+- Final runtime state is `active/running`, with a valid MainPID, `NRestarts=0`, and unit state `disabled`.
+- Port `8788` has exactly one listener at `127.0.0.1:8788`; no wildcard or public bind exists.
+- Provider usage was zero before and after the start; provider-call delta is zero. No diagnosis request or provider request was made.
+- The systemd InvocationID was non-empty. The invocation-scoped journal contained three lines and zero sensitive-keyword matches; no journal body was copied into this record.
+
+### External Boundary Verification
+
+- Analytics remained listening on `127.0.0.1:8787`.
+- The public home and frozen `/diagnosis/` returned HTTP 200; the Diagnosis page still contains no upload control, retired script or `/api/diagnosis` reference.
+- Active Nginx remained SHA-256 `49f693bf8a461c136e3c72965b47c497e56820faa607617139ce41725a10b4d4`.
+- No Beta/API/feedback/health/readiness location exists. The public Diagnosis API path still resolves to the static 404 response.
+- Upload staging was removed after verification. Nginx, env, application code and public webroot were not modified.
+
+### Stage B0.2 Traffic Lights
+
+1. Repository log-check correction: **Green**.
+2. Corrected unit installation: **Green**.
+3. systemd verify: **Green**.
+4. Service active/running: **Green**.
+5. Readiness: **Green**.
+6. Health: **Green**.
+7. Port `8788` loopback-only: **Green**.
+8. Provider-call delta zero: **Green**.
+9. InvocationID journal check: **Green**.
+10. Sensitive journal signals: **Green** - zero matches.
+11. Analytics, public website and frozen Diagnosis page: **Green**.
+12. Nginx unchanged and Beta/API unopened: **Green**.
+13. Final service state: **active/disabled**.
+
+### Stage B0.2 Stop Conclusion
+
+**允许进入 Stage B1 的独立规划/授权阶段，但不自动进入。** B0.2 proves only local service startup, readiness, health, loopback binding, zero provider calls and unchanged public boundaries. It does not authorize Basic Auth creation, Nginx modification or reload, Beta/API/feedback exposure, diagnosis POST requests, real AI calls, invitation distribution, commit or push.
