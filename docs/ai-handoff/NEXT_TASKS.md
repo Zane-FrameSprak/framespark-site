@@ -10,7 +10,8 @@ Updated by: Codex
 - After the key is safely present, require a new explicit authorization before `systemctl daemon-reload`, service enable/start, readiness checks, Basic Auth creation, Nginx changes, real AI smoke, or Beta/API opening.
 - Keep the current service inactive/disabled, port `8788` without a listener, public `/diagnosis/` frozen, and active Nginx unchanged until that authorization.
 - The moderate production dependency finding is fixed in the repository lockfile: `qs` now resolves transitively to `6.15.2`, production audit is clean, and V1/MVP no-AI regression passed. See `docs/diagnosis/DIAGNOSIS_BETA_NPM_AUDIT_REVIEW_2026-06-12.md`.
-- Before any service activation, create a new separately authorized immutable release from the patched commit and switch `current` only after checks pass. Do not mutate the installed Stage A release or use a blanket audit fix.
+- Stage A2 installed the patched immutable release at `683dea7fa98848cc40829b825cf4209692b7abe4`; `current` selects it and `previous` retains `f4451587...`. Do not mutate either release in place.
+- The next permitted action is only the user's separate, non-echoing server-side entry of `DEEPSEEK_API_KEY`. Afterward, require another explicit authorization before daemon reload, service activation, readiness checks, Basic Auth, Nginx, real AI, or Beta/API opening.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_HUMAN_CONFIRMATION_2026-06-11.md` as the decision baseline for the next controlled deployment execution plan. The plan must include a 60-minute observation period, red/yellow/green reporting, immediate red-light stop/rollback points and a separately authorized one-call fictional smoke.
 - Do not distribute Beta credentials until all applicable post-deployment checks remain green for the observation window and rollback verification passes.

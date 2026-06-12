@@ -337,6 +337,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The installed Stage A immutable release was not modified and still predates the patch. A future separately authorized deployment must build a new release from the patched commit rather than mutate the existing release.
 - No server connection, service/key/Nginx change, real AI call, or public Beta/API opening occurred during the fix.
 
+## Diagnosis Beta Controlled Deployment Stage A2 (2026-06-12)
+
+- A fresh fetch locked server release candidate `683dea7fa98848cc40829b825cf4209692b7abe4`, containing the reviewed `qs@6.15.2` security patch.
+- A new immutable release was installed as the dedicated service identity, then frozen as `root:framespark-diagnosis` and selected atomically through `current`. `previous` retains the old `f4451587...` release for rollback.
+- Server-side `npm ls` resolves `qs@6.15.2`, production audit reports zero vulnerabilities, and all 18 approved V1/MVP no-AI commands plus syntax checks passed.
+- The service remains inactive/disabled, `8788` remains unused, the env is unchanged and still lacks the real key, and Diagnosis journald remains empty.
+- Nginx hash, analytics `8787`, the public website, and the frozen `/diagnosis/` page remain unchanged. No functional Beta/API/feedback/health route, Basic Auth, real AI call, or invitation opening exists.
+- Current stop state: the user may add the provider key directly on the server using a non-echoing method. All service and routing actions still require separate authorization.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
