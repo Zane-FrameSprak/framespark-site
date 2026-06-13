@@ -5,6 +5,8 @@
 Description=FrameSpark Diagnosis API Invite Beta
 Wants=network-online.target
 After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=3
 
 [Service]
 Type=simple

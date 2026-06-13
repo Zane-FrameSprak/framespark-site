@@ -83,6 +83,8 @@ cat > "${SERVICE_FILE}" <<'SERVICE'
 [Unit]
 Description=FrameSpark Diagnosis API
 After=network.target
+StartLimitIntervalSec=300
+StartLimitBurst=3
 
 [Service]
 Type=simple
