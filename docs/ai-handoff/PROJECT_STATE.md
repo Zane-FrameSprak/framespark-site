@@ -391,6 +391,15 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Diagnosis request counts and provider call counts must be recorded separately. Provider usage must not be inferred as a fixed multiple of request count.
 - B3.2 remains blocked on the systemd boot-continuity decision, actual production-limit confirmation, named monitoring/deletion/cost owners, independent-account handling and human legal review.
 
+## Diagnosis Beta Stage B3.2b Limits And Service Enablement (2026-06-13)
+
+- Repository configuration commit `e3d0b544689c28f4cd9b0717a8ca59a16ab63cc4` is the locked source for the production limit and systemd start-rate changes.
+- Production limits are now account `1`, IP `3`, global diagnoses `3`, provider daily `15`, concurrency `1`, and provider calls per diagnosis `5`. The first four request/concurrency controls remain process-memory state except for the file-persistent provider counter.
+- systemd now uses a 300-second start-limit window with burst `3`, while retaining `Restart=on-failure` and `RestartSec=5s`.
+- One controlled restart passed readiness, health, loopback-listener, restart-count, provider-count and sensitive-log checks. Provider usage stayed at `3`, with no metadata or review-record increase.
+- After verification, the Diagnosis service was enabled without `--now`. Final state is `active/enabled`, `NRestarts=0`, and `8788` remains loopback-only.
+- Nginx, Basic Auth, public pages, frozen `/diagnosis/`, analytics and public-route boundaries did not change. No POST, AI call, account creation, invitation, page deployment or B3.2c action occurred.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

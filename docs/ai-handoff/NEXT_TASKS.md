@@ -158,6 +158,9 @@ Updated by: Codex
 - Before B3.2, decide whether systemd will be enabled or whether restart interruption is formally accepted; verify production account-key isolation, other real limits and the in-memory reset boundary; assign monitoring, deletion and cost owners; approve independent account handling; and complete human legal review.
 - Do not create tester accounts with `htpasswd -c`; additions must preserve the existing password file and remain a separately authorized B3.2 operation.
 - Do not invite users, change env/limits, restart or enable services, open feedback, or run another real diagnosis as part of B3.1.
+- B3.2b is complete: approved production limits are active and the Diagnosis service is now `active/enabled` with bounded systemd restart frequency.
+- Before B3.2c, assign monitoring, deletion and cost owners; complete human review of Beta/privacy wording; and approve the independent tester-account creation and credential-distribution procedure.
+- Do not create tester accounts, modify htpasswd, deploy the B3.1 page, execute an API POST, call AI, invite users or enter B3.2c without separate authorization.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
 - Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.

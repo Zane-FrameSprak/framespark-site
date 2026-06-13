@@ -331,3 +331,11 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Removed the Beta page's optional full-material review retention control and fixed all B3 submissions to `reviewConsent=false`.
 - Documented that account limits are currently in-memory rather than persistent guarantees, and that diagnosis requests and provider calls require separate records.
 - Recorded B3.2 blockers covering systemd boot continuity, production limits, duty ownership, account handling and legal review. No account, env, limit, service, Nginx, feedback, AI, invitation or deployment action was performed.
+
+### Diagnosis Beta Stage B3.2b Production Limits And Enablement
+
+- Committed and pushed the approved production limit values and systemd start-rate settings as `e3d0b544689c28f4cd9b0717a8ca59a16ab63cc4`.
+- Created root-only server backups, installed the verified unit, and atomically changed only the six approved nonsecret env limits.
+- Performed one controlled restart; readiness, health, `NRestarts=0`, loopback-only `8788`, unchanged provider usage and zero sensitive-log matches all passed.
+- Enabled the service without `--now`; final state is `active/enabled`.
+- Nginx, htpasswd, public pages, frozen Diagnosis, analytics and public routes were unchanged. No API POST, AI call, account creation, invitation or Beta-page deployment occurred.
