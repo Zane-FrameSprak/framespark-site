@@ -373,6 +373,16 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Feedback, backend health/readiness, public Diagnosis uploads and Stage B2 remain unopened. The public site and analytics are unchanged.
 - Diagnosis remains `active/disabled`, loopback-only on `8788`, with zero restarts and zero provider-call delta. No real diagnosis or AI request was made.
 
+## Diagnosis Beta Controlled Deployment Stage B2 (2026-06-13)
+
+- One separately authorized production smoke used fictional short material through the Basic Auth protected HTTPS API. It was one POST with no automatic retry.
+- The request returned HTTP 200 in approximately 67.9 seconds. The public DTO whitelist passed with zero internal-field exposure.
+- Metadata reached `stage=final`, decision `complete_final`, prompt version `v1-final-2026-06-patch5`, model `deepseek-v4-flash`, `fallback=false`, and `providerCalls=3`.
+- The persistent provider counter increased by three and matched metadata. No second POST occurred.
+- Diagnosis remains `active/disabled`, `NRestarts=0`, and loopback-only on `8788`. Nginx, the public site, frozen `/diagnosis/` and analytics boundaries are unchanged.
+- Sensitive log matches were zero. The temporary sample, headers and complete response were removed after verification; only a restricted redacted summary and metadata remain.
+- Stage B2 proves this single protected production chain only. Invitation distribution, public uploads, feedback and any later stage remain unopened.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

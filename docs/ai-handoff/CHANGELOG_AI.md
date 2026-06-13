@@ -315,3 +315,12 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Corrected the Beta homepage mapping from a file alias affected by inherited index handling to an exact `rewrite + root` mapping; no `try_files` was added.
 - Verified correct, missing and incorrect authentication behavior, exact API method/path boundaries, the unchanged public site and analytics, loopback-only `8788`, zero restarts and zero provider-call delta.
 - Feedback, backend health/readiness, real diagnosis requests, real AI and Stage B2 remain unopened.
+
+### Diagnosis Beta Stage B2 Production Smoke
+
+- Executed one separately authorized real-AI production smoke using reviewed fictional short material through the protected HTTPS Beta API, with automatic retry disabled.
+- The single request returned HTTP 200 in approximately 67.9 seconds and produced a valid public DTO with no forbidden internal fields.
+- Metadata reached Final with `complete_final`, `deepseek-v4-flash`, prompt version `v1-final-2026-06-patch5`, three provider calls and no fallback. The persistent provider-count delta matched the metadata.
+- Diagnosis remained active but disabled, restart count stayed zero, `8788` remained loopback-only, and Nginx/public-site/analytics boundaries were unchanged.
+- Sensitive log matches were zero. Temporary sample, headers and complete response artifacts were removed after verification; no second POST occurred.
+- This smoke does not authorize invitation distribution, public uploads, feedback exposure or a later deployment stage.

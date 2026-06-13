@@ -150,8 +150,10 @@ Updated by: Codex
 ## Next - Invitation Diagnosis Beta Production Gate (2026-06-10)
 
 - Stage B1 completed the protected route gate. Basic Auth covers the exact Beta static files and exact Diagnosis POST API; the static homepage index mapping is corrected and verified.
-- Feedback, backend health/readiness, public uploads and Stage B2 remain unopened. Do not run a real diagnosis, distribute credentials or enter Stage B2 without a new explicit plan and authorization.
-- Keep the service `active/disabled`, port `8788` loopback-only and the public `/diagnosis/` page frozen. Preserve the B1 route and credential rollback evidence.
+- Stage B2 completed one authorized fictional production smoke: HTTP 200, Final stage, three provider calls, no fallback, public DTO whitelist passed and no sensitive log matches.
+- Do not repeat the production smoke without a new plan and explicit authorization. Do not infer invitation distribution or public-readiness approval from B2.
+- Feedback, backend health/readiness and public uploads remain unopened. Keep the service `active/disabled`, port `8788` loopback-only and the public `/diagnosis/` page frozen.
+- The next permitted work is a separate post-B2 review and invitation-release decision. It must assess legal sign-off, credential distribution, observation/rollback ownership and support procedures before any access is shared.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
 - Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.
