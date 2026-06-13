@@ -306,3 +306,12 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Installed the corrected unit and performed one authorized local-only start. Readiness passed on attempt 3, health passed, and the service remains active/running but disabled.
 - Verified loopback-only `127.0.0.1:8788`, zero provider-call delta, zero restarts and zero sensitive-keyword matches in the invocation journal.
 - Analytics, public pages, frozen Diagnosis, Nginx hash and absent Beta/API/feedback routes remain unchanged. No diagnosis POST or real AI call occurred.
+
+## 2026-06-13
+
+### Diagnosis Beta Stage B1 Protected Routes
+
+- Added the invitation Basic Auth boundary for exact Beta HTML, `app.js`, `beta.css` and exact `POST /api/diagnosis/` access.
+- Corrected the Beta homepage mapping from a file alias affected by inherited index handling to an exact `rewrite + root` mapping; no `try_files` was added.
+- Verified correct, missing and incorrect authentication behavior, exact API method/path boundaries, the unchanged public site and analytics, loopback-only `8788`, zero restarts and zero provider-call delta.
+- Feedback, backend health/readiness, real diagnosis requests, real AI and Stage B2 remain unopened.

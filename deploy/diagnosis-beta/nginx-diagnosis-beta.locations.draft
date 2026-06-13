@@ -1,47 +1,61 @@
 # DRAFT LOCATION FRAGMENT ONLY.
-# Manually review and merge into the existing HTTPS framespark.cn server block.
-# Never overwrite the complete site config with this file.
-# Keep the existing public /diagnosis/ page and /api/analytics/ location unchanged.
-# Do not expose /health, /ready, /api/dev/, the release tree, env, logs, or data.
-# CORS remains application-controlled by ALLOWED_ORIGINS=https://framespark.cn.
-# Do not add Access-Control-Allow-Origin *.
-# The Basic Auth file must remain outside webroot at the exact path below,
-# as a regular non-symlink file owned by root and readable only by the
-# confirmed Nginx worker group (draft target mode: 0640). Never print it.
+# Manually review and include this fragment inside the active HTTPS
+# framespark.cn server block. Keep the public /diagnosis/ page and the
+# existing /api/analytics/ location unchanged.
+#
+# The Basic Auth file is created interactively outside Git. It must be a
+# regular non-symlink file owned by root, readable by the Nginx worker group,
+# and must never be printed. Do not expose feedback, health or readiness in B1.
 
-# Do not expose an unauthenticated no-trailing-slash alias.
 location = /diagnosis/beta {
     return 404;
 }
 
-# ^~ is required so the existing static-resource regex location cannot bypass auth.
-location ^~ /diagnosis/beta/ {
+location = /diagnosis/beta/ {
     auth_basic "FrameSpark diagnosis beta";
-    auth_basic_user_file /etc/nginx/framespark-diagnosis-beta.htpasswd;
+    auth_basic_user_file /www/server/nginx/conf/framespark-diagnosis-beta.htpasswd;
+    limit_except GET { deny all; }
 
-    limit_except GET {
-        deny all;
-    }
-
-    # This prefix bypasses server-level regex locations, so reject dotfiles and
-    # hidden path segments locally without affecting normal HTML/CSS/JS assets.
-    if ($uri ~ "(^|/)\.") {
-        return 404;
-    }
-
-    alias /srv/framespark/diagnosis-api/current/beta-site/;
-    index index.html;
-    autoindex off;
-    disable_symlinks if_not_owner from=/srv/framespark/diagnosis-api/current/beta-site/;
+    # The rewrite prevents the inherited server-level `index index.html`
+    # directive from appending index.html to a file-level alias.
+    rewrite ^/diagnosis/beta/$ /index.html break;
+    root /srv/framespark/diagnosis-beta-site/current;
+    default_type text/html;
+    add_header Cache-Control "no-store" always;
 }
 
-location ^~ /api/diagnosis/ {
+location = /diagnosis/beta/app.js {
     auth_basic "FrameSpark diagnosis beta";
-    auth_basic_user_file /etc/nginx/framespark-diagnosis-beta.htpasswd;
+    auth_basic_user_file /www/server/nginx/conf/framespark-diagnosis-beta.htpasswd;
+    limit_except GET { deny all; }
 
-    limit_except POST {
-        deny all;
-    }
+    alias /srv/framespark/diagnosis-beta-site/current/app.js;
+    default_type application/javascript;
+    add_header Cache-Control "no-store" always;
+}
+
+location = /diagnosis/beta/beta.css {
+    auth_basic "FrameSpark diagnosis beta";
+    auth_basic_user_file /www/server/nginx/conf/framespark-diagnosis-beta.htpasswd;
+    limit_except GET { deny all; }
+
+    alias /srv/framespark/diagnosis-beta-site/current/beta.css;
+    default_type text/css;
+    add_header Cache-Control "no-store" always;
+}
+
+location ^~ /diagnosis/beta/ {
+    return 404;
+}
+
+location = /api/diagnosis {
+    return 404;
+}
+
+location = /api/diagnosis/ {
+    auth_basic "FrameSpark diagnosis beta";
+    auth_basic_user_file /www/server/nginx/conf/framespark-diagnosis-beta.htpasswd;
+    limit_except POST { deny all; }
 
     proxy_pass http://127.0.0.1:8788/api/diagnosis/;
     proxy_http_version 1.1;
@@ -51,6 +65,7 @@ location ^~ /api/diagnosis/ {
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Framespark-Beta-User $remote_user;
+    proxy_set_header Authorization "";
 
     client_max_body_size 5m;
     proxy_connect_timeout 10s;
@@ -58,25 +73,6 @@ location ^~ /api/diagnosis/ {
     proxy_send_timeout 240s;
 }
 
-location ^~ /api/diagnosis-feedback/ {
-    auth_basic "FrameSpark diagnosis beta";
-    auth_basic_user_file /etc/nginx/framespark-diagnosis-beta.htpasswd;
-
-    limit_except POST {
-        deny all;
-    }
-
-    proxy_pass http://127.0.0.1:8788/api/diagnosis-feedback/;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header Origin $http_origin;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $remote_addr;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Framespark-Beta-User $remote_user;
-
-    client_max_body_size 64k;
-    proxy_connect_timeout 10s;
-    proxy_read_timeout 30s;
-    proxy_send_timeout 30s;
+location ^~ /api/diagnosis/ {
+    return 404;
 }

@@ -365,6 +365,14 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Analytics, the public website, frozen `/diagnosis/`, Nginx hash and absent Beta/API/feedback routes remain unchanged.
 - Stage B0.2 permits only separate Stage B1 planning/authorization. It does not open routes, authorize real AI, or distribute access.
 
+## Diagnosis Beta Controlled Deployment Stage B1 (2026-06-13)
+
+- Invitation Basic Auth now protects the exact Beta HTML, `app.js`, `beta.css` and `POST /api/diagnosis/` boundary.
+- The Beta static mirror is separate from the backend release tree. The homepage location uses `rewrite + root` to avoid the inherited-index `index.htmlindex.html` failure.
+- Correct credentials passed static and empty-body API checks; missing or incorrect credentials return 401. GET on the API is 403 and unknown API children are 404.
+- Feedback, backend health/readiness, public Diagnosis uploads and Stage B2 remain unopened. The public site and analytics are unchanged.
+- Diagnosis remains `active/disabled`, loopback-only on `8788`, with zero restarts and zero provider-call delta. No real diagnosis or AI request was made.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.
