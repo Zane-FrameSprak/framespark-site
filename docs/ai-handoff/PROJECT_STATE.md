@@ -383,6 +383,14 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Sensitive log matches were zero. The temporary sample, headers and complete response were removed after verification; only a restricted redacted summary and metadata remain.
 - Stage B2 proves this single protected production chain only. Invitation distribution, public uploads, feedback and any later stage remain unopened.
 
+## Diagnosis Beta Stage B3.1 Preparation (2026-06-13)
+
+- B3.1 now documents the invitation rules, user notice, manual feedback template, deletion procedure and monitoring duty checklist. No tester account, production limit, service, Nginx or provider action is included.
+- The Beta page no longer offers review-consent retention. It always submits `reviewConsent=false`, so B3 does not provide a path for FrameSpark to retain complete material or complete reports.
+- The code contains a single-process account-keyed limiter, but production per-account enforcement has not been separately verified for B3. It resets after service restart and is not a persistent technical quota guarantee; manual invitation records remain required.
+- Diagnosis request counts and provider call counts must be recorded separately. Provider usage must not be inferred as a fixed multiple of request count.
+- B3.2 remains blocked on the systemd boot-continuity decision, actual production-limit confirmation, named monitoring/deletion/cost owners, independent-account handling and human legal review.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

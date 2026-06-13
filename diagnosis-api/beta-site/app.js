@@ -6,7 +6,6 @@
     var fileName = document.getElementById('diagnosisBetaFileName');
     var textInput = document.getElementById('diagnosisBetaText');
     var consent = document.getElementById('diagnosisBetaConsent');
-    var reviewConsent = document.getElementById('diagnosisBetaReviewConsent');
     var progress = document.getElementById('diagnosisBetaProgress');
     var status = document.getElementById('diagnosisBetaStatus');
     var result = document.getElementById('diagnosisBetaResult');
@@ -34,7 +33,7 @@
         var data = new FormData();
         data.append('materialType', form.elements.materialType.value);
         data.append('inputMode', file ? 'file_upload' : 'pasted_text');
-        data.append('reviewConsent', reviewConsent && reviewConsent.checked ? 'true' : 'false');
+        data.append('reviewConsent', 'false');
         if (file) data.append('file', file);
         else data.append('text', text);
 
@@ -52,10 +51,11 @@
                     : '诊断未完成，请稍后再试。');
             }
             renderResult(payload);
-            setStatus('诊断完成。', 'success');
+            setStatus('诊断完成。AI 结果仅供创作参考。', 'success');
         } catch (error) {
-            renderError(error.message);
-            setStatus(error.message || '诊断未完成，请稍后再试。', 'error');
+            var failureMessage = error.message || '诊断未完成。';
+            renderError(failureMessage);
+            setStatus(failureMessage + ' 请勿立即重复提交，请记录发生时间并联系内测人员。', 'error');
         } finally {
             setLoading(false);
         }
@@ -108,7 +108,7 @@
     }
 
     function renderError(message) {
-        result.innerHTML = '<div class="diagnosis-result__empty diagnosis-result__empty--error"><p class="subpage-kicker">NOT COMPLETED</p><h2>本次未生成报告</h2><p>' + escapeHtml(message || '请稍后再试。') + '</p></div>';
+        result.innerHTML = '<div class="diagnosis-result__empty diagnosis-result__empty--error"><p class="subpage-kicker">NOT COMPLETED</p><h2>本次未生成报告</h2><p>' + escapeHtml(message || '诊断未完成。') + '</p><p>请勿立即重复提交，请记录发生时间和页面提示并联系内测人员。</p></div>';
     }
 
     function setLoading(loading) {

@@ -154,6 +154,10 @@ Updated by: Codex
 - Do not repeat the production smoke without a new plan and explicit authorization. Do not infer invitation distribution or public-readiness approval from B2.
 - Feedback, backend health/readiness and public uploads remain unopened. Keep the service `active/disabled`, port `8788` loopback-only and the public `/diagnosis/` page frozen.
 - The next permitted work is a separate post-B2 review and invitation-release decision. It must assess legal sign-off, credential distribution, observation/rollback ownership and support procedures before any access is shared.
+- B3.1 preparation is complete in the repository: rules, user notice, manual feedback, deletion procedure and monitoring duty checklist are documented, and the Beta client fixes `reviewConsent=false`.
+- Before B3.2, decide whether systemd will be enabled or whether restart interruption is formally accepted; verify production account-key isolation, other real limits and the in-memory reset boundary; assign monitoring, deletion and cost owners; approve independent account handling; and complete human legal review.
+- Do not create tester accounts with `htpasswd -c`; additions must preserve the existing password file and remain a separately authorized B3.2 operation.
+- Do not invite users, change env/limits, restart or enable services, open feedback, or run another real diagnosis as part of B3.1.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
 - Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.

@@ -324,3 +324,10 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Diagnosis remained active but disabled, restart count stayed zero, `8788` remained loopback-only, and Nginx/public-site/analytics boundaries were unchanged.
 - Sensitive log matches were zero. Temporary sample, headers and complete response artifacts were removed after verification; no second POST occurred.
 - This smoke does not authorize invitation distribution, public uploads, feedback exposure or a later deployment stage.
+
+### Diagnosis Beta Stage B3.1 Preparation
+
+- Added the initial invitation rules, user notice, manual feedback template, deletion procedure and monitoring duty checklist for a future three-person Beta.
+- Removed the Beta page's optional full-material review retention control and fixed all B3 submissions to `reviewConsent=false`.
+- Documented that account limits are currently in-memory rather than persistent guarantees, and that diagnosis requests and provider calls require separate records.
+- Recorded B3.2 blockers covering systemd boot continuity, production limits, duty ownership, account handling and legal review. No account, env, limit, service, Nginx, feedback, AI, invitation or deployment action was performed.

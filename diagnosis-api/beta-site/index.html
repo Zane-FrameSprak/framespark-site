@@ -35,7 +35,7 @@
             <div class="subpage-hero__inner">
                 <p class="subpage-kicker">INVITE-ONLY BETA</p>
                 <h1>故事开发诊断内测</h1>
-                <p class="subpage-lead">当前仅对受邀用户开放。系统用于辅助整理故事问题，不替代人工判断，也不承诺完整剧本评估能力。</p>
+                <p class="subpage-lead">当前仅对受邀用户开放。单次处理通常需要 60-90 秒。系统用于辅助整理故事问题，不替代人工判断，也不承诺完整剧本评估能力。</p>
             </div>
         </section>
 
@@ -78,15 +78,11 @@
                         <legend>提交确认</legend>
                         <label>
                             <input id="diagnosisBetaConsent" type="checkbox" required>
-                            <span>我确认有权提交该材料，并同意本次内容发送至第三方 AI 服务完成诊断。默认不保存完整材料或完整报告。</span>
-                        </label>
-                        <label>
-                            <input id="diagnosisBetaReviewConsent" type="checkbox">
-                            <span>我自愿同意帧火花为人工复核临时保存本次材料和报告，最长 14 天。</span>
+                            <span>我确认有权提交该材料，材料已完成必要脱敏，并同意本次内容发送至第三方 AI 服务完成诊断。B3 内测默认不保存完整材料或完整报告。</span>
                         </label>
                     </fieldset>
 
-                    <p class="diagnosis-privacy">请勿提交身份证、联系方式、商业秘密或未获授权的材料。内测版本可能超时、失败或返回不完整结果。详见<a href="/legal/privacy.html">隐私政策</a>与<a href="/legal/terms.html">使用条款</a>。</p>
+                    <p class="diagnosis-privacy">请勿提交身份证、联系方式、商业秘密、保密内容或未获授权的材料。内测版本可能超时、失败或返回不完整结果；AI 结果仅供创作参考。失败时请勿立即重复提交，请记录发生时间和页面提示并联系内测人员。详见<a href="/legal/privacy.html">隐私政策</a>与<a href="/legal/terms.html">使用条款</a>。</p>
 
                     <div class="diagnosis-actions">
                         <button class="diagnosis-submit" type="submit">开始内测诊断</button>
@@ -96,7 +92,7 @@
                         <div class="diagnosis-progress__copy">
                             <p class="diagnosis-progress__eyebrow">PROCESSING</p>
                             <h3>正在处理材料</h3>
-                            <p>请保持页面开启。系统会在超时或安全校验失败时停止，不会无限重试。</p>
+                            <p>预计需要 60-90 秒，请保持页面开启且不要重复提交。系统会在超时或安全校验失败时停止，不会无限重试。</p>
                         </div>
                     </div>
                     <p id="diagnosisBetaStatus" role="status" aria-live="polite"></p>
@@ -126,6 +122,6 @@
             </div>
         </div>
     </footer>
-    <script src="/diagnosis/beta/app.js?v=20260610-diagnosis-beta1" defer></script>
+    <script src="/diagnosis/beta/app.js?v=20260613-diagnosis-beta2" defer></script>
 </body>
 </html>
