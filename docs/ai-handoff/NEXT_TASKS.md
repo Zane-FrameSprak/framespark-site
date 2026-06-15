@@ -159,14 +159,13 @@ Updated by: Codex
 - Do not create tester accounts with `htpasswd -c`; additions must preserve the existing password file and remain a separately authorized B3.2 operation.
 - Do not invite users, change env/limits, restart or enable services, open feedback, or run another real diagnosis as part of B3.1.
 - B3.2b is complete: approved production limits are active and the Diagnosis service is now `active/enabled` with bounded systemd restart frequency.
-- Before B3.2c, assign monitoring, deletion and cost owners; complete human review of Beta/privacy wording; and approve the independent tester-account creation and credential-distribution procedure.
-- Do not create tester accounts, modify htpasswd, deploy the B3.1 page, execute an API POST, call AI, invite users or enter B3.2c without separate authorization.
+- B3.2c is complete: `beta-001`, `beta-002`, and `beta-003` exist alongside `framespark-beta`, and static authentication passed without diagnosis traffic.
+- B3.2d is complete: the reviewed B3.1 Beta page is the active protected static release, with `reviewConsent=false` and the invitation/privacy/wait-time notices verified.
 - B4 observability blocking item is resolved: the independent timing log is live and a no-POST GET validation wrote one safe seven-field JSON entry. The GET returned HTTP `403` instead of `401`, which is acceptable for this gate because the route rejects non-POST methods before authentication.
 - B4 T0 is still not started, and the 72-hour observation window must not begin from the log-only validation. Recommended T0 is after the first real invited tester completes the first real Diagnosis Beta submission and timing-log field safety is confirmed.
-- B3.2c should be the next account-preparation task only after separate authorization: create `beta-001`, `beta-002` and `beta-003` by appending to the existing password file; never use `htpasswd -c`.
-- B3.2c passwords must be entered by the user interactively on the server. They must not appear in chat, command arguments, scripts, docs, logs or shared notes.
-- B3.2c verification is static-only: without credentials should return `401` or the agreed protected-route refusal, correct credentials should load `/diagnosis/beta/`, and wrong credentials should return `401`. Do not access `POST /api/diagnosis/`, do not call AI, and do not reload Nginx for password-file-only changes.
-- B3.2c account-to-person mapping belongs only in the user's offline encrypted list. Revocation should use a temporary password-file copy, delete the target account there, then atomically replace the active file; restore from backup on failure.
+- Keep account-to-person mapping only in the user's offline protected list. Do not add credentials or mappings to Git, handoff, logs, or shared notes.
+- B4 T0 remains not started. Do not invite testers, execute a diagnosis POST, call AI, begin the 72-hour observation window, or enter B3.2e without a separate plan and explicit authorization.
+- Before any invitation or B4 T0 decision, confirm named monitoring/deletion/cost owners, legal wording review, credential-distribution procedure, support coverage, and the exact observation start rule.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
 - Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.

@@ -347,3 +347,19 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - The timing entry was valid seven-field JSON and did not contain credentials, cookies, request body, user text, diagnostic content or secrets. No POST, provider call, account creation or invitation occurred.
 - B4 blocker status is resolved, but B4 T0 remains not started and the 72-hour observation window has not begun. Recommended T0 is after the first real invited tester completes a real Diagnosis Beta submission and safe timing fields are confirmed.
 - Added the B3.2c account plan for `beta-001`, `beta-002` and `beta-003`: append to the existing password file only, never use `htpasswd -c`, user enters passwords interactively, static-page verification only, and revocation uses a temporary copy plus atomic replacement.
+
+### Diagnosis Beta Stage B3.2c Independent Accounts
+
+- Created `beta-001`, `beta-002`, and `beta-003` while retaining `framespark-beta`; usernames were unique and no credential or account-to-person mapping was recorded.
+- Preserved the password file as `root:www 0640`, used a same-directory temporary copy and atomic replacement, and retained root-only backup `/etc/framespark/backups/diagnosis-b3.2c/20260615T024833Z`.
+- Correct credentials for each new account returned HTTP 200 on the static Beta page; missing and incorrect credentials returned HTTP 401.
+- No diagnosis POST, AI call, Nginx reload, tester invitation, provider increment, metadata increment, review increment, or B4 T0 action occurred.
+
+### Diagnosis Beta Stage B3.2d Invitation Page Deployment
+
+- Deployed only the reviewed `index.html`, `app.js`, and `beta.css` from locked source `9672664f0f1770f3e45b27484bd2f924030e3781` into a new immutable Beta static release.
+- Verified file hashes and permissions, then atomically switched `current` using an exclusive same-directory symlink with same-device validation. The previous release and root-only backup `/etc/framespark/backups/diagnosis-b3.2d/20260615T031340Z` were retained.
+- Authenticated HTML, JavaScript, and CSS returned HTTP 200; missing and incorrect credentials returned HTTP 401.
+- Verified fixed `reviewConsent=false`, the 60-90 second wait/no-repeat notice, anonymization and submission-rights notice, and AI-reference-only statement.
+- Nginx, password file, service, public site, frozen Diagnosis and analytics boundaries remained unchanged. Provider calls stayed `0`, metadata stayed `1`, and review records stayed `0`.
+- No diagnosis POST, AI call, real user material, tester invitation, B4 T0, or B3.2e action occurred.

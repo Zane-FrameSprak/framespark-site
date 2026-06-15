@@ -408,7 +408,25 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - The validation log entry did not include credentials, cookies, request body, user text, diagnostic content or secrets. No POST, provider call, account creation or invitation occurred.
 - Diagnosis stayed `active/enabled`, `NRestarts=0`, and `8788` remained loopback-only. Public homepage, frozen Diagnosis, Beta authentication and analytics remained normal.
 - B4 blocker status is resolved, but B4 T0 is not started and the 72-hour observation window has not begun. Recommended T0 is after the first real invited tester completes the first real Diagnosis Beta submission and the operator confirms safe timing fields.
-- B3.2c is planned only: create `beta-001`, `beta-002` and `beta-003` by appending to the existing password file, never using `htpasswd -c`; passwords must be entered interactively by the user and not written to chat, command arguments, docs or logs.
+- B4 T0 remains not started. The timing-log validation alone does not begin the 72-hour observation window.
+
+## Diagnosis Beta Stage B3.2c Independent Accounts (2026-06-15)
+
+- Created `beta-001`, `beta-002`, and `beta-003`, retained `framespark-beta`, and confirmed no duplicate usernames.
+- Password entry remained interactive and no password, password hash, or account-to-person mapping was recorded in Git or handoff files.
+- The active password file remained a regular `root:www 0640` file. A same-directory temporary copy and atomic replacement were used; the root-only backup is `/etc/framespark/backups/diagnosis-b3.2c/20260615T024833Z`.
+- Correct credentials for all three new accounts returned HTTP 200 on the static Beta page. Missing and incorrect credentials returned HTTP 401.
+- No API POST, AI call, invitation, Nginx reload, provider increment, metadata increment, review increment, or B4 T0 action occurred.
+
+## Diagnosis Beta Stage B3.2d Invitation Page Deployment (2026-06-15)
+
+- Deployed only `index.html`, `app.js`, and `beta.css` from locked source `9672664f0f1770f3e45b27484bd2f924030e3781` into a new immutable Beta static release.
+- File hashes and permissions passed, and `current` was atomically switched with an exclusive same-directory symlink after same-device validation. The previous release and root-only backup `/etc/framespark/backups/diagnosis-b3.2d/20260615T031340Z` were retained.
+- Authenticated HTML, JavaScript, and CSS returned HTTP 200; missing and incorrect credentials returned HTTP 401.
+- The deployed page fixes `reviewConsent=false`, includes the 60-90 second wait/no-repeat notice, material anonymization and rights notice, and AI-reference-only statement. It adds no feedback or other route.
+- Nginx and the password file were unchanged, with no reload; Diagnosis remained `active/enabled`, `NRestarts=0`, and loopback-only on `8788`, with no service restart.
+- Public homepage, frozen `/diagnosis/`, and analytics remained normal. Provider calls stayed `0`, metadata stayed `1`, and review records stayed `0`.
+- No API POST, AI call, tester invitation, real user material, B4 T0, or B3.2e action occurred.
 
 ## Public Site Metadata State (2026-06-01)
 
