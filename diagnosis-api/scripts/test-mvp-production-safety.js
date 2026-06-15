@@ -102,6 +102,45 @@ function testProductionReadiness() {
   });
   assertEqual(ready.ok, true, 'ready config');
 
+  const accessReady = getProductionReadiness({
+    ...readyConfig(),
+    enableBetaCodeAccess: true,
+    betaAccess: {
+      dbPath: '/var/lib/framespark-diagnosis/access/beta-access.sqlite',
+      codeHmacKey: 'code-key-0123456789abcdef-0123456789abcdef',
+      sessionHmacKey: 'session-key-0123456789abcdef-0123456789abcdef',
+      cookieSecure: true,
+      sessionTtlMs: 86400000,
+      defaultExpiresDays: 7,
+      defaultMaxUses: 5,
+      maxCodeChars: 256,
+      originalUriHeader: 'x-framespark-original-uri',
+      auditRetentionDays: 30,
+      verifyLimits: { windowMs: 900000, ipWindowLimit: 5, ipDailyLimit: 20, globalWindowLimit: 30, globalDailyLimit: 100, cooldownMs: 2000 }
+    }
+  });
+  assertEqual(accessReady.ok, true, 'access ready config');
+
+  const accessUnsafe = getProductionReadiness({
+    ...readyConfig(),
+    enableBetaCodeAccess: true,
+    betaAccess: {
+      dbPath: '/tmp/beta.sqlite',
+      codeHmacKey: 'short',
+      sessionHmacKey: 'short',
+      cookieSecure: false,
+      sessionTtlMs: 1,
+      defaultExpiresDays: 8,
+      defaultMaxUses: 6,
+      maxCodeChars: 300,
+      originalUriHeader: 'wrong-header',
+      auditRetentionDays: 31,
+      verifyLimits: { windowMs: 900001, ipWindowLimit: 6, ipDailyLimit: 21, globalWindowLimit: 31, globalDailyLimit: 101, cooldownMs: 1 }
+    }
+  });
+  assertEqual(accessUnsafe.ok, false, 'unsafe access config');
+  assertTruthy(accessUnsafe.errors.includes('BETA_ACCESS_CODE_HMAC_KEY_TOO_SHORT'), 'access key check');
+
   const unsafe = getProductionReadiness({
     deepseekApiKey: '',
     enableDiagnosisV1: false,
@@ -117,6 +156,30 @@ function testProductionReadiness() {
   });
   assertEqual(unsafe.ok, false, 'unsafe config');
   assertTruthy(unsafe.errors.includes('ENABLE_DEV_TOOLS_MUST_BE_FALSE'), 'dev tools check');
+}
+
+function readyConfig() {
+  return {
+    deepseekApiKey: 'configured',
+    enableDiagnosisV1: true,
+    enableV1StagedRunner: true,
+    enableV1RealPrompts: true,
+    enableDevTools: false,
+    failClosedOnV1Error: true,
+    requireBetaIdentity: true,
+    host: '127.0.0.1',
+    port: 8788,
+    dataDir: '/var/lib/framespark-diagnosis',
+    trustedProxy: 'loopback',
+    maxUploadBytes: 5 * 1024 * 1024,
+    maxTextChars: 20000,
+    metadataRetentionDays: 30,
+    reviewRetentionDays: 14,
+    requestTimeoutMs: 210000,
+    providerCallLimitPerDiagnosis: 5,
+    rateLimits: { concurrencyLimit: 2 },
+    allowedOrigins: ['https://framespark.cn']
+  };
 }
 
 function testProviderBudget() {

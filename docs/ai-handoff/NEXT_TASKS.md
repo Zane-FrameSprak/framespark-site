@@ -165,6 +165,8 @@ Updated by: Codex
 - B4 T0 is still not started, and the 72-hour observation window must not begin from the log-only validation. Recommended T0 is after the first real invited tester completes the first real Diagnosis Beta submission and timing-log field safety is confirmed.
 - Keep account-to-person mapping only in the user's offline protected list. Do not add credentials or mappings to Git, handoff, logs, or shared notes.
 - B4 T0 remains not started. Do not invite testers, execute a diagnosis POST, call AI, begin the 72-hour observation window, or enter B3.2e without a separate plan and explicit authorization.
+- Beta access Phase 1 is repository-only and defaults off. Before Phase 2, review the homepage entry UI, Nginx `auth_request` cookie flow, identity-header overwrite, Basic Auth rollback and production native SQLite installation as one separate high-risk plan.
+- Do not generate the five real access codes, add HMAC secrets, switch the Diagnosis identity chain, deploy or start B4 T0 as part of Phase 1.
 - Before any invitation or B4 T0 decision, confirm named monitoring/deletion/cost owners, legal wording review, credential-distribution procedure, support coverage, and the exact observation start rule.
 
 - Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.

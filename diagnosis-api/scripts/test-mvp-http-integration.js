@@ -50,6 +50,11 @@ child.stderr.on('data', chunk => { childOutput += chunk; });
 try {
   await waitForServer(child, appPort);
 
+  const betaAccessDisabled = await jsonRequest(appPort, '/api/beta-access/verify', { code: 'test-code' }, {
+    Origin: 'https://framespark.cn'
+  });
+  assert.equal(betaAccessDisabled.status, 404);
+
   const missingIdentity = await jsonRequest(appPort, '/api/diagnosis/', makeJsonBody(nonStoryText()), {
     Origin: 'https://framespark.cn'
   });

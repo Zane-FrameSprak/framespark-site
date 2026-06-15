@@ -12,6 +12,7 @@
 - final 结构校验和单次安全修复
 - 公共结果 DTO 与受控错误映射
 - 邀请身份、Origin、限流、调用预算和脱敏日志
+- 受功能开关保护的内测码 SQLite / Session 基础层
 - 本地 mock 与注入式 DeepSeek 兼容调用
 
 暂不实现：
@@ -111,3 +112,14 @@ materialType: short | feature | other
 - 如后续支持 PDF，需要单独迁移解析逻辑、补测试和错误提示；扫描版 PDF / OCR 不在当前范围。
 - 邀请 Beta 源文件位于 `beta-site/`，不进入静态官网部署；未来仅由受保护的 Nginx alias 映射。
 - 正式站接入计划见 `DEPLOYMENT.md` 和 `DEPLOYMENT_RUNBOOK.md`。
+
+## 内测码基础层
+
+`ENABLE_BETA_CODE_ACCESS` 默认为 `false`。Phase 1 只提供持久化码、短期 Session、验证限流和内部 Session 校验端点；它不替换当前 Basic Auth，不修改 Beta 页面或诊断 API 身份链。
+
+```bash
+npm run beta-access:manage -- create --count 5
+npm run beta-access:manage -- list
+```
+
+`create` 必须在交互式终端执行，明文码只显示一次。不得把生产 HMAC 密钥、内测码或 SQLite 文件写入 Git。首批最终规划为 5 人、一人一码，但 Phase 1 不创建真实码。

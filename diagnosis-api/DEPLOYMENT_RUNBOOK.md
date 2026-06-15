@@ -34,9 +34,13 @@ Manual runbook for a protected diagnosis Beta. It is not an automatic deployment
 
 Never print or commit the env file.
 
+Phase 1 access-code variables remain disabled and secret-free in production. A later migration must create two distinct HMAC secrets through the approved root-only env process and must not generate real codes before cookie authentication and rollback have been reviewed.
+
 ## Installation Order
 
 1. Create `/srv/framespark/diagnosis-api/releases/<commit>`, install dependencies there with `npm ci --omit=dev`, and run the full no-AI suite before treating the release as immutable.
+   - Confirm `npm ls better-sqlite3` resolves exactly `12.10.1` and `npm audit --omit=dev` reports zero vulnerabilities.
+   - Run `npm run test:beta-access` and `npm run test:no-ai` without a provider key.
 2. Confirm the prepared release contains `package-lock.json` and `node_modules`, then atomically point `current` to it; do not install dependencies through the `current` link.
 3. Review, then run `install-diagnosis-systemd.sh`; it only verifies the prepared release and installs the service definition. Confirm `/health` and `/ready` locally.
 4. Run `install-diagnosis-nginx-proxy.sh` as an audit only. It reports each Beta/API location as present or missing and never edits Nginx.

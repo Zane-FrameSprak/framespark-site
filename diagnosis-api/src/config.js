@@ -22,6 +22,9 @@ function readList(name, fallback = []) {
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const defaultDataDir = path.resolve(process.cwd(), 'logs');
+const betaAccessDbPath = path.resolve(
+  process.env.BETA_ACCESS_DB_PATH || path.join(process.env.DIAGNOSIS_DATA_DIR || defaultDataDir, 'access', 'beta-access.sqlite')
+);
 
 export const config = {
   nodeEnv,
@@ -46,6 +49,7 @@ export const config = {
   enableDevTools: readBoolean('ENABLE_DEV_TOOLS'),
   failClosedOnV1Error: readBoolean('FAIL_CLOSED_ON_V1_ERROR'),
   requireBetaIdentity: readBoolean('REQUIRE_BETA_IDENTITY'),
+  enableBetaCodeAccess: readBoolean('ENABLE_BETA_CODE_ACCESS'),
   trustedProxy: process.env.TRUST_PROXY || 'loopback',
   allowedOrigins: readList('ALLOWED_ORIGINS', ['https://framespark.cn']),
   providerCallLimitPerDiagnosis: readNumber('PROVIDER_CALL_LIMIT_PER_DIAGNOSIS', 5),
@@ -56,5 +60,25 @@ export const config = {
     providerGlobalDailyLimit: readNumber('PROVIDER_GLOBAL_DAILY_LIMIT', 100),
     concurrencyLimit: readNumber('DIAGNOSIS_CONCURRENCY_LIMIT', 2),
     feedbackDailyLimit: readNumber('DIAGNOSIS_FEEDBACK_DAILY_LIMIT', 10)
+  },
+  betaAccess: {
+    dbPath: betaAccessDbPath,
+    codeHmacKey: process.env.BETA_ACCESS_CODE_HMAC_KEY || '',
+    sessionHmacKey: process.env.BETA_ACCESS_SESSION_HMAC_KEY || '',
+    sessionTtlMs: readNumber('BETA_ACCESS_SESSION_TTL_HOURS', 24) * 60 * 60 * 1000,
+    defaultExpiresDays: readNumber('BETA_ACCESS_DEFAULT_EXPIRES_DAYS', 7),
+    defaultMaxUses: readNumber('BETA_ACCESS_DEFAULT_MAX_USES', 5),
+    maxCodeChars: readNumber('BETA_ACCESS_CODE_MAX_CHARS', 256),
+    cookieSecure: readBoolean('BETA_ACCESS_COOKIE_SECURE', true),
+    originalUriHeader: process.env.BETA_ACCESS_ORIGINAL_URI_HEADER || 'x-framespark-original-uri',
+    auditRetentionDays: readNumber('BETA_ACCESS_AUDIT_RETENTION_DAYS', 30),
+    verifyLimits: {
+      windowMs: readNumber('BETA_ACCESS_VERIFY_WINDOW_MINUTES', 15) * 60 * 1000,
+      ipWindowLimit: readNumber('BETA_ACCESS_VERIFY_IP_WINDOW_LIMIT', 5),
+      ipDailyLimit: readNumber('BETA_ACCESS_VERIFY_IP_DAILY_LIMIT', 20),
+      globalWindowLimit: readNumber('BETA_ACCESS_VERIFY_GLOBAL_WINDOW_LIMIT', 30),
+      globalDailyLimit: readNumber('BETA_ACCESS_VERIFY_GLOBAL_DAILY_LIMIT', 100),
+      cooldownMs: readNumber('BETA_ACCESS_VERIFY_COOLDOWN_SECONDS', 2) * 1000
+    }
   }
 };

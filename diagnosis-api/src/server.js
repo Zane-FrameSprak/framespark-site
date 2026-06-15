@@ -16,14 +16,17 @@ import { createRequestDeadline } from './middleware/requestDeadline.js';
 import { diagnosisRouter } from './routes/diagnosis.js';
 import { devSampleRunsRouter } from './routes/devSampleRuns.js';
 import { feedbackRouter } from './routes/feedback.js';
+import { createBetaAccessRouters } from './routes/betaAccess.js';
 import { hasAiProvider } from './services/aiClient.js';
 import { cleanupExpiredFeedback } from './services/diagnosisFeedbackLogger.js';
 import { cleanupExpiredDiagnosisData } from './services/diagnosisLogger.js';
 import { getPublicError } from './services/publicErrors.js';
+import { createBetaAccessService } from './services/betaAccessService.js';
+import { createBetaAccessStore } from './services/betaAccessStore.js';
 import { assertProductionReady, getProductionReadiness } from './services/productionReadiness.js';
 import { ApiError } from './utils/errors.js';
 
-export function createApp() {
+export function createApp(options = {}) {
   const app = express();
   const originGuard = createOriginGuard();
 
@@ -36,6 +39,19 @@ export function createApp() {
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS']
   }));
+  if (config.enableBetaCodeAccess || options.betaAccessService) {
+    const store = options.betaAccessStore || (options.betaAccessService ? null : createBetaAccessStore({ dbPath: config.betaAccess.dbPath }));
+    store?.cleanup({ auditRetentionDays: config.betaAccess.auditRetentionDays });
+    const service = options.betaAccessService || createBetaAccessService({ store, settings: config.betaAccess });
+    const routers = createBetaAccessRouters({
+      service,
+      settings: config.betaAccess,
+      allowedOrigins: config.allowedOrigins
+    });
+    app.use('/api/beta-access', routers.verifyRouter);
+    app.use('/internal/beta-session', routers.internalRouter);
+  }
+
   app.use(express.json({ limit: '1mb' }));
 
   app.get('/health', (req, res) => {

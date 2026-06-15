@@ -39,10 +39,60 @@ export function getProductionReadiness(current = config) {
     errors.push('FRAMESPARK_ORIGIN_REQUIRED');
   }
 
+  if (current.enableBetaCodeAccess) {
+    const beta = current.betaAccess || {};
+    if (!path.isAbsolute(beta.dbPath || '')) errors.push('BETA_ACCESS_DB_PATH_MUST_BE_ABSOLUTE');
+    if (!String(beta.dbPath || '').startsWith(`${current.dataDir}${path.sep}`)) {
+      errors.push('BETA_ACCESS_DB_PATH_MUST_BE_INSIDE_DATA_DIR');
+    }
+    if (Buffer.byteLength(String(beta.codeHmacKey || ''), 'utf8') < 32) {
+      errors.push('BETA_ACCESS_CODE_HMAC_KEY_TOO_SHORT');
+    }
+    if (Buffer.byteLength(String(beta.sessionHmacKey || ''), 'utf8') < 32) {
+      errors.push('BETA_ACCESS_SESSION_HMAC_KEY_TOO_SHORT');
+    }
+    if (beta.codeHmacKey && beta.codeHmacKey === beta.sessionHmacKey) {
+      errors.push('BETA_ACCESS_HMAC_KEYS_MUST_DIFFER');
+    }
+    if (beta.cookieSecure !== true) errors.push('BETA_ACCESS_COOKIE_MUST_BE_SECURE');
+    if (Number(beta.sessionTtlMs) !== 24 * 60 * 60 * 1000) {
+      errors.push('BETA_ACCESS_SESSION_TTL_MUST_BE_24_HOURS');
+    }
+    if (Number(beta.defaultExpiresDays) <= 0 || Number(beta.defaultExpiresDays) > 7) {
+      errors.push('BETA_ACCESS_DEFAULT_EXPIRY_MUST_NOT_EXCEED_7_DAYS');
+    }
+    if (Number(beta.defaultMaxUses) <= 0 || Number(beta.defaultMaxUses) > 5) {
+      errors.push('BETA_ACCESS_DEFAULT_MAX_USES_MUST_NOT_EXCEED_5');
+    }
+    if (Number(beta.maxCodeChars) <= 0 || Number(beta.maxCodeChars) > 256) {
+      errors.push('BETA_ACCESS_CODE_MAX_CHARS_MUST_NOT_EXCEED_256');
+    }
+    if (String(beta.originalUriHeader || '').toLowerCase() !== 'x-framespark-original-uri') {
+      errors.push('BETA_ACCESS_ORIGINAL_URI_HEADER_INVALID');
+    }
+    if (Number(beta.auditRetentionDays) <= 0 || Number(beta.auditRetentionDays) > 30) {
+      errors.push('BETA_ACCESS_AUDIT_RETENTION_MUST_NOT_EXCEED_30_DAYS');
+    }
+    const limits = beta.verifyLimits || {};
+    if (!positiveAtMost(limits.windowMs, 15 * 60 * 1000)) errors.push('BETA_ACCESS_VERIFY_WINDOW_MUST_NOT_EXCEED_15_MINUTES');
+    if (!positiveAtMost(limits.ipWindowLimit, 5)) errors.push('BETA_ACCESS_IP_WINDOW_LIMIT_MUST_NOT_EXCEED_5');
+    if (!positiveAtMost(limits.ipDailyLimit, 20)) errors.push('BETA_ACCESS_IP_DAILY_LIMIT_MUST_NOT_EXCEED_20');
+    if (!positiveAtMost(limits.globalWindowLimit, 30)) errors.push('BETA_ACCESS_GLOBAL_WINDOW_LIMIT_MUST_NOT_EXCEED_30');
+    if (!positiveAtMost(limits.globalDailyLimit, 100)) errors.push('BETA_ACCESS_GLOBAL_DAILY_LIMIT_MUST_NOT_EXCEED_100');
+    if (!Number.isFinite(Number(limits.cooldownMs)) || Number(limits.cooldownMs) < 2000) {
+      errors.push('BETA_ACCESS_COOLDOWN_MUST_BE_AT_LEAST_2_SECONDS');
+    }
+  }
+
   return {
     ok: errors.length === 0,
     errors
   };
+}
+
+function positiveAtMost(value, maximum) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 && number <= maximum;
 }
 
 export function assertProductionReady(current = config) {

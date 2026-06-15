@@ -27,6 +27,8 @@ const PUBLIC_ERRORS = Object.freeze({
   FEEDBACK_EMPTY: [400, '请至少勾选一项或填写补充说明。'],
   INVALID_FEEDBACK_TYPE: [400, '未支持的反馈类型，请稍后再试。'],
   BETA_ACCESS_REQUIRED: [401, '当前诊断仅对受邀内测用户开放。'],
+  BETA_ACCESS_INVALID: [401, '内测码无效或已失效'],
+  BETA_ACCESS_RATE_LIMITED: [429, '尝试次数过多，请稍后再试。'],
   ORIGIN_NOT_ALLOWED: [403, '当前请求来源不允许使用诊断内测。']
 });
 

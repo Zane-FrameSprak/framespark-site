@@ -100,6 +100,13 @@ Important modularity note:
 
 ## Diagnosis System State
 
+### Beta access-code foundation (2026-06-15)
+
+- Phase 1 adds a disabled-by-default SQLite access-code and short-session foundation inside `diagnosis-api`.
+- It supports hashed codes, 7-day/5-use defaults, 24-hour scoped cookies, persistent verification limits, lifecycle revocation and a loopback-only internal session validator.
+- The eventual first cohort is five people with one new code each. Existing Basic Auth credentials are not migrated or reused.
+- Homepage, Beta static assets, Nginx, production env/server, current Basic Auth identity and Diagnosis routes remain unchanged; no real code, POST, AI call, deployment, invitation or B4 T0 occurred.
+
 ### V1 Final Structure Revision (2026-06-10)
 
 - Patch 4b confirmed that prompt-only prohibitions cannot reliably prevent concrete story writing in final output.

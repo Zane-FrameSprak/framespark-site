@@ -17,6 +17,15 @@ Install production dependencies inside the versioned release before promoting th
 
 Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 
+## Access-code Phase 1 Boundary
+
+- The repository contains an optional SQLite access-code/session foundation.
+- `ENABLE_BETA_CODE_ACCESS=false` remains the production default for this phase.
+- Do not add HMAC keys, create the database, generate real codes or change Nginx until the homepage and cookie-auth migration receive separate approval.
+- When enabled later, the database must be `/var/lib/framespark-diagnosis/access/beta-access.sqlite`, a regular service-owned `0600` file outside webroot.
+- Code and session HMAC keys must be distinct random secrets of at least 32 bytes. Rotating the code key invalidates codes; rotating the session key invalidates active sessions.
+- `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit and no-AI checks on the target Node 20 host.
+
 ## Invite Beta Boundary
 
 - Keep public `/diagnosis/` as the upload-disabled preview.

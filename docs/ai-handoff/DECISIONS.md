@@ -224,3 +224,14 @@ Fallback success can hide safety failures, while unnecessary storage of creative
 
 Impact:
 The public DTO excludes internal diagnostics and raw reports. Production readiness requires the real staged runner, all safety switches, external data storage, access isolation, and strict quotas before the service is considered ready.
+
+## 2026-06-15 — Build access codes before replacing Basic Auth
+
+Decision:
+Add the access-code data/session foundation behind a default-off feature flag before changing the homepage or Nginx. The first real cohort will use five newly generated codes, one per person; existing Basic Auth credentials are not migrated.
+
+Reason:
+This isolates storage, transaction, revocation, rate-limit and session security work from the public entry and proxy cutover. Basic Auth remains a reversible production boundary while the new foundation is tested without AI or server changes.
+
+Impact:
+Phase 1 may be committed and pushed but not deployed or enabled. Homepage UI, Nginx `auth_request`, production secrets, real code generation and Basic Auth retirement require separate authorization.

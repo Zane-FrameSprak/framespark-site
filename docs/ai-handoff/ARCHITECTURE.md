@@ -86,6 +86,12 @@ It posts to `/api/analytics/event` by default. Privacy copy should stay aligned 
 
 ## Diagnosis API Architecture
 
+### Optional Beta access-code layer
+
+The disabled Phase 1 layer adds SQLite-backed hashed invitation codes and scoped page/API sessions. Verification is a separate `POST /api/beta-access/verify` route; loopback-only `/internal/beta-session/validate` is reserved for a future Nginx `auth_request` flow. Existing Basic Auth identity injection remains authoritative until a later migration.
+
+SQLite lives under the external Diagnosis data directory and stores no plaintext codes, cookies, materials or reports. A stable code UUID becomes the future account-limit identity; disable/revoke changes `session_version` so active sessions fail validation immediately.
+
 The diagnosis backend lives under `diagnosis-api/`.
 
 Important files:

@@ -86,6 +86,9 @@ server_prepare_draft() {
   cd "${release_dir}"
   sudo -u "${service_user}" /usr/bin/npm ci --omit=dev
   sudo -u "${service_user}" /usr/bin/npm run check
+  sudo -u "${service_user}" env \
+    NODE_ENV=test DIAGNOSIS_DATA_DIR="${test_data_dir}" DEEPSEEK_API_KEY= \
+    /usr/bin/npm run test:no-ai
 
   # Use only built-in fictional test fixtures and an isolated test data path.
   # These checks must verify metadata redaction and must never write to the
@@ -104,6 +107,11 @@ server_prepare_draft() {
   sudo -u "${service_user}" env \
     NODE_ENV=test DIAGNOSIS_DATA_DIR="${test_data_dir}" DEEPSEEK_API_KEY= \
     /usr/bin/npm run test:mvp-http-integration
+
+  # The access-code foundation is repository-only in Phase 1. Do not create
+  # its production database, HMAC keys or real codes in this deployment draft.
+  # ENABLE_BETA_CODE_ACCESS must remain false until a separate Nginx/homepage
+  # migration and rollback task has been approved.
 
   # Existing tests assert that default metadata excludes the fictional full
   # material/report markers. Remove all isolated test metadata after review.
