@@ -400,6 +400,16 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - After verification, the Diagnosis service was enabled without `--now`. Final state is `active/enabled`, `NRestarts=0`, and `8788` remains loopback-only.
 - Nginx, Basic Auth, public pages, frozen `/diagnosis/`, analytics and public-route boundaries did not change. No POST, AI call, account creation, invitation, page deployment or B3.2c action occurred.
 
+## Diagnosis Beta B4 Observability Unblock (2026-06-15)
+
+- The minimal Diagnosis timing log configuration is now recorded as successfully applied: `nginx -t`, logrotate dry-run and one controlled Nginx reload passed.
+- The independent timing log is scoped to the exact Diagnosis Beta API URI, uses a seven-field JSONL entry, has `root:www 0640` permissions and daily rotation with 14 retained rotations.
+- The no-POST validation used one unauthenticated GET. It returned HTTP `403`, not the originally expected `401`, because the route rejects non-POST methods before the auth challenge. This does not block B4 because the validation target was timing-log write and field safety.
+- The validation log entry did not include credentials, cookies, request body, user text, diagnostic content or secrets. No POST, provider call, account creation or invitation occurred.
+- Diagnosis stayed `active/enabled`, `NRestarts=0`, and `8788` remained loopback-only. Public homepage, frozen Diagnosis, Beta authentication and analytics remained normal.
+- B4 blocker status is resolved, but B4 T0 is not started and the 72-hour observation window has not begun. Recommended T0 is after the first real invited tester completes the first real Diagnosis Beta submission and the operator confirms safe timing fields.
+- B3.2c is planned only: create `beta-001`, `beta-002` and `beta-003` by appending to the existing password file, never using `htpasswd -c`; passwords must be entered interactively by the user and not written to chat, command arguments, docs or logs.
+
 ## Public Site Metadata State (2026-06-01)
 
 - Public site metadata/icons have been tightened after launch: OG PNG, root favicon, apple touch icon, manifest icon references, and 404 head metadata.

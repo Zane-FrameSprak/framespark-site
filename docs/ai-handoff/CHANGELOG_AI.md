@@ -339,3 +339,11 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Performed one controlled restart; readiness, health, `NRestarts=0`, loopback-only `8788`, unchanged provider usage and zero sensitive-log matches all passed.
 - Enabled the service without `--now`; final state is `active/enabled`.
 - Nginx, htpasswd, public pages, frozen Diagnosis, analytics and public routes were unchanged. No API POST, AI call, account creation, invitation or Beta-page deployment occurred.
+
+### Diagnosis Beta B4 Observability Unblock And B3.2c Planning
+
+- Recorded that the minimal independent Diagnosis timing log was successfully applied and validated: `nginx -t`, logrotate dry-run and one controlled reload passed.
+- The no-POST validation returned HTTP `403` rather than the originally expected `401`; this is acceptable for B4 because the goal was safe timing-log write, and non-POST is rejected before the auth challenge.
+- The timing entry was valid seven-field JSON and did not contain credentials, cookies, request body, user text, diagnostic content or secrets. No POST, provider call, account creation or invitation occurred.
+- B4 blocker status is resolved, but B4 T0 remains not started and the 72-hour observation window has not begun. Recommended T0 is after the first real invited tester completes a real Diagnosis Beta submission and safe timing fields are confirmed.
+- Added the B3.2c account plan for `beta-001`, `beta-002` and `beta-003`: append to the existing password file only, never use `htpasswd -c`, user enters passwords interactively, static-page verification only, and revocation uses a temporary copy plus atomic replacement.
