@@ -35,7 +35,8 @@ const scripts = [
   ['test-mvp-http-integration.js'],
   ['test-beta-access-store.js'],
   ['test-beta-access-http.js'],
-  ['test-beta-access-cli.js']
+  ['test-beta-access-cli.js'],
+  ['test-beta-access-frontend.js']
 ];
 
 for (const [script, ...args] of scripts) {

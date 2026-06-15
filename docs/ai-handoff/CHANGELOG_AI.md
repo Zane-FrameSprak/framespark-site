@@ -365,3 +365,12 @@ Initial local redesign notes. This work was later cleaned up and committed in `6
 - Verified fixed `reviewConsent=false`, the 60-90 second wait/no-repeat notice, anonymization and submission-rights notice, and AI-reference-only statement.
 - Nginx, password file, service, public site, frozen Diagnosis and analytics boundaries remained unchanged. Provider calls stayed `0`, metadata stayed `1`, and review records stayed `0`.
 - No diagnosis POST, AI call, real user material, tester invitation, B4 T0, or B3.2e action occurred.
+
+## 2026-06-15
+
+### Diagnosis Beta Access Phase 2
+
+- Added the repository-only homepage access-code entry with password masking, empty-only validation, submission locking, fixed-path success navigation and generic safe failures.
+- Added Beta-client handling that returns to the homepage entry only for the stable `BETA_ACCESS_REQUIRED` session-expiry response.
+- Updated privacy and terms for transient access codes, maximum 24-hour credentials, no account/profile system and no default full-material retention.
+- Added no-AI frontend tests and updated cache versions. No deployment, server/Nginx change, production POST, AI call, real code generation, invitation or B4 T0 occurred.

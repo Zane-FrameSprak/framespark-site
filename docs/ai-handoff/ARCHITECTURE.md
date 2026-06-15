@@ -308,6 +308,19 @@ protected Beta request
 - Beta assets live under `diagnosis-api/beta-site/`, outside public static deployment. `/diagnosis/beta/`, `/api/diagnosis/`, and feedback are intended to share Nginx Basic Auth protection through an authenticated alias/proxy. Nginx forwards the authenticated username; the API rejects missing production identity and disallowed origins.
 - The production runtime target is `/srv/framespark/diagnosis-api/releases/<commit>` with a `current` symlink, a dedicated service user, env under `/etc/framespark`, data under `/var/lib`, and `127.0.0.1:8788`.
 
+### Access-code client boundary (2026-06-15)
+
+```text
+homepage code form
+-> POST /api/beta-access/verify
+-> scoped HttpOnly page/API cookies
+-> fixed /diagnosis/beta/ navigation
+```
+
+- The homepage client treats the access code as transient input and never reads the issued cookies.
+- The future proxy layer must validate the appropriate scoped cookie through the loopback internal validator and overwrite the trusted Beta identity header before forwarding to Diagnosis.
+- The Beta client only treats `BETA_ACCESS_REQUIRED` as session expiry; other public Diagnosis errors retain their existing UI behavior.
+
 ## Deployment Notes
 
 - `.github/workflows/pages.yml` deploys static site files to GitHub Pages.

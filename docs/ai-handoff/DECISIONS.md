@@ -235,3 +235,14 @@ This isolates storage, transaction, revocation, rate-limit and session security 
 
 Impact:
 Phase 1 may be committed and pushed but not deployed or enabled. Homepage UI, Nginx `auth_request`, production secrets, real code generation and Basic Auth retirement require separate authorization.
+
+## 2026-06-15 — Keep the access-code client transient and fixed-path
+
+Decision:
+The homepage validates only whether the trimmed code is empty, sends it only in a same-origin JSON body, and accepts only the fixed `/diagnosis/beta/` success destination. It does not persist, log, analyze or parse the code format.
+
+Reason:
+Code validity belongs to the Phase 1 server foundation. Keeping client behavior minimal avoids leaking credential structure and prevents server-controlled open redirects.
+
+Impact:
+Phase 2 can be tested and committed without enabling production access. Nginx cookie validation and Basic Auth migration remain a separately reviewed Phase 3 boundary.

@@ -71,7 +71,8 @@
                 description: '故事开发诊断工具',
                 actionLabel: '点击进入',
                 notice: '诊断系统内测中，暂未开放公开上传。',
-                href: 'diagnosis/'
+                href: 'diagnosis/',
+                betaAccessEntry: true
             },
             {
                 number: '02',

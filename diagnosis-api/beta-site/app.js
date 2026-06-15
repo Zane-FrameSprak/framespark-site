@@ -1,16 +1,42 @@
-(function () {
+(function (root) {
     'use strict';
 
-    var form = document.getElementById('diagnosisBetaForm');
-    var fileInput = document.getElementById('diagnosisBetaFile');
-    var fileName = document.getElementById('diagnosisBetaFileName');
-    var textInput = document.getElementById('diagnosisBetaText');
-    var consent = document.getElementById('diagnosisBetaConsent');
-    var progress = document.getElementById('diagnosisBetaProgress');
-    var status = document.getElementById('diagnosisBetaStatus');
-    var result = document.getElementById('diagnosisBetaResult');
+    var HOME_ACCESS_ENTRY = '/#diagnosis-beta-entry';
+
+    function isAccessExpiredResponse(response, payload) {
+        return Boolean(response && response.status === 401 && payload && payload.error && payload.error.code === 'BETA_ACCESS_REQUIRED');
+    }
+
+    function clearExpiredAccess(options) {
+        options.form.reset();
+        options.textInput.value = '';
+        options.fileInput.value = '';
+        options.fileName.textContent = '未选择文件';
+        options.progress.hidden = true;
+        options.status.textContent = '';
+        options.status.dataset.state = '';
+        options.result.innerHTML = options.emptyResultHtml;
+        options.location.replace(HOME_ACCESS_ENTRY);
+    }
+
+    root.FrameSparkDiagnosisBetaClient = {
+        isAccessExpiredResponse: isAccessExpiredResponse,
+        clearExpiredAccess: clearExpiredAccess,
+        homeAccessEntry: HOME_ACCESS_ENTRY
+    };
+
+    var documentRef = root.document;
+    var form = documentRef.getElementById('diagnosisBetaForm');
+    var fileInput = documentRef.getElementById('diagnosisBetaFile');
+    var fileName = documentRef.getElementById('diagnosisBetaFileName');
+    var textInput = documentRef.getElementById('diagnosisBetaText');
+    var consent = documentRef.getElementById('diagnosisBetaConsent');
+    var progress = documentRef.getElementById('diagnosisBetaProgress');
+    var status = documentRef.getElementById('diagnosisBetaStatus');
+    var result = documentRef.getElementById('diagnosisBetaResult');
 
     if (!form || !fileInput || !textInput || !consent || !status || !result) return;
+    var emptyResultHtml = result.innerHTML;
 
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
@@ -45,6 +71,20 @@
                 body: data
             });
             var payload = await response.json().catch(function () { return null; });
+            if (isAccessExpiredResponse(response, payload)) {
+                clearExpiredAccess({
+                    form: form,
+                    textInput: textInput,
+                    fileInput: fileInput,
+                    fileName: fileName,
+                    progress: progress,
+                    status: status,
+                    result: result,
+                    emptyResultHtml: emptyResultHtml,
+                    location: root.location
+                });
+                return;
+            }
             if (!response.ok || !payload || !payload.ok) {
                 throw new Error(payload && payload.error && payload.error.message
                     ? payload.error.message
@@ -135,4 +175,4 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
-})();
+})(window);

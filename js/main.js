@@ -120,6 +120,15 @@
         notice.textContent = platform.notice || '当前暂未开放。';
         notice.setAttribute('aria-live', 'polite');
 
+        var betaEntry = null;
+        if (platform.betaAccessEntry) {
+            var betaTemplate = document.getElementById('diagnosisBetaEntryTemplate');
+            if (betaTemplate && betaTemplate.content) {
+                betaEntry = betaTemplate.content.cloneNode(true);
+                article.classList.add('platform-card--beta-access');
+            }
+        }
+
         var noticeTimer = null;
         action.addEventListener('click', function () {
             if (noticeTimer) {
@@ -139,6 +148,7 @@
         article.appendChild(description);
         article.appendChild(action);
         article.appendChild(notice);
+        if (betaEntry) article.appendChild(betaEntry);
 
         return article;
     }

@@ -107,6 +107,13 @@ Important modularity note:
 - The eventual first cohort is five people with one new code each. Existing Basic Auth credentials are not migrated or reused.
 - Homepage, Beta static assets, Nginx, production env/server, current Basic Auth identity and Diagnosis routes remain unchanged; no real code, POST, AI call, deployment, invitation or B4 T0 occurred.
 
+### Beta access-code client (2026-06-15)
+
+- Phase 2 adds a repository-only access-code form to the homepage diagnosis card while preserving the existing `点击进入` behavior.
+- The client performs only empty-value validation, sends the code to the existing verify API, accepts only the fixed Beta redirect contract and does not persist or log the code.
+- The Beta client now returns to the homepage entry only for `401 + BETA_ACCESS_REQUIRED`; business validation, limits and service errors remain on the Beta page.
+- The feature remains undeployed and disabled. Basic Auth, Nginx, production identity, server state and B4 T0 are unchanged.
+
 ### V1 Final Structure Revision (2026-06-10)
 
 - Patch 4b confirmed that prompt-only prohibitions cannot reliably prevent concrete story writing in final output.
