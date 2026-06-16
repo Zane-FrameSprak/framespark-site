@@ -44,6 +44,7 @@
     "test:beta-access": "node scripts/test-beta-access-store.js && node scripts/test-beta-access-http.js && node scripts/test-beta-access-cli.js",
     "test:beta-access-frontend": "node scripts/test-beta-access-frontend.js",
     "test:no-ai": "node scripts/test-no-ai-regression.js",
+    "test:server-release": "npm run check && npm run test:beta-access && npm run test:no-ai",
     "test:unified-v1-prompt": "node scripts/test-unified-v1-prompt.js",
     "smoke:v1-staged-real": "node scripts/smoke-v1-staged-real.js",
     "logs:diagnosis": "node scripts/list-diagnosis-logs.js",

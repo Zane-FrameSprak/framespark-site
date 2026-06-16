@@ -9,6 +9,8 @@ const homeScriptPath = path.join(repoRoot, 'js', 'beta-access.js');
 const betaScriptPath = path.join(repoRoot, 'diagnosis-api', 'beta-site', 'app.js');
 const homeHtmlPath = path.join(repoRoot, 'index.html');
 
+await assertRepositoryRootFiles();
+
 const homeSource = await fs.readFile(homeScriptPath, 'utf8');
 const betaSource = await fs.readFile(betaScriptPath, 'utf8');
 const homeHtml = await fs.readFile(homeHtmlPath, 'utf8');
@@ -28,6 +30,16 @@ testStaticPrivacyBoundaries();
 testBetaSessionExpiryBehavior();
 
 console.log('Beta access frontend tests passed: state machine, fixed navigation, session expiry, privacy boundaries, zero provider calls');
+
+async function assertRepositoryRootFiles() {
+  const requiredFiles = [homeScriptPath, betaScriptPath, homeHtmlPath];
+  try {
+    await Promise.all(requiredFiles.map(file => fs.access(file)));
+  } catch {
+    console.error('frontend test requires repository root; skip in diagnosis-api-only release');
+    process.exit(1);
+  }
+}
 
 async function testEmptyInput(client) {
   let fetchCount = 0;

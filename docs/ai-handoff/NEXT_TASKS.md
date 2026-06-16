@@ -6,6 +6,7 @@ Updated by: Codex
 ## Now
 
 - Diagnosis Beta Phase 3 stopped before deployment because `test-diagnosis-log-version.js` assumed release-local `logs/diagnosis`. The test is now release-safe and uses `DIAGNOSIS_DATA_DIR` or a temporary data directory. A Phase 3 retry still requires separate authorization; do not reconnect to the server, switch releases, initialize SQLite, write HMAC keys, restart, deploy, run production POST, call AI, create real codes, or start B4 automatically.
+- A later Phase 3 retry must use `npm run test:server-release` with an isolated `DIAGNOSIS_DATA_DIR`. Do not run `test:beta-access-frontend` inside a diagnosis-api-only server release; keep it for complete-repository and Phase 4 static deployment validation.
 - Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.
 - The user must independently SSH and use `sudoedit /etc/framespark/diagnosis-api.env` or an equivalent non-echoing method to add `DEEPSEEK_API_KEY`; never send or print the key in chat, command arguments, Git, or logs.
 - After the key is safely present, require a new explicit authorization before `systemctl daemon-reload`, service enable/start, readiness checks, Basic Auth creation, Nginx changes, real AI smoke, or Beta/API opening.

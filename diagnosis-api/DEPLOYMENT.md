@@ -25,6 +25,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 - When enabled later, the database must be `/var/lib/framespark-diagnosis/access/beta-access.sqlite`, a regular service-owned `0600` file outside webroot.
 - Code and session HMAC keys must be distinct random secrets of at least 32 bytes. Rotating the code key invalidates codes; rotating the session key invalidates active sessions.
 - `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit and no-AI checks on the target Node 20 host.
+- Diagnosis-api-only server releases use `npm run test:server-release` with an isolated `DIAGNOSIS_DATA_DIR`. Frontend access-code tests require the repository root static files and are validated before static-site or Beta-client deployment, not inside the backend-only release.
 
 ## Invite Beta Boundary
 

@@ -2,6 +2,8 @@
 
 ## Recent Summary
 
+- 2026-06-16: Split Diagnosis Beta frontend access-code tests from the diagnosis-api-only server release check. Added `npm run test:server-release` for backend release validation and documented that `test:beta-access-frontend` requires repository-root static files and belongs to complete-repository/Phase 4 validation. No business code, API, SQLite schema, homepage, Beta page, Nginx, systemd, env, server, POST, AI, real code or B4 action changed.
+
 - 2026-06-16: Fixed the release-safety issue that stopped Diagnosis Beta Phase 3 before deployment. `test-diagnosis-log-version.js` now uses the active `DIAGNOSIS_DATA_DIR` or a temporary data directory instead of assuming writable `logs/diagnosis` under the immutable release tree. Added `DIAGNOSIS_BETA_PHASE3_LOG_TEST_FIX_2026-06-16.md`. No production logger, deployment config, SQLite schema, Beta access API, homepage, Beta static page, Nginx, systemd, env, server, POST, AI, real code or B4 action changed.
 
 - 2026-06-15: Added the default-off Diagnosis Beta access-code foundation: pinned SQLite dependency, hash-only code records, transactional max-use consumption, scoped 24-hour sessions, lifecycle revocation, persistent verification limits, loopback session validation, redacted management CLI and full no-AI tests. The eventual cohort is five people with one new code each; no real code, homepage/Beta UI, Nginx, server, htpasswd, production POST, AI, deployment, invitation or B4 T0 action was included.
