@@ -2,6 +2,8 @@
 
 ## Recent Summary
 
+- 2026-06-16: Fixed the release-safety issue that stopped Diagnosis Beta Phase 3 before deployment. `test-diagnosis-log-version.js` now uses the active `DIAGNOSIS_DATA_DIR` or a temporary data directory instead of assuming writable `logs/diagnosis` under the immutable release tree. Added `DIAGNOSIS_BETA_PHASE3_LOG_TEST_FIX_2026-06-16.md`. No production logger, deployment config, SQLite schema, Beta access API, homepage, Beta static page, Nginx, systemd, env, server, POST, AI, real code or B4 action changed.
+
 - 2026-06-15: Added the default-off Diagnosis Beta access-code foundation: pinned SQLite dependency, hash-only code records, transactional max-use consumption, scoped 24-hour sessions, lifecycle revocation, persistent verification limits, loopback session validation, redacted management CLI and full no-AI tests. The eventual cohort is five people with one new code each; no real code, homepage/Beta UI, Nginx, server, htpasswd, production POST, AI, deployment, invitation or B4 T0 action was included.
 
 - 2026-06-12: Executed Diagnosis Beta Stage A2 at locked SHA `683dea7fa98848cc40829b825cf4209692b7abe4`. Installed and froze a new immutable release, confirmed `qs@6.15.2`, zero production audit findings, and all approved V1/MVP no-AI checks, then atomically selected it through `current` while retaining `f4451587...` as `previous`. The service remains inactive/disabled, `8788` remains unused, env and Nginx hashes are unchanged, no key was written, no real AI ran, and no functional Beta/API route was opened.

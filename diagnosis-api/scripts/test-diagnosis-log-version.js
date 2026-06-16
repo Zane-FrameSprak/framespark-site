@@ -5,14 +5,23 @@
  */
 
 import fs from 'fs/promises';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { logDiagnosisResult } from '../src/services/diagnosisLogger.js';
-import { diagnosisVersions } from '../src/config/diagnosisVersion.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const API_ROOT = path.join(__dirname, '..');
+const existingDataDir = process.env.DIAGNOSIS_DATA_DIR;
+const ownsTempDataDir = !existingDataDir;
+const testDataDir = path.resolve(
+  existingDataDir || await fs.mkdtemp(path.join(os.tmpdir(), 'framespark-diagnosis-log-version-'))
+);
+
+process.env.DIAGNOSIS_DATA_DIR = testDataDir;
+
+const { logDiagnosisResult } = await import('../src/services/diagnosisLogger.js');
+const { diagnosisVersions } = await import('../src/config/diagnosisVersion.js');
 
 const c = {
   reset:  '\x1b[0m',
@@ -24,6 +33,7 @@ const ok = `${c.green}✓${c.reset}`;
 const fail = `${c.red}✗${c.reset}`;
 
 let failed = 0;
+let entryForCleanup = null;
 
 try {
   const entry = await logDiagnosisResult({
@@ -59,6 +69,7 @@ try {
       finalReport: makeReport()
     }
   });
+  entryForCleanup = entry;
 
   assertTruthy(entry, 'entry');
   assertTruthy(entry.id, 'entry.id');
@@ -69,17 +80,33 @@ try {
   assertEqual(entry.versions.promptVersion, diagnosisVersions.promptVersion, 'promptVersion');
   assertEqual(entry.versions.routerVersion, diagnosisVersions.routerVersion, 'routerVersion');
   assertEqual(entry.versions.reportParserVersion, diagnosisVersions.reportParserVersion, 'reportParserVersion');
-  const logPath = path.join(API_ROOT, 'logs', 'diagnosis', 'metadata', 'by-date', entry.createdAt.slice(0, 10), `${entry.id}.json`);
+  const logPath = path.join(testDataDir, 'diagnosis', 'metadata', 'by-date', entry.createdAt.slice(0, 10), `${entry.id}.json`);
   const saved = JSON.parse(await fs.readFile(logPath, 'utf8'));
+  const index = JSON.parse(await fs.readFile(path.join(testDataDir, 'diagnosis', 'metadata', 'index.json'), 'utf8'));
+  const indexEntry = index.find(item => item.id === entry.id);
+  assertTruthy(indexEntry, 'indexEntry');
+  assertTruthy(indexEntry.metadataPath, 'indexEntry.metadataPath');
+  if (indexEntry.metadataPath.startsWith('logs/')) {
+    throw new Error(`metadataPath must not point into release logs: ${indexEntry.metadataPath}`);
+  }
   assertEqual(saved.model, 'mock', 'saved.model');
   assertEqual(saved.finalReport, undefined, 'saved.finalReport');
+  assertEqual(saved.basicReport, undefined, 'saved.basicReport');
+  assertEqual(saved.reportV1, undefined, 'saved.reportV1');
   assertEqual(saved.originalFileName, undefined, 'saved.originalFileName');
+  assertEqual(saved.material, undefined, 'saved.material');
 
   console.log(`${ok} ${c.bold}诊断日志仅保存脱敏元数据和 versions 字段${c.reset}`);
 } catch (err) {
   failed += 1;
   console.log(`${fail} ${c.bold}诊断日志版本字段测试失败${c.reset}`);
   console.log(`   ${c.red}${err.message}${c.reset}`);
+} finally {
+  await cleanupTestData(entryForCleanup).catch(error => {
+    failed += 1;
+    console.log(`${fail} ${c.bold}诊断日志临时数据清理失败${c.reset}`);
+    console.log(`   ${c.red}${error.message}${c.reset}`);
+  });
 }
 
 if (failed > 0) {
@@ -108,5 +135,38 @@ function assertEqual(actual, expected, label) {
 function assertTruthy(value, label) {
   if (!value) {
     throw new Error(`${label} expected truthy value`);
+  }
+}
+
+async function cleanupTestData(entry) {
+  if (ownsTempDataDir) {
+    await fs.rm(testDataDir, { recursive: true, force: true });
+    return;
+  }
+  if (!entry?.id || !entry?.createdAt) return;
+  const dateDir = path.join(testDataDir, 'diagnosis', 'metadata', 'by-date', entry.createdAt.slice(0, 10));
+  await fs.rm(path.join(dateDir, `${entry.id}.json`), { force: true });
+  await removeIndexEntry(entry.id);
+  await removeDirectoryIfEmpty(dateDir);
+}
+
+async function removeDirectoryIfEmpty(dir) {
+  try {
+    const entries = await fs.readdir(dir);
+    if (entries.length === 0) await fs.rmdir(dir);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+}
+
+async function removeIndexEntry(id) {
+  const indexPath = path.join(testDataDir, 'diagnosis', 'metadata', 'index.json');
+  try {
+    const parsed = JSON.parse(await fs.readFile(indexPath, 'utf8'));
+    if (!Array.isArray(parsed)) return;
+    const next = parsed.filter(item => item.id !== id);
+    await fs.writeFile(indexPath, JSON.stringify(next, null, 2), { encoding: 'utf8', mode: 0o600 });
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
   }
 }

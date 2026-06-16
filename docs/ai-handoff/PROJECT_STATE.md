@@ -9,6 +9,8 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
+Diagnosis Beta Phase 3 has not been deployed. The previous attempt stopped before release switch because a no-AI test read release-local `logs/diagnosis`; the test has been made release-safe and a retry still requires separate explicit authorization.
+
 This is a lightweight product system, not only a static website. It currently includes:
 
 - Public static site.
