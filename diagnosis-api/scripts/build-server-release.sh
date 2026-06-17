@@ -38,6 +38,20 @@ if [[ "$platform" != "linux" ]]; then
   fail "release artifacts with native dependencies must be built on Linux; found $platform"
 fi
 
+os_release="$(awk -F= '/^PRETTY_NAME=/{gsub(/^"|"$/, "", $2); print $2}' /etc/os-release 2>/dev/null || true)"
+[[ -n "$os_release" ]] || os_release="$(uname -a)"
+glibc_line="$(getconf GNU_LIBC_VERSION 2>/dev/null || true)"
+glibc_version="$(awk '{print $2}' <<<"$glibc_line")"
+glibc_ldd_version="$(ldd --version 2>/dev/null | head -1 || true)"
+[[ -n "$glibc_version" ]] || fail "unable to determine glibc version"
+
+max_glibc_version="${RELEASE_MAX_GLIBC_VERSION:-2.35}"
+if [[ "$(printf '%s\n%s\n' "$max_glibc_version" "$glibc_version" | sort -V | tail -1)" != "$max_glibc_version" ]]; then
+  fail "build glibc $glibc_version is newer than allowed $max_glibc_version"
+fi
+info "build OS: $os_release"
+info "build glibc: $glibc_line"
+
 server_release_script="$(node -e "const s=require('$api_root/package.json').scripts['test:server-release'] || ''; process.stdout.write(s)")"
 if [[ "$server_release_script" == *"beta-access-frontend"* ]]; then
   fail "test:server-release must not run test:beta-access-frontend"
@@ -124,22 +138,41 @@ fi
 tarball_sha256="$(sha256sum "$tarball_path" | awk '{print $1}')"
 npm_version="$(npm -v)"
 node_version="$(node -v)"
+build_runner_image="${BUILD_RUNNER_IMAGE:-${ImageOS:-unknown}}"
 
-node - "$manifest_path" <<NODE
+MANIFEST_COMMIT_SHA="$commit_sha" \
+MANIFEST_BUILD_TIME_UTC="$build_time_utc" \
+MANIFEST_NODE_VERSION="$node_version" \
+MANIFEST_NPM_VERSION="$npm_version" \
+MANIFEST_PLATFORM="$platform" \
+MANIFEST_ARCH="$arch" \
+MANIFEST_MODULES_ABI="$modules_abi" \
+MANIFEST_BETTER_SQLITE_VERSION="$better_sqlite_version" \
+MANIFEST_TARBALL_NAME="$tarball_name" \
+MANIFEST_TARBALL_SHA256="$tarball_sha256" \
+MANIFEST_OS_RELEASE="$os_release" \
+MANIFEST_GLIBC_VERSION="$glibc_version" \
+MANIFEST_GLIBC_LDD_VERSION="$glibc_ldd_version" \
+MANIFEST_BUILD_RUNNER_IMAGE="$build_runner_image" \
+node - "$manifest_path" <<'NODE'
 const fs = require('node:fs');
 const manifestPath = process.argv[2];
 const manifest = {
-  commitSha: '$commit_sha',
-  buildTimeUtc: '$build_time_utc',
-  nodeVersion: '$node_version',
-  npmVersion: '$npm_version',
-  platform: '$platform',
-  arch: '$arch',
-  modulesAbi: '$modules_abi',
-  betterSqlite3Version: '$better_sqlite_version',
+  commitSha: process.env.MANIFEST_COMMIT_SHA,
+  buildTimeUtc: process.env.MANIFEST_BUILD_TIME_UTC,
+  osRelease: process.env.MANIFEST_OS_RELEASE,
+  glibcVersion: process.env.MANIFEST_GLIBC_VERSION,
+  glibcLddVersion: process.env.MANIFEST_GLIBC_LDD_VERSION,
+  nodeVersion: process.env.MANIFEST_NODE_VERSION,
+  npmVersion: process.env.MANIFEST_NPM_VERSION,
+  platform: process.env.MANIFEST_PLATFORM,
+  arch: process.env.MANIFEST_ARCH,
+  modulesAbi: process.env.MANIFEST_MODULES_ABI,
+  betterSqlite3Version: process.env.MANIFEST_BETTER_SQLITE_VERSION,
+  buildRunnerImage: process.env.MANIFEST_BUILD_RUNNER_IMAGE,
   serverReleaseCheck: 'passed',
-  tarballFilename: '$tarball_name',
-  tarballSha256: '$tarball_sha256'
+  tarballFilename: process.env.MANIFEST_TARBALL_NAME,
+  tarballSha256: process.env.MANIFEST_TARBALL_SHA256
 };
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 NODE

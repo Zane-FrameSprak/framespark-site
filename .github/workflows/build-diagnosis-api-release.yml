@@ -8,7 +8,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    env:
+      BUILD_RUNNER_IMAGE: github-actions/ubuntu-22.04
+      RELEASE_MAX_GLIBC_VERSION: "2.35"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,6 +26,8 @@ jobs:
           node -v
           npm -v
           node -p "process.platform + '/' + process.arch + ' modules=' + process.versions.modules"
+          getconf GNU_LIBC_VERSION
+          ldd --version | head -1
 
       - name: Build Diagnosis API release artifact
         working-directory: diagnosis-api

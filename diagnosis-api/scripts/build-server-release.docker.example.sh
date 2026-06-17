@@ -20,11 +20,11 @@ docker run --rm \
   --platform linux/amd64 \
   -v "$repo_root:/workspace/framespark-site:ro" \
   -v "$artifacts_dir:/artifacts" \
-  node:20-bookworm \
+  node:20-bullseye \
   bash -lc '
     set -euo pipefail
     mkdir -p /build
     cp -a /workspace/framespark-site /build/framespark-site
     cd /build/framespark-site/diagnosis-api
-    OUTPUT_DIR=/artifacts ./scripts/build-server-release.sh
+    BUILD_RUNNER_IMAGE=node:20-bullseye OUTPUT_DIR=/artifacts ./scripts/build-server-release.sh
   '

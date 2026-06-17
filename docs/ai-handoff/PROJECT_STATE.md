@@ -11,6 +11,12 @@ The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main
 
 Diagnosis API Phase 3 backend deployment is complete at production release `d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to `683dea7fa98848cc40829b825cf4209692b7abe4`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `0 / 2 / 0`. `ENABLE_BETA_CODE_ACCESS` is absent/false, no HMAC keys or real access codes exist, beta access SQLite schema was not initialized, no production POST or AI call occurred, B4 T0 has not started, and Phase 4 must not begin without a separate plan.
 
+Phase 4B attempted to initialize Beta access env/schema and was rolled back.
+The current `d722fc3...` release remains healthy while Beta access is disabled,
+but its artifact cannot be used for Phase 4B because `better-sqlite3` required
+`GLIBC_2.38` and production is glibc `2.35`. Generate a new artifact from the
+fixed `ubuntu-22.04` workflow before any Beta access env, SQLite or code work.
+
 Separate finding: `framespark-analytics.service` failed after reboot because its `WorkingDirectory` points to `/tmp/framespark-site/analytics-api`, which disappears across restart. Treat analytics stabilization as a separate task, not part of Diagnosis Phase 3.
 
 This is a lightweight product system, not only a static website. It currently includes:

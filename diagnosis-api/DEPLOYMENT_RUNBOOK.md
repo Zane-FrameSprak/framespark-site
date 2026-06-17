@@ -15,6 +15,11 @@ Basic Auth Beta boundary remain unchanged. Access-code login is still disabled:
 production POST or AI call has been made, B4 T0 has not started, and Phase 4
 must be planned separately.
 
+Important: do not reuse the `d722fc3...` artifact for Phase 4B. It was built on
+a runner with newer glibc and its `better-sqlite3` native module failed to load
+on production glibc `2.35`. Generate a new artifact from the fixed
+`ubuntu-22.04` workflow and verify it in server staging first.
+
 ## Preflight
 
 - Approved commit is on `origin/main`; worktree is clean.
@@ -53,10 +58,10 @@ Prepare the diagnosis-api release outside the production server in a Linux
 environment that matches the production Node 20 platform and architecture.
 
 1. Preferred first step: manually run the GitHub Actions workflow
-   `Build Diagnosis API release artifact`. It uses an `ubuntu-latest` Node 20
+   `Build Diagnosis API release artifact`. It uses an `ubuntu-22.04` Node 20
    runner, no production secrets, and uploads a seven-day artifact containing
    the tarball, manifest and `SHA256SUMS`. Artifact generation is not a
-   deployment.
+   deployment. Do not use `ubuntu-latest` for native dependency artifacts.
 2. For non-GitHub builder runs, run `scripts/build-server-release.sh` in a
    Linux Node 20 build environment, not on the production host. The script
    enforces clean git state, Node 20, Linux, `npm ci --omit=dev`,
@@ -65,7 +70,7 @@ environment that matches the production Node 20 platform and architecture.
    `DIAGNOSIS_DATA_DIR=<isolated-test-data> npm run test:server-release`.
 3. For Docker-based builds, use
    `scripts/build-server-release.docker.example.sh` from the repository root.
-   It uses `node:20-bookworm` with `--platform linux/amd64` and writes artifacts
+   It uses `node:20-bullseye` with `--platform linux/amd64` and writes artifacts
    to a host artifacts directory outside the repository by default.
 4. Do not run `npm run test:beta-access-frontend` inside a diagnosis-api-only
    release; it requires repository-root static site files and belongs to

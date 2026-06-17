@@ -19,6 +19,12 @@ Phase 3 backend deployment is complete, but Beta access-code flow is not live:
 boundary, no real access codes or HMAC keys have been created, B4 T0 has not
 started, and Phase 4 must not begin without a separate plan.
 
+Do not reuse the `d722fc3...` artifact for Phase 4B. Its `better-sqlite3`
+native module was built against a newer glibc than production and failed to
+load when Beta access schema initialization was attempted. Generate and verify
+a new artifact from the fixed `ubuntu-22.04` workflow before any Beta access
+env, SQLite or code-generation work.
+
 Production dependencies for native modules must be built outside the production
 server in a Linux environment matching the target Node 20 platform/architecture,
 then uploaded as an immutable release artifact that already contains
@@ -28,10 +34,12 @@ compilation during Phase 3.
 
 First use the manual GitHub Actions workflow
 `Build Diagnosis API release artifact` to create the tarball, manifest and
-`SHA256SUMS` on a Linux Node 20 runner. The workflow uses no production secrets
-and does not deploy. Use `scripts/verify-server-release-artifact.sh` later in
-server staging to verify the downloaded artifact without `npm ci`, network
-access, env changes, `current` changes or service restarts.
+`SHA256SUMS` on the fixed `ubuntu-22.04` Linux Node 20 runner. The workflow
+uses no production secrets and does not deploy. Use
+`scripts/verify-server-release-artifact.sh` later in server staging to verify
+the downloaded artifact without `npm ci`, network access, env changes,
+`current` changes or service restarts. The manifest and verifier must prove the
+artifact glibc is not newer than production glibc.
 
 Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 

@@ -49,6 +49,24 @@ manifest_sha="$(node -e "const fs=require('node:fs'); const m=JSON.parse(fs.read
 manifest_tarball="$(node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(m.tarballFilename || '')" "$manifest_abs")"
 [[ "$manifest_tarball" == "$tarball_name" ]] || fail "manifest tarballFilename does not match tarball"
 
+manifest_platform="$(node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(m.platform || '')" "$manifest_abs")"
+manifest_arch="$(node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(m.arch || '')" "$manifest_abs")"
+local_platform="$(node -p "process.platform")"
+local_arch="$(node -p "process.arch")"
+[[ "$manifest_platform" == "$local_platform" ]] || fail "manifest platform $manifest_platform does not match server $local_platform"
+[[ "$manifest_arch" == "$local_arch" ]] || fail "manifest arch $manifest_arch does not match server $local_arch"
+
+manifest_glibc="$(node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(m.glibcVersion || '')" "$manifest_abs")"
+local_glibc_line="$(getconf GNU_LIBC_VERSION 2>/dev/null || true)"
+local_glibc="$(awk '{print $2}' <<<"$local_glibc_line")"
+if [[ -n "$manifest_glibc" && -n "$local_glibc" ]]; then
+  if [[ "$(printf '%s\n%s\n' "$local_glibc" "$manifest_glibc" | sort -V | tail -1)" != "$local_glibc" ]]; then
+    fail "artifact glibc $manifest_glibc is newer than server glibc $local_glibc"
+  fi
+else
+  fail "unable to compare artifact/server glibc versions"
+fi
+
 if tar -tzf "$tarball_abs" | grep -E '(^|/)(\.env|logs|tmp|temp|coverage|secrets|test-results|test-runs)(/|$)|(^|/)diagnosis/(metadata|review|provider)(/|$)|\.sqlite($|[-.])' >/dev/null; then
   fail "tarball contains a forbidden path"
 fi
@@ -77,6 +95,6 @@ if find "$tmp_root" \( -name '.env' -o -name '.env.*' -o -name '*.sqlite' -o -na
 fi
 
 info "manifest summary"
-node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); console.log(JSON.stringify({commitSha:m.commitSha,nodeVersion:m.nodeVersion,npmVersion:m.npmVersion,platform:m.platform,arch:m.arch,modulesAbi:m.modulesAbi,betterSqlite3Version:m.betterSqlite3Version,serverReleaseCheck:m.serverReleaseCheck}, null, 2));" "$manifest_abs"
+node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); console.log(JSON.stringify({commitSha:m.commitSha,osRelease:m.osRelease,glibcVersion:m.glibcVersion,nodeVersion:m.nodeVersion,npmVersion:m.npmVersion,platform:m.platform,arch:m.arch,modulesAbi:m.modulesAbi,betterSqlite3Version:m.betterSqlite3Version,buildRunnerImage:m.buildRunnerImage,serverReleaseCheck:m.serverReleaseCheck}, null, 2));" "$manifest_abs"
 
 printf 'GREEN: artifact verified without npm ci, env changes, current switch, restart, or network access\n'
