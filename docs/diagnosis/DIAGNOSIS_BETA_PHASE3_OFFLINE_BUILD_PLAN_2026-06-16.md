@@ -15,6 +15,7 @@ preparation and one controlled restart.
 
 Repository tooling:
 
+- `.github/workflows/build-diagnosis-api-release.yml`
 - `diagnosis-api/scripts/build-server-release.sh`
 - `diagnosis-api/scripts/verify-server-release-artifact.sh`
 - `diagnosis-api/scripts/build-server-release.docker.example.sh`
@@ -53,6 +54,10 @@ Repository tooling:
 - Node 20 and npm version recorded in the release manifest.
 - No production env file, HMAC key, DeepSeek key, Basic Auth credential or
   user material present in the build environment.
+- Preferred next step is to manually run the GitHub Actions workflow
+  `Build Diagnosis API release artifact` on the target commit. It uses
+  `ubuntu-latest`, Node 20, `contents: read`, no secrets and no deployment
+  step, then uploads `diagnosis-api-release-<sha>` for 7 days.
 - Run:
 
 ```bash
@@ -93,6 +98,10 @@ The release tarball must exclude:
 ## Server Deployment Requirements
 
 The production server must not run `npm ci` for this phase.
+
+Generating or downloading the GitHub Actions artifact is only a build step. A
+separate Phase 3 retry plan is still required before any server connection,
+artifact upload, SQLite/env preparation, restart, or release switch.
 
 Server-side steps are limited to:
 

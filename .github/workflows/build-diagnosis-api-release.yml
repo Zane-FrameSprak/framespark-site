@@ -1,0 +1,42 @@
+name: Build Diagnosis API release artifact
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Print build environment
+        run: |
+          node -v
+          npm -v
+          node -p "process.platform + '/' + process.arch + ' modules=' + process.versions.modules"
+
+      - name: Build Diagnosis API release artifact
+        working-directory: diagnosis-api
+        env:
+          OUTPUT_DIR: ${{ runner.temp }}/diagnosis-api-release
+        run: bash scripts/build-server-release.sh
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnosis-api-release-${{ github.sha }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/diagnosis-api-release/*.tar.gz
+            ${{ runner.temp }}/diagnosis-api-release/*.manifest.json
+            ${{ runner.temp }}/diagnosis-api-release/SHA256SUMS

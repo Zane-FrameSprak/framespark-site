@@ -20,11 +20,12 @@ then uploaded as an immutable release artifact that already contains
 permissions and switch `current`; it must not run full `npm ci` or native
 compilation during Phase 3.
 
-Use `scripts/build-server-release.sh` in the Linux builder to create the
-tarball, manifest and `SHA256SUMS`. Use
-`scripts/verify-server-release-artifact.sh` in server staging to verify the
-artifact without `npm ci`, network access, env changes, `current` changes or
-service restarts.
+First use the manual GitHub Actions workflow
+`Build Diagnosis API release artifact` to create the tarball, manifest and
+`SHA256SUMS` on a Linux Node 20 runner. The workflow uses no production secrets
+and does not deploy. Use `scripts/verify-server-release-artifact.sh` later in
+server staging to verify the downloaded artifact without `npm ci`, network
+access, env changes, `current` changes or service restarts.
 
 Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 
