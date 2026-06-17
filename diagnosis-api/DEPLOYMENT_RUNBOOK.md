@@ -7,18 +7,19 @@ Manual runbook for a protected diagnosis Beta. It is not an automatic deployment
 ## Current Phase 3 State
 
 Phase 3 backend deployment completed at release
-`d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to
-`683dea7fa98848cc40829b825cf4209692b7abe4`. The service is
+`e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to
+`d722fc3ed06ce6908a8936390455def8f735913e`. The service is
 `active/running/enabled` on loopback `8788`, and public `/diagnosis/` plus the
 Basic Auth Beta boundary remain unchanged. Access-code login is still disabled:
 `ENABLE_BETA_CODE_ACCESS` is unset/false, no HMAC keys or real codes exist, no
 production POST or AI call has been made, B4 T0 has not started, and Phase 4
 must be planned separately.
 
-Important: do not reuse the `d722fc3...` artifact for Phase 4B. It was built on
-a runner with newer glibc and its `better-sqlite3` native module failed to load
-on production glibc `2.35`. Generate a new artifact from the fixed
-`ubuntu-22.04` workflow and verify it in server staging first.
+Important: do not reuse the older `d722fc3...` artifact for Phase 4B. It was
+built on a runner with newer glibc and its `better-sqlite3` native module
+failed to load on production glibc `2.35`. The current `e16d699...` release was
+generated from the fixed `ubuntu-22.04` workflow and verified in server staging
+before deployment.
 
 ## Preflight
 

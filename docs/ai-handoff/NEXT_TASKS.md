@@ -5,9 +5,8 @@ Updated by: Codex
 
 ## Now
 
-- Diagnosis API Phase 3 backend deployment is complete at production release `d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to `683dea7fa98848cc40829b825cf4209692b7abe4`. Keep `ENABLE_BETA_CODE_ACCESS` absent/false, Basic Auth as the current Beta boundary, and do not treat this as invite-code launch.
-- Next step is not deployment. First generate a new glibc-compatible Diagnosis API artifact from the fixed `ubuntu-22.04` workflow and verify it in server staging; the current `d722fc3...` artifact is not valid for Phase 4B because its `better-sqlite3` native module required `GLIBC_2.38` while production is glibc `2.35`.
-- After the compatible artifact is verified, separately plan Phase 4 for invite-code flow: homepage entry deployment, Nginx `auth_request` / session validation, stable identity handoff, real code generation, rollback and verification. Do not create real codes, write HMAC keys, initialize beta access SQLite schema, execute production POST, call AI, start B4 T0 or invite testers before that plan is approved.
+- Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. Keep `ENABLE_BETA_CODE_ACCESS` absent/false, Basic Auth as the current Beta boundary, and do not treat this as invite-code launch.
+- Next step is Phase 4B retry planning/execution for root-only HMAC secrets, env and SQLite schema, still with `ENABLE_BETA_CODE_ACCESS=false` and no real access codes. Do not deploy homepage entry, modify/reload Nginx, create real codes, execute production POST, call AI, start B4 T0 or invite testers before the relevant phase is approved.
 - Continue to avoid production-host `npm ci` or native dependency compilation. Future backend release updates should still use the Linux prebuilt artifact flow.
 - `framespark-analytics.service` has a separate stability issue: its unit points to `/tmp/framespark-site/analytics-api`, which disappears after reboot. Plan analytics stabilization separately; do not fold it into Diagnosis Phase 3.
 - Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.

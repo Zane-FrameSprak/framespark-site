@@ -49,9 +49,13 @@ deployment.
 
 ## Next Required Step
 
-Generate a new Diagnosis API release artifact from the fixed workflow. Do not
-reuse the current `d722fc3...` artifact for Phase 4B. The new artifact must be
-verified in server staging before any env, SQLite or service action.
+Update: a new Diagnosis API release artifact was generated from the fixed
+workflow and deployed as production release
+`e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`. It was verified in server staging
+and loaded `better-sqlite3` successfully on production before deployment.
+
+The next step is a separate Phase 4B retry plan for env, HMAC secrets and
+SQLite schema. Invite-code access is still disabled.
 
 Still forbidden until a separate execution plan is approved:
 

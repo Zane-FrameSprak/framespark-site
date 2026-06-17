@@ -13,17 +13,17 @@ This repository contains the production baseline only. It does not authorize dep
 - Bind: `127.0.0.1:8788`; analytics remains on `8787`
 - Start: `npm start`
 
-Current production backend release: `d722fc3ed06ce6908a8936390455def8f735913e`.
+Current production backend release: `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`.
 Phase 3 backend deployment is complete, but Beta access-code flow is not live:
 `ENABLE_BETA_CODE_ACCESS` remains unset/false, Basic Auth remains the user
 boundary, no real access codes or HMAC keys have been created, B4 T0 has not
 started, and Phase 4 must not begin without a separate plan.
 
-Do not reuse the `d722fc3...` artifact for Phase 4B. Its `better-sqlite3`
-native module was built against a newer glibc than production and failed to
-load when Beta access schema initialization was attempted. Generate and verify
-a new artifact from the fixed `ubuntu-22.04` workflow before any Beta access
-env, SQLite or code-generation work.
+The previous `d722fc3...` artifact must not be reused for Phase 4B. Its
+`better-sqlite3` native module was built against a newer glibc than production
+and failed to load when Beta access schema initialization was attempted. The
+current `e16d699...` release was built from the fixed `ubuntu-22.04` workflow
+and verified on the production server before deployment.
 
 Production dependencies for native modules must be built outside the production
 server in a Linux environment matching the target Node 20 platform/architecture,

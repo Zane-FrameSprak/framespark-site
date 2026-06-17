@@ -9,13 +9,14 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis API Phase 3 backend deployment is complete at production release `d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to `683dea7fa98848cc40829b825cf4209692b7abe4`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `0 / 2 / 0`. `ENABLE_BETA_CODE_ACCESS` is absent/false, no HMAC keys or real access codes exist, beta access SQLite schema was not initialized, no production POST or AI call occurred, B4 T0 has not started, and Phase 4 must not begin without a separate plan.
+Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `1 / 2 / 0` with no deployment increment. `ENABLE_BETA_CODE_ACCESS` is absent/false, no HMAC keys or real access codes exist, no beta access code was created, no production POST or AI call occurred, B4 T0 has not started, and Phase 4 must not begin without a separate plan.
 
 Phase 4B attempted to initialize Beta access env/schema and was rolled back.
-The current `d722fc3...` release remains healthy while Beta access is disabled,
-but its artifact cannot be used for Phase 4B because `better-sqlite3` required
-`GLIBC_2.38` and production is glibc `2.35`. Generate a new artifact from the
-fixed `ubuntu-22.04` workflow before any Beta access env, SQLite or code work.
+The older `d722fc3...` release remained healthy while Beta access was disabled,
+but its artifact could not be used for Phase 4B because `better-sqlite3`
+required `GLIBC_2.38` and production is glibc `2.35`. The current
+`e16d699...` release was built from the fixed `ubuntu-22.04` workflow and
+verified on production before deployment.
 
 Separate finding: `framespark-analytics.service` failed after reboot because its `WorkingDirectory` points to `/tmp/framespark-site/analytics-api`, which disappears across restart. Treat analytics stabilization as a separate task, not part of Diagnosis Phase 3.
 
