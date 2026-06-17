@@ -54,8 +54,9 @@ workflow and deployed as production release
 `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`. It was verified in server staging
 and loaded `better-sqlite3` successfully on production before deployment.
 
-The next step is a separate Phase 4B retry plan for env, HMAC secrets and
-SQLite schema. Invite-code access is still disabled.
+Update: Phase 4B later initialized the root-only HMAC secrets and SQLite schema
+on the `e16d699...` release while keeping `ENABLE_BETA_CODE_ACCESS=false`.
+Invite-code access is still disabled, and no real code exists.
 
 Still forbidden until a separate execution plan is approved:
 

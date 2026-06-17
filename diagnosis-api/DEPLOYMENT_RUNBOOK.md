@@ -11,9 +11,9 @@ Phase 3 backend deployment completed at release
 `d722fc3ed06ce6908a8936390455def8f735913e`. The service is
 `active/running/enabled` on loopback `8788`, and public `/diagnosis/` plus the
 Basic Auth Beta boundary remain unchanged. Access-code login is still disabled:
-`ENABLE_BETA_CODE_ACCESS` is unset/false, no HMAC keys or real codes exist, no
-production POST or AI call has been made, B4 T0 has not started, and Phase 4
-must be planned separately.
+`ENABLE_BETA_CODE_ACCESS=false`, HMAC secrets and the SQLite schema exist, no
+real codes exist, no production POST or AI call has been made, B4 T0 has not
+started, and Phase 4C/4D must be planned separately.
 
 Important: do not reuse the older `d722fc3...` artifact for Phase 4B. It was
 built on a runner with newer glibc and its `better-sqlite3` native module
@@ -51,7 +51,11 @@ before deployment.
 
 Never print or commit the env file.
 
-Phase 1 access-code variables remain disabled and secret-free in production. A later migration must create two distinct HMAC secrets through the approved root-only env process and must not generate real codes before cookie authentication and rollback have been reviewed.
+Phase 4B access-code variables remain disabled but no longer secret-free in
+production. Two distinct HMAC secrets exist in the root-only env, and
+`/var/lib/framespark-diagnosis/access/beta-access.sqlite` has schema
+`user_version=1` with zero codes. A later migration must not generate real codes
+before cookie authentication and rollback have been reviewed.
 
 ## Release Artifact Preparation
 

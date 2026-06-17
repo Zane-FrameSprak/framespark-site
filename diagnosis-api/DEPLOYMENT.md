@@ -16,8 +16,8 @@ This repository contains the production baseline only. It does not authorize dep
 Current production backend release: `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`.
 Phase 3 backend deployment is complete, but Beta access-code flow is not live:
 `ENABLE_BETA_CODE_ACCESS` remains unset/false, Basic Auth remains the user
-boundary, no real access codes or HMAC keys have been created, B4 T0 has not
-started, and Phase 4 must not begin without a separate plan.
+boundary, no real access codes have been created, B4 T0 has not started, and
+Phase 4C/4D must not begin without a separate plan.
 
 The previous `d722fc3...` artifact must not be reused for Phase 4B. Its
 `better-sqlite3` native module was built against a newer glibc than production
@@ -47,7 +47,10 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 
 - The repository contains an optional SQLite access-code/session foundation.
 - `ENABLE_BETA_CODE_ACCESS=false` remains the production default for this phase.
-- Do not add HMAC keys, create the database, generate real codes or change Nginx until the homepage and cookie-auth migration receive separate approval.
+- Phase 4B initialized the production HMAC secrets and SQLite schema, but did
+  not enable the routes and did not create any access code.
+- Do not generate real codes or change Nginx until the homepage and cookie-auth
+  migration receive separate approval.
 - When enabled later, the database must be `/var/lib/framespark-diagnosis/access/beta-access.sqlite`, a regular service-owned `0600` file outside webroot.
 - Code and session HMAC keys must be distinct random secrets of at least 32 bytes. Rotating the code key invalidates codes; rotating the session key invalidates active sessions.
 - `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit, native load and no-AI checks in a Linux Node 20 build environment compatible with production.
