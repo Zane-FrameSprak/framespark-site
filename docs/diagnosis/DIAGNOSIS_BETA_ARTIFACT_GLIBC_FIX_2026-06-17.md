@@ -13,7 +13,7 @@ Root cause: the GitHub Actions artifact was built on `ubuntu-latest`, whose
 native `better-sqlite3` module required `GLIBC_2.38`. Production is
 Ubuntu glibc `2.35` with Node `v20.20.2`, module ABI `115`, `linux/x64`.
 
-## Current Production State
+## Production State At The Failed Attempt
 
 - Production `current`: `d722fc3ed06ce6908a8936390455def8f735913e`
 - The service is healthy while `ENABLE_BETA_CODE_ACCESS` is absent/false.
@@ -58,13 +58,18 @@ Update: Phase 4B later initialized the root-only HMAC secrets and SQLite schema
 on the `e16d699...` release while keeping `ENABLE_BETA_CODE_ACCESS=false`.
 Invite-code access is still disabled, and no real code exists.
 
+Update: Phase 4C later set `ENABLE_BETA_CODE_ACCESS=true` only for loopback
+backend verification. One internal test code path was verified and revoked, all
+test code records are revoked, no active or real tester code exists, and Nginx
+still does not expose functional invite-code routes publicly.
+
 Still forbidden until a separate execution plan is approved:
 
 - production server `npm ci`
 - Nginx changes or reload
 - homepage invite-code deployment
 - real access code creation
-- `ENABLE_BETA_CODE_ACCESS=true`
+- public invite-code Nginx route changes
 - production POST
 - AI call
 - B4 T0

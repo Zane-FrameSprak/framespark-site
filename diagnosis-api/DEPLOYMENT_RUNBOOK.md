@@ -10,10 +10,12 @@ Phase 3 backend deployment completed at release
 `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to
 `d722fc3ed06ce6908a8936390455def8f735913e`. The service is
 `active/running/enabled` on loopback `8788`, and public `/diagnosis/` plus the
-Basic Auth Beta boundary remain unchanged. Access-code login is still disabled:
-`ENABLE_BETA_CODE_ACCESS=false`, HMAC secrets and the SQLite schema exist, no
-real codes exist, no production POST or AI call has been made, B4 T0 has not
-started, and Phase 4C/4D must be planned separately.
+Basic Auth Beta boundary remain unchanged. Access-code backend routes are
+enabled only inside the loopback Diagnosis API process after Phase 4C:
+`ENABLE_BETA_CODE_ACCESS=true`, HMAC secrets and the SQLite schema exist, but
+Nginx still does not expose the invite-code flow publicly. No real codes exist,
+no production diagnosis POST or AI call has been made, B4 T0 has not started,
+and Phase 4D must be planned separately.
 
 Important: do not reuse the older `d722fc3...` artifact for Phase 4B. It was
 built on a runner with newer glibc and its `better-sqlite3` native module
@@ -51,11 +53,13 @@ before deployment.
 
 Never print or commit the env file.
 
-Phase 4B access-code variables remain disabled but no longer secret-free in
-production. Two distinct HMAC secrets exist in the root-only env, and
+Phase 4B access-code variables are no longer secret-free in production. Two
+distinct HMAC secrets exist in the root-only env, and
 `/var/lib/framespark-diagnosis/access/beta-access.sqlite` has schema
-`user_version=1` with zero codes. A later migration must not generate real codes
-before cookie authentication and rollback have been reviewed.
+`user_version=1`. Phase 4C created and revoked internal test records for
+loopback verification only; the DB has no active code and no real tester code.
+A later migration must not generate real codes before cookie authentication and
+rollback have been reviewed.
 
 ## Release Artifact Preparation
 

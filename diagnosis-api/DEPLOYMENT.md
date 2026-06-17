@@ -14,10 +14,12 @@ This repository contains the production baseline only. It does not authorize dep
 - Start: `npm start`
 
 Current production backend release: `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`.
-Phase 3 backend deployment is complete, but Beta access-code flow is not live:
-`ENABLE_BETA_CODE_ACCESS` remains unset/false, Basic Auth remains the user
-boundary, no real access codes have been created, B4 T0 has not started, and
-Phase 4C/4D must not begin without a separate plan.
+Phase 3 backend deployment is complete. Phase 4B initialized the access-code
+secrets and SQLite schema, and Phase 4C enabled the backend routes only inside
+the loopback Diagnosis API process for internal verification. The public
+invite-code flow is still not live: Nginx still uses Basic Auth as the user
+boundary, no real tester codes have been created, B4 T0 has not started, and
+Phase 4D must not begin without a separate plan.
 
 The previous `d722fc3...` artifact must not be reused for Phase 4B. Its
 `better-sqlite3` native module was built against a newer glibc than production
@@ -46,9 +48,11 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 ## Access-code Phase 1 Boundary
 
 - The repository contains an optional SQLite access-code/session foundation.
-- `ENABLE_BETA_CODE_ACCESS=false` remains the production default for this phase.
-- Phase 4B initialized the production HMAC secrets and SQLite schema, but did
-  not enable the routes and did not create any access code.
+- `ENABLE_BETA_CODE_ACCESS=true` is now set only for loopback backend
+  validation. Nginx does not expose the verify/session routes publicly yet.
+- Phase 4B initialized the production HMAC secrets and SQLite schema.
+- Phase 4C created and revoked internal test records only; the access DB has no
+  active code and no real tester code.
 - Do not generate real codes or change Nginx until the homepage and cookie-auth
   migration receive separate approval.
 - When enabled later, the database must be `/var/lib/framespark-diagnosis/access/beta-access.sqlite`, a regular service-owned `0600` file outside webroot.
@@ -96,6 +100,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 ## Open Gates
 
 Do not enable the invite-code homepage entry, create real access codes, switch
-to cookie auth, start B4 T0 or begin Phase 4 until a separate Phase 4 plan is
-approved and verified. The current production backend release alone does not
-mean real tester access is live.
+public traffic to cookie auth, start B4 T0 or begin Phase 4D until a separate
+Phase 4D plan is approved and verified. The current production backend routes
+are loopback-only from the public user's perspective and do not mean real tester
+access is live.

@@ -9,9 +9,10 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `1 / 2 / 0` with no deployment increment. Phase 4B initialized root-only HMAC secrets and `/var/lib/framespark-diagnosis/access/beta-access.sqlite` with schema `user_version=1` and code count `0`, while keeping `ENABLE_BETA_CODE_ACCESS=false`. No real access code was created, no production POST or AI call occurred, B4 T0 has not started, and Phase 4C/4D must not begin without a separate plan.
+Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `1 / 2 / 0` with no deployment increment. Phase 4B initialized root-only HMAC secrets and `/var/lib/framespark-diagnosis/access/beta-access.sqlite` with schema `user_version=1`; Phase 4C set `ENABLE_BETA_CODE_ACCESS=true` for loopback-only backend validation, verified and revoked internal test code/session flows, and left the DB with no active codes. No real tester code was created, no production diagnosis POST or AI call occurred, B4 T0 has not started, and Phase 4D must not begin without a separate plan.
 
-Phase 4B attempted to initialize Beta access env/schema and was rolled back.
+The first Phase 4B attempt against the older `d722fc3...` release attempted to
+initialize Beta access env/schema and was rolled back.
 The older `d722fc3...` release remained healthy while Beta access was disabled,
 but its artifact could not be used for Phase 4B because `better-sqlite3`
 required `GLIBC_2.38` and production is glibc `2.35`. The current
@@ -21,6 +22,11 @@ verified on production before deployment.
 Phase 4B public route probes for `/api/beta-access/verify` and
 `/internal/beta-session/validate` still return the known static HTML fallback,
 not functional JSON API responses. This Nginx boundary remains a Phase 4D task.
+
+Phase 4C left two revoked internal test code records and two session records in
+the access DB as audit evidence; active code count is `0`, revoked code count is
+`2`, and used-count sum is `1`. These are not real tester codes and must not be
+reused or shared.
 
 Separate finding: `framespark-analytics.service` failed after reboot because its `WorkingDirectory` points to `/tmp/framespark-site/analytics-api`, which disappears across restart. Treat analytics stabilization as a separate task, not part of Diagnosis Phase 3.
 

@@ -5,8 +5,8 @@ Updated by: Codex
 
 ## Now
 
-- Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. Phase 4B initialized HMAC secrets and SQLite schema, but `ENABLE_BETA_CODE_ACCESS=false`, Basic Auth remains the current Beta boundary, code count is `0`, and this is not invite-code launch.
-- Next step is Phase 4C planning/execution for a single internal test code and backend-only verify/session validation, still without homepage deployment or Nginx cookie-auth migration unless separately approved. Do not deploy homepage entry, modify/reload Nginx, create real tester codes, execute Diagnosis POST, call AI, start B4 T0 or invite testers before the relevant phase is approved.
+- Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. Phase 4B initialized HMAC secrets and SQLite schema. Phase 4C set `ENABLE_BETA_CODE_ACCESS=true` for loopback-only backend validation, verified and revoked internal test code/session flows, and left no active code. Basic Auth remains the current public Beta boundary; this is not invite-code launch.
+- Next step is Phase 4D planning for homepage/static deployment and the Nginx session-auth boundary. Do not deploy homepage entry, modify/reload Nginx, create real tester codes, execute Diagnosis POST, call AI, start B4 T0 or invite testers before a separate Phase 4D plan is approved.
 - Continue to avoid production-host `npm ci` or native dependency compilation. Future backend release updates should still use the Linux prebuilt artifact flow.
 - `framespark-analytics.service` has a separate stability issue: its unit points to `/tmp/framespark-site/analytics-api`, which disappears after reboot. Plan analytics stabilization separately; do not fold it into Diagnosis Phase 3.
 - Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.

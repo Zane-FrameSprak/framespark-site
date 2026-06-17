@@ -305,7 +305,7 @@ protected Beta request
 - Production V1 errors are fail-closed. Unsafe final output and staged-runner failures return controlled errors instead of a legacy fallback report.
 - `diagnosisLogger.js` writes metadata under `/var/lib/framespark-diagnosis/diagnosis/metadata`; optional review-consent records use a separate 14-day directory. Default logs do not store the source filename, full material, or full report.
 - `providerUsageStore.js` persists the global provider-call daily cap. Initial account/IP/request limits are process-local and are suitable only for the planned single-instance invitation Beta; multi-instance deployment requires a shared limiter.
-- Beta assets live under `diagnosis-api/beta-site/`, outside public static deployment. `/diagnosis/beta/`, `/api/diagnosis/`, and feedback are intended to share Nginx Basic Auth protection through an authenticated alias/proxy. Nginx forwards the authenticated username; the API rejects missing production identity and disallowed origins.
+- Beta assets live under `diagnosis-api/beta-site/`, outside public static deployment. Current production protects the Beta page and exact Diagnosis API with Nginx Basic Auth. Nginx forwards the authenticated username; the API rejects missing production identity and disallowed origins. Feedback remains unopened.
 - The production runtime target is `/srv/framespark/diagnosis-api/releases/<commit>` with a `current` symlink, a dedicated service user, env under `/etc/framespark`, data under `/var/lib`, and `127.0.0.1:8788`.
 
 ### Access-code client boundary (2026-06-15)
@@ -318,7 +318,8 @@ homepage code form
 ```
 
 - The homepage client treats the access code as transient input and never reads the issued cookies.
-- The future proxy layer must validate the appropriate scoped cookie through the loopback internal validator and overwrite the trusted Beta identity header before forwarding to Diagnosis.
+- Phase 4C validated the backend verify/session routes on loopback only. The public Nginx layer still does not expose functional invite-code routes.
+- The future Phase 4D proxy layer must validate the appropriate scoped cookie through the loopback internal validator and overwrite the trusted Beta identity header before forwarding to Diagnosis.
 - The Beta client only treats `BETA_ACCESS_REQUIRED` as session expiry; other public Diagnosis errors retain their existing UI behavior.
 
 ## Deployment Notes
@@ -327,7 +328,7 @@ homepage code form
 - Historical project notes indicate the formal public site may be served from Tencent Cloud / Nginx.
 - GitHub Pages does not deploy `diagnosis-api`.
 - Production backend deployment and static-site sync need separate planning.
-- Production currently confirms only the `/api/analytics/` reverse proxy. `/api/diagnosis` is not wired to a live diagnosis backend yet.
+- Production currently has the protected Diagnosis Beta backend on loopback behind Basic Auth routes. The invite-code public flow is not wired yet.
 - Diagnosis API deployment plan uses `127.0.0.1:8788` because analytics-api already uses `127.0.0.1:8787`.
 
 ## High-Risk Change Areas
