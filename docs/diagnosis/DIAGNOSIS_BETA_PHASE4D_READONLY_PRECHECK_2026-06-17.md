@@ -91,9 +91,11 @@ Any chosen path must include:
 
 ## Stop Status
 
-Phase 4D.1 initially blocked on Cookie logging. The blocker was later resolved
-by `DIAGNOSIS_BETA_NGINX_NO_COOKIE_LOG_FIX_2026-06-17.md`, which redacted the
-`site_total` Cookie field and reloaded Nginx after `nginx -t` passed.
+Phase 4D.1 initially blocked on Cookie logging. A direct no-cookie log edit was
+attempted, but the later Phase 4D Nginx test path showed the panel-managed
+source file had reverted to `$http_cookie`. The Cookie logging blocker remains
+open. The Nginx `auth_request` design is also blocked because the production
+Nginx build does not support that directive.
 
 No public invite-code flow has been deployed. No real tester code exists. B4 T0
 has not started.

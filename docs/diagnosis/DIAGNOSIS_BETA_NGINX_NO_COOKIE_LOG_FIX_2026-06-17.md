@@ -9,11 +9,17 @@ Phase 4D.1 found that the active Nginx `site_total` log format recorded
 because scoped HttpOnly session cookies would be visible to Nginx and could be
 written to the site-total logging pipeline.
 
-The minimal fix was applied: keep the existing `cookie` JSON field in
+The minimal fix was attempted: keep the existing `cookie` JSON field in
 `site_total`, but set it to an empty string instead of `$http_cookie`.
 
 No invite-code route, static homepage, Beta static file, env, service, access
 code, diagnosis POST or AI flow was changed.
+
+Correction after the later Phase 4D attempt: this direct edit did not persist
+through the panel-managed Nginx test path. The active source file again contains
+`$http_cookie`. Treat this as an attempted fix and not a completed durable
+resolution. See
+`DIAGNOSIS_BETA_PHASE4D_AUTH_REQUEST_BLOCKER_2026-06-17.md`.
 
 ## Change
 
@@ -23,7 +29,7 @@ File changed on the production server:
 /www/server/panel/vhost/nginx/0.site_total_log_format.conf
 ```
 
-Effective value after reload:
+Attempted value after reload:
 
 ```text
 "cookie":""
@@ -35,7 +41,8 @@ The prior value was:
 "cookie":"$http_cookie"
 ```
 
-This preserves the log schema while preventing Cookie values from being logged.
+This would preserve the log schema while preventing Cookie values from being
+logged, but the change was not durable in the panel-managed source file.
 
 ## Backup
 
@@ -52,7 +59,7 @@ The backup contains the original `0.site_total_log_format.conf` and
 
 - `nginx -t`: passed
 - Nginx reload: completed
-- Effective config no longer contains `$http_cookie` in `site_total`
+- Initial effective config no longer contained `$http_cookie` in `site_total`
 - Homepage: `200`
 - Public `/diagnosis/`: `200`
 - Public `/diagnosis/beta/` without Basic Auth: `401`
@@ -73,6 +80,11 @@ fda5109b74fd58ae46080e5a0dd33c6d10f7e95fc3e4c573952981c7204e4b9d  /www/server/pa
 cea27af7ea2e7a43d337ec1379e47200a921174afbdbdf14ce623800879c58b4  /www/server/nginx/conf/framespark-diagnosis-beta.locations.conf
 6bb283acf80650d151204b3357f37a2cbcc35696fae963a44a1a72af7c8a3589  /www/server/nginx/conf/framespark-diagnosis-beta.htpasswd
 ```
+
+## Current Status
+
+This fix is no longer considered complete. The Cookie logging blocker remains
+open.
 
 ## Remaining Phase 4D Work
 
