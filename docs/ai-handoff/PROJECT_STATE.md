@@ -9,7 +9,7 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis Beta Phase 3 has not been deployed. Retry 2 at `74a3605c5536943cf6aa68d44ff301e1ec1c2560` stopped red during production-host `npm ci`; after Tencent Cloud console restart, `current` still pointed to `683dea7fa98848cc40829b825cf4209692b7abe4`, env/systemd/Nginx/htpasswd were unchanged, failed build artifacts were quarantined, and provider/metadata/review remained `1 / 2 / 0`. Next Phase 3 must use a same-architecture Linux prebuilt artifact with bundled `node_modules`; do not run native dependency builds on the production host. B4 T0 has not started and Phase 4 must not begin.
+Diagnosis Beta Phase 3 has not been deployed. Retry 2 at `74a3605c5536943cf6aa68d44ff301e1ec1c2560` stopped red during production-host `npm ci`; after Tencent Cloud console restart, `current` still pointed to `683dea7fa98848cc40829b825cf4209692b7abe4`, env/systemd/Nginx/htpasswd were unchanged, failed build artifacts were quarantined, and provider/metadata/review remained `1 / 2 / 0`. Next Phase 3 must use a same-architecture Linux prebuilt artifact with bundled `node_modules`; do not run native dependency builds on the production host. The repository now includes `diagnosis-api/scripts/build-server-release.sh`, `verify-server-release-artifact.sh`, and a Docker `linux/amd64` example for that flow. B4 T0 has not started and Phase 4 must not begin.
 
 Separate finding: `framespark-analytics.service` failed after reboot because its `WorkingDirectory` points to `/tmp/framespark-site/analytics-api`, which disappears across restart. Treat analytics stabilization as a separate task, not part of Diagnosis Phase 3.
 

@@ -41,25 +41,28 @@ Phase 1 access-code variables remain disabled and secret-free in production. A l
 Prepare the diagnosis-api release outside the production server in a Linux
 environment that matches the production Node 20 platform and architecture.
 
-1. Run `npm ci --omit=dev` in that build environment, not on the production
-   host.
-2. Confirm `npm ls better-sqlite3 --depth=0` resolves exactly `12.10.1`,
-   `npm audit --omit=dev` reports zero vulnerabilities, and
-   `node -e "require('better-sqlite3')"` succeeds.
-3. For a diagnosis-api-only server release, run
-   `DIAGNOSIS_DATA_DIR=<isolated-test-data> npm run test:server-release`
-   without a provider key.
-4. Do not run `npm run test:beta-access-frontend` inside a diagnosis-api-only
+1. Run `scripts/build-server-release.sh` in that build environment, not on the
+   production host. The script enforces clean git state, Node 20, Linux,
+   `npm ci --omit=dev`, `npm ls better-sqlite3 --depth=0`, native
+   `better-sqlite3` loading, `npm audit --omit=dev`, and
+   `DIAGNOSIS_DATA_DIR=<isolated-test-data> npm run test:server-release`.
+2. For Docker-based builds, use
+   `scripts/build-server-release.docker.example.sh` from the repository root.
+   It uses `node:20-bookworm` with `--platform linux/amd64` and writes artifacts
+   to a host artifacts directory outside the repository by default.
+3. Do not run `npm run test:beta-access-frontend` inside a diagnosis-api-only
    release; it requires repository-root static site files and belongs to
    complete-repository or static-deployment validation.
-5. Package the release with production `node_modules`, a manifest and
-   `SHA256SUMS`. Exclude `.env`, credentials, logs, test data, production DB
-   files, provider/metadata/review data, materials and full reports.
+4. The builder creates a release tarball with production `node_modules`, a
+   manifest and `SHA256SUMS`. It excludes `.env`, credentials, logs, test data,
+   production DB files, provider/metadata/review data, materials and full
+   reports.
 
 ## Installation Order
 
-1. Upload the prebuilt Linux release artifact to staging and verify its hash and
-   manifest. Do not run `npm ci` on the production server during Phase 3.
+1. Upload the prebuilt Linux release artifact to staging and verify it with
+   `scripts/verify-server-release-artifact.sh <tarball> <SHA256SUMS> <manifest>`.
+   Do not run `npm ci` on the production server during Phase 3.
 2. Unpack into `/srv/framespark/diagnosis-api/releases/<commit>` and confirm
    the prepared release contains `package-lock.json` and `node_modules`, then
    atomically point `current` to it; do not install dependencies through the

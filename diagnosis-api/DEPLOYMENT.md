@@ -20,6 +20,12 @@ then uploaded as an immutable release artifact that already contains
 permissions and switch `current`; it must not run full `npm ci` or native
 compilation during Phase 3.
 
+Use `scripts/build-server-release.sh` in the Linux builder to create the
+tarball, manifest and `SHA256SUMS`. Use
+`scripts/verify-server-release-artifact.sh` in server staging to verify the
+artifact without `npm ci`, network access, env changes, `current` changes or
+service restarts.
+
 Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 
 ## Access-code Phase 1 Boundary
@@ -32,6 +38,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 - `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit, native load and no-AI checks in a Linux Node 20 build environment compatible with production.
 - Diagnosis-api-only server artifacts use `npm run test:server-release` with an isolated `DIAGNOSIS_DATA_DIR` before upload. Frontend access-code tests require the repository root static files and are validated before static-site or Beta-client deployment, not inside the backend-only release.
 - Phase 3 retry 2 showed that production-host `npm ci` can destabilize the instance. Do not repeat production-host native dependency builds unless a separate maintenance-window fallback plan explicitly approves resource limits and timeout supervision.
+- `scripts/build-server-release.docker.example.sh` documents the recommended Docker `linux/amd64` Node 20 build flow and writes artifacts outside the repository by default.
 
 ## Invite Beta Boundary
 

@@ -2,6 +2,8 @@
 
 ## Recent Summary
 
+- 2026-06-17: Added repository-only tooling for offline Diagnosis API server release builds. The new scripts create a Linux Node 20 diagnosis-api tarball with production `node_modules`, manifest and SHA-256 checks, verify artifacts in server staging without `npm ci`, and document a Docker `linux/amd64` builder flow. Deployment docs now direct Phase 3 to use prebuilt Linux artifacts. No server connection, deployment, env, SQLite, HMAC key, restart, Nginx change, real code, POST, AI call or B4 T0 action occurred.
+
 - 2026-06-16: Recorded the Diagnosis Beta Phase 3 retry 2 red-light incident and updated the next deployment strategy. The failed attempt at `74a3605c5536943cf6aa68d44ff301e1ec1c2560` did not switch `current`, modify env, initialize SQLite, write HMAC keys, restart Diagnosis, change/reload Nginx, execute POST, call AI, create real codes or start B4 T0. Production recovered after Tencent Cloud restart with `current` still on `683dea7...`, unchanged env/systemd/Nginx/htpasswd, provider/metadata/review `1 / 2 / 0`, and failed build artifacts quarantined. Next Phase 3 must use a same-architecture Linux prebuilt artifact with bundled `node_modules`; production-host native dependency builds are blocked. Analytics reboot failure is recorded as a separate issue.
 
 - 2026-06-16: Split Diagnosis Beta frontend access-code tests from the diagnosis-api-only server release check. Added `npm run test:server-release` for backend release validation and documented that `test:beta-access-frontend` requires repository-root static files and belongs to complete-repository/Phase 4 validation. No business code, API, SQLite schema, homepage, Beta page, Nginx, systemd, env, server, POST, AI, real code or B4 action changed.
