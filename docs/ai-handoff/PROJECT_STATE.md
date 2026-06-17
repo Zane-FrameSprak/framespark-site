@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-12
+Last updated: 2026-06-17
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -9,7 +9,7 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis Beta Phase 3 has not been deployed. Retry 2 at `74a3605c5536943cf6aa68d44ff301e1ec1c2560` stopped red during production-host `npm ci`; after Tencent Cloud console restart, `current` still pointed to `683dea7fa98848cc40829b825cf4209692b7abe4`, env/systemd/Nginx/htpasswd were unchanged, failed build artifacts were quarantined, and provider/metadata/review remained `1 / 2 / 0`. Next Phase 3 must use a same-architecture Linux prebuilt artifact with bundled `node_modules`; do not run native dependency builds on the production host. The repository now includes `diagnosis-api/scripts/build-server-release.sh`, `verify-server-release-artifact.sh`, a Docker `linux/amd64` example, and a manual GitHub Actions workflow `Build Diagnosis API release artifact` for generating the release artifact without secrets or deployment. B4 T0 has not started and Phase 4 must not begin.
+Diagnosis API Phase 3 backend deployment is complete at production release `d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to `683dea7fa98848cc40829b825cf4209692b7abe4`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `0 / 2 / 0`. `ENABLE_BETA_CODE_ACCESS` is absent/false, no HMAC keys or real access codes exist, beta access SQLite schema was not initialized, no production POST or AI call occurred, B4 T0 has not started, and Phase 4 must not begin without a separate plan.
 
 Separate finding: `framespark-analytics.service` failed after reboot because its `WorkingDirectory` points to `/tmp/framespark-site/analytics-api`, which disappears across restart. Treat analytics stabilization as a separate task, not part of Diagnosis Phase 3.
 

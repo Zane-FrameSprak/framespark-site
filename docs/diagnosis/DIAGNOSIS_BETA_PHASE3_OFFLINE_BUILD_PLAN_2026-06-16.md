@@ -4,6 +4,13 @@ Date: 2026-06-16
 
 ## Summary
 
+Update 2026-06-17: this offline build strategy has now been used successfully
+for Diagnosis API Phase 3 retry 2.1. Production `current` points to
+`d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to
+`683dea7fa98848cc40829b825cf4209692b7abe4`. This completed the backend release
+only. Invite-code access remains disabled, Basic Auth remains the Beta boundary,
+B4 T0 has not started and Phase 4 must still be planned separately.
+
 The next Diagnosis Beta Access Phase 3 deployment must not run full `npm ci` or
 native dependency compilation on the production server.
 

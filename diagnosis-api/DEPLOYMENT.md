@@ -13,6 +13,12 @@ This repository contains the production baseline only. It does not authorize dep
 - Bind: `127.0.0.1:8788`; analytics remains on `8787`
 - Start: `npm start`
 
+Current production backend release: `d722fc3ed06ce6908a8936390455def8f735913e`.
+Phase 3 backend deployment is complete, but Beta access-code flow is not live:
+`ENABLE_BETA_CODE_ACCESS` remains unset/false, Basic Auth remains the user
+boundary, no real access codes or HMAC keys have been created, B4 T0 has not
+started, and Phase 4 must not begin without a separate plan.
+
 Production dependencies for native modules must be built outside the production
 server in a Linux environment matching the target Node 20 platform/architecture,
 then uploaded as an immutable release artifact that already contains
@@ -78,4 +84,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 
 ## Open Gates
 
-Do not deploy or enable the Beta page until local tests, legal review, service installation, authenticated proxy, readiness, rate limits, metadata-only logging, rollback and 1-3 fictional production smoke runs pass.
+Do not enable the invite-code homepage entry, create real access codes, switch
+to cookie auth, start B4 T0 or begin Phase 4 until a separate Phase 4 plan is
+approved and verified. The current production backend release alone does not
+mean real tester access is live.

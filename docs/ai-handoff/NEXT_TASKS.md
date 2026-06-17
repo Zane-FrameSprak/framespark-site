@@ -1,14 +1,13 @@
 # Next Tasks
 
-Last updated: 2026-06-12
+Last updated: 2026-06-17
 Updated by: Codex
 
 ## Now
 
-- Diagnosis Beta Phase 3 retry 2 stopped red during production-host `npm ci` at `74a3605c5536943cf6aa68d44ff301e1ec1c2560`. Production recovered after Tencent Cloud console restart, `current/env/Nginx/htpasswd` were not polluted, and failed build artifacts were quarantined. Do not run full `npm ci` or native dependency compilation on the production host in the next Phase 3 attempt.
-- The next immediate step is to manually run the GitHub Actions workflow `Build Diagnosis API release artifact` on the target commit. It uses `ubuntu-latest`, Node 20, no secrets and no deployment step, and uploads `diagnosis-api-release-<sha>` for 7 days. Artifact generation is not deployment.
-- A later Phase 3 retry must use `diagnosis-api/scripts/build-server-release.sh` in a Linux same-architecture Node 20 builder to produce a prebuilt artifact containing production `node_modules`, then use `diagnosis-api/scripts/verify-server-release-artifact.sh` in server staging. Do not run `test:beta-access-frontend` inside a diagnosis-api-only server release; keep it for complete-repository and Phase 4 static deployment validation.
-- After downloading the artifact, separately plan server staging verification and Phase 3 retry. Do not connect to the server, prepare SQLite/env, restart, modify Nginx, create real codes, execute POST, call AI, start B4 T0 or begin Phase 4 from the artifact build step.
+- Diagnosis API Phase 3 backend deployment is complete at production release `d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to `683dea7fa98848cc40829b825cf4209692b7abe4`. Keep `ENABLE_BETA_CODE_ACCESS` absent/false, Basic Auth as the current Beta boundary, and do not treat this as invite-code launch.
+- Next step is not deployment. Separately plan Phase 4 for invite-code flow: homepage entry deployment, Nginx `auth_request` / session validation, stable identity handoff, real code generation, rollback and verification. Do not create real codes, write HMAC keys, initialize beta access SQLite schema, execute production POST, call AI, start B4 T0 or invite testers before that plan is approved.
+- Continue to avoid production-host `npm ci` or native dependency compilation. Future backend release updates should still use the Linux prebuilt artifact flow.
 - `framespark-analytics.service` has a separate stability issue: its unit points to `/tmp/framespark-site/analytics-api`, which disappears after reboot. Plan analytics stabilization separately; do not fold it into Diagnosis Phase 3.
 - Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.
 - The user must independently SSH and use `sudoedit /etc/framespark/diagnosis-api.env` or an equivalent non-echoing method to add `DEEPSEEK_API_KEY`; never send or print the key in chat, command arguments, Git, or logs.

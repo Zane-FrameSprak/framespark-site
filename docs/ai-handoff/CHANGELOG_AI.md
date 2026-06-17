@@ -2,6 +2,8 @@
 
 ## Recent Summary
 
+- 2026-06-17: Completed Diagnosis API Phase 3 retry 2.1 backend deployment using the prebuilt GitHub Actions artifact. Production `current` now points to `d722fc3ed06ce6908a8936390455def8f735913e`, with `previous` at `683dea7fa98848cc40829b825cf4209692b7abe4`; service is `active/running/enabled`, `NRestarts=0`, ready/health OK and loopback-only on `8788`. Nginx/htpasswd were unchanged and not reloaded, Basic Auth remains the Beta boundary, `ENABLE_BETA_CODE_ACCESS` is absent/false, no HMAC key, real access code, beta access schema, production POST, AI call, B4 T0 or Phase 4 action occurred.
+
 - 2026-06-17: Added the manual GitHub Actions workflow `Build Diagnosis API release artifact` for Diagnosis API server release artifact generation. It runs on `ubuntu-latest` with Node 20, `contents: read`, no secrets, no deployment, and uploads the tarball, manifest and `SHA256SUMS` as `diagnosis-api-release-<sha>` for 7 days. Documentation now states that artifact generation is not deployment; server verification and Phase 3 retry require a separate plan. No server connection, production env, SQLite, HMAC key, restart, Nginx change, real access code, POST, AI call, B4 T0 or Phase 4 action occurred.
 
 - 2026-06-17: Added repository-only tooling for offline Diagnosis API server release builds. The new scripts create a Linux Node 20 diagnosis-api tarball with production `node_modules`, manifest and SHA-256 checks, verify artifacts in server staging without `npm ci`, and document a Docker `linux/amd64` builder flow. Deployment docs now direct Phase 3 to use prebuilt Linux artifacts. No server connection, deployment, env, SQLite, HMAC key, restart, Nginx change, real code, POST, AI call or B4 T0 action occurred.

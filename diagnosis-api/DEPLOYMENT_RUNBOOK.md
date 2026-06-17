@@ -4,6 +4,17 @@
 
 Manual runbook for a protected diagnosis Beta. It is not an automatic deployment instruction and does not authorize public upload.
 
+## Current Phase 3 State
+
+Phase 3 backend deployment completed at release
+`d722fc3ed06ce6908a8936390455def8f735913e`; `previous` points to
+`683dea7fa98848cc40829b825cf4209692b7abe4`. The service is
+`active/running/enabled` on loopback `8788`, and public `/diagnosis/` plus the
+Basic Auth Beta boundary remain unchanged. Access-code login is still disabled:
+`ENABLE_BETA_CODE_ACCESS` is unset/false, no HMAC keys or real codes exist, no
+production POST or AI call has been made, B4 T0 has not started, and Phase 4
+must be planned separately.
+
 ## Preflight
 
 - Approved commit is on `origin/main`; worktree is clean.

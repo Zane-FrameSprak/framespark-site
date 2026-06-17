@@ -8,6 +8,12 @@ Phase 3 retry 2 attempted to deploy the Diagnosis Beta access backend foundation
 at locked commit `74a3605c5536943cf6aa68d44ff301e1ec1c2560`. The attempt stopped
 red before deployment completed.
 
+Update 2026-06-17: Phase 3 retry 2.1 later completed using the prebuilt artifact
+release `d722fc3ed06ce6908a8936390455def8f735913e`. This incident remains the
+record for the earlier production-host build failure; the current backend
+release is deployed, while invite-code access remains disabled and Phase 4 has
+not started.
+
 The production server recovered after a Tencent Cloud console restart. The
 Diagnosis production boundary was not polluted: `current`, env, systemd, Nginx
 and htpasswd remained unchanged, the failed build artifacts were isolated, and
