@@ -91,5 +91,9 @@ Any chosen path must include:
 
 ## Stop Status
 
-Phase 4D.1 is complete but Phase 4D is blocked. No public invite-code flow has
-been deployed. No real tester code exists. B4 T0 has not started.
+Phase 4D.1 initially blocked on Cookie logging. The blocker was later resolved
+by `DIAGNOSIS_BETA_NGINX_NO_COOKIE_LOG_FIX_2026-06-17.md`, which redacted the
+`site_total` Cookie field and reloaded Nginx after `nginx -t` passed.
+
+No public invite-code flow has been deployed. No real tester code exists. B4 T0
+has not started.
