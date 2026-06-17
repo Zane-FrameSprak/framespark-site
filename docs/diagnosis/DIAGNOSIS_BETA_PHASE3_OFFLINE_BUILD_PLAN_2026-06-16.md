@@ -1,0 +1,141 @@
+# Diagnosis Beta Phase 3 Offline Build Plan
+
+Date: 2026-06-16
+
+## Summary
+
+The next Diagnosis Beta Access Phase 3 deployment must not run full `npm ci` or
+native dependency compilation on the production server.
+
+Recommended strategy: build the diagnosis-api release in a Linux environment
+matching production Node 20 and CPU architecture, package the checked release
+with production `node_modules`, then upload the immutable artifact to the
+server for lightweight verification, permission freezing, SQLite/env
+preparation and one controlled restart.
+
+## Option Comparison
+
+### A. Local Mac build and upload
+
+- Pros: fastest and lowest production-server load.
+- Cons: macOS and production Linux ABI differ; `better-sqlite3` native output
+  cannot be trusted on Linux.
+- Decision: do not use for the production backend release. It is only suitable
+  for source packaging or non-native static assets.
+
+### B. Same-architecture Linux build artifact
+
+- Forms: temporary Linux build host, Docker `linux/amd64` Node 20 image, or a
+  dedicated low-risk Linux builder.
+- Artifact: diagnosis-api source, `package-lock.json`, production
+  `node_modules`, release manifest and SHA-256 checksums.
+- Pros: avoids production-host native compilation while preserving Linux ABI
+  compatibility.
+- Decision: recommended.
+
+### C. Continue production-server npm ci with swap, limits and timeout
+
+- Pros: exact target host environment.
+- Cons: already caused instance-level instability; still risks SSH, HTTPS and
+  Nginx availability.
+- Decision: not recommended. Use only as a last-resort maintenance-window
+  fallback with strict resource limits and timeout supervision.
+
+## Build Environment Requirements
+
+- Linux environment matching production architecture.
+- Node 20 and npm version recorded in the release manifest.
+- No production env file, HMAC key, DeepSeek key, Basic Auth credential or
+  user material present in the build environment.
+- Run:
+
+```bash
+npm ci --omit=dev
+npm ls better-sqlite3 --depth=0
+npm audit --omit=dev
+node -p "process.platform + '/' + process.arch + ' modules=' + process.versions.modules"
+node -e "require('better-sqlite3'); console.log('sqlite_native_ok')"
+DIAGNOSIS_DATA_DIR=<isolated-test-data> npm run test:server-release
+```
+
+The `test:server-release` check must not run `test:beta-access-frontend`; that
+frontend test belongs to complete-repository or Phase 4 static deployment
+validation.
+
+## Artifact Requirements
+
+The release tarball must contain:
+
+- diagnosis-api source files for the locked commit.
+- `package.json` and `package-lock.json`.
+- production `node_modules` from the Linux build.
+- release manifest with commit SHA, Node/npm versions, platform/arch, ABI,
+  `better-sqlite3` version and check results.
+- `SHA256SUMS`.
+
+The release tarball must exclude:
+
+- `.git`, test caches, temporary data and logs.
+- `.env` or any env file.
+- keys, tokens, cookies, Authorization values or real access codes.
+- production SQLite DB files.
+- provider, metadata, review or user-material records.
+- full reports or sample/user text.
+
+## Server Deployment Requirements
+
+The production server must not run `npm ci` for this phase.
+
+Server-side steps are limited to:
+
+- verify artifact SHA-256 and manifest;
+- unpack into `/srv/framespark/diagnosis-api/releases/<commit>`;
+- set final permissions to `root:framespark-diagnosis`, directories `0750` and
+  files readable but not writable by the runtime user;
+- prepare `/var/lib/framespark-diagnosis/access` and the SQLite schema;
+- update root-only env with Beta access settings and HMAC secrets while keeping
+  `ENABLE_BETA_CODE_ACCESS=false`;
+- atomically switch `current`;
+- run one controlled `systemctl restart framespark-diagnosis.service`;
+- verify `/ready`, `/health`, `active/enabled`, `NRestarts=0`, and loopback-only
+  `8788`.
+
+## Required Boundary Verification
+
+After restart, verify:
+
+- existing Basic Auth Beta behavior remains unchanged;
+- homepage and public `/diagnosis/` remain normal;
+- Nginx and htpasswd SHA values are unchanged;
+- no Nginx reload occurred;
+- no public beta-access, internal session, feedback, health or readiness route
+  was opened;
+- provider / metadata / review counts have no unexplained increment;
+- logs contain no key, cookie, Authorization, code, request body, material or
+  full report.
+
+## Rollback
+
+- Build/audit/test failure: do not upload or deploy.
+- Artifact hash or manifest failure: do not unpack or switch.
+- SQLite/env failure: restore env backup and do not restart.
+- Restart/readiness failure: atomically switch back to previous release, restore
+  env backup and restart the old service.
+- Public route exposure, Basic Auth regression, provider increment or sensitive
+  logging: immediately switch back to previous release, restore env backup and
+  stop.
+- Do not roll back provider counters and do not delete production journald or
+  Nginx logs.
+
+## Still Forbidden
+
+- Do not deploy the homepage access-code entry.
+- Do not deploy the new Beta static page.
+- Do not modify or reload Nginx.
+- Do not create real access codes.
+- Do not switch to cookie auth.
+- Do not remove Basic Auth.
+- Do not execute production POST requests.
+- Do not call AI.
+- Do not invite testers.
+- Do not start B4 T0.

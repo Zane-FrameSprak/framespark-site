@@ -13,7 +13,12 @@ This repository contains the production baseline only. It does not authorize dep
 - Bind: `127.0.0.1:8788`; analytics remains on `8787`
 - Start: `npm start`
 
-Install production dependencies inside the versioned release before promoting the `current` symlink. The systemd installer only verifies the prepared release and must not mutate it through `current`.
+Production dependencies for native modules must be built outside the production
+server in a Linux environment matching the target Node 20 platform/architecture,
+then uploaded as an immutable release artifact that already contains
+`node_modules`. The production server should only verify, unpack, freeze
+permissions and switch `current`; it must not run full `npm ci` or native
+compilation during Phase 3.
 
 Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 
@@ -24,8 +29,9 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 - Do not add HMAC keys, create the database, generate real codes or change Nginx until the homepage and cookie-auth migration receive separate approval.
 - When enabled later, the database must be `/var/lib/framespark-diagnosis/access/beta-access.sqlite`, a regular service-owned `0600` file outside webroot.
 - Code and session HMAC keys must be distinct random secrets of at least 32 bytes. Rotating the code key invalidates codes; rotating the session key invalidates active sessions.
-- `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit and no-AI checks on the target Node 20 host.
-- Diagnosis-api-only server releases use `npm run test:server-release` with an isolated `DIAGNOSIS_DATA_DIR`. Frontend access-code tests require the repository root static files and are validated before static-site or Beta-client deployment, not inside the backend-only release.
+- `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit, native load and no-AI checks in a Linux Node 20 build environment compatible with production.
+- Diagnosis-api-only server artifacts use `npm run test:server-release` with an isolated `DIAGNOSIS_DATA_DIR` before upload. Frontend access-code tests require the repository root static files and are validated before static-site or Beta-client deployment, not inside the backend-only release.
+- Phase 3 retry 2 showed that production-host `npm ci` can destabilize the instance. Do not repeat production-host native dependency builds unless a separate maintenance-window fallback plan explicitly approves resource limits and timeout supervision.
 
 ## Invite Beta Boundary
 

@@ -36,13 +36,34 @@ Never print or commit the env file.
 
 Phase 1 access-code variables remain disabled and secret-free in production. A later migration must create two distinct HMAC secrets through the approved root-only env process and must not generate real codes before cookie authentication and rollback have been reviewed.
 
+## Release Artifact Preparation
+
+Prepare the diagnosis-api release outside the production server in a Linux
+environment that matches the production Node 20 platform and architecture.
+
+1. Run `npm ci --omit=dev` in that build environment, not on the production
+   host.
+2. Confirm `npm ls better-sqlite3 --depth=0` resolves exactly `12.10.1`,
+   `npm audit --omit=dev` reports zero vulnerabilities, and
+   `node -e "require('better-sqlite3')"` succeeds.
+3. For a diagnosis-api-only server release, run
+   `DIAGNOSIS_DATA_DIR=<isolated-test-data> npm run test:server-release`
+   without a provider key.
+4. Do not run `npm run test:beta-access-frontend` inside a diagnosis-api-only
+   release; it requires repository-root static site files and belongs to
+   complete-repository or static-deployment validation.
+5. Package the release with production `node_modules`, a manifest and
+   `SHA256SUMS`. Exclude `.env`, credentials, logs, test data, production DB
+   files, provider/metadata/review data, materials and full reports.
+
 ## Installation Order
 
-1. Create `/srv/framespark/diagnosis-api/releases/<commit>`, install dependencies there with `npm ci --omit=dev`, and run the full no-AI suite before treating the release as immutable.
-   - Confirm `npm ls better-sqlite3` resolves exactly `12.10.1` and `npm audit --omit=dev` reports zero vulnerabilities.
-   - For a diagnosis-api-only server release, run `DIAGNOSIS_DATA_DIR=<isolated-var-tmp-test-dir> npm run test:server-release` without a provider key.
-   - Do not run `npm run test:beta-access-frontend` inside a diagnosis-api-only server release; it requires the repository root static site files and belongs to complete-repository or static-deployment validation.
-2. Confirm the prepared release contains `package-lock.json` and `node_modules`, then atomically point `current` to it; do not install dependencies through the `current` link.
+1. Upload the prebuilt Linux release artifact to staging and verify its hash and
+   manifest. Do not run `npm ci` on the production server during Phase 3.
+2. Unpack into `/srv/framespark/diagnosis-api/releases/<commit>` and confirm
+   the prepared release contains `package-lock.json` and `node_modules`, then
+   atomically point `current` to it; do not install dependencies through the
+   `current` link.
 3. Review, then run `install-diagnosis-systemd.sh`; it only verifies the prepared release and installs the service definition. Confirm `/health` and `/ready` locally.
 4. Run `install-diagnosis-nginx-proxy.sh` as an audit only. It reports each Beta/API location as present or missing and never edits Nginx.
 5. Confirm the active site-config path, back it up manually, compare every existing location with the canonical snippet, and add only missing locations without changing analytics.

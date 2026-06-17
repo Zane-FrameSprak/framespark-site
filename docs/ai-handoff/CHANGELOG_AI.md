@@ -2,6 +2,8 @@
 
 ## Recent Summary
 
+- 2026-06-16: Recorded the Diagnosis Beta Phase 3 retry 2 red-light incident and updated the next deployment strategy. The failed attempt at `74a3605c5536943cf6aa68d44ff301e1ec1c2560` did not switch `current`, modify env, initialize SQLite, write HMAC keys, restart Diagnosis, change/reload Nginx, execute POST, call AI, create real codes or start B4 T0. Production recovered after Tencent Cloud restart with `current` still on `683dea7...`, unchanged env/systemd/Nginx/htpasswd, provider/metadata/review `1 / 2 / 0`, and failed build artifacts quarantined. Next Phase 3 must use a same-architecture Linux prebuilt artifact with bundled `node_modules`; production-host native dependency builds are blocked. Analytics reboot failure is recorded as a separate issue.
+
 - 2026-06-16: Split Diagnosis Beta frontend access-code tests from the diagnosis-api-only server release check. Added `npm run test:server-release` for backend release validation and documented that `test:beta-access-frontend` requires repository-root static files and belongs to complete-repository/Phase 4 validation. No business code, API, SQLite schema, homepage, Beta page, Nginx, systemd, env, server, POST, AI, real code or B4 action changed.
 
 - 2026-06-16: Fixed the release-safety issue that stopped Diagnosis Beta Phase 3 before deployment. `test-diagnosis-log-version.js` now uses the active `DIAGNOSIS_DATA_DIR` or a temporary data directory instead of assuming writable `logs/diagnosis` under the immutable release tree. Added `DIAGNOSIS_BETA_PHASE3_LOG_TEST_FIX_2026-06-16.md`. No production logger, deployment config, SQLite schema, Beta access API, homepage, Beta static page, Nginx, systemd, env, server, POST, AI, real code or B4 action changed.
