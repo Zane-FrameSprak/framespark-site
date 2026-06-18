@@ -4,6 +4,8 @@
 
 ## Recent Summary
 
+- 2026-06-18 (Codex): Deployed the homepage project-card copy refinement to Tencent Cloud with a minimal `sudo rsync` of `index.html`, `css/style.css`, `js/site-data.js`, and `js/main.js`. Production now references `20260618-project-cards1`; `site-data.js` no longer includes project duration/episode wording, and project cards display only type, title and status. No backend, Nginx, env, Diagnosis POST, AI, invite-code, or B4 change occurred.
+
 - 2026-06-18 (Codex): Refined the homepage "开发中项目" cards so each card displays only project type, title and development status. Removed duration/episode wording from `js/site-data.js`, updated the card renderer to use `project.status`, aligned the three text rows with CSS grid, and bumped homepage CSS/JS resource versions. `node --check` for `js/site-data.js` and `js/main.js`, `git diff --check`, and a project-card data assertion passed. No deployment, backend, Nginx, env, POST, AI, or invite-code change occurred.
 
 - 2026-06-18 (Codex): Refreshed the local-only internal admin console status cards and reminders. The console now reflects that public-security filing is approved and deployed, Diagnosis Beta invite-code access is live, five tester codes exist with 7-day/5-use defaults, and B4 T0 has not started. Verified `node --check` for the console server and client, `git diff --check`, and local `/api/console/config` plus `/api/console/summary` responses. No public deployment, server change, POST, AI call, or code generation occurred.
