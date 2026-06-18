@@ -4,6 +4,8 @@
 
 ## Recent Summary
 
+- 2026-06-18 (Codex): Added color status dots to homepage project cards and deployed the change to Tencent Cloud. Project status text now carries `data-state`, CSS maps each development state to a small muted color dot, and homepage CSS/JS cache versions were bumped to `20260618-project-state-dots1`. Deployed only `index.html`, `css/style.css`, and `js/main.js`; production verification confirmed the new resource versions and state-dot CSS/JS are live. No backend, Nginx, env, Diagnosis POST, AI, invite-code, or B4 change occurred.
+
 - 2026-06-18 (Codex): Updated and deployed homepage project statuses only. `《恭喜你，中奖了！》` and `《面试》` now show `拍摄筹备中`; `《红领带》` now shows `制作中`. Deployed only `js/site-data.js` to Tencent Cloud via minimal `sudo rsync` and verified production `site-data.js`. No backend, Nginx, env, Diagnosis POST, AI, invite-code, or B4 change occurred.
 
 - 2026-06-18 (Codex): Deployed the homepage project-card copy refinement to Tencent Cloud with a minimal `sudo rsync` of `index.html`, `css/style.css`, `js/site-data.js`, and `js/main.js`. Production now references `20260618-project-cards1`; `site-data.js` no longer includes project duration/episode wording, and project cards display only type, title and status. No backend, Nginx, env, Diagnosis POST, AI, invite-code, or B4 change occurred.
