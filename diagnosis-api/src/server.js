@@ -2,9 +2,15 @@ import cors from 'cors';
 import express from 'express';
 import fs from 'fs/promises';
 import { constants as fsConstants } from 'fs';
-import { pathToFileURL } from 'url';
+import path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { config } from './config.js';
-import { createOriginGuard, requireBetaIdentity } from './middleware/betaAccess.js';
+import {
+  createBetaPageSessionGuard,
+  createBetaSessionIdentityMiddleware,
+  createOriginGuard,
+  requireBetaIdentity
+} from './middleware/betaAccess.js';
 import {
   createConcurrencyLimit,
   createDailyRateLimit,
@@ -26,9 +32,12 @@ import { createBetaAccessStore } from './services/betaAccessStore.js';
 import { assertProductionReady, getProductionReadiness } from './services/productionReadiness.js';
 import { ApiError } from './utils/errors.js';
 
+const betaSiteDir = fileURLToPath(new URL('../beta-site/', import.meta.url));
+
 export function createApp(options = {}) {
   const app = express();
   const originGuard = createOriginGuard();
+  let betaAccessService = null;
 
   app.set('trust proxy', config.trustedProxy);
   app.disable('x-powered-by');
@@ -43,6 +52,7 @@ export function createApp(options = {}) {
     const store = options.betaAccessStore || (options.betaAccessService ? null : createBetaAccessStore({ dbPath: config.betaAccess.dbPath }));
     store?.cleanup({ auditRetentionDays: config.betaAccess.auditRetentionDays });
     const service = options.betaAccessService || createBetaAccessService({ store, settings: config.betaAccess });
+    betaAccessService = service;
     const routers = createBetaAccessRouters({
       service,
       settings: config.betaAccess,
@@ -50,6 +60,7 @@ export function createApp(options = {}) {
     });
     app.use('/api/beta-access', routers.verifyRouter);
     app.use('/internal/beta-session', routers.internalRouter);
+    mountBetaSiteRoutes(app, service);
   }
 
   app.use(express.json({ limit: '1mb' }));
@@ -83,6 +94,7 @@ export function createApp(options = {}) {
   app.use(
     '/api/diagnosis',
     originGuard,
+    betaAccessService ? createBetaSessionIdentityMiddleware(betaAccessService, '/api/diagnosis/') : passThrough,
     requireBetaIdentity,
     createRequestDeadline(config.requestTimeoutMs),
     createDailyRateLimit({
@@ -184,6 +196,49 @@ export function createApp(options = {}) {
   });
 
   return app;
+}
+
+function mountBetaSiteRoutes(app, service) {
+  const noStore = { 'Cache-Control': 'no-store' };
+  const routes = [
+    { uri: '/diagnosis/beta/', file: 'index.html' },
+    { uri: '/diagnosis/beta/app.js', file: 'app.js' },
+    { uri: '/diagnosis/beta/beta.css', file: 'beta.css' }
+  ];
+
+  for (const route of routes) {
+    app.get(
+      route.uri,
+      createBetaPageSessionGuard(service, route.uri),
+      (req, res) => {
+        res.sendFile(path.join(betaSiteDir, route.file), { headers: noStore });
+      }
+    );
+  }
+
+  app.get('/diagnosis/beta', (req, res) => {
+    res.status(404).json({
+      ok: false,
+      error: {
+        code: 'NOT_FOUND',
+        message: '接口不存在'
+      }
+    });
+  });
+
+  app.use('/diagnosis/beta/', (req, res) => {
+    res.status(404).json({
+      ok: false,
+      error: {
+        code: 'NOT_FOUND',
+        message: '接口不存在'
+      }
+    });
+  });
+}
+
+function passThrough(req, res, next) {
+  next();
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {

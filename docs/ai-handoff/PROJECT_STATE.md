@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -9,7 +9,17 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `1 / 2 / 0` with no deployment increment. Phase 4B initialized root-only HMAC secrets and `/var/lib/framespark-diagnosis/access/beta-access.sqlite` with schema `user_version=1`; Phase 4C set `ENABLE_BETA_CODE_ACCESS=true` for loopback-only backend validation, verified and revoked internal test code/session flows, and left the DB with no active codes. No real tester code was created, no production diagnosis POST or AI call occurred, B4 T0 has not started, and Phase 4D must not begin without a separate plan.
+Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `1 / 2 / 0` with no deployment increment. Phase 4B initialized root-only HMAC secrets and `/var/lib/framespark-diagnosis/access/beta-access.sqlite` with schema `user_version=1`; Phase 4C set `ENABLE_BETA_CODE_ACCESS=true` for loopback-only backend validation, verified and revoked internal test code/session flows, and left the DB with no active codes. No real tester code was created, no production diagnosis POST or AI call occurred, B4 T0 has not started, and Phase 4D public launch is still not deployed.
+
+Phase 4D Nginx `auth_request` migration failed because production Nginx does
+not support the directive. The repository now contains a backend-boundary fix:
+when Beta code access is enabled, Diagnosis API can protect and serve the exact
+Beta static files with the page-scoped session cookie, and can derive
+`/api/diagnosis/` identity from the API-scoped session cookie before the
+existing Beta identity guard. This is not deployed yet. The next invite-code
+deployment should use exact Nginx proxy routes to the backend, clear trusted
+client headers, and prevent Cookie logging at the location level instead of
+relying on `auth_request`.
 
 The first Phase 4B attempt against the older `d722fc3...` release attempted to
 initialize Beta access env/schema and was rolled back.

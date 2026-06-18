@@ -1,12 +1,13 @@
 # Next Tasks
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 Updated by: Codex
 
 ## Now
 
 - Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. Phase 4B initialized HMAC secrets and SQLite schema. Phase 4C set `ENABLE_BETA_CODE_ACCESS=true` for loopback-only backend validation, verified and revoked internal test code/session flows, and left no active code. Basic Auth remains the current public Beta boundary; this is not invite-code launch.
-- Phase 4D public invite-code migration is blocked. Production Nginx does not support `auth_request`, so the reviewed Nginx session-boundary design cannot be used. The attempted direct `site_total` no-cookie edit also did not persist; `$http_cookie` is again present in the panel-managed source file. Use `docs/diagnosis/DIAGNOSIS_BETA_PHASE4D_AUTH_REQUEST_BLOCKER_2026-06-17.md` as the current evidence. Next strategy should move session enforcement into the Diagnosis API backend or separately plan an Nginx module/rebuild; do not deploy homepage invite-code entry, change Nginx again, create real tester codes, execute Diagnosis POST, call AI, start B4 T0 or invite testers before a new plan.
+- Phase 4D public invite-code migration is not live. Production Nginx does not support `auth_request`, so the reviewed Nginx session-boundary design cannot be used. The repository now has a backend-boundary fix: Diagnosis API can protect exact Beta static routes with the page-scoped invite session and can derive `/api/diagnosis/` identity from the API-scoped session before the existing guard. Next step is to build a new Linux release artifact, deploy the backend release, then separately plan exact Nginx proxy routes without `auth_request`. Do not deploy homepage invite-code entry, change Nginx again, create real tester codes, execute Diagnosis POST, call AI, start B4 T0 or invite testers before that deployment plan passes.
+- The attempted direct `site_total` no-cookie edit did not persist; `$http_cookie` is again present in the panel-managed source file. Future invite-code Nginx work must prevent Cookie logging at the relevant location level or through another durable reviewed mechanism; do not rely on direct global panel-managed log-format edits.
 - Continue to avoid production-host `npm ci` or native dependency compilation. Future backend release updates should still use the Linux prebuilt artifact flow.
 - `framespark-analytics.service` has a separate stability issue: its unit points to `/tmp/framespark-site/analytics-api`, which disappears after reboot. Plan analytics stabilization separately; do not fold it into Diagnosis Phase 3.
 - Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.

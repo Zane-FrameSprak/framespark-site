@@ -1,4 +1,5 @@
 import { config } from '../config.js';
+import { betaIdentityForCode } from '../services/betaAccessService.js';
 
 const BETA_HEADER = 'x-framespark-beta-user';
 
@@ -12,7 +13,7 @@ export function createBetaIdentityGuard(required = config.requireBetaIdentity) {
       return;
     }
 
-    const identity = sanitizeIdentity(req.get(BETA_HEADER));
+    const identity = sanitizeIdentity(req.betaIdentity) || sanitizeIdentity(req.get(BETA_HEADER));
     if (!identity) {
       res.status(401).json({
         ok: false,
@@ -26,6 +27,39 @@ export function createBetaIdentityGuard(required = config.requireBetaIdentity) {
 
     req.betaIdentity = identity;
     next();
+  };
+}
+
+export function createBetaSessionIdentityMiddleware(service, originalUri = '/api/diagnosis/') {
+  return function betaSessionIdentity(req, res, next) {
+    if (sanitizeIdentity(req.betaIdentity)) {
+      next();
+      return;
+    }
+
+    const session = service.validateRequest({
+      originalUri,
+      cookieHeader: req.get('cookie')
+    });
+    if (session) {
+      req.betaIdentity = betaIdentityForCode(session.identityId);
+    }
+    next();
+  };
+}
+
+export function createBetaPageSessionGuard(service, originalUri) {
+  return function betaPageSessionGuard(req, res, next) {
+    const session = service.validateRequest({
+      originalUri,
+      cookieHeader: req.get('cookie')
+    });
+    if (session) {
+      req.betaIdentity = betaIdentityForCode(session.identityId);
+      next();
+      return;
+    }
+    res.redirect(302, '/#diagnosis-beta-entry');
   };
 }
 

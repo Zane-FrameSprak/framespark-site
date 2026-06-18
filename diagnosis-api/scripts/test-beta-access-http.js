@@ -34,6 +34,7 @@ const child = spawn(process.execPath, ['src/server.js'], {
     PORT: String(port),
     DIAGNOSIS_DATA_DIR: root,
     ENABLE_BETA_CODE_ACCESS: 'true',
+    REQUIRE_BETA_IDENTITY: 'true',
     BETA_ACCESS_DB_PATH: dbPath,
     BETA_ACCESS_CODE_HMAC_KEY: codeKey,
     BETA_ACCESS_SESSION_HMAC_KEY: sessionKey,
@@ -69,6 +70,34 @@ try {
 
   const pageCookie = valid.cookies.find(value => value.startsWith('__Secure-fs_beta_page='));
   const apiCookie = valid.cookies.find(value => value.startsWith('__Secure-fs_beta_api='));
+
+  const protectedPageNoCookie = await get(port, '/diagnosis/beta/', {});
+  assert.equal(protectedPageNoCookie.status, 302);
+  assert.equal(protectedPageNoCookie.headers.location, '/#diagnosis-beta-entry');
+
+  const protectedPage = await get(port, '/diagnosis/beta/', {
+    Cookie: cookiePair(pageCookie)
+  });
+  assert.equal(protectedPage.status, 200);
+  assert.equal(protectedPage.body.raw.includes('diagnosisBetaForm'), true);
+  assert.equal(protectedPage.body.raw.includes(code.code), false);
+
+  const protectedScript = await get(port, '/diagnosis/beta/app.js', {
+    Cookie: cookiePair(pageCookie)
+  });
+  assert.equal(protectedScript.status, 200);
+  assert.equal(protectedScript.body.raw.includes('BETA_ACCESS_REQUIRED'), true);
+
+  const protectedCss = await get(port, '/diagnosis/beta/beta.css', {
+    Cookie: cookiePair(pageCookie)
+  });
+  assert.equal(protectedCss.status, 200);
+
+  const apiCookieCannotLoadPage = await get(port, '/diagnosis/beta/', {
+    Cookie: cookiePair(apiCookie)
+  });
+  assert.equal(apiCookieCannotLoadPage.status, 302);
+
   const page = await get(port, '/internal/beta-session/validate', {
     Cookie: cookiePair(pageCookie),
     'X-Framespark-Original-URI': '/diagnosis/beta/'
@@ -82,6 +111,21 @@ try {
   });
   assert.equal(api.status, 204);
   assert.equal(api.headers['x-framespark-beta-user'], page.headers['x-framespark-beta-user']);
+
+  const pageCookieCannotUseApi = await postMultipart(port, '/api/diagnosis/', {
+    Origin: 'https://framespark.cn',
+    Cookie: cookiePair(pageCookie)
+  });
+  assert.equal(pageCookieCannotUseApi.status, 401);
+  assert.equal(pageCookieCannotUseApi.body.error.code, 'BETA_ACCESS_REQUIRED');
+
+  const apiCookieMissingMaterial = await postMultipart(port, '/api/diagnosis/', {
+    Origin: 'https://framespark.cn',
+    Cookie: cookiePair(apiCookie)
+  });
+  assert.equal(apiCookieMissingMaterial.status, 400);
+  assert.equal(apiCookieMissingMaterial.body.error.code, 'TEXT_REQUIRED');
+  assert.equal(providerRequests, 0);
 
   const spoofed = await get(port, '/internal/beta-session/validate', {
     'X-Framespark-Beta-User': page.headers['x-framespark-beta-user'],
@@ -105,10 +149,22 @@ try {
     'X-Framespark-Original-URI': '/api/diagnosis/'
   });
   assert.equal(revoked.status, 401);
+
+  const revokedPage = await get(port, '/diagnosis/beta/', {
+    Cookie: cookiePair(pageCookie)
+  });
+  assert.equal(revokedPage.status, 302);
+
+  const revokedApi = await postMultipart(port, '/api/diagnosis/', {
+    Origin: 'https://framespark.cn',
+    Cookie: cookiePair(apiCookie)
+  });
+  assert.equal(revokedApi.status, 401);
+  assert.equal(revokedApi.body.error.code, 'BETA_ACCESS_REQUIRED');
   assert.equal(providerRequests, 0);
   assert.equal(output.includes(code.code), false);
 
-  console.log('Beta access HTTP tests passed: strict origin, cookies, scoped validation, generic errors, revocation, zero provider calls');
+  console.log('Beta access HTTP tests passed: strict origin, cookies, scoped validation, protected beta site, API cookie identity, generic errors, revocation, zero provider calls');
 } finally {
   child.kill('SIGTERM');
   await Promise.race([onceExit(child), delay(1000)]);
@@ -144,6 +200,21 @@ function postRaw(port, pathname, raw, extraHeaders) {
   return request(port, pathname, 'POST', payload, {
     ...extraHeaders,
     'Content-Type': 'application/json',
+    'Content-Length': String(payload.length)
+  });
+}
+
+function postMultipart(port, pathname, extraHeaders) {
+  const boundary = '----framespark-beta-access-test';
+  const payload = Buffer.from([
+    `--${boundary}\r\nContent-Disposition: form-data; name="materialType"\r\n\r\nshort\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="inputMode"\r\n\r\npasted_text\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="reviewConsent"\r\n\r\nfalse\r\n`,
+    `--${boundary}--\r\n`
+  ].join(''));
+  return request(port, pathname, 'POST', payload, {
+    ...extraHeaders,
+    'Content-Type': `multipart/form-data; boundary=${boundary}`,
     'Content-Length': String(payload.length)
   });
 }
