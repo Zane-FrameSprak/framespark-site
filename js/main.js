@@ -48,6 +48,7 @@
         var status = document.createElement('p');
         status.className = 'project-card__state';
         status.textContent = project.status || '开发中';
+        status.dataset.state = project.status || '开发中';
 
         body.appendChild(type);
         body.appendChild(title);

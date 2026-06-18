@@ -570,11 +570,59 @@ svg {
 }
 
 .project-card__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     font-family: var(--font-sans);
     font-size: 13px;
     color: var(--ink-muted);
     letter-spacing: 0.04em;
     line-height: 1.6;
+}
+
+.project-card__state::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #8b8275;
+    box-shadow: 0 0 0 3px rgba(139, 130, 117, 0.14);
+}
+
+.project-card__state[data-state="概念开发中"]::before {
+    background: #7893b2;
+    box-shadow: 0 0 0 3px rgba(120, 147, 178, 0.16);
+}
+
+.project-card__state[data-state="世界观开发中"]::before {
+    background: #8a78b2;
+    box-shadow: 0 0 0 3px rgba(138, 120, 178, 0.16);
+}
+
+.project-card__state[data-state="剧本开发中"]::before,
+.project-card__state[data-state="IP开发中"]::before {
+    background: #c49a4e;
+    box-shadow: 0 0 0 3px rgba(196, 154, 78, 0.16);
+}
+
+.project-card__state[data-state="系列开发中"]::before {
+    background: #5f8fc4;
+    box-shadow: 0 0 0 3px rgba(95, 143, 196, 0.16);
+}
+
+.project-card__state[data-state="拍摄筹备中"]::before {
+    background: #6ea56f;
+    box-shadow: 0 0 0 3px rgba(110, 165, 111, 0.16);
+}
+
+.project-card__state[data-state="制作中"]::before {
+    background: #c96b45;
+    box-shadow: 0 0 0 3px rgba(201, 107, 69, 0.16);
+}
+
+.project-card:hover .project-card__state::before {
+    filter: saturate(1.18) brightness(1.08);
 }
 
 .platform-section {
