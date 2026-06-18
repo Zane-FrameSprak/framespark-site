@@ -630,9 +630,6 @@
       }
       throw new Error(message);
     }
-    if (!data) {
-      throw new Error(DEV_API_ERROR);
-    }
     return data;
   }
 

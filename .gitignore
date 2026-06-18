@@ -34,3 +34,6 @@ test-results/
 
 # Manual diagnosis sample test runs may contain sensitive story material.
 diagnosis-api/test-runs/sample-diagnosis/20*/
+
+# Local WorkBuddy memory/tooling
+.workbuddy/

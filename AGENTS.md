@@ -9,7 +9,7 @@
 - 官网当前定位：品牌展示站 + 内测预告站。
 - 诊断系统、人才平台、项目详情仍不是普通用户产品流。
 - 公开诊断页保持内测提示，不恢复上传入口。
-- 生产 `/api/diagnosis` 不视为已接入；diagnosis-api 需要单独部署和反代计划。
+- 生产 `/api/diagnosis/` 已作为邀请制 Beta API 接入，必须受内测码 Cookie session 保护；不得恢复公开匿名上传。
 - analytics-api 已有生产反代，diagnosis-api 仍按独立后端处理。
 - V1 诊断处于内部评测和方案阶段；诊断质量由评审助手判断，Codex 不自行定性。
 - Tencent Cloud 正式站通过本地 sudo rsync 同步，不等同于 GitHub push。
@@ -201,3 +201,13 @@
 - 只报：做了什么、改了哪些文件、检查结果、commit hash、push/deploy 状态、下一步。
 - 失败时贴关键错误，不贴长日志。
 - 不输出完整 diff。
+
+## 任务完成后必须更新同步文档
+
+每次有实质改动（改代码、改配置、改文档、部署）的任务完成后，**必须**更新以下文件，不得跳过：
+
+- `docs/ai-handoff/PROJECT_STATE.md` — 状态变化（开关、部署版本、已知问题）
+- `docs/ai-handoff/NEXT_TASKS.md` — 任务完成/新增/阻塞状态
+- `docs/ai-handoff/CHANGELOG_AI.md` — 操作记录，格式 `YYYY-MM-DD (Agent): summary`（详见 `WORKING_RULES.md`）
+
+如果改动涉及架构或重大决策，同时更新 `ARCHITECTURE.md` 和 `DECISIONS.md`。

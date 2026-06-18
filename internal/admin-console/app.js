@@ -153,22 +153,36 @@
   }
 
   function renderAll() {
-    setText('lastRefresh', formatDateTime(state.summary.refreshedAt));
-    renderDeadlines();
-    renderShortcuts();
-    renderReminders();
-    renderStats();
-    renderV1EvalSummary();
-    renderLegend();
-    renderAnalytics();
-    drawChart();
-    renderTrafficSummary();
-    renderTrendModeText();
-    renderTrafficSource();
+    setText('lastRefresh', formatDateTime(state.summary && state.summary.refreshedAt ? state.summary.refreshedAt : null));
+    safeRender(renderDeadlines);
+    safeRender(renderShortcuts);
+    safeRender(renderReminders);
+    safeRender(renderStats);
+    safeRender(renderV1EvalSummary);
+    safeRender(renderLegend);
+    safeRender(renderAnalytics);
+    safeRender(drawChart);
+    safeRender(renderTrafficSummary);
+    safeRender(renderTrendModeText);
+    safeRender(renderTrafficSource);
+  }
+
+  function safeRender(fn) {
+    try {
+      fn();
+    } catch (err) {
+      if (window.console && typeof window.console.warn === 'function') {
+        window.console.warn('Admin console panel render failed:', err);
+      }
+    }
   }
 
   function renderDeadlines() {
     var grid = document.getElementById('deadlineGrid');
+    if (!state.config || !Array.isArray(state.config.deadlines)) {
+      if (grid) grid.innerHTML = '';
+      return;
+    }
     var groups = [
       { key: '到期类', label: '到期提醒', note: '续费与证书。' },
       { key: '状态类', label: '当前状态', note: '阶段状态。' },
@@ -212,7 +226,11 @@
 
   function renderShortcuts() {
     var root = document.getElementById('shortcutGroups');
-    var groups = groupBy(state.config.openTargets || [], 'group');
+    if (!state.config || !Array.isArray(state.config.openTargets)) {
+      if (root) root.innerHTML = '';
+      return;
+    }
+    var groups = groupBy(state.config.openTargets, 'group');
     root.innerHTML = Object.keys(groups).map(function (groupName) {
       var buttons = groups[groupName].map(function (target) {
         var disabled = target.available ? '' : ' disabled';
@@ -253,12 +271,22 @@
 
   function renderReminders() {
     var root = document.getElementById('reminders');
-    root.innerHTML = (state.summary.reminders || []).map(function (item) {
+    if (!state.summary || !Array.isArray(state.summary.reminders)) {
+      if (root) root.innerHTML = '';
+      return;
+    }
+    root.innerHTML = state.summary.reminders.map(function (item) {
       return '<article data-level="' + escapeHtml(item.level || 'normal') + '">' + escapeHtml(item.text) + '</article>';
     }).join('');
   }
 
   function renderStats() {
+    if (!state.summary) {
+      var statsRoot = document.getElementById('recordStats');
+      if (statsRoot) statsRoot.innerHTML = '';
+      setText('recordStatsStatus', '暂无本地记录。');
+      return;
+    }
     var stats = state.summary.counts || {};
     var rows = [
       { label: '用户反馈', value: stats.reviewQueue && stats.reviewQueue.userFeedbackToday, priority: true, targetId: 'reviewQueue' },
@@ -369,7 +397,12 @@
       stageCounts[key] = (stageCounts[key] || 0) + 1;
     });
     var latest = v1Results.slice().sort(function (a, b) {
-      return Date.parse(b.createdAt || '') - Date.parse(a.createdAt || '');
+      var dateA = Date.parse(a.createdAt || '');
+      var dateB = Date.parse(b.createdAt || '');
+      if (Number.isNaN(dateA) && Number.isNaN(dateB)) return 0;
+      if (Number.isNaN(dateA)) return 1;
+      if (Number.isNaN(dateB)) return -1;
+      return dateB - dateA;
     })[0] || null;
 
     return {
@@ -1345,10 +1378,15 @@
   }
 
   async function fetchJson(url, options) {
-    var response = await fetch(url, options || {});
+    var response;
+    try {
+      response = await fetch(url, options || {});
+    } catch (err) {
+      throw new Error('网络请求失败：无法连接 ' + url);
+    }
     var data = await response.json().catch(function () { return null; });
     if (!response.ok || !data || data.ok === false) {
-      var message = data && data.message ? data.message : '请求失败。';
+      var message = data && data.message ? data.message : 'HTTP ' + response.status + ' 请求失败。';
       throw new Error(message);
     }
     return data;

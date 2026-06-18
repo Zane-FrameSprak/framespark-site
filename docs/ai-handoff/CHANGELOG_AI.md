@@ -1,6 +1,12 @@
 # AI Changelog
 
+> Format for new entries: `YYYY-MM-DD (Agent): summary`. New entries MUST include the AI agent identifier in parentheses after the date.
+
 ## Recent Summary
+
+- 2026-06-18 (Codex): Completed the Diagnosis Beta invite-code public launch. Production Diagnosis API now runs release `8e089c5bcf68086c787a3cafc58ba358d92e1ee1` with `previous` at `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; homepage invite-code entry is deployed; Nginx exact Beta/API routes proxy to the backend Cookie-session boundary without Basic Auth for ordinary testers; `ENABLE_BETA_CODE_ACCESS=true`; five real `beta-tester` codes are active and five orphan codes from a failed generation attempt are revoked. The root-only plaintext code file was deleted after the user saved the codes. Service is `active/running/enabled`, `NRestarts=0`, ready/health OK, `8788` loopback-only, homepage and `/diagnosis/` return `200`, `/diagnosis/beta/` without Cookie redirects to `/#diagnosis-beta-entry`, and provider/metadata/review remain `1 / 2 / 0`. No Diagnosis POST, DeepSeek/AI call, B4 T0 start or analytics repair occurred.
+
+- 2026-06-18 (CodeBuddy): Created `CODEX.md` as a symlink to `AGENTS.md` so Codex auto-loads project rules. Synced `.claude/skills/` with `.agents/skills/` — the `.claude/` copy was missing `framespark-target-mode`; both directories now contain all 5 project skills. No code, server, deploy, or AI call changes.
 
 - 2026-06-18: Implemented the repository-side Phase 4D backend boundary fix after production Nginx lacked `auth_request`. When `ENABLE_BETA_CODE_ACCESS=true`, Diagnosis API can now protect and serve exact Beta static routes with the page-scoped invite session cookie and can derive `/api/diagnosis/` Beta identity from the API-scoped session cookie before the existing identity guard. Existing Basic Auth identity-header compatibility remains for the current production boundary and rollback. Updated no-AI beta-access HTTP tests cover protected Beta static files, wrong-scope cookies, API-cookie identity on a missing-material 400 path, revocation and zero provider calls. `npm --prefix diagnosis-api run check`, `test:beta-access`, `test:beta-access-frontend`, and `test:no-ai` passed. No server, Nginx, env, SQLite, real code, production POST, AI call, static deployment or B4 T0 action occurred.
 

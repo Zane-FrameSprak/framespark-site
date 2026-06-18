@@ -9,17 +9,29 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis API Phase 3 backend deployment is complete at production release `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to `d722fc3ed06ce6908a8936390455def8f735913e`. The service is `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK, and `8788` is loopback-only. Homepage and public `/diagnosis/` remain normal, `/diagnosis/beta/` still returns `401` without Basic Auth, Nginx/htpasswd were unchanged and not reloaded, and provider/metadata/review remained `1 / 2 / 0` with no deployment increment. Phase 4B initialized root-only HMAC secrets and `/var/lib/framespark-diagnosis/access/beta-access.sqlite` with schema `user_version=1`; Phase 4C set `ENABLE_BETA_CODE_ACCESS=true` for loopback-only backend validation, verified and revoked internal test code/session flows, and left the DB with no active codes. No real tester code was created, no production diagnosis POST or AI call occurred, B4 T0 has not started, and Phase 4D public launch is still not deployed.
+Diagnosis Beta invite-code launch is live. Production Diagnosis API `current`
+points to release `8e089c5bcf68086c787a3cafc58ba358d92e1ee1`; `previous`
+points to `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`. The service is
+`active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK,
+and `8788` remains loopback-only. `ENABLE_BETA_CODE_ACCESS=true`, root-only
+HMAC secrets are present, and `/var/lib/framespark-diagnosis/access/beta-access.sqlite`
+exists with schema `user_version=1`. Homepage invite-code UI is deployed;
+public `/diagnosis/` remains the formal frozen page; `/diagnosis/beta/` without
+a valid invite-code Cookie now redirects to `/#diagnosis-beta-entry`; exact
+Beta static routes and `/api/diagnosis/` are protected by backend Cookie
+session validation. Nginx no longer uses Basic Auth as the ordinary tester
+entry boundary, but the old htpasswd file remains on disk for rollback/admin
+history. Five real `beta-tester` codes are active, five orphan codes from a
+failed generation attempt are revoked, and the temporary root-only plaintext
+code file was deleted after the user saved the codes. Provider/metadata/review
+remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
+analytics repair occurred.
 
-Phase 4D Nginx `auth_request` migration failed because production Nginx does
-not support the directive. The repository now contains a backend-boundary fix:
-when Beta code access is enabled, Diagnosis API can protect and serve the exact
-Beta static files with the page-scoped session cookie, and can derive
-`/api/diagnosis/` identity from the API-scoped session cookie before the
-existing Beta identity guard. This is not deployed yet. The next invite-code
-deployment should use exact Nginx proxy routes to the backend, clear trusted
-client headers, and prevent Cookie logging at the location level instead of
-relying on `auth_request`.
+The first Phase 4D Nginx `auth_request` migration failed because production
+Nginx does not support the directive. The deployed solution uses exact Nginx
+proxy routes to the backend-owned Cookie session boundary, clears trusted
+client headers, and keeps health/ready/internal session endpoints out of the
+public route surface.
 
 The first Phase 4B attempt against the older `d722fc3...` release attempted to
 initialize Beta access env/schema and was rolled back.
@@ -29,14 +41,11 @@ required `GLIBC_2.38` and production is glibc `2.35`. The current
 `e16d699...` release was built from the fixed `ubuntu-22.04` workflow and
 verified on production before deployment.
 
-Phase 4B public route probes for `/api/beta-access/verify` and
-`/internal/beta-session/validate` still return the known static HTML fallback,
-not functional JSON API responses. This Nginx boundary remains a Phase 4D task.
-
-Phase 4C left two revoked internal test code records and two session records in
-the access DB as audit evidence; active code count is `0`, revoked code count is
-`2`, and used-count sum is `1`. These are not real tester codes and must not be
-reused or shared.
+Phase 4B/4C left revoked internal test code/session records in the access DB as
+audit evidence. Phase 4D also left revoked temporary validation and orphan-code
+records. Active real tester code count is `5`; revoked beta-tester orphan count
+is `5`. Do not attempt to recover plaintext codes from the database; only hash
+records are retained.
 
 Separate finding: `framespark-analytics.service` failed after reboot because its `WorkingDirectory` points to `/tmp/framespark-site/analytics-api`, which disappears across restart. Treat analytics stabilization as a separate task, not part of Diagnosis Phase 3.
 

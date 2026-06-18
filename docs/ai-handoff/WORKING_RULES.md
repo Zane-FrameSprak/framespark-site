@@ -117,6 +117,22 @@ High-risk areas:
 
 ## Handoff File Rules
 
+### CHANGELOG Format
+
+Every CHANGELOG_AI.md entry MUST use the format:
+
+```
+YYYY-MM-DD (Agent): summary — what was done, why, and what was NOT done.
+```
+
+The agent identifier in parentheses is mandatory. Use the AI tool name the user calls you (e.g. `Codex`, `Claude Code`, `CodeBuddy`). Example:
+
+```
+- 2026-06-18 (CodeBuddy): Created CODEX.md symlink to AGENTS.md so Codex auto-loads project rules. No code or deploy changes.
+```
+
+### Handoff File Update Rules
+
 Core handoff files:
 
 ```text
