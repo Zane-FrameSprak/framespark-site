@@ -1,6 +1,12 @@
 name: Build Diagnosis API release artifact
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "diagnosis-api/**"
+      - ".github/workflows/build-diagnosis-api-release.yml"
   workflow_dispatch:
 
 permissions:
