@@ -133,10 +133,10 @@ Important modularity note:
 
 ### Public Filing Footer (2026-06-11)
 
-- The public-site footer displays the MIIT filing number `沪ICP备2026021671号`.
-- Public security filing approval is complete. The footer now displays `沪公网安备31011502406316号` and links it to the official MPS filing query URL.
-- No local public-security filing icon exists in the repository, so the current implementation uses a text link and does not download an external asset.
-- This static compliance update does not deploy or open Diagnosis Beta, `/diagnosis/beta/`, or `/api/diagnosis/`.
+- The public-site footer displays the MIIT filing number `沪ICP备2026021671号` as a link to `https://beian.miit.gov.cn/`.
+- Public security filing approval is complete. The footer displays the official public-security filing icon from `assets/brand/beian-police.png`, the number `沪公网安备31011502406316号`, and links to the official MPS filing query URL.
+- The footer compliance update was deployed to Tencent Cloud via the verified minimal `sudo rsync` flow on 2026-06-18.
+- This static compliance update did not change Nginx, env, systemd, Diagnosis API, invite-code records, B4 T0, or AI usage.
 
 ## Diagnosis System State
 
