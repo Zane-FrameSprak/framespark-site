@@ -1042,6 +1042,19 @@ svg {
     opacity: 0.7;
 }
 
+.footer__beian-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer__beian-link img {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    opacity: 0.9;
+}
+
 .subpage-main {
     min-height: calc(100vh - 76px);
 }
