@@ -45,12 +45,13 @@
         var title = document.createElement('h3');
         title.textContent = project.title;
 
-        var duration = document.createElement('p');
-        duration.textContent = project.duration;
+        var status = document.createElement('p');
+        status.className = 'project-card__state';
+        status.textContent = project.status || '开发中';
 
         body.appendChild(type);
         body.appendChild(title);
-        body.appendChild(duration);
+        body.appendChild(status);
         article.appendChild(poster);
         article.appendChild(body);
 

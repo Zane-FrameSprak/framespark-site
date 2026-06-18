@@ -6,56 +6,56 @@
             {
                 type: '短片',
                 title: '《恭喜你，中奖了！》',
-                duration: '时长 12-15min',
+                status: '剧本开发中',
                 cover: '',
                 href: 'projects/gongxi.html'
             },
             {
                 type: '网络电影',
                 title: '《上市前夜》',
-                duration: '时长 105-120min · 悬疑IP系列首作',
+                status: 'IP开发中',
                 cover: '',
                 href: 'projects/listing-eve.html'
             },
             {
                 type: '院线电影',
                 title: '《Chorolove》',
-                duration: '时长 120-150min',
+                status: '剧本开发中',
                 cover: '',
                 href: 'projects/chorolove.html'
             },
             {
                 type: '流媒体剧集',
                 title: '《当科技过于发达》',
-                duration: '时长不等 · 单集 15-60min',
+                status: '系列开发中',
                 cover: '',
                 href: 'projects/too-advanced.html'
             },
             {
                 type: '现实荒诞短片',
                 title: '《面试》',
-                duration: '剧本开发中',
+                status: '剧本开发中',
                 cover: '',
                 href: 'projects/interview.html'
             },
             {
                 type: '奇幻公路片',
                 title: '《心鸡石》',
-                duration: '概念开发中',
+                status: '概念开发中',
                 cover: '',
                 href: 'projects/xinjishi.html'
             },
             {
                 type: '末世丧尸片',
                 title: '《红领带》',
-                duration: '世界观开发中',
+                status: '世界观开发中',
                 cover: '',
                 href: 'projects/red-tie.html'
             },
             {
                 type: '神话史诗片',
                 title: '《七大圣》',
-                duration: '概念开发中',
+                status: '概念开发中',
                 cover: '',
                 href: 'projects/seven-sages.html'
             }
