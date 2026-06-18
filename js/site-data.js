@@ -6,7 +6,7 @@
             {
                 type: '短片',
                 title: '《恭喜你，中奖了！》',
-                status: '剧本开发中',
+                status: '拍摄筹备中',
                 cover: '',
                 href: 'projects/gongxi.html'
             },
@@ -34,7 +34,7 @@
             {
                 type: '现实荒诞短片',
                 title: '《面试》',
-                status: '剧本开发中',
+                status: '拍摄筹备中',
                 cover: '',
                 href: 'projects/interview.html'
             },
@@ -48,7 +48,7 @@
             {
                 type: '末世丧尸片',
                 title: '《红领带》',
-                status: '世界观开发中',
+                status: '制作中',
                 cover: '',
                 href: 'projects/red-tie.html'
             },
