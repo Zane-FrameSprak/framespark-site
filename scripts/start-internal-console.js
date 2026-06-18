@@ -92,25 +92,37 @@ const deadlineConfig = [
   {
     id: 'policeFiling',
     label: '公安备案状态',
-    statusText: '已提交，待审核',
-    severity: 'warning'
+    statusText: '已通过，页脚图标与链接已上线',
+    severity: 'normal'
   },
   {
     id: 'diagnosisApi',
     label: 'diagnosis-api',
-    statusText: '未线上部署',
-    severity: 'attention'
+    statusText: '已上线：invite-code Beta，Cookie session 保护',
+    severity: 'normal'
   },
   {
     id: 'publicDiagnosis',
     label: '公开诊断页',
-    statusText: '内测中，暂未开放上传',
+    statusText: '邀请制内测中，未公开开放',
+    severity: 'attention'
+  },
+  {
+    id: 'betaInviteCodes',
+    label: 'Beta 内测码',
+    statusText: '5 个真实测试码有效；每码 7 天 / 5 次',
+    severity: 'attention'
+  },
+  {
+    id: 'b4Observation',
+    label: 'B4 72 小时观测',
+    statusText: '未启动；真实诊断与观察期需单独授权',
     severity: 'attention'
   },
   {
     id: 'serverSync',
     label: 'GitHub push 后不会自动同步腾讯云正式站',
-    statusText: '需要补部署同步流程',
+    statusText: '仍需手动 sudo rsync；最近备案 footer 已同步',
     severity: 'warning'
   }
 ];
@@ -498,8 +510,10 @@ function buildReminders({ reviewQueue, pdfQuality, traffic }) {
     reminders.push({ level: 'attention', text: `PDF 文本质量需复查：warning ${pdfQuality.warning}，failed ${pdfQuality.failed}。` });
   }
   if (diagnosisVisits >= 20) {
-    reminders.push({ level: 'attention', text: `诊断页访问较多${trafficLabel}，但 diagnosis-api 尚未线上部署，只能统计页面访问，不能统计真实诊断提交。` });
+    reminders.push({ level: 'attention', text: `诊断页访问较多${trafficLabel}，请结合 provider 调用、metadata 和费用判断真实诊断提交。` });
   }
+  reminders.push({ level: 'normal', text: 'Diagnosis Beta invite-code 已上线；B4 T0 尚未启动，真实诊断扩量前需要单独确认。' });
+  reminders.push({ level: 'normal', text: '备案 footer 已上线：ICP 与公安备案均可点击，公安图标已部署。' });
   if (!reminders.length) reminders.push({ level: 'normal', text: '当前没有高优先级提醒。' });
   return reminders;
 }
@@ -690,6 +704,6 @@ function getTargetGroup(id) {
 
 function getDeadlineCategory(id) {
   if (['domain', 'ssl', 'server'].includes(id)) return '到期类';
-  if (['policeFiling', 'diagnosisApi', 'publicDiagnosis'].includes(id)) return '状态类';
+  if (['policeFiling', 'diagnosisApi', 'publicDiagnosis', 'betaInviteCodes', 'b4Observation'].includes(id)) return '状态类';
   return '操作风险类';
 }
