@@ -1033,6 +1033,8 @@ svg {
     padding: 16px var(--pad-x);
     border-top: 1px solid var(--line-soft);
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
     gap: 18px;
@@ -1053,6 +1055,10 @@ svg {
     width: 18px;
     height: 19px;
     flex: 0 0 18px;
+}
+
+.footer__bottom > * {
+    white-space: nowrap;
 }
 
 .subpage-main {
