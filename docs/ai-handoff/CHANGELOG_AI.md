@@ -4,6 +4,8 @@
 
 ## Recent Summary
 
+- 2026-06-18 (Codex): Updated and deployed homepage project statuses only. `《恭喜你，中奖了！》` and `《面试》` now show `拍摄筹备中`; `《红领带》` now shows `制作中`. Deployed only `js/site-data.js` to Tencent Cloud via minimal `sudo rsync` and verified production `site-data.js`. No backend, Nginx, env, Diagnosis POST, AI, invite-code, or B4 change occurred.
+
 - 2026-06-18 (Codex): Deployed the homepage project-card copy refinement to Tencent Cloud with a minimal `sudo rsync` of `index.html`, `css/style.css`, `js/site-data.js`, and `js/main.js`. Production now references `20260618-project-cards1`; `site-data.js` no longer includes project duration/episode wording, and project cards display only type, title and status. No backend, Nginx, env, Diagnosis POST, AI, invite-code, or B4 change occurred.
 
 - 2026-06-18 (Codex): Refined the homepage "开发中项目" cards so each card displays only project type, title and development status. Removed duration/episode wording from `js/site-data.js`, updated the card renderer to use `project.status`, aligned the three text rows with CSS grid, and bumped homepage CSS/JS resource versions. `node --check` for `js/site-data.js` and `js/main.js`, `git diff --check`, and a project-card data assertion passed. No deployment, backend, Nginx, env, POST, AI, or invite-code change occurred.
