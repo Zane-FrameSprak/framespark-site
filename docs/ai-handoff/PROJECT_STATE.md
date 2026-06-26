@@ -9,34 +9,30 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis Beta invite-code launch is live in production until the public-beta
-deployment is completed. Production Diagnosis API `current`
-points to release `8e089c5bcf68086c787a3cafc58ba358d92e1ee1`; `previous`
-points to `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`. The service is
+Diagnosis public beta is live in production. Production Diagnosis API `current`
+points to release `757c94ffaded6cfdf39e389979ff1c9195359d80`; `previous`
+points to `8e089c5bcf68086c787a3cafc58ba358d92e1ee1`. The service is
 `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK,
-and `8788` remains loopback-only. `ENABLE_BETA_CODE_ACCESS=true`, root-only
-HMAC secrets are present, and `/var/lib/framespark-diagnosis/access/beta-access.sqlite`
-exists with schema `user_version=1`. Homepage invite-code UI is deployed;
-public `/diagnosis/` remains the formal frozen page; `/diagnosis/beta/` without
-a valid invite-code Cookie now redirects to `/#diagnosis-beta-entry`; exact
-Beta static routes and `/api/diagnosis/` are protected by backend Cookie
-session validation. Nginx no longer uses Basic Auth as the ordinary tester
-entry boundary, but the old htpasswd file remains on disk for rollback/admin
-history. Five real `beta-tester` codes are active, five orphan codes from a
-failed generation attempt are revoked, and the temporary root-only plaintext
-code file was deleted after the user saved the codes. Provider/metadata/review
-remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
-analytics repair occurred.
+and `8788` remains loopback-only. `ENABLE_PUBLIC_BETA_ACCESS=true` and
+`ENABLE_BETA_CODE_ACCESS=false`; root-only HMAC secrets and the access SQLite DB
+remain in place from the prior invite-code launch. Homepage now shows the fixed
+public beta entry, and `/diagnosis/beta/` without a valid Cookie redirects to
+`/#diagnosis-beta-entry`. `POST /api/beta-access/public-session` signs 24-hour
+page/API cookies for anonymous public beta sessions; the old
+`/api/beta-access/verify` path returns `404`. Nginx exact Beta static routes and
+`/api/diagnosis/` are still protected by backend Cookie session validation, and
+trusted client identity headers are cleared before proxying. The old htpasswd
+file remains on disk for rollback/admin history but is not the ordinary tester
+entry boundary. Provider/metadata/review remain `1 / 2 / 0`; no Diagnosis POST,
+DeepSeek/AI call, B4 T0 start, or analytics repair occurred during the public
+beta switch.
 
-Repository-side public beta preparation is now implemented but not yet deployed:
-the homepage entry changes from invite-code input to "公测入口", the backend adds
-`ENABLE_PUBLIC_BETA_ACCESS` plus `POST /api/beta-access/public-session`, and
-anonymous public beta sessions use signed 24-hour page/API cookies before the
-existing Diagnosis identity and rate-limit chain. The intended first-day caps
-are account/session `1`, IP `3`, global diagnoses `5`, provider daily `30`,
-concurrency `1`, and provider calls per diagnosis `5`. Production remains on
-the invite-code flow until a new backend release, env/Nginx update, static
-deploy, no-AI checks, and a separately authorized real-AI smoke are completed.
+Initial public-beta caps are account/session `1`, IP `3`, global diagnoses `5`,
+provider daily `30`, concurrency `1`, and provider calls per diagnosis `5`.
+Nginx `site_total` keeps the `cookie` JSON field but no longer writes
+`$http_cookie`, and recent post-deploy scans showed zero Cookie or sensitive
+journal matches. Deployment evidence is recorded in
+`docs/diagnosis/DIAGNOSIS_PUBLIC_BETA_DEPLOY_2026-06-26.md`.
 
 The first Phase 4D Nginx `auth_request` migration failed because production
 Nginx does not support the directive. The deployed solution uses exact Nginx
