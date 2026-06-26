@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-18
+Last updated: 2026-06-26
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -9,7 +9,8 @@ Repository: `Zane-FrameSprak/framespark-site`
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
-Diagnosis Beta invite-code launch is live. Production Diagnosis API `current`
+Diagnosis Beta invite-code launch is live in production until the public-beta
+deployment is completed. Production Diagnosis API `current`
 points to release `8e089c5bcf68086c787a3cafc58ba358d92e1ee1`; `previous`
 points to `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`. The service is
 `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK,
@@ -26,6 +27,16 @@ failed generation attempt are revoked, and the temporary root-only plaintext
 code file was deleted after the user saved the codes. Provider/metadata/review
 remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
 analytics repair occurred.
+
+Repository-side public beta preparation is now implemented but not yet deployed:
+the homepage entry changes from invite-code input to "公测入口", the backend adds
+`ENABLE_PUBLIC_BETA_ACCESS` plus `POST /api/beta-access/public-session`, and
+anonymous public beta sessions use signed 24-hour page/API cookies before the
+existing Diagnosis identity and rate-limit chain. The intended first-day caps
+are account/session `1`, IP `3`, global diagnoses `5`, provider daily `30`,
+concurrency `1`, and provider calls per diagnosis `5`. Production remains on
+the invite-code flow until a new backend release, env/Nginx update, static
+deploy, no-AI checks, and a separately authorized real-AI smoke are completed.
 
 The first Phase 4D Nginx `auth_request` migration failed because production
 Nginx does not support the directive. The deployed solution uses exact Nginx

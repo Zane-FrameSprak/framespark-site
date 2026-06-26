@@ -21,8 +21,8 @@ vm.runInNewContext(homeSource, homeSandbox, { filename: homeScriptPath });
 const homeClient = homeSandbox.FrameSparkBetaAccess;
 assert.ok(homeClient);
 
-await testEmptyInput(homeClient);
-await testTrimAndGenericInvalid(homeClient);
+await testPublicSessionRequest(homeClient);
+await testRateLimitMessage(homeClient);
 await testSubmissionLock(homeClient);
 await testSuccessfulFixedNavigation(homeClient);
 await testUnsafeSuccessAndNetworkFailure(homeClient);
@@ -41,49 +41,31 @@ async function assertRepositoryRootFiles() {
   }
 }
 
-async function testEmptyInput(client) {
-  let fetchCount = 0;
-  const fixture = createFixture({
-    value: '   ',
-    fetchImpl: async () => {
-      fetchCount += 1;
-      return response(500, null);
-    }
-  });
-  const controller = client.createController(fixture.options);
-  await controller.submit(event());
-  assert.equal(fetchCount, 0);
-  assert.equal(fixture.status.textContent, '请输入你的邀请码/内测码');
-  assert.equal(fixture.button.attributes['aria-disabled'], 'true');
-}
-
-async function testTrimAndGenericInvalid(client) {
+async function testPublicSessionRequest(client) {
   const calls = [];
   const fixture = createFixture({
-    value: '  Ab - 19 xY  ',
     fetchImpl: async (url, options) => {
       calls.push({ url, options });
-      return response(401, { ok: false, error: { code: 'BETA_ACCESS_INVALID' } });
+      return response(200, { ok: true, redirectTo: '/diagnosis/beta/' });
     }
   });
   client.createController(fixture.options);
-  fixture.input.emit('input');
   assert.equal(fixture.button.attributes['aria-disabled'], 'false');
   await fixture.form.emit('submit');
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].url, '/api/beta-access/verify');
+  assert.equal(calls[0].url, '/api/beta-access/public-session');
   assert.equal(calls[0].options.credentials, 'same-origin');
-  assert.deepEqual(JSON.parse(calls[0].options.body), { code: 'Ab - 19 xY' });
-  assert.equal(fixture.status.textContent, '内测码无效或已失效');
-  assert.equal(fixture.input.value, '  Ab - 19 xY  ');
+  assert.deepEqual(JSON.parse(calls[0].options.body), {});
+  assert.deepEqual(fixture.navigations, ['/diagnosis/beta/']);
+}
 
+async function testRateLimitMessage(client) {
   const rateFixture = createFixture({
-    value: 'anything',
     fetchImpl: async () => response(429, { ok: false, error: { code: 'BETA_ACCESS_RATE_LIMITED' } })
   });
   const rateController = client.createController(rateFixture.options);
   await rateController.submit(event());
-  assert.equal(rateFixture.status.textContent, '内测码无效或已失效');
+  assert.equal(rateFixture.status.textContent, '今日公测名额已满，请明天再试');
 }
 
 async function testSubmissionLock(client) {
@@ -91,7 +73,6 @@ async function testSubmissionLock(client) {
   let release;
   const pending = new Promise(resolve => { release = resolve; });
   const fixture = createFixture({
-    value: 'one-use-code',
     fetchImpl: async () => {
       fetchCount += 1;
       return pending;
@@ -101,30 +82,25 @@ async function testSubmissionLock(client) {
   const first = controller.submit(event());
   const duplicate = controller.submit(event());
   assert.equal(fetchCount, 1);
-  assert.equal(fixture.input.readOnly, true);
-  assert.equal(fixture.button.textContent, '验证中...');
+  assert.equal(fixture.button.textContent, '进入中...');
   release(response(401, { ok: false, error: { code: 'BETA_ACCESS_INVALID' } }));
   await Promise.all([first, duplicate]);
   assert.equal(fetchCount, 1);
-  assert.equal(fixture.input.readOnly, false);
 }
 
 async function testSuccessfulFixedNavigation(client) {
   const fixture = createFixture({
-    value: 'valid-code',
     fetchImpl: async () => response(200, { ok: true, redirectTo: '/diagnosis/beta/' })
   });
   const controller = client.createController(fixture.options);
   await controller.submit(event());
   assert.deepEqual(fixture.navigations, ['/diagnosis/beta/']);
-  assert.equal(fixture.input.value, '');
   assert.equal(fixture.button.dataset.state, 'navigating');
   assert.equal(controller.isSubmitting(), true);
 }
 
 async function testUnsafeSuccessAndNetworkFailure(client) {
   const unsafe = createFixture({
-    value: 'valid-code',
     fetchImpl: async () => response(200, { ok: true, redirectTo: 'https://example.invalid/' })
   });
   await client.createController(unsafe.options).submit(event());
@@ -132,7 +108,6 @@ async function testUnsafeSuccessAndNetworkFailure(client) {
   assert.equal(unsafe.status.textContent, '暂时无法验证，请稍后重试');
 
   const network = createFixture({
-    value: 'valid-code',
     fetchImpl: async () => { throw new Error('network'); }
   });
   await client.createController(network.options).submit(event());
@@ -142,16 +117,16 @@ async function testUnsafeSuccessAndNetworkFailure(client) {
 
 function testStaticPrivacyBoundaries() {
   assert.match(homeHtml, /id="diagnosis-beta-entry"/);
-  assert.match(homeHtml, /type="password"/);
-  assert.match(homeHtml, /autocomplete="off"/);
-  assert.match(homeHtml, /autocapitalize="none"/);
-  assert.match(homeHtml, /spellcheck="false"/);
-  assert.doesNotMatch(homeHtml, /id="diagnosisBetaCode"[^>]+(?:maxlength|pattern)=/i);
+  assert.match(homeHtml, /公测入口/);
+  assert.match(homeHtml, /进入公测/);
+  assert.doesNotMatch(homeHtml, /diagnosisBetaCode/);
+  assert.doesNotMatch(homeHtml, /邀请码|内测码/);
   assert.doesNotMatch(homeHtml, /<button type="submit"[^>]*\sdisabled(?:\s|=|>)/i);
   for (const forbidden of ['localStorage', 'sessionStorage', 'document.cookie', 'FrameSparkAnalytics', 'console.']) {
     assert.equal(homeSource.includes(forbidden), false, `frontend source contains ${forbidden}`);
   }
-  assert.equal(homeSource.includes("JSON.stringify({ code: code })"), true);
+  assert.equal(homeSource.includes("JSON.stringify({ code: code })"), false);
+  assert.equal(homeSource.includes('/api/beta-access/public-session'), true);
   assert.equal(homeSource.includes('location.assign(path)'), true);
 }
 
@@ -199,23 +174,19 @@ function testBetaSessionExpiryBehavior() {
   assert.equal(state.location.target, '/#diagnosis-beta-entry');
 }
 
-function createFixture({ value, fetchImpl }) {
+function createFixture({ fetchImpl }) {
   const form = element();
-  const input = element();
   const button = element();
   const status = element();
-  input.value = value;
-  button.textContent = '进入内测';
+  button.textContent = '进入公测';
   const navigations = [];
   return {
     form,
-    input,
     button,
     status,
     navigations,
     options: {
       form,
-      input,
       button,
       status,
       fetchImpl,

@@ -42,7 +42,7 @@ export function createConcurrencyLimit(options = {}) {
         ok: false,
         error: {
           code: 'SERVICE_BUSY',
-          message: '当前内测请求较多，请稍后再试。'
+          message: '当前公测请求较多，请稍后再试。'
         }
       });
       return;

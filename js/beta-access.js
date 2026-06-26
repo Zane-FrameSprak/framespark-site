@@ -1,15 +1,13 @@
 (function (root) {
     'use strict';
 
-    var VERIFY_PATH = '/api/beta-access/verify';
+    var PUBLIC_SESSION_PATH = '/api/beta-access/public-session';
     var BETA_PATH = '/diagnosis/beta/';
-    var EMPTY_MESSAGE = '请输入你的邀请码/内测码';
-    var INVALID_MESSAGE = '内测码无效或已失效';
+    var RATE_LIMIT_MESSAGE = '今日公测名额已满，请明天再试';
     var UNAVAILABLE_MESSAGE = '暂时无法验证，请稍后重试';
 
     function createController(options) {
         var form = options.form;
-        var input = options.input;
         var button = options.button;
         var status = options.status;
         var fetchImpl = options.fetchImpl;
@@ -23,18 +21,16 @@
         }
 
         function updateReadyState() {
-            var ready = input.value.trim().length > 0;
-            button.setAttribute('aria-disabled', ready ? 'false' : 'true');
-            button.dataset.state = ready ? 'ready' : 'empty';
-            return ready;
+            button.setAttribute('aria-disabled', 'false');
+            button.dataset.state = 'ready';
+            return true;
         }
 
         function setSubmitting(active) {
             submitting = active;
             form.setAttribute('aria-busy', active ? 'true' : 'false');
-            input.readOnly = active;
-            button.dataset.state = active ? 'submitting' : (input.value.trim() ? 'ready' : 'empty');
-            button.textContent = active ? '验证中...' : '进入内测';
+            button.dataset.state = active ? 'submitting' : 'ready';
+            button.textContent = active ? '进入中...' : '进入公测';
             if (!active) updateReadyState();
         }
 
@@ -42,26 +38,18 @@
             if (event && typeof event.preventDefault === 'function') event.preventDefault();
             if (submitting) return;
 
-            var code = input.value.trim();
-            if (!code) {
-                updateReadyState();
-                setStatus(EMPTY_MESSAGE, 'error');
-                return;
-            }
-
             setStatus('', '');
             setSubmitting(true);
             try {
-                var response = await fetchImpl(VERIFY_PATH, {
+                var response = await fetchImpl(PUBLIC_SESSION_PATH, {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ code: code })
+                    body: '{}'
                 });
-                code = '';
                 var payload = await response.json().catch(function () { return null; });
                 var errorCode = payload && payload.error ? payload.error.code : '';
                 var keys = payload && typeof payload === 'object' && !Array.isArray(payload)
@@ -69,32 +57,24 @@
                     : '';
 
                 if (response.status === 200 && keys === 'ok,redirectTo' && payload.ok === true && payload.redirectTo === BETA_PATH) {
-                    input.value = '';
                     navigating = true;
                     button.dataset.state = 'navigating';
                     navigate(BETA_PATH);
                     return;
                 }
 
-                if ((response.status === 401 && errorCode === 'BETA_ACCESS_INVALID') ||
-                    (response.status === 429 && errorCode === 'BETA_ACCESS_RATE_LIMITED')) {
-                    setStatus(INVALID_MESSAGE, 'error');
+                if (response.status === 429 && errorCode === 'BETA_ACCESS_RATE_LIMITED') {
+                    setStatus(RATE_LIMIT_MESSAGE, 'error');
                 } else {
                     setStatus(UNAVAILABLE_MESSAGE, 'error');
                 }
             } catch (error) {
-                code = '';
                 setStatus(UNAVAILABLE_MESSAGE, 'error');
             } finally {
                 if (!navigating) setSubmitting(false);
             }
         }
 
-        input.addEventListener('input', function () {
-            if (submitting) return;
-            updateReadyState();
-            if (status.textContent) setStatus('', '');
-        });
         form.addEventListener('submit', submit);
         updateReadyState();
 
@@ -107,14 +87,12 @@
 
     function init(documentRef, windowRef) {
         var form = documentRef.getElementById('diagnosisBetaAccessForm');
-        var input = documentRef.getElementById('diagnosisBetaCode');
         var button = form && form.querySelector('button[type="submit"]');
         var status = documentRef.getElementById('diagnosisBetaAccessStatus');
-        if (!form || !input || !button || !status || typeof windowRef.fetch !== 'function') return null;
+        if (!form || !button || !status || typeof windowRef.fetch !== 'function') return null;
 
         var controller = createController({
             form: form,
-            input: input,
             button: button,
             status: status,
             fetchImpl: windowRef.fetch.bind(windowRef),
@@ -145,7 +123,7 @@
         createController: createController,
         init: init,
         constants: {
-            verifyPath: VERIFY_PATH,
+            publicSessionPath: PUBLIC_SESSION_PATH,
             betaPath: BETA_PATH
         }
     };

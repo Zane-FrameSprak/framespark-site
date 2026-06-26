@@ -1,6 +1,6 @@
 # FrameSpark Diagnosis API
 
-帧火花故事开发诊断系统的邀请制 MVP 后端。
+帧火花故事开发诊断系统的公测 MVP 后端。
 
 当前实现包括：
 
@@ -11,8 +11,8 @@
 - D0 / basic / advanced / final 分阶段诊断
 - final 结构校验和单次安全修复
 - 公共结果 DTO 与受控错误映射
-- 邀请身份、Origin、限流、调用预算和脱敏日志
-- 受功能开关保护的内测码 SQLite / Session 基础层
+- 会话身份、Origin、限流、调用预算和脱敏日志
+- 受功能开关保护的内测码与匿名公测 Session 基础层
 - 本地 mock 与注入式 DeepSeek 兼容调用
 
 暂不实现：
@@ -46,7 +46,7 @@ AI_TIMEOUT_MS=90000
 
 `DEEPSEEK_API_KEY` 必须只写入仓库外的生产 env 或本地未提交 `.env`，不要在文档、日志或 Git 中填写真实值。
 
-三个 V1 开关在示例文件中继续默认 `false`。生产邀请 Beta 只有在独立审批后才临时设为 `true`，并同时要求 `FAIL_CLOSED_ON_V1_ERROR=true`、`REQUIRE_BETA_IDENTITY=true` 和 `ENABLE_DEV_TOOLS=false`。
+三个 V1 开关在示例文件中继续默认 `false`。生产公测只有在独立审批后才设为 `true`，并同时要求 `FAIL_CLOSED_ON_V1_ERROR=true`、`REQUIRE_BETA_IDENTITY=true` 和 `ENABLE_DEV_TOOLS=false`。
 
 健康检查：
 
@@ -110,16 +110,20 @@ materialType: short | feature | other
 - 当前公开解析器支持 TXT / DOCX / 粘贴文本，不要提前承诺 PDF 支持。
 - 内部评测解析器可能支持文本型 PDF，但这不等于公网诊断链路支持 PDF。
 - 如后续支持 PDF，需要单独迁移解析逻辑、补测试和错误提示；扫描版 PDF / OCR 不在当前范围。
-- 邀请 Beta 源文件位于 `beta-site/`，不进入静态官网部署；未来仅由受保护的 Nginx alias 映射。
+- Beta 源文件位于 `beta-site/`，不进入普通静态官网部署；生产只通过受控 Nginx/backend 会话边界映射。
 - 正式站接入计划见 `DEPLOYMENT.md` 和 `DEPLOYMENT_RUNBOOK.md`。
 
-## 内测码基础层
+## 访问基础层
 
-`ENABLE_BETA_CODE_ACCESS` 默认为 `false`。Phase 1 只提供持久化码、短期 Session、验证限流和内部 Session 校验端点；它不替换当前 Basic Auth，不修改 Beta 页面或诊断 API 身份链。
+`ENABLE_BETA_CODE_ACCESS` 和 `ENABLE_PUBLIC_BETA_ACCESS` 默认均为 `false`。
+
+- `ENABLE_BETA_CODE_ACCESS=true` 开启内测码验证入口。
+- `ENABLE_PUBLIC_BETA_ACCESS=true` 开启匿名公测 Session 入口。
+- 两种模式都使用 scoped HttpOnly Cookie，并通过后端生成的 Beta identity 接入现有限额链。
 
 ```bash
 npm run beta-access:manage -- create --count 5
 npm run beta-access:manage -- list
 ```
 
-`create` 必须在交互式终端执行，明文码只显示一次。不得把生产 HMAC 密钥、内测码或 SQLite 文件写入 Git。首批最终规划为 5 人、一人一码，但 Phase 1 不创建真实码。
+`create` 仅用于内测码模式，必须在交互式终端执行，明文码只显示一次。不得把生产 HMAC 密钥、访问码或 SQLite 文件写入 Git。公测模式不需要创建真实访问码。

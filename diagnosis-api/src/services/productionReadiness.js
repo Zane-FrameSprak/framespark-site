@@ -39,7 +39,7 @@ export function getProductionReadiness(current = config) {
     errors.push('FRAMESPARK_ORIGIN_REQUIRED');
   }
 
-  if (current.enableBetaCodeAccess) {
+  if (current.enableBetaCodeAccess || current.enablePublicBetaAccess) {
     const beta = current.betaAccess || {};
     if (!path.isAbsolute(beta.dbPath || '')) errors.push('BETA_ACCESS_DB_PATH_MUST_BE_ABSOLUTE');
     if (!String(beta.dbPath || '').startsWith(`${current.dataDir}${path.sep}`)) {
@@ -81,6 +81,21 @@ export function getProductionReadiness(current = config) {
     if (!positiveAtMost(limits.globalDailyLimit, 100)) errors.push('BETA_ACCESS_GLOBAL_DAILY_LIMIT_MUST_NOT_EXCEED_100');
     if (!Number.isFinite(Number(limits.cooldownMs)) || Number(limits.cooldownMs) < 2000) {
       errors.push('BETA_ACCESS_COOLDOWN_MUST_BE_AT_LEAST_2_SECONDS');
+    }
+  }
+
+  if (current.enablePublicBetaAccess) {
+    if (Number(current.rateLimits?.accountDailyLimit) > 1) {
+      errors.push('PUBLIC_BETA_ACCOUNT_DAILY_LIMIT_MUST_NOT_EXCEED_1');
+    }
+    if (Number(current.rateLimits?.ipDailyLimit) > 3) {
+      errors.push('PUBLIC_BETA_IP_DAILY_LIMIT_MUST_NOT_EXCEED_3');
+    }
+    if (Number(current.rateLimits?.globalDailyLimit) > 5) {
+      errors.push('PUBLIC_BETA_GLOBAL_DAILY_LIMIT_MUST_NOT_EXCEED_5');
+    }
+    if (Number(current.rateLimits?.providerGlobalDailyLimit) > 30) {
+      errors.push('PUBLIC_BETA_PROVIDER_DAILY_LIMIT_MUST_NOT_EXCEED_30');
     }
   }
 

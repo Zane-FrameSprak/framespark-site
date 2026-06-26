@@ -322,6 +322,21 @@ homepage code form
 - The future Phase 4D proxy layer must validate the appropriate scoped cookie through the loopback internal validator and overwrite the trusted Beta identity header before forwarding to Diagnosis.
 - The Beta client only treats `BETA_ACCESS_REQUIRED` as session expiry; other public Diagnosis errors retain their existing UI behavior.
 
+### Public beta anonymous-session boundary (2026-06-26)
+
+```text
+homepage public beta button
+-> POST /api/beta-access/public-session
+-> signed 24-hour scoped HttpOnly page/API cookies
+-> fixed /diagnosis/beta/ navigation
+-> /api/diagnosis/ derives beta identity from the API cookie
+```
+
+- Public beta does not introduce user registration, profiles, a user center, or diagnosis history.
+- Invite-code verification remains in the codebase for rollback or future controlled cohorts.
+- Public beta identities are anonymous HMAC-derived session identities; full IP, User-Agent, cookies, submitted material, and full reports must not be logged.
+- Public beta production readiness rejects limits above account/session `1`, IP `3`, global diagnoses `5`, provider daily `30`, concurrency `2`, and provider calls per diagnosis `5`; the intended first launch uses concurrency `1`.
+
 ## Deployment Notes
 
 - `.github/workflows/pages.yml` deploys static site files to GitHub Pages.

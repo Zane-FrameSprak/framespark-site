@@ -95,7 +95,7 @@
         } catch (error) {
             var failureMessage = error.message || '诊断未完成。';
             renderError(failureMessage);
-            setStatus(failureMessage + ' 请勿立即重复提交，请记录发生时间并联系内测人员。', 'error');
+            setStatus(failureMessage + ' 请勿立即重复提交，请记录发生时间并联系工作人员。', 'error');
         } finally {
             setLoading(false);
         }
@@ -148,13 +148,13 @@
     }
 
     function renderError(message) {
-        result.innerHTML = '<div class="diagnosis-result__empty diagnosis-result__empty--error"><p class="subpage-kicker">NOT COMPLETED</p><h2>本次未生成报告</h2><p>' + escapeHtml(message || '诊断未完成。') + '</p><p>请勿立即重复提交，请记录发生时间和页面提示并联系内测人员。</p></div>';
+        result.innerHTML = '<div class="diagnosis-result__empty diagnosis-result__empty--error"><p class="subpage-kicker">NOT COMPLETED</p><h2>本次未生成报告</h2><p>' + escapeHtml(message || '诊断未完成。') + '</p><p>请勿立即重复提交，请记录发生时间和页面提示并联系工作人员。</p></div>';
     }
 
     function setLoading(loading) {
         var button = form.querySelector('button[type="submit"]');
         button.disabled = loading;
-        button.textContent = loading ? '诊断处理中...' : '开始内测诊断';
+        button.textContent = loading ? '诊断处理中...' : '开始公测诊断';
         progress.hidden = !loading;
         if (loading) {
             status.textContent = '';

@@ -1,4 +1,4 @@
-# Diagnosis API Invite Beta Deployment Plan
+# Diagnosis API Beta Deployment Plan
 
 This repository contains the production baseline only. It does not authorize deployment or public access. Read `DEPLOYMENT_RUNBOOK.md` before any server change.
 
@@ -13,13 +13,13 @@ This repository contains the production baseline only. It does not authorize dep
 - Bind: `127.0.0.1:8788`; analytics remains on `8787`
 - Start: `npm start`
 
-Current production backend release: `e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`.
-Phase 3 backend deployment is complete. Phase 4B initialized the access-code
-secrets and SQLite schema, and Phase 4C enabled the backend routes only inside
-the loopback Diagnosis API process for internal verification. The public
-invite-code flow is still not live: Nginx still uses Basic Auth as the user
-boundary, no real tester codes have been created, B4 T0 has not started, and
-Phase 4D must not begin without a separate plan.
+Current production backend release in the handoff docs is
+`8e089c5bcf68086c787a3cafc58ba358d92e1ee1`. Invite-code Beta is live in
+production until the public-beta release is deployed. The repository now also
+supports anonymous public beta sessions through `ENABLE_PUBLIC_BETA_ACCESS`,
+but that switch requires a new immutable release, env update, Nginx route
+review, static asset deploy and no-AI boundary verification before production
+traffic can use it. B4 T0 has not started.
 
 The previous `d722fc3...` artifact must not be reused for Phase 4B. Its
 `better-sqlite3` native module was built against a newer glibc than production
@@ -45,16 +45,18 @@ artifact glibc is not newer than production glibc.
 
 Production startup fails unless the DeepSeek key, all three V1 switches, fail-closed behavior, Beta identity enforcement, loopback binding, port `8788`, allowed origin and external data directory are valid.
 
-## Access-code Phase 1 Boundary
+## Access Boundary
 
-- The repository contains an optional SQLite access-code/session foundation.
-- `ENABLE_BETA_CODE_ACCESS=true` is now set only for loopback backend
-  validation. Nginx does not expose the verify/session routes publicly yet.
-- Phase 4B initialized the production HMAC secrets and SQLite schema.
-- Phase 4C created and revoked internal test records only; the access DB has no
-  active code and no real tester code.
-- Do not generate real codes or change Nginx until the homepage and cookie-auth
-  migration receive separate approval.
+- The repository contains a SQLite access-code/session foundation and a
+  separate signed anonymous public-session path.
+- `ENABLE_BETA_CODE_ACCESS=true` exposes `POST /api/beta-access/verify` for
+  invite-code cohorts.
+- `ENABLE_PUBLIC_BETA_ACCESS=true` exposes
+  `POST /api/beta-access/public-session` for public beta without creating user
+  accounts or real access codes.
+- Do not enable public beta without the hardened limits: account/session `1`,
+  IP `3`, global diagnoses `5`, provider daily `30`, concurrency `1`, provider
+  calls per diagnosis `5`.
 - When enabled later, the database must be `/var/lib/framespark-diagnosis/access/beta-access.sqlite`, a regular service-owned `0600` file outside webroot.
 - Code and session HMAC keys must be distinct random secrets of at least 32 bytes. Rotating the code key invalidates codes; rotating the session key invalidates active sessions.
 - `better-sqlite3@12.10.1` is native. Every production candidate must pass install, audit, native load and no-AI checks in a Linux Node 20 build environment compatible with production.
@@ -62,12 +64,17 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 - Phase 3 retry 2 showed that production-host `npm ci` can destabilize the instance. Do not repeat production-host native dependency builds unless a separate maintenance-window fallback plan explicitly approves resource limits and timeout supervision.
 - `scripts/build-server-release.docker.example.sh` documents the recommended Docker `linux/amd64` Node 20 build flow and writes artifacts outside the repository by default.
 
-## Invite Beta Boundary
+## Beta Boundary
 
-- Keep public `/diagnosis/` as the upload-disabled preview.
+- Public `/diagnosis/` may remain an explanatory page; the functional Beta UI
+  is `/diagnosis/beta/`.
 - Keep Beta source under `diagnosis-api/beta-site/`, outside the static webroot and existing public-site rsync scope.
-- Protect `/diagnosis/beta/`, `/api/diagnosis/` and `/api/diagnosis-feedback/` with Nginx Basic Auth.
-- Nginx must overwrite `X-Framespark-Beta-User` with `$remote_user`.
+- Protect `/diagnosis/beta/` and `/api/diagnosis/` through the backend Cookie
+  session boundary. Basic Auth files may remain for rollback but must not be
+  the ordinary public-beta user experience.
+- Feedback remains closed unless a separate plan opens it.
+- Nginx must clear any client-supplied `X-Framespark-Beta-User`; the backend
+  derives identity from the page/API Cookie session.
 - Nginx must overwrite `X-Forwarded-For` with `$remote_addr`; do not preserve a client-supplied forwarding chain.
 - Do not expose `/health` or `/ready` publicly; use them from localhost.
 - Do not enable `ENABLE_DEV_TOOLS` in production.
@@ -78,7 +85,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 - Text: 20,000 non-whitespace characters maximum; short or low-information material can return D0.
 - Request deadline: 210 seconds; Nginx read timeout: 240 seconds.
 - Per diagnosis: at most five provider calls, including one shared normal repair and one final safety repair.
-- Initial Beta quota: account 3/day, IP 6/day, global 20 diagnoses/day, global 100 provider calls/day, concurrency 2.
+- Initial public beta quota: account/session 1/day, IP 3/day, global 5 diagnoses/day, global 30 provider calls/day, concurrency 1.
 
 ## Data Handling
 
@@ -99,8 +106,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 
 ## Open Gates
 
-Do not enable the invite-code homepage entry, create real access codes, switch
-public traffic to cookie auth, start B4 T0 or begin Phase 4D until a separate
-Phase 4D plan is approved and verified. The current production backend routes
-are loopback-only from the public user's perspective and do not mean real tester
-access is live.
+Do not start B4 T0, raise limits, open feedback, add a user system, or run a
+real production Diagnosis POST until the public-beta backend/static/Nginx
+deployment has passed no-AI verification and a separate real-AI smoke decision
+is made.

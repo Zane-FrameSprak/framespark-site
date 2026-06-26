@@ -4,6 +4,7 @@ import { ApiError } from '../utils/errors.js';
 export const PAGE_COOKIE = '__Secure-fs_beta_page';
 export const API_COOKIE = '__Secure-fs_beta_api';
 export const BETA_IDENTITY_HEADER = 'X-Framespark-Beta-User';
+const PUBLIC_BETA_IDENTITY_PREFIX = 'public-beta-';
 
 export function createBetaAccessService(options) {
   const store = options.store;
@@ -63,6 +64,41 @@ export function createBetaAccessService(options) {
       };
     },
 
+    async issuePublicSession(input = {}) {
+      const issuedAt = now();
+      const ipHash = consumeVerificationAttempt(store, settings, input.clientIp, issuedAt);
+      const userAgentHash = hmac(settings.codeHmacKey, `ua:${String(input.userAgent || '').slice(0, 300)}`);
+      const identityId = `${PUBLIC_BETA_IDENTITY_PREFIX}${hmac(settings.codeHmacKey, `public:${ipHash}:${userAgentHash}`).slice(0, 32)}`;
+      const expiresAt = new Date(issuedAt.getTime() + settings.sessionTtlMs);
+      const pageToken = createSignedPublicSessionToken(settings, {
+        identityId,
+        scope: 'page',
+        expiresAt
+      });
+      const apiToken = createSignedPublicSessionToken(settings, {
+        identityId,
+        scope: 'api',
+        expiresAt
+      });
+
+      store.clearVerificationCooldown(ipHash);
+      store.recordAudit({
+        identityId,
+        subjectHash: ipHash,
+        event: 'public_session_issued',
+        status: 'success',
+        createdAt: issuedAt
+      });
+      return {
+        identityId,
+        expiresAt,
+        cookies: [
+          serializeCookie(PAGE_COOKIE, pageToken, '/diagnosis/beta/', expiresAt, settings.sessionTtlMs, settings.cookieSecure),
+          serializeCookie(API_COOKIE, apiToken, '/api/diagnosis/', expiresAt, settings.sessionTtlMs, settings.cookieSecure)
+        ]
+      };
+    },
+
     rejectInvalidInput(clientIp) {
       const ipHash = consumeVerificationAttempt(store, settings, clientIp, now());
       recordInvalid(store, ipHash, settings.verifyLimits.cooldownMs);
@@ -74,7 +110,9 @@ export function createBetaAccessService(options) {
       if (!route) return null;
       const cookies = parseCookies(input.cookieHeader);
       const token = cookies[route.cookieName];
-      if (!token || token.length > 128) return null;
+      if (!token || token.length > 512) return null;
+      const publicSession = validateSignedPublicSessionToken(settings, token, route.scope, now());
+      if (publicSession) return publicSession;
       return store.validateSession({
         tokenHash: hmac(settings.sessionHmacKey, `session:${token}`),
         scope: route.scope,
@@ -126,6 +164,12 @@ export function betaIdentityForCode(identityId) {
   return `beta-code-${identityId}`;
 }
 
+export function betaIdentityForSession(identityId) {
+  const value = String(identityId || '');
+  if (value.startsWith(PUBLIC_BETA_IDENTITY_PREFIX)) return value;
+  return betaIdentityForCode(value);
+}
+
 function recordInvalid(store, ipHash, cooldownMs) {
   store.recordVerificationFailure(ipHash, cooldownMs);
   store.recordAudit({ subjectHash: ipHash, event: 'verify_failed', status: 'invalid' });
@@ -153,6 +197,40 @@ function serializeCookie(name, value, cookiePath, expiresAt, ttlMs, secure) {
   return fields.join('; ');
 }
 
+function createSignedPublicSessionToken(settings, input) {
+  const payload = base64url(JSON.stringify({
+    v: 1,
+    sub: input.identityId,
+    scope: input.scope,
+    exp: input.expiresAt.getTime()
+  }));
+  const signature = hmacBase64url(settings.sessionHmacKey, `public-session:${payload}`);
+  return `${payload}.${signature}`;
+}
+
+function validateSignedPublicSessionToken(settings, token, expectedScope, timestamp) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+  const expectedSignature = hmacBase64url(settings.sessionHmacKey, `public-session:${parts[0]}`);
+  if (!safeEqual(expectedSignature, parts[1])) return null;
+  let payload;
+  try {
+    payload = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+  const identityId = String(payload.sub || '');
+  if (payload.v !== 1 || payload.scope !== expectedScope) return null;
+  if (!identityId.startsWith(PUBLIC_BETA_IDENTITY_PREFIX)) return null;
+  if (!/^[A-Za-z0-9._@-]+$/.test(identityId) || identityId.length > 80) return null;
+  if (!Number.isFinite(Number(payload.exp)) || Number(payload.exp) <= timestamp.getTime()) return null;
+  return {
+    identityId,
+    sessionVersion: 1,
+    expiresAt: new Date(Number(payload.exp)).toISOString()
+  };
+}
+
 function parseCookies(header) {
   const result = Object.create(null);
   for (const part of String(header || '').split(';')) {
@@ -167,6 +245,14 @@ function parseCookies(header) {
 
 function hmac(key, value) {
   return createHmac('sha256', key).update(value).digest('hex');
+}
+
+function hmacBase64url(key, value) {
+  return createHmac('sha256', key).update(value).digest('base64url');
+}
+
+function base64url(value) {
+  return Buffer.from(value, 'utf8').toString('base64url');
 }
 
 function assertKey(value, name) {

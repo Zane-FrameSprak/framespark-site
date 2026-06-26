@@ -1,5 +1,5 @@
 import { config } from '../config.js';
-import { betaIdentityForCode } from '../services/betaAccessService.js';
+import { betaIdentityForSession } from '../services/betaAccessService.js';
 
 const BETA_HEADER = 'x-framespark-beta-user';
 
@@ -19,7 +19,7 @@ export function createBetaIdentityGuard(required = config.requireBetaIdentity) {
         ok: false,
         error: {
           code: 'BETA_ACCESS_REQUIRED',
-          message: '当前诊断仅对受邀内测用户开放。'
+          message: '公测访问凭证已失效，请从首页重新进入。'
         }
       });
       return;
@@ -42,7 +42,7 @@ export function createBetaSessionIdentityMiddleware(service, originalUri = '/api
       cookieHeader: req.get('cookie')
     });
     if (session) {
-      req.betaIdentity = betaIdentityForCode(session.identityId);
+      req.betaIdentity = betaIdentityForSession(session.identityId);
     }
     next();
   };
@@ -55,7 +55,7 @@ export function createBetaPageSessionGuard(service, originalUri) {
       cookieHeader: req.get('cookie')
     });
     if (session) {
-      req.betaIdentity = betaIdentityForCode(session.identityId);
+      req.betaIdentity = betaIdentityForSession(session.identityId);
       next();
       return;
     }
@@ -77,7 +77,7 @@ export function createOriginGuard(allowedOrigins = config.allowedOrigins) {
       ok: false,
       error: {
         code: 'ORIGIN_NOT_ALLOWED',
-        message: '当前请求来源不允许使用诊断内测。'
+        message: '当前请求来源不允许使用诊断公测。'
       }
     });
   };

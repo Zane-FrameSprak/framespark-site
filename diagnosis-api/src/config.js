@@ -50,6 +50,7 @@ export const config = {
   failClosedOnV1Error: readBoolean('FAIL_CLOSED_ON_V1_ERROR'),
   requireBetaIdentity: readBoolean('REQUIRE_BETA_IDENTITY'),
   enableBetaCodeAccess: readBoolean('ENABLE_BETA_CODE_ACCESS'),
+  enablePublicBetaAccess: readBoolean('ENABLE_PUBLIC_BETA_ACCESS'),
   trustedProxy: process.env.TRUST_PROXY || 'loopback',
   allowedOrigins: readList('ALLOWED_ORIGINS', ['https://framespark.cn']),
   providerCallLimitPerDiagnosis: readNumber('PROVIDER_CALL_LIMIT_PER_DIAGNOSIS', 5),

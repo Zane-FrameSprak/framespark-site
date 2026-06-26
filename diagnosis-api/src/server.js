@@ -48,7 +48,7 @@ export function createApp(options = {}) {
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS']
   }));
-  if (config.enableBetaCodeAccess || options.betaAccessService) {
+  if (config.enableBetaCodeAccess || config.enablePublicBetaAccess || options.betaAccessService) {
     const store = options.betaAccessStore || (options.betaAccessService ? null : createBetaAccessStore({ dbPath: config.betaAccess.dbPath }));
     store?.cleanup({ auditRetentionDays: config.betaAccess.auditRetentionDays });
     const service = options.betaAccessService || createBetaAccessService({ store, settings: config.betaAccess });
@@ -56,7 +56,9 @@ export function createApp(options = {}) {
     const routers = createBetaAccessRouters({
       service,
       settings: config.betaAccess,
-      allowedOrigins: config.allowedOrigins
+      allowedOrigins: config.allowedOrigins,
+      enableCodeVerify: config.enableBetaCodeAccess,
+      enablePublicSession: config.enablePublicBetaAccess
     });
     app.use('/api/beta-access', routers.verifyRouter);
     app.use('/internal/beta-session', routers.internalRouter);
@@ -100,13 +102,13 @@ export function createApp(options = {}) {
     createDailyRateLimit({
       limit: config.rateLimits.globalDailyLimit,
       errorCode: 'RATE_LIMIT_EXCEEDED',
-      message: '今日内测总次数已达上限。',
+      message: '今日公测总次数已达上限。',
       keyFn: getGlobalKey
     }),
     createDailyRateLimit({
       limit: config.rateLimits.accountDailyLimit,
       errorCode: 'RATE_LIMIT_EXCEEDED',
-      message: '当前内测账号今日次数已达上限。',
+      message: '当前公测访问凭证今日次数已达上限。',
       keyFn: getBetaIdentityKey
     }),
     createDailyRateLimit({

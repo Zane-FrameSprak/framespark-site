@@ -121,6 +121,48 @@ function testProductionReadiness() {
   });
   assertEqual(accessReady.ok, true, 'access ready config');
 
+  const publicBetaAccessConfig = {
+    dbPath: '/var/lib/framespark-diagnosis/access/beta-access.sqlite',
+    codeHmacKey: 'code-key-0123456789abcdef-0123456789abcdef',
+    sessionHmacKey: 'session-key-0123456789abcdef-0123456789abcdef',
+    cookieSecure: true,
+    sessionTtlMs: 86400000,
+    defaultExpiresDays: 7,
+    defaultMaxUses: 5,
+    maxCodeChars: 256,
+    originalUriHeader: 'x-framespark-original-uri',
+    auditRetentionDays: 30,
+    verifyLimits: { windowMs: 900000, ipWindowLimit: 5, ipDailyLimit: 20, globalWindowLimit: 30, globalDailyLimit: 100, cooldownMs: 2000 }
+  };
+  const publicReady = getProductionReadiness({
+    ...readyConfig(),
+    enablePublicBetaAccess: true,
+    rateLimits: {
+      accountDailyLimit: 1,
+      ipDailyLimit: 3,
+      globalDailyLimit: 5,
+      providerGlobalDailyLimit: 30,
+      concurrencyLimit: 1
+    },
+    betaAccess: publicBetaAccessConfig
+  });
+  assertEqual(publicReady.ok, true, 'public beta ready config');
+
+  const publicUnsafe = getProductionReadiness({
+    ...readyConfig(),
+    enablePublicBetaAccess: true,
+    rateLimits: {
+      accountDailyLimit: 2,
+      ipDailyLimit: 4,
+      globalDailyLimit: 6,
+      providerGlobalDailyLimit: 31,
+      concurrencyLimit: 2
+    },
+    betaAccess: publicBetaAccessConfig
+  });
+  assertEqual(publicUnsafe.ok, false, 'unsafe public beta config');
+  assertTruthy(publicUnsafe.errors.includes('PUBLIC_BETA_GLOBAL_DAILY_LIMIT_MUST_NOT_EXCEED_5'), 'public global limit check');
+
   const accessUnsafe = getProductionReadiness({
     ...readyConfig(),
     enableBetaCodeAccess: true,

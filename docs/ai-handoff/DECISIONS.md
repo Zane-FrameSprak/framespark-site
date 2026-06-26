@@ -246,3 +246,23 @@ Code validity belongs to the Phase 1 server foundation. Keeping client behavior 
 
 Impact:
 Phase 2 can be tested and committed without enabling production access. Nginx cookie validation and Basic Auth migration remain a separately reviewed Phase 3 boundary.
+
+## 2026-06-26 — Public beta uses anonymous sessions before user accounts
+
+Decision:
+Do not build a full user system before the first public beta. Replace the
+ordinary tester-facing invite-code input with a public beta button that obtains
+a signed 24-hour anonymous session. Keep the Diagnosis API behind session-derived
+identity plus account/IP/global/concurrency/provider limits.
+
+Reason:
+The immediate product question is whether people use the diagnosis result and
+whether cost/latency/quality stay controlled. Registration, login, user profiles,
+history, password recovery and account deletion would add substantial scope
+before those signals exist.
+
+Impact:
+The first public beta launch uses low hard caps: account/session 1, IP 3,
+global diagnoses 5, provider daily 30, concurrency 1 and provider calls per
+diagnosis 5. Invite-code tooling remains available for rollback or future
+closed cohorts. B4 T0 and real-AI smoke still require separate authorization.

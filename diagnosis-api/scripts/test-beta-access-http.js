@@ -34,6 +34,7 @@ const child = spawn(process.execPath, ['src/server.js'], {
     PORT: String(port),
     DIAGNOSIS_DATA_DIR: root,
     ENABLE_BETA_CODE_ACCESS: 'true',
+    ENABLE_PUBLIC_BETA_ACCESS: 'true',
     REQUIRE_BETA_IDENTITY: 'true',
     BETA_ACCESS_DB_PATH: dbPath,
     BETA_ACCESS_CODE_HMAC_KEY: codeKey,
@@ -70,6 +71,23 @@ try {
 
   const pageCookie = valid.cookies.find(value => value.startsWith('__Secure-fs_beta_page='));
   const apiCookie = valid.cookies.find(value => value.startsWith('__Secure-fs_beta_api='));
+
+  const publicMissingOrigin = await postRaw(port, '/api/beta-access/public-session', '{}', {});
+  assert.equal(publicMissingOrigin.status, 403);
+
+  const publicSession = await postRaw(port, '/api/beta-access/public-session', '{}', headers('10.0.0.10'));
+  assert.equal(publicSession.status, 200);
+  assert.deepEqual(publicSession.body, { ok: true, redirectTo: '/diagnosis/beta/' });
+  assert.equal(publicSession.cookies.length, 2);
+  assert.equal(JSON.stringify(publicSession.body).includes('public-beta-'), false);
+  const publicPageCookie = publicSession.cookies.find(value => value.startsWith('__Secure-fs_beta_page='));
+  const publicApiCookie = publicSession.cookies.find(value => value.startsWith('__Secure-fs_beta_api='));
+  for (const cookie of publicSession.cookies) {
+    assert.match(cookie, /HttpOnly/);
+    assert.match(cookie, /Secure/);
+    assert.match(cookie, /SameSite=Strict/);
+    assert.match(cookie, /Max-Age=86400/);
+  }
 
   const protectedPageNoCookie = await get(port, '/diagnosis/beta/', {});
   assert.equal(protectedPageNoCookie.status, 302);
@@ -111,6 +129,25 @@ try {
   });
   assert.equal(api.status, 204);
   assert.equal(api.headers['x-framespark-beta-user'], page.headers['x-framespark-beta-user']);
+
+  const publicPage = await get(port, '/diagnosis/beta/', {
+    Cookie: cookiePair(publicPageCookie)
+  });
+  assert.equal(publicPage.status, 200);
+  const publicApiIdentity = await get(port, '/internal/beta-session/validate', {
+    Cookie: cookiePair(publicApiCookie),
+    'X-Framespark-Original-URI': '/api/diagnosis/'
+  });
+  assert.equal(publicApiIdentity.status, 204);
+  assert.match(publicApiIdentity.headers['x-framespark-beta-user'], /^public-beta-[0-9a-f]{32}$/);
+
+  const publicApiMissingMaterial = await postMultipart(port, '/api/diagnosis/', {
+    Origin: 'https://framespark.cn',
+    Cookie: cookiePair(publicApiCookie)
+  });
+  assert.equal(publicApiMissingMaterial.status, 400);
+  assert.equal(publicApiMissingMaterial.body.error.code, 'TEXT_REQUIRED');
+  assert.equal(providerRequests, 0);
 
   const pageCookieCannotUseApi = await postMultipart(port, '/api/diagnosis/', {
     Origin: 'https://framespark.cn',

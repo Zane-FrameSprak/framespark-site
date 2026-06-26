@@ -64,13 +64,13 @@
         platforms: [
             {
                 number: '01',
-                status: '内测中',
+                status: '公测中',
                 title: '故事开发诊断系统',
                 freeLabel: '免费',
                 english: 'FRAMESPARK STORY DEVELOPMENT DIAGNOSIS',
                 description: '故事开发诊断工具',
                 actionLabel: '点击进入',
-                notice: '诊断系统内测中，暂未开放公开上传。',
+                notice: '诊断系统公测中，每日开放少量真实诊断名额。',
                 href: 'diagnosis/',
                 betaAccessEntry: true
             },

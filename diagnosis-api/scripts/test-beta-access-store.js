@@ -65,8 +65,9 @@ try {
   assert.equal(expired.reason, 'expired');
 
   clock = new Date('2026-06-15T01:00:00.000Z');
-  const contested = service.createCodes({ count: 1, maxUses: 1 })[0];
-  const results = await consumeConcurrently(dbPath, service.hashCode(contested.code), sessionExpiry);
+  const contested = service.createCodes({ count: 1, maxUses: 1, expiresDays: 3650 })[0];
+  const contestedSessionExpiry = new Date('2036-06-15T01:00:00.000Z');
+  const results = await consumeConcurrently(dbPath, service.hashCode(contested.code), contestedSessionExpiry);
   assert.deepEqual(results.map(result => result.ok).sort(), [false, true]);
   assert.equal(store.listCodes().find(code => code.id === contested.record.id).usedCount, 1);
 

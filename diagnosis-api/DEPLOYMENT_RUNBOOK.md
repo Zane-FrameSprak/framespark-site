@@ -1,21 +1,19 @@
-# Diagnosis API Invite Beta Runbook
+# Diagnosis API Beta Runbook
 
 ## Purpose
 
-Manual runbook for a protected diagnosis Beta. It is not an automatic deployment instruction and does not authorize public upload.
+Manual runbook for a protected diagnosis Beta/public beta. It is not an automatic deployment instruction and does not authorize unchecked public upload.
 
-## Current Phase 3 State
+## Current Production State
 
-Phase 3 backend deployment completed at release
-`e16d6997c5dc4c08671c7c2f8d66d0dd989e90bf`; `previous` points to
-`d722fc3ed06ce6908a8936390455def8f735913e`. The service is
-`active/running/enabled` on loopback `8788`, and public `/diagnosis/` plus the
-Basic Auth Beta boundary remain unchanged. Access-code backend routes are
-enabled only inside the loopback Diagnosis API process after Phase 4C:
-`ENABLE_BETA_CODE_ACCESS=true`, HMAC secrets and the SQLite schema exist, but
-Nginx still does not expose the invite-code flow publicly. No real codes exist,
-no production diagnosis POST or AI call has been made, B4 T0 has not started,
-and Phase 4D must be planned separately.
+Invite-code Beta production launch is recorded in the handoff docs at release
+`8e089c5bcf68086c787a3cafc58ba358d92e1ee1`. The service is
+`active/running/enabled` on loopback `8788`; `ENABLE_BETA_CODE_ACCESS=true`
+is live for the current invite-code flow. The repository now also supports
+`ENABLE_PUBLIC_BETA_ACCESS=true` for a no-code public beta button that issues
+anonymous signed 24-hour page/API cookies. Public beta is not considered live
+until the backend release, env, Nginx routes and static assets are deployed and
+verified.
 
 Important: do not reuse the older `d722fc3...` artifact for Phase 4B. It was
 built on a runner with newer glibc and its `better-sqlite3` native module
@@ -53,13 +51,10 @@ before deployment.
 
 Never print or commit the env file.
 
-Phase 4B access-code variables are no longer secret-free in production. Two
-distinct HMAC secrets exist in the root-only env, and
+Beta access variables are no longer secret-free in production. Two distinct
+HMAC secrets exist in the root-only env, and
 `/var/lib/framespark-diagnosis/access/beta-access.sqlite` has schema
-`user_version=1`. Phase 4C created and revoked internal test records for
-loopback verification only; the DB has no active code and no real tester code.
-A later migration must not generate real codes before cookie authentication and
-rollback have been reviewed.
+`user_version=1`. Public beta does not require real access-code creation.
 
 ## Release Artifact Preparation
 
@@ -103,19 +98,24 @@ environment that matches the production Node 20 platform and architecture.
 5. Confirm the active site-config path, back it up manually, compare every existing location with the canonical snippet, and add only missing locations without changing analytics.
 6. Run the panel Nginx config test. Reload only after it passes.
 7. Add the authenticated Nginx alias from `/diagnosis/beta/` to the release's `beta-site/`; never copy these files into the public webroot.
-8. Verify anonymous access receives authentication and authenticated access serves the Beta page/API.
+8. For public beta, expose only `POST /api/beta-access/public-session`, exact
+   Beta static routes and exact `POST /api/diagnosis/`. Keep health, ready,
+   internal session validation and feedback out of the public route surface.
+9. Verify no-code public entry receives scoped cookies, missing-material POST
+   returns controlled 400 with zero provider calls, and per-session/IP/global
+   limits return controlled 429 before provider.
 
 ## Verification
 
 - Local: `/health` returns liveness; `/ready` returns HTTP 200.
-- Public preview remains closed; Beta page requires authentication.
+- Beta page requires a valid scoped session; without it the user returns to the homepage entry.
 - Unsupported files, oversized files, overlong text, bad origin and missing Beta identity fail before AI.
 - A client-supplied `X-Forwarded-For` value cannot change the API's effective IP because Nginx overwrites it.
 - D0 returns a user result rather than an internal error for low-information material.
 - Public success JSON contains no `reportV1`, model, prompt version, latency, retry or fallback fields.
 - A final unsafe result returns controlled failure and no legacy report.
 - Metadata logs contain no original filename, full material or full report.
-- Run 1-3 fictional production smoke cases only after explicit real-AI approval.
+- Run at most one fictional production smoke only after explicit real-AI approval.
 
 ## Rollback
 
