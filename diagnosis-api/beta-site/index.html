@@ -10,13 +10,15 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
     <link rel="stylesheet" href="/css/style.css?v=20260627-subpage-density1">
-    <link rel="stylesheet" href="/diagnosis/beta/beta.css?v=20260627-beta-density1">
+    <link rel="stylesheet" href="/diagnosis/beta/beta.css?v=20260627-beta-layout2">
 </head>
 <body>
     <header class="nav">
         <div class="nav__inner">
             <a class="brand" href="/" aria-label="返回帧火花首页">
-                <span class="brand__mark" aria-hidden="true"></span>
+                <span class="brand__mark">
+                    <img src="/assets/brand/framespark-logo.svg" alt="帧火花 FrameSpark">
+                </span>
                 <span class="brand__text">
                     <span class="brand__cn">帧火花</span>
                     <span class="brand__en">FRAMESPARK</span>
@@ -48,14 +50,25 @@
                         <p>支持粘贴文本、UTF-8 TXT 和 DOCX。暂不支持 PDF、扫描件、图片 OCR 或超长完整剧本。</p>
                     </div>
 
-                    <label class="diagnosis-field">
-                        <span>目标方向</span>
-                        <select name="materialType" required>
+                    <label class="diagnosis-field diagnosis-field--target">
+                        <span id="diagnosisTargetLabel">目标方向</span>
+                        <select class="diagnosis-native-select" name="materialType" aria-hidden="true" tabindex="-1">
                             <option value="">请选择</option>
                             <option value="short">短片</option>
                             <option value="feature">长片方向</option>
                             <option value="other">其他 / 不确定</option>
                         </select>
+                        <div class="diagnosis-select" data-diagnosis-select>
+                            <button class="diagnosis-select__button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="diagnosisTargetLabel diagnosisTargetValue">
+                                <span id="diagnosisTargetValue">请选择</span>
+                                <span class="diagnosis-select__chevron" aria-hidden="true"></span>
+                            </button>
+                            <div class="diagnosis-select__menu" role="listbox" aria-label="目标方向" hidden>
+                                <button type="button" role="option" data-value="short" aria-selected="false">短片</button>
+                                <button type="button" role="option" data-value="feature" aria-selected="false">长片方向</button>
+                                <button type="button" role="option" data-value="other" aria-selected="false">其他 / 不确定</button>
+                            </div>
+                        </div>
                     </label>
 
                     <section class="diagnosis-material" aria-labelledby="betaMaterialTitle">
@@ -122,6 +135,6 @@
             </div>
         </div>
     </footer>
-    <script src="/diagnosis/beta/app.js?v=20260626-public-beta1" defer></script>
+    <script src="/diagnosis/beta/app.js?v=20260627-beta-layout2" defer></script>
 </body>
 </html>

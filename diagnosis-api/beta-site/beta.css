@@ -18,7 +18,7 @@
 
 .diagnosis-beta .subpage-hero__inner,
 .diagnosis-beta .subpage-section__inner {
-    max-width: 1320px;
+    max-width: 1240px;
 }
 
 .diagnosis-beta .subpage-kicker {
@@ -47,9 +47,9 @@
 }
 
 .diagnosis-beta .diagnosis-console {
-    max-width: 1280px;
-    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
-    gap: clamp(16px, 1.8vw, 24px);
+    max-width: 1200px;
+    grid-template-columns: minmax(340px, 0.92fr) minmax(420px, 1.08fr);
+    gap: clamp(14px, 1.6vw, 22px);
 }
 
 .diagnosis-beta .diagnosis-form,
@@ -61,7 +61,7 @@
 }
 
 .diagnosis-beta .diagnosis-form {
-    padding: clamp(16px, 1.7vw, 22px);
+    padding: clamp(15px, 1.5vw, 20px);
 }
 
 .diagnosis-beta .diagnosis-result {
@@ -99,8 +99,103 @@
     background: rgba(10, 9, 8, 0.54);
 }
 
-.diagnosis-beta .diagnosis-field select {
+.diagnosis-beta .diagnosis-native-select {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.diagnosis-beta .diagnosis-select {
+    position: relative;
+}
+
+.diagnosis-beta .diagnosis-select__button {
+    display: flex;
+    width: 100%;
     min-height: 42px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0 13px;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background:
+        linear-gradient(180deg, rgba(201, 168, 117, 0.065), transparent 80%),
+        rgba(10, 9, 8, 0.56);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.diagnosis-beta .diagnosis-select__button:hover,
+.diagnosis-beta .diagnosis-select__button:focus-visible,
+.diagnosis-beta .diagnosis-select[data-open="true"] .diagnosis-select__button {
+    border-color: rgba(201, 168, 117, 0.72);
+    background:
+        linear-gradient(180deg, rgba(201, 168, 117, 0.12), transparent 82%),
+        rgba(10, 9, 8, 0.78);
+    outline: none;
+}
+
+.diagnosis-beta .diagnosis-select__chevron {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 auto;
+    border-right: 1px solid var(--gold);
+    border-bottom: 1px solid var(--gold);
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform 160ms ease;
+}
+
+.diagnosis-beta .diagnosis-select[data-open="true"] .diagnosis-select__chevron {
+    transform: translateY(2px) rotate(225deg);
+}
+
+.diagnosis-beta .diagnosis-select__menu {
+    position: absolute;
+    z-index: 8;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    display: grid;
+    overflow: hidden;
+    border: 1px solid rgba(201, 168, 117, 0.42);
+    background:
+        linear-gradient(145deg, rgba(201, 168, 117, 0.1), transparent 46%),
+        #15120f;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+}
+
+.diagnosis-beta .diagnosis-select__menu[hidden] {
+    display: none;
+}
+
+.diagnosis-beta .diagnosis-select__menu button {
+    min-height: 40px;
+    padding: 0 13px;
+    border: 0;
+    border-bottom: 1px solid rgba(201, 168, 117, 0.14);
+    background: transparent;
+    color: var(--ink-muted);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.diagnosis-beta .diagnosis-select__menu button:last-child {
+    border-bottom: 0;
+}
+
+.diagnosis-beta .diagnosis-select__menu button:hover,
+.diagnosis-beta .diagnosis-select__menu button:focus-visible,
+.diagnosis-beta .diagnosis-select__menu button[aria-selected="true"] {
+    outline: none;
+    background: rgba(201, 168, 117, 0.16);
+    color: var(--ink);
 }
 
 .diagnosis-beta .diagnosis-material textarea {
@@ -272,5 +367,14 @@
 
     .diagnosis-beta-consent {
         padding: 14px;
+    }
+
+    .diagnosis-beta .diagnosis-console {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .diagnosis-beta .diagnosis-select__menu {
+        position: static;
+        margin-top: 6px;
     }
 }

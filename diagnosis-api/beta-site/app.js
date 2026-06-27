@@ -12,6 +12,7 @@
         options.textInput.value = '';
         options.fileInput.value = '';
         options.fileName.textContent = '未选择文件';
+        if (typeof options.syncTargetSelect === 'function') options.syncTargetSelect();
         options.progress.hidden = true;
         options.status.textContent = '';
         options.status.dataset.state = '';
@@ -34,9 +35,14 @@
     var progress = documentRef.getElementById('diagnosisBetaProgress');
     var status = documentRef.getElementById('diagnosisBetaStatus');
     var result = documentRef.getElementById('diagnosisBetaResult');
+    var materialSelect = form && form.elements.materialType;
+    var targetSelectControl = documentRef.querySelector
+        ? documentRef.querySelector('[data-diagnosis-select]')
+        : null;
 
-    if (!form || !fileInput || !textInput || !consent || !status || !result) return;
+    if (!form || !fileInput || !textInput || !consent || !status || !result || !materialSelect) return;
     var emptyResultHtml = result.innerHTML;
+    var syncTargetSelect = setupTargetSelect(targetSelectControl, materialSelect);
 
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
@@ -47,6 +53,11 @@
         event.preventDefault();
         var file = fileInput.files && fileInput.files[0];
         var text = textInput.value.trim();
+        if (!materialSelect.value) {
+            setStatus('请选择目标方向。', 'error');
+            focusTargetSelect(targetSelectControl);
+            return;
+        }
         if (!file && !text) {
             setStatus('请粘贴文本或选择 TXT / DOCX 文件。', 'error');
             return;
@@ -81,6 +92,7 @@
                     status: status,
                     result: result,
                     emptyResultHtml: emptyResultHtml,
+                    syncTargetSelect: syncTargetSelect,
                     location: root.location
                 });
                 return;
@@ -165,6 +177,101 @@
     function setStatus(message, state) {
         status.textContent = message || '';
         status.dataset.state = state || '';
+    }
+
+    function setupTargetSelect(control, select) {
+        if (!control || !select) return function () {};
+        var button = control.querySelector('.diagnosis-select__button');
+        var valueText = control.querySelector('#diagnosisTargetValue');
+        var menu = control.querySelector('.diagnosis-select__menu');
+        var options = Array.prototype.slice.call(control.querySelectorAll('[role="option"]'));
+        if (!button || !valueText || !menu || !options.length) return function () {};
+
+        function sync() {
+            var selected = options.find(function (option) {
+                return option.dataset.value === select.value;
+            });
+            valueText.textContent = selected ? selected.textContent : '请选择';
+            options.forEach(function (option) {
+                option.setAttribute('aria-selected', option === selected ? 'true' : 'false');
+            });
+            control.dataset.state = selected ? 'selected' : '';
+        }
+
+        function openMenu() {
+            menu.hidden = false;
+            button.setAttribute('aria-expanded', 'true');
+            control.dataset.open = 'true';
+        }
+
+        function closeMenu() {
+            menu.hidden = true;
+            button.setAttribute('aria-expanded', 'false');
+            control.dataset.open = 'false';
+        }
+
+        function toggleMenu() {
+            if (menu.hidden) openMenu();
+            else closeMenu();
+        }
+
+        function choose(option) {
+            select.value = option.dataset.value || '';
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            sync();
+            closeMenu();
+            button.focus();
+        }
+
+        button.addEventListener('click', toggleMenu);
+        button.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openMenu();
+                var selected = options.find(function (option) {
+                    return option.getAttribute('aria-selected') === 'true';
+                });
+                (selected || options[0]).focus();
+            }
+        });
+
+        options.forEach(function (option, index) {
+            option.addEventListener('click', function () {
+                choose(option);
+            });
+            option.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeMenu();
+                    button.focus();
+                    return;
+                }
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    choose(option);
+                    return;
+                }
+                if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    var direction = event.key === 'ArrowDown' ? 1 : -1;
+                    var next = (index + direction + options.length) % options.length;
+                    options[next].focus();
+                }
+            });
+        });
+
+        documentRef.addEventListener('click', function (event) {
+            if (!control.contains(event.target)) closeMenu();
+        });
+
+        select.addEventListener('change', sync);
+        sync();
+        closeMenu();
+        return sync;
+    }
+
+    function focusTargetSelect(control) {
+        var button = control && control.querySelector('.diagnosis-select__button');
+        if (button) button.focus();
     }
 
     function escapeHtml(value) {
