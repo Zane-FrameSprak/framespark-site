@@ -27,7 +27,7 @@ const cases = [
   ['DOCX extracted text token length is capped after extraction', async () => {
     const parsed = await parseUploadedFile(makeFile(makeDocx('token '.repeat(40))));
     assert.throws(() => validateInputTokenLimit(parsed.text, { maxInputTokens: 10 }), hasCode('TEXT_TOO_LONG'));
-    assert.equal(config.maxInputTokens, 15000);
+    assert.equal(config.maxInputTokens, 50000);
   }]
 ];
 

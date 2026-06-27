@@ -34,7 +34,7 @@ export const config = {
   maxUploadBytes: readNumber('MAX_UPLOAD_MB', 5) * 1024 * 1024,
   maxDocxExpandedBytes: readNumber('MAX_DOCX_EXPANDED_MB', 20) * 1024 * 1024,
   minTextChars: readNumber('MIN_TEXT_CHARS', 80),
-  maxInputTokens: readNumber('MAX_INPUT_TOKENS', 15000),
+  maxInputTokens: readNumber('MAX_INPUT_TOKENS', 50000),
   dataDir: path.resolve(process.env.DIAGNOSIS_DATA_DIR || defaultDataDir),
   metadataRetentionDays: readNumber('DIAGNOSIS_METADATA_RETENTION_DAYS', 30),
   reviewRetentionDays: readNumber('DIAGNOSIS_REVIEW_RETENTION_DAYS', 14),

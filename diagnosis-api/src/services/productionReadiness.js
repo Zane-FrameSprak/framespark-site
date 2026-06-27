@@ -25,7 +25,7 @@ export function getProductionReadiness(current = config) {
     errors.push('DATA_DIR_MUST_USE_PRODUCTION_PATH');
   }
   if (Number(current.maxUploadBytes) > 5 * 1024 * 1024) errors.push('MAX_UPLOAD_MUST_NOT_EXCEED_5MB');
-  if (Number(current.maxInputTokens) > 15000) errors.push('MAX_INPUT_TOKENS_MUST_NOT_EXCEED_15000');
+  if (Number(current.maxInputTokens) > 50000) errors.push('MAX_INPUT_TOKENS_MUST_NOT_EXCEED_50000');
   if (Number(current.metadataRetentionDays) > 30) errors.push('METADATA_RETENTION_MUST_NOT_EXCEED_30_DAYS');
   if (Number(current.reviewRetentionDays) > 14) errors.push('REVIEW_RETENTION_MUST_NOT_EXCEED_14_DAYS');
   if (Number(current.requestTimeoutMs) > 210000) errors.push('REQUEST_TIMEOUT_MUST_NOT_EXCEED_210_SECONDS');

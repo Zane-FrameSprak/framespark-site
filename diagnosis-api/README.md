@@ -100,7 +100,7 @@ materialType: short | feature | other
 公共响应不返回 raw `reportV1`、stage code、prompt version、model、fallback、latency、JSON retry 或内部路由信息。
 
 输入长度使用 `tiktoken` 的 `cl100k_base` 编码计算 token 数。编码对象在服务启动时初始化并复用。生产默认
-`MAX_INPUT_TOKENS=15000`，超出会在调用 provider 前返回 `TEXT_TOO_LONG`，且不会消耗每日诊断次数。
+`MAX_INPUT_TOKENS=50000`，超出会在调用 provider 前返回 `TEXT_TOO_LONG`，且不会消耗每日诊断次数。
 
 ## 安全原则
 

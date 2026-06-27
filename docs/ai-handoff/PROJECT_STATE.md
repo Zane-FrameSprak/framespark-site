@@ -36,7 +36,7 @@ analytics repair occurred during the public beta polish deployment.
 
 Repository work now enforces Diagnosis input length by `tiktoken` token count
 instead of raw character count. `tiktoken@1.0.22` is pinned, `cl100k_base` is
-initialized once and reused, and `MAX_INPUT_TOKENS` defaults to `15000`. The
+initialized once and reused, and `MAX_INPUT_TOKENS` defaults to `50000`. The
 Diagnosis request path keeps admission checks in this order: file-size/upload
 limits, token limit, then daily counters. Over-token materials return
 `TEXT_TOO_LONG` before provider budget creation, daily-counter consumption,
