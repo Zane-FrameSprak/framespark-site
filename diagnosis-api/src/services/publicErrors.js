@@ -17,6 +17,7 @@ const PUBLIC_ERRORS = Object.freeze({
   V1_FINAL_OUTPUT_UNSAFE: [503, '本次报告未通过安全校验，请稍后再试。'],
   V1_DIAGNOSIS_FAILED: [503, '本次报告未能安全生成，请稍后再试。'],
   AI_CALL_BUDGET_EXCEEDED: [503, '本次诊断处理已停止，请稍后再试。'],
+  PROVIDER_TOKEN_BUDGET_EXCEEDED: [503, '今日诊断名额已满，请明天再来'],
   PROVIDER_DAILY_LIMIT_EXCEEDED: [503, '今日公测调用额度已达上限。'],
   USAGE_STORE_UNAVAILABLE: [503, '诊断服务暂时无法确认调用额度。'],
   AI_NOT_CONFIGURED: [503, '诊断服务尚未就绪。'],

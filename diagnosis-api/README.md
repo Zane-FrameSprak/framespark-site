@@ -101,6 +101,9 @@ materialType: short | feature | other
 
 输入长度使用 `tiktoken` 的 `cl100k_base` 编码计算 token 数。编码对象在服务启动时初始化并复用。生产默认
 `MAX_INPUT_TOKENS=50000`，超出会在调用 provider 前返回 `TEXT_TOO_LONG`，且不会消耗每日诊断次数。
+Provider 返回的 `usage.total_tokens` 会按 UTC 日期持久化累计。默认
+`PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT=5000000`，约对应每天 10 元 API 预算；当天累计达到上限后，新诊断统一返回
+`今日诊断名额已满，请明天再来`，不会继续调用 provider。
 
 ## 安全原则
 

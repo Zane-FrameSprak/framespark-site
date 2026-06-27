@@ -59,6 +59,7 @@ export const config = {
     ipDailyLimit: readNumber('DIAGNOSIS_IP_DAILY_LIMIT', 6),
     globalDailyLimit: readNumber('DIAGNOSIS_GLOBAL_DAILY_LIMIT', 20),
     providerGlobalDailyLimit: readNumber('PROVIDER_GLOBAL_DAILY_LIMIT', 100),
+    providerGlobalDailyTokenLimit: readNumber('PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT', 5000000),
     concurrencyLimit: readNumber('DIAGNOSIS_CONCURRENCY_LIMIT', 2),
     feedbackDailyLimit: readNumber('DIAGNOSIS_FEEDBACK_DAILY_LIMIT', 10)
   },

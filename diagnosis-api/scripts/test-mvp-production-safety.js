@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import os from 'os';
 import path from 'path';
 import { config } from '../src/config.js';
 import { createBetaIdentityGuard, createOriginGuard, requireBetaIdentity } from '../src/middleware/betaAccess.js';
@@ -8,6 +9,12 @@ import { runDiagnosisPipelineWithEngines } from '../src/services/diagnosisPipeli
 import { parseUploadedFile } from '../src/services/fileParser.js';
 import { logDiagnosisResult } from '../src/services/diagnosisLogger.js';
 import { createProviderCallBudget } from '../src/services/providerCallBudget.js';
+import {
+  assertGlobalProviderTokenBudget,
+  consumeGlobalProviderCall,
+  readGlobalProviderUsage,
+  recordGlobalProviderTokens
+} from '../src/services/providerUsageStore.js';
 import { buildPublicDiagnosisResponse } from '../src/services/publicDiagnosisResponse.js';
 import { getPublicError } from '../src/services/publicErrors.js';
 import { getProductionReadiness } from '../src/services/productionReadiness.js';
@@ -17,6 +24,7 @@ const cases = [
   ['public response hides internal fields', testPublicResponse],
   ['production readiness requires secure V1 config', testProductionReadiness],
   ['provider budget caps total calls and repair count', testProviderBudget],
+  ['provider usage store tracks daily token budget', testProviderUsageStore],
   ['fail-closed V1 errors do not return legacy reports', testFailClosedPipeline],
   ['TXT parser rejects MIME mismatch and binary content', testStrictTxtParser],
   ['diagnosis metadata log does not persist full report or filename', testMetadataRedaction],
@@ -156,12 +164,14 @@ function testProductionReadiness() {
       ipDailyLimit: 4,
       globalDailyLimit: 6,
       providerGlobalDailyLimit: 31,
+      providerGlobalDailyTokenLimit: 5000001,
       concurrencyLimit: 2
     },
     betaAccess: publicBetaAccessConfig
   });
   assertEqual(publicUnsafe.ok, false, 'unsafe public beta config');
   assertTruthy(publicUnsafe.errors.includes('PUBLIC_BETA_GLOBAL_DAILY_LIMIT_MUST_NOT_EXCEED_5'), 'public global limit check');
+  assertTruthy(publicUnsafe.errors.includes('PUBLIC_BETA_PROVIDER_DAILY_TOKEN_LIMIT_MUST_NOT_EXCEED_5000000'), 'public provider token limit check');
 
   const tokenUnsafe = getProductionReadiness({
     ...readyConfig(),
@@ -238,6 +248,31 @@ function testProviderBudget() {
   assertEqual(budget.consumeGeneralRepair(), true, 'first repair');
   assertEqual(budget.consumeGeneralRepair(), false, 'second repair');
   assertThrowsCode(() => budget.consumeCall(), 'AI_CALL_BUDGET_EXCEEDED');
+}
+
+async function testProviderUsageStore() {
+  const usageDir = await fs.mkdtemp(path.join(os.tmpdir(), 'framespark-provider-usage-'));
+  const now = new Date('2026-06-27T12:00:00.000Z');
+  try {
+    const options = { now, dataDir: usageDir, limit: 2, tokenLimit: 100 };
+    assertEqual((await consumeGlobalProviderCall(options)), 1, 'first provider call count');
+    await recordGlobalProviderTokens(40, { now, dataDir: usageDir });
+    await assertGlobalProviderTokenBudget({ now, dataDir: usageDir, tokenLimit: 100 });
+    await recordGlobalProviderTokens(60, { now, dataDir: usageDir });
+    const usage = await readGlobalProviderUsage({ now, dataDir: usageDir });
+    assertEqual(usage.count, 1, 'provider call count');
+    assertEqual(usage.totalTokens, 100, 'provider token count');
+    await assertRejectsCode(
+      () => assertGlobalProviderTokenBudget({ now, dataDir: usageDir, tokenLimit: 100 }),
+      'PROVIDER_TOKEN_BUDGET_EXCEEDED'
+    );
+    await assertRejectsCode(
+      () => consumeGlobalProviderCall(options),
+      'PROVIDER_TOKEN_BUDGET_EXCEEDED'
+    );
+  } finally {
+    await fs.rm(usageDir, { recursive: true, force: true });
+  }
 }
 
 async function testFailClosedPipeline() {
@@ -370,6 +405,10 @@ function testFeedbackPublicError() {
   assertEqual(result.status, 400, 'feedback status');
   assertEqual(result.code, 'FEEDBACK_EMPTY', 'feedback code');
   assertEqual(result.message.includes('internal text'), false, 'internal feedback message exposed');
+
+  const budget = getPublicError(new ApiError(503, 'PROVIDER_TOKEN_BUDGET_EXCEEDED', 'internal token text'));
+  assertEqual(budget.status, 503, 'token budget status');
+  assertEqual(budget.message, '今日诊断名额已满，请明天再来', 'token budget public message');
 }
 
 function createResponseRecorder() {

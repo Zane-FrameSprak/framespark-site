@@ -85,7 +85,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 - Text: 50,000 `cl100k_base` tokens maximum via `MAX_INPUT_TOKENS`; short or low-information material can return D0.
 - Request deadline: 210 seconds; Nginx read timeout: 240 seconds.
 - Per diagnosis: at most five provider calls, including one shared normal repair and one final safety repair.
-- Initial public beta quota: account/session 1/day, IP 3/day, global 5 diagnoses/day, global 30 provider calls/day, concurrency 1.
+- Initial public beta quota: account/session 1/day, IP 3/day, global 5 diagnoses/day, global 30 provider calls/day, global 5,000,000 provider tokens/day, concurrency 1.
 
 ## Data Handling
 

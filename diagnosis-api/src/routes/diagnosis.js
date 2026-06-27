@@ -11,6 +11,7 @@ import { logDiagnosisResult } from '../services/diagnosisLogger.js';
 import { buildPublicDiagnosisResponse } from '../services/publicDiagnosisResponse.js';
 import { createProviderCallBudget } from '../services/providerCallBudget.js';
 import { validateInputTokenLimit } from '../services/tokenCounter.js';
+import { assertGlobalProviderTokenBudget } from '../services/providerUsageStore.js';
 import {
   consumeDailyLimit,
   getBetaIdentityKey,
@@ -36,6 +37,7 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     const input = await resolveDiagnosisInput(req);
     const { parsed, inputMode } = input;
     const tokenStats = validateInputTokenLimit(parsed.text);
+    if (hasAiProvider()) await assertGlobalProviderTokenBudget();
     consumeDiagnosisDailyLimits(req);
     const providerBudget = createProviderCallBudget({
       maxCalls: config.providerCallLimitPerDiagnosis,

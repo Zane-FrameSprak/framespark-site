@@ -44,7 +44,8 @@ metadata creation, or any DeepSeek/API call. This repository change is not a
 production deployment record.
 
 Initial public-beta caps are account/session `1`, IP `3`, global diagnoses `5`,
-provider daily `30`, concurrency `1`, and provider calls per diagnosis `5`.
+provider daily `30`, provider tokens `5,000,000` per UTC day, concurrency `1`,
+and provider calls per diagnosis `5`.
 Nginx `site_total` keeps the `cookie` JSON field but no longer writes
 `$http_cookie`, and recent post-deploy scans showed zero Cookie or sensitive
 journal matches. Deployment evidence is recorded in

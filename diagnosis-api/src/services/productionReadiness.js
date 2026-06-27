@@ -97,6 +97,9 @@ export function getProductionReadiness(current = config) {
     if (Number(current.rateLimits?.providerGlobalDailyLimit) > 30) {
       errors.push('PUBLIC_BETA_PROVIDER_DAILY_LIMIT_MUST_NOT_EXCEED_30');
     }
+    if (Number(current.rateLimits?.providerGlobalDailyTokenLimit) > 5000000) {
+      errors.push('PUBLIC_BETA_PROVIDER_DAILY_TOKEN_LIMIT_MUST_NOT_EXCEED_5000000');
+    }
   }
 
   return {

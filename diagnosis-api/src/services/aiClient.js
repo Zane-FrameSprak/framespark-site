@@ -11,7 +11,10 @@ import {
   isFinalOutputValidationError,
   normalizeV1FinalAssessment
 } from './v1FinalAssessment.js';
-import { consumeGlobalProviderCall } from './providerUsageStore.js';
+import {
+  consumeGlobalProviderCall,
+  recordGlobalProviderTokens
+} from './providerUsageStore.js';
 
 const ADVANCED_BUILDERS = {
   short:   buildAdvancedShortDiagnosisMessages,
@@ -269,6 +272,7 @@ async function makeRequest(messages, options = {}) {
     const data = await response.json().catch(function () {
       return null;
     });
+    await recordProviderUsage(data);
 
     if (!response.ok) {
       throw new ApiError(response.status, 'AI_REQUEST_FAILED', 'AI 诊断请求失败。');
@@ -287,6 +291,12 @@ async function makeRequest(messages, options = {}) {
     clearTimeout(timeout);
     options.signal?.removeEventListener('abort', abortFromRequest);
   }
+}
+
+async function recordProviderUsage(data) {
+  const totalTokens = Number(data?.usage?.total_tokens);
+  if (!Number.isInteger(totalTokens) || totalTokens <= 0) return;
+  await recordGlobalProviderTokens(totalTokens);
 }
 
 function buildRetryMessages(originalMessages) {

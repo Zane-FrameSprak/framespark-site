@@ -6,10 +6,15 @@ import os from 'node:os';
 import path from 'node:path';
 
 const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'framespark-http-'));
+let providerResponses = 0;
 const provider = http.createServer((req, res) => {
   req.resume();
+  providerResponses += 1;
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ choices: [{ message: { content: 'not valid JSON' } }] }));
+  res.end(JSON.stringify({
+    choices: [{ message: { content: 'not valid JSON' } }],
+    usage: { total_tokens: 9 }
+  }));
 });
 await listen(provider, 0);
 
@@ -93,6 +98,9 @@ try {
   assert.equal(failClosed.status, 503);
   assert.equal(failClosed.body.error.code, 'V1_DIAGNOSIS_FAILED');
   assert.equal(JSON.stringify(failClosed.body).includes('legacy'), false);
+  const providerUsage = await readProviderUsage(dataDir);
+  assert.equal(providerUsage.count, providerResponses);
+  assert.equal(providerUsage.totalTokens, providerResponses * 9);
 
   console.log('MVP HTTP integration tests passed: auth/origin, public DTO, rate limit, upload validation, fail-closed');
 } finally {
@@ -120,6 +128,14 @@ function storyText() {
 
 function tooLongText() {
   return 'token '.repeat(1600);
+}
+
+async function readProviderUsage(root) {
+  const usageDir = path.join(root, 'usage');
+  const files = await fs.readdir(usageDir);
+  const providerFile = files.find(file => /^provider-\d{4}-\d{2}-\d{2}\.json$/.test(file));
+  assert.ok(providerFile, 'provider usage file exists');
+  return JSON.parse(await fs.readFile(path.join(usageDir, providerFile), 'utf8'));
 }
 
 async function jsonRequest(port, pathname, body, headers = {}) {
