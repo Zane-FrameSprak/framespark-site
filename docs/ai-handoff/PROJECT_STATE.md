@@ -28,7 +28,9 @@ entry boundary. The Beta page now uses the homepage-aligned black/gold grid,
 spacing, type scale, and form/result panel styling, with a tighter desktop
 composition so the public diagnosis form fits inside a 100%-zoom desktop
 viewport. Shared subpage hero and section spacing were also tightened across
-formal Diagnosis, legal, talent, and project pages. Provider/metadata/review
+formal Diagnosis, legal, talent, and project pages. Formal Diagnosis, talent,
+and project detail subpage headers now use the same
+`assets/brand/framespark-logo.svg` brand mark as the homepage. Provider/metadata/review
 remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
 analytics repair occurred during the public beta polish deployment.
 
