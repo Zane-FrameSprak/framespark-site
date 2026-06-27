@@ -66,7 +66,7 @@
                 number: '01',
                 status: '公测中',
                 title: '故事开发诊断系统',
-                freeLabel: '免费',
+                freeLabel: '',
                 english: 'FRAMESPARK STORY DEVELOPMENT DIAGNOSIS',
                 description: '故事开发诊断工具',
                 actionLabel: '点击进入',

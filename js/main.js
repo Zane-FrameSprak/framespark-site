@@ -93,15 +93,13 @@
         var title = document.createElement('h2');
         title.textContent = platform.title || '';
 
-        var freeRow = document.createElement('div');
-        freeRow.className = 'platform-card__free-row';
+        var freeRow = null;
         if (platform.freeLabel) {
+            freeRow = document.createElement('div');
+            freeRow.className = 'platform-card__free-row';
             var freeLabel = document.createElement('span');
             freeLabel.textContent = platform.freeLabel;
             freeRow.appendChild(freeLabel);
-        } else {
-            freeRow.classList.add('platform-card__free-row--empty');
-            freeRow.setAttribute('aria-hidden', 'true');
         }
 
         var english = document.createElement('p');
@@ -145,7 +143,7 @@
         article.appendChild(meta);
         article.appendChild(number);
         article.appendChild(title);
-        article.appendChild(freeRow);
+        if (freeRow) article.appendChild(freeRow);
         article.appendChild(english);
         article.appendChild(description);
         if (!betaEntry) {
