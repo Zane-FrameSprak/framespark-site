@@ -1,3 +1,116 @@
+.diagnosis-beta {
+    background:
+        linear-gradient(90deg, rgba(201, 168, 117, 0.045) 1px, transparent 1px) 0 0 / 25vw 100%,
+        var(--bg);
+}
+
+.diagnosis-beta .nav {
+    background: rgba(10, 9, 8, 0.94);
+}
+
+.diagnosis-beta .subpage-hero {
+    padding: clamp(72px, 8vw, 112px) var(--pad-x) clamp(46px, 5.5vw, 72px);
+    background:
+        linear-gradient(90deg, rgba(201, 168, 117, 0.06) 1px, transparent 1px) 0 0 / 25vw 100%,
+        radial-gradient(circle at 82% 18%, rgba(201, 168, 117, 0.08), transparent 30%),
+        var(--bg);
+}
+
+.diagnosis-beta .subpage-hero__inner,
+.diagnosis-beta .subpage-section__inner {
+    max-width: 1320px;
+}
+
+.diagnosis-beta .subpage-kicker {
+    margin-bottom: 18px;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+}
+
+.diagnosis-beta .subpage-hero h1 {
+    max-width: 780px;
+    font-size: clamp(42px, 5.8vw, 76px);
+    line-height: 1.18;
+    letter-spacing: 0.08em;
+}
+
+.diagnosis-beta .subpage-lead {
+    max-width: 760px;
+    margin-top: 24px;
+    color: var(--ink-soft);
+    font-size: clamp(15px, 1.35vw, 17px);
+    line-height: 2;
+}
+
+.diagnosis-beta .diagnosis-section {
+    padding: clamp(44px, 5.2vw, 76px) var(--pad-x) clamp(76px, 8vw, 112px);
+}
+
+.diagnosis-beta .diagnosis-console {
+    max-width: 1320px;
+    grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(20px, 2.4vw, 32px);
+}
+
+.diagnosis-beta .diagnosis-form,
+.diagnosis-beta .diagnosis-result {
+    border-color: var(--line);
+    background:
+        linear-gradient(145deg, rgba(201, 168, 117, 0.055), transparent 44%),
+        var(--bg-soft);
+}
+
+.diagnosis-beta .diagnosis-form {
+    padding: clamp(28px, 3vw, 42px);
+}
+
+.diagnosis-beta .diagnosis-result {
+    min-height: 560px;
+    padding: clamp(30px, 3.2vw, 44px);
+}
+
+.diagnosis-beta .diagnosis-form__head h2,
+.diagnosis-beta .diagnosis-result h2 {
+    font-size: clamp(26px, 2.6vw, 38px);
+    line-height: 1.32;
+}
+
+.diagnosis-beta .diagnosis-field span,
+.diagnosis-beta .diagnosis-material__head span,
+.diagnosis-beta .diagnosis-beta-consent legend {
+    letter-spacing: 0.22em;
+}
+
+.diagnosis-beta .diagnosis-field select,
+.diagnosis-beta .diagnosis-material textarea {
+    background: rgba(10, 9, 8, 0.54);
+}
+
+.diagnosis-beta .diagnosis-material textarea {
+    min-height: 300px;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.diagnosis-beta .diagnosis-submit {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    background: rgba(158, 116, 55, 0.28);
+}
+
+.diagnosis-beta .diagnosis-submit:hover:not(:disabled),
+.diagnosis-beta .diagnosis-submit:focus-visible:not(:disabled) {
+    border-color: rgba(201, 168, 117, 0.72);
+    background: rgba(201, 168, 117, 0.92);
+}
+
+.diagnosis-beta .diagnosis-privacy {
+    color: var(--ink-muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
 .diagnosis-beta-consent {
     display: grid;
     gap: 10px;
@@ -87,7 +200,29 @@
     font-weight: 500;
 }
 
+@media (max-width: 980px) {
+    .diagnosis-beta .diagnosis-console {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .diagnosis-beta .diagnosis-result {
+        min-height: 360px;
+    }
+}
+
 @media (max-width: 768px) {
+    .diagnosis-beta .subpage-hero {
+        padding-top: 54px;
+    }
+
+    .diagnosis-beta .subpage-hero h1 {
+        font-size: clamp(34px, 9vw, 46px);
+    }
+
+    .diagnosis-beta .diagnosis-section {
+        padding-top: 32px;
+    }
+
     .diagnosis-beta-consent {
         padding: 14px;
     }

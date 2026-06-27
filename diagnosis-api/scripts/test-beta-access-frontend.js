@@ -25,6 +25,7 @@ await testPublicSessionRequest(homeClient);
 await testRateLimitMessage(homeClient);
 await testSubmissionLock(homeClient);
 await testSuccessfulFixedNavigation(homeClient);
+testPageReturnReset(homeClient);
 await testUnsafeSuccessAndNetworkFailure(homeClient);
 testStaticPrivacyBoundaries();
 testBetaSessionExpiryBehavior();
@@ -97,6 +98,23 @@ async function testSuccessfulFixedNavigation(client) {
   assert.deepEqual(fixture.navigations, ['/diagnosis/beta/']);
   assert.equal(fixture.button.dataset.state, 'navigating');
   assert.equal(controller.isSubmitting(), true);
+  assert.equal(controller.isNavigating(), true);
+}
+
+function testPageReturnReset(client) {
+  const fixture = createFixture({
+    fetchImpl: async () => response(200, { ok: true, redirectTo: '/diagnosis/beta/' })
+  });
+  const controller = client.createController(fixture.options);
+  fixture.button.dataset.state = 'navigating';
+  fixture.button.textContent = '进入中...';
+  fixture.form.attributes['aria-busy'] = 'true';
+  fixture.status.textContent = 'working';
+  controller.resetAfterPageReturn();
+  assert.equal(fixture.button.dataset.state, 'ready');
+  assert.equal(fixture.button.textContent, '进入公测');
+  assert.equal(fixture.form.attributes['aria-busy'], 'false');
+  assert.equal(fixture.status.textContent, '');
 }
 
 async function testUnsafeSuccessAndNetworkFailure(client) {

@@ -34,6 +34,15 @@
             if (!active) updateReadyState();
         }
 
+        function resetAfterPageReturn() {
+            navigating = false;
+            submitting = false;
+            form.setAttribute('aria-busy', 'false');
+            setStatus('', '');
+            button.textContent = '进入公测';
+            updateReadyState();
+        }
+
         async function submit(event) {
             if (event && typeof event.preventDefault === 'function') event.preventDefault();
             if (submitting) return;
@@ -81,6 +90,8 @@
         return {
             submit: submit,
             isSubmitting: function () { return submitting; },
+            isNavigating: function () { return navigating; },
+            resetAfterPageReturn: resetAfterPageReturn,
             updateReadyState: updateReadyState
         };
     }
@@ -97,6 +108,11 @@
             status: status,
             fetchImpl: windowRef.fetch.bind(windowRef),
             navigate: function (path) { windowRef.location.assign(path); }
+        });
+        windowRef.addEventListener('pageshow', function (event) {
+            if (event.persisted || button.dataset.state === 'navigating' || controller.isSubmitting()) {
+                controller.resetAfterPageReturn();
+            }
         });
 
         function revealEntry() {
