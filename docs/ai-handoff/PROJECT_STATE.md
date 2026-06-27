@@ -34,6 +34,11 @@ and project detail subpage headers now use the same
 remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
 analytics repair occurred during the public beta polish deployment.
 
+The homepage Diagnosis platform card now uses a single public-beta entry. The
+old separate `点击进入` card button is no longer rendered for the Diagnosis card;
+only the public-beta copy and `进入公测` submit button remain. Other platform cards
+still keep their normal unavailable-state button behavior.
+
 Repository work now enforces Diagnosis input length by `tiktoken` token count
 instead of raw character count. `tiktoken@1.0.22` is pinned, `cl100k_base` is
 initialized once and reused, and `MAX_INPUT_TOKENS` defaults to `50000`. The

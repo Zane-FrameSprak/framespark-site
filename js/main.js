@@ -148,8 +148,10 @@
         article.appendChild(freeRow);
         article.appendChild(english);
         article.appendChild(description);
-        article.appendChild(action);
-        article.appendChild(notice);
+        if (!betaEntry) {
+            article.appendChild(action);
+            article.appendChild(notice);
+        }
         if (betaEntry) article.appendChild(betaEntry);
 
         return article;
