@@ -10,8 +10,8 @@ Repository: `Zane-FrameSprak/framespark-site`
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
 Diagnosis public beta is live in production. Production Diagnosis API `current`
-points to release `ce440d7a92a7e6141915c3bfbb1e3277bb8fbb82`; `previous`
-points to `757c94ffaded6cfdf39e389979ff1c9195359d80`. The service is
+points to release `535640213756e07a4c144f1ea4eb9df98b2e305b`; `previous`
+points to `ce440d7a92a7e6141915c3bfbb1e3277bb8fbb82`. The service is
 `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK,
 and `8788` remains loopback-only. `ENABLE_PUBLIC_BETA_ACCESS=true` and
 `ENABLE_BETA_CODE_ACCESS=false`; root-only HMAC secrets and the access SQLite DB
@@ -25,7 +25,10 @@ page/API cookies for anonymous public beta sessions; the old
 trusted client identity headers are cleared before proxying. The old htpasswd
 file remains on disk for rollback/admin history but is not the ordinary tester
 entry boundary. The Beta page now uses the homepage-aligned black/gold grid,
-spacing, type scale, and form/result panel styling. Provider/metadata/review
+spacing, type scale, and form/result panel styling, with a tighter desktop
+composition so the public diagnosis form fits inside a 100%-zoom desktop
+viewport. Shared subpage hero and section spacing were also tightened across
+formal Diagnosis, legal, talent, and project pages. Provider/metadata/review
 remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
 analytics repair occurred during the public beta polish deployment.
 
