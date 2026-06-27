@@ -4,7 +4,7 @@
 
 ## Recent Summary
 
-- 2026-06-27 (Codex): Merged the homepage Diagnosis system entry into a single public-beta entry. The Diagnosis platform card no longer renders the old separate `点击进入` button; it keeps only the public-beta copy and `进入公测` submit flow. Updated the homepage `main.js` cache version and handoff docs. No Diagnosis API, Nginx, env, systemd, POST, AI call, B4 T0 or analytics action occurred.
+- 2026-06-27 (Codex): Merged and deployed the homepage Diagnosis system entry into a single public-beta entry. The Diagnosis platform card no longer renders the old separate `点击进入` button; it keeps only the public-beta copy and `进入公测` submit flow. Updated the homepage `main.js` cache version, deployed `index.html` and `js/main.js` to Tencent Cloud, and verified production no longer contains the duplicate homepage Diagnosis CTA. No Diagnosis API, Nginx, env, systemd, POST, AI call, B4 T0 or analytics action occurred.
 
 - 2026-06-27 (Codex): Added repository-side global provider token budget tracking for Diagnosis. Provider responses now persist `usage.total_tokens` into the existing UTC-day usage file alongside provider call count; `PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT` defaults to `5000000`, roughly the current 10 CNY/day budget target. Once the daily total is reached, new diagnosis requests return `今日诊断名额已满，请明天再来` before additional provider calls. Updated env examples, readiness checks, docs and no-AI tests. No production deploy, Diagnosis POST, DeepSeek/AI call, Nginx/env/systemd change, B4 T0 or analytics action occurred.
 
