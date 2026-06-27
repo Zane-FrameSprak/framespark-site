@@ -92,7 +92,7 @@ function testProductionReadiness() {
     dataDir: '/var/lib/framespark-diagnosis',
     trustedProxy: 'loopback',
     maxUploadBytes: 5 * 1024 * 1024,
-    maxTextChars: 20000,
+    maxInputTokens: 15000,
     metadataRetentionDays: 30,
     reviewRetentionDays: 14,
     requestTimeoutMs: 210000,
@@ -163,6 +163,13 @@ function testProductionReadiness() {
   assertEqual(publicUnsafe.ok, false, 'unsafe public beta config');
   assertTruthy(publicUnsafe.errors.includes('PUBLIC_BETA_GLOBAL_DAILY_LIMIT_MUST_NOT_EXCEED_5'), 'public global limit check');
 
+  const tokenUnsafe = getProductionReadiness({
+    ...readyConfig(),
+    maxInputTokens: 15001
+  });
+  assertEqual(tokenUnsafe.ok, false, 'unsafe token config');
+  assertTruthy(tokenUnsafe.errors.includes('MAX_INPUT_TOKENS_MUST_NOT_EXCEED_15000'), 'token limit check');
+
   const accessUnsafe = getProductionReadiness({
     ...readyConfig(),
     enableBetaCodeAccess: true,
@@ -214,7 +221,7 @@ function readyConfig() {
     dataDir: '/var/lib/framespark-diagnosis',
     trustedProxy: 'loopback',
     maxUploadBytes: 5 * 1024 * 1024,
-    maxTextChars: 20000,
+    maxInputTokens: 15000,
     metadataRetentionDays: 30,
     reviewRetentionDays: 14,
     requestTimeoutMs: 210000,

@@ -37,14 +37,6 @@ export function validateScriptText(text, materialRoutingOrType, options = {}) {
     );
   }
 
-  if (stats.charCount > config.maxTextChars) {
-    throw new ApiError(
-      413,
-      'TEXT_TOO_LONG',
-      `当前文本约 ${stats.charCount} 字，超过第一版 MVP 支持范围，请先拆分材料。`
-    );
-  }
-
   return {
     materialType: materialRouting.effectiveDiagnosisType,
     materialRouting,

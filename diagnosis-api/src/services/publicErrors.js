@@ -8,7 +8,7 @@ const PUBLIC_ERRORS = Object.freeze({
   FILE_ENCODING_INVALID: [400, 'TXT 文件必须使用 UTF-8 编码。'],
   FILE_PARSE_FAILED: [400, '文件解析失败，请确认文件未损坏。'],
   FILE_TOO_SHORT: [400, '材料信息不足，请补充后再试。'],
-  TEXT_TOO_LONG: [413, '材料超过当前公测支持的长度。'],
+  TEXT_TOO_LONG: [413, '材料超过当前公测支持的 token 长度，请删减或拆分后再提交。'],
   FILE_TOO_LARGE: [413, '文件超过当前公测支持的大小。'],
   DOCX_EXPANSION_LIMIT: [413, 'DOCX 解压后内容过大，请移除图片或改用文本。'],
   MATERIAL_REJECTED: [400, '当前材料不适合进入故事诊断，请补充故事相关内容。'],

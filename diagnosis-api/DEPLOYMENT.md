@@ -82,7 +82,7 @@ Production startup fails unless the DeepSeek key, all three V1 switches, fail-cl
 ## Limits
 
 - File: TXT/DOCX only, 5 MB compressed, 20 MB DOCX expansion ceiling.
-- Text: 20,000 non-whitespace characters maximum; short or low-information material can return D0.
+- Text: 15,000 `cl100k_base` tokens maximum via `MAX_INPUT_TOKENS`; short or low-information material can return D0.
 - Request deadline: 210 seconds; Nginx read timeout: 240 seconds.
 - Per diagnosis: at most five provider calls, including one shared normal repair and one final safety repair.
 - Initial public beta quota: account/session 1/day, IP 3/day, global 5 diagnoses/day, global 30 provider calls/day, concurrency 1.

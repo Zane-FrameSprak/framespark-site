@@ -37,6 +37,7 @@ const child = spawn(process.execPath, ['src/server.js'], {
     DIAGNOSIS_GLOBAL_DAILY_LIMIT: '20',
     PROVIDER_GLOBAL_DAILY_LIMIT: '20',
     DIAGNOSIS_CONCURRENCY_LIMIT: '2',
+    MAX_INPUT_TOKENS: '1000',
     AI_TIMEOUT_MS: '2000',
     REQUEST_TIMEOUT_MS: '5000'
   },
@@ -67,6 +68,10 @@ try {
   });
   assert.equal(badOrigin.status, 403);
   assert.equal(badOrigin.body.error.code, 'ORIGIN_NOT_ALLOWED');
+
+  const tooLong = await jsonRequest(appPort, '/api/diagnosis/', makeJsonBody(tooLongText()), betaHeaders('dto-test'));
+  assert.equal(tooLong.status, 413);
+  assert.equal(tooLong.body.error.code, 'TEXT_TOO_LONG');
 
   const success = await jsonRequest(appPort, '/api/diagnosis/', makeJsonBody(nonStoryText()), betaHeaders('dto-test'));
   assert.equal(success.status, 200);
@@ -111,6 +116,10 @@ function nonStoryText() {
 
 function storyText() {
   return '一个年轻导演回到故乡寻找母亲留下的旧胶片。她发现旧剧组隐瞒了事故真相，必须决定是否公开影像，并承担家庭关系破裂的代价。'.repeat(8);
+}
+
+function tooLongText() {
+  return 'token '.repeat(1600);
 }
 
 async function jsonRequest(port, pathname, body, headers = {}) {

@@ -7,6 +7,7 @@
 import { resolveDiagnosisInput } from '../src/routes/diagnosis.js';
 import { routeMaterial } from '../src/services/materialRouter.js';
 import { validateScriptText } from '../src/services/guard.js';
+import { validateInputTokenLimit } from '../src/services/tokenCounter.js';
 import { ApiError } from '../src/utils/errors.js';
 
 const c = {
@@ -101,6 +102,19 @@ const cases = [
       }
       assertTruthy(error instanceof ApiError, 'ApiError');
       assertEqual(error?.code, 'TEXT_REQUIRED', 'error.code');
+    }
+  },
+  {
+    name: 'token 超限会在 provider 前被打回',
+    run() {
+      let error = null;
+      try {
+        validateInputTokenLimit('token '.repeat(40), { maxInputTokens: 10 });
+      } catch (err) {
+        error = err;
+      }
+      assertTruthy(error instanceof ApiError, 'ApiError');
+      assertEqual(error?.code, 'TEXT_TOO_LONG', 'error.code');
     }
   }
 ];

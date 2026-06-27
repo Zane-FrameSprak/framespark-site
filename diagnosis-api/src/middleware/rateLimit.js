@@ -11,12 +11,8 @@ export function createDailyRateLimit(options) {
   } = options;
 
   return function dailyRateLimit(req, res, next) {
-    const clientKey = keyFn(req);
-    const dateKey = now().toISOString().slice(0, 10);
-    const key = `${dateKey}:${clientKey}`;
-    const currentCount = store.get(key) || 0;
-
-    if (currentCount >= limit) {
+    const result = consumeDailyLimit({ req, limit, store, now, keyFn });
+    if (!result.ok) {
       res.status(429).json({
         ok: false,
         error: {
@@ -26,10 +22,29 @@ export function createDailyRateLimit(options) {
       });
       return;
     }
-
-    store.set(key, currentCount + 1);
     next();
   };
+}
+
+export function consumeDailyLimit(options = {}) {
+  const {
+    req,
+    limit,
+    store = new Map(),
+    now = () => new Date(),
+    keyFn = getClientIpKey
+  } = options;
+  const clientKey = keyFn(req);
+  const dateKey = now().toISOString().slice(0, 10);
+  const key = `${dateKey}:${clientKey}`;
+  const currentCount = store.get(key) || 0;
+
+  if (currentCount >= limit) {
+    return { ok: false, key, currentCount, limit };
+  }
+
+  store.set(key, currentCount + 1);
+  return { ok: true, key, currentCount: currentCount + 1, limit };
 }
 
 export function createConcurrencyLimit(options = {}) {

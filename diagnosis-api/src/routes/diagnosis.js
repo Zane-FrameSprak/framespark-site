@@ -10,6 +10,13 @@ import { buildMockDiagnosisReport } from '../services/mockDiagnosis.js';
 import { logDiagnosisResult } from '../services/diagnosisLogger.js';
 import { buildPublicDiagnosisResponse } from '../services/publicDiagnosisResponse.js';
 import { createProviderCallBudget } from '../services/providerCallBudget.js';
+import { validateInputTokenLimit } from '../services/tokenCounter.js';
+import {
+  consumeDailyLimit,
+  getBetaIdentityKey,
+  getClientIpKey,
+  getGlobalKey
+} from '../middleware/rateLimit.js';
 import { ApiError } from '../utils/errors.js';
 
 const upload = multer({
@@ -26,12 +33,14 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
   try {
     const userSelectedType = normalizeMaterialType(req.body.materialType);
     const reviewConsent = req.body.reviewConsent === 'true';
+    const input = await resolveDiagnosisInput(req);
+    const { parsed, inputMode } = input;
+    const tokenStats = validateInputTokenLimit(parsed.text);
+    consumeDiagnosisDailyLimits(req);
     const providerBudget = createProviderCallBudget({
       maxCalls: config.providerCallLimitPerDiagnosis,
       maxGeneralRepairs: 1
     });
-    const input = await resolveDiagnosisInput(req);
-    const { parsed, inputMode } = input;
     const allowV1D0 = config.enableDiagnosisV1 && config.enableV1StagedRunner;
     const materialRouting = await routeMaterial({
       userSelectedType,
@@ -59,7 +68,10 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       materialRouting,
       materialHint: buildMaterialHint(materialRouting),
       inputMode,
-      stats: guard.stats,
+      stats: {
+        ...guard.stats,
+        tokenCount: tokenStats.tokenCount
+      },
       source: parsed.source,
       signal: req.diagnosisSignal,
       providerBudget
@@ -86,7 +98,10 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
       materialRouting,
       inputMode,
       parsed,
-      stats: guard.stats,
+      stats: {
+        ...guard.stats,
+        tokenCount: tokenStats.tokenCount
+      },
       result,
       reviewConsent
     });
@@ -101,6 +116,46 @@ diagnosisRouter.post('/', upload.single('file'), async (req, res, next) => {
     next(err);
   }
 });
+
+const dailyLimitStores = {
+  global: new Map(),
+  account: new Map(),
+  ip: new Map()
+};
+
+function consumeDiagnosisDailyLimits(req) {
+  consumeDiagnosisDailyLimit({
+    req,
+    store: dailyLimitStores.global,
+    limit: config.rateLimits.globalDailyLimit,
+    errorCode: 'RATE_LIMIT_EXCEEDED',
+    message: '今日公测总次数已达上限。',
+    keyFn: getGlobalKey
+  });
+  consumeDiagnosisDailyLimit({
+    req,
+    store: dailyLimitStores.account,
+    limit: config.rateLimits.accountDailyLimit,
+    errorCode: 'RATE_LIMIT_EXCEEDED',
+    message: '当前公测访问凭证今日次数已达上限。',
+    keyFn: getBetaIdentityKey
+  });
+  consumeDiagnosisDailyLimit({
+    req,
+    store: dailyLimitStores.ip,
+    limit: config.rateLimits.ipDailyLimit,
+    errorCode: 'RATE_LIMIT_EXCEEDED',
+    message: '当前网络今日次数已达上限。',
+    keyFn: getClientIpKey
+  });
+}
+
+function consumeDiagnosisDailyLimit(options) {
+  const result = consumeDailyLimit(options);
+  if (!result.ok) {
+    throw new ApiError(429, options.errorCode, options.message);
+  }
+}
 
 export function getDiagnosisDepth(result) {
   if (result?.diagnosisDepth === 'advanced' || result?.internalStage === 'advanced') {

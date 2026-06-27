@@ -14,9 +14,7 @@ import {
 import {
   createConcurrencyLimit,
   createDailyRateLimit,
-  getBetaIdentityKey,
-  getClientIpKey,
-  getGlobalKey
+  getBetaIdentityKey
 } from './middleware/rateLimit.js';
 import { createRequestDeadline } from './middleware/requestDeadline.js';
 import { diagnosisRouter } from './routes/diagnosis.js';
@@ -99,24 +97,6 @@ export function createApp(options = {}) {
     betaAccessService ? createBetaSessionIdentityMiddleware(betaAccessService, '/api/diagnosis/') : passThrough,
     requireBetaIdentity,
     createRequestDeadline(config.requestTimeoutMs),
-    createDailyRateLimit({
-      limit: config.rateLimits.globalDailyLimit,
-      errorCode: 'RATE_LIMIT_EXCEEDED',
-      message: '今日公测总次数已达上限。',
-      keyFn: getGlobalKey
-    }),
-    createDailyRateLimit({
-      limit: config.rateLimits.accountDailyLimit,
-      errorCode: 'RATE_LIMIT_EXCEEDED',
-      message: '当前公测访问凭证今日次数已达上限。',
-      keyFn: getBetaIdentityKey
-    }),
-    createDailyRateLimit({
-      limit: config.rateLimits.ipDailyLimit,
-      errorCode: 'RATE_LIMIT_EXCEEDED',
-      message: '当前网络今日次数已达上限。',
-      keyFn: getClientIpKey
-    }),
     createConcurrencyLimit({ limit: config.rateLimits.concurrencyLimit }),
     diagnosisRouter
   );

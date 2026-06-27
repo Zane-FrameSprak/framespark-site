@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { parseUploadedFile } from '../src/services/fileParser.js';
 import { config } from '../src/config.js';
+import { validateInputTokenLimit } from '../src/services/tokenCounter.js';
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
@@ -23,8 +24,10 @@ const cases = [
     const reportedSize = config.maxDocxExpandedBytes + 1;
     await assert.rejects(() => parseUploadedFile(makeFile(makeDocx('故事。'.repeat(40), { reportedSize }))), hasCode('DOCX_EXPANSION_LIMIT'));
   }],
-  ['DOCX extracted text length is capped', async () => {
-    await assert.rejects(() => parseUploadedFile(makeFile(makeDocx('故'.repeat(config.maxTextChars + 1)))), hasCode('TEXT_TOO_LONG'));
+  ['DOCX extracted text token length is capped after extraction', async () => {
+    const parsed = await parseUploadedFile(makeFile(makeDocx('token '.repeat(40))));
+    assert.throws(() => validateInputTokenLimit(parsed.text, { maxInputTokens: 10 }), hasCode('TEXT_TOO_LONG'));
+    assert.equal(config.maxInputTokens, 15000);
   }]
 ];
 

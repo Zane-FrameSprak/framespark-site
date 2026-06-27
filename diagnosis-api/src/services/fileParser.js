@@ -38,9 +38,6 @@ export async function parseUploadedFile(file) {
     try {
       const result = await mammoth.extractRawText({ buffer: file.buffer });
       const text = normalizeText(result.value || '');
-      if (text.replace(/\s/g, '').length > config.maxTextChars) {
-        throw new ApiError(413, 'TEXT_TOO_LONG', `材料最多支持 ${config.maxTextChars} 字。`);
-      }
       return {
         source: {
           type: 'docx'
