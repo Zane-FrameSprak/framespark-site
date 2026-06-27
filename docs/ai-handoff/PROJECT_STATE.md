@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-26
+Last updated: 2026-06-27
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -10,22 +10,24 @@ Repository: `Zane-FrameSprak/framespark-site`
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
 Diagnosis public beta is live in production. Production Diagnosis API `current`
-points to release `757c94ffaded6cfdf39e389979ff1c9195359d80`; `previous`
-points to `8e089c5bcf68086c787a3cafc58ba358d92e1ee1`. The service is
+points to release `ce440d7a92a7e6141915c3bfbb1e3277bb8fbb82`; `previous`
+points to `757c94ffaded6cfdf39e389979ff1c9195359d80`. The service is
 `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK,
 and `8788` remains loopback-only. `ENABLE_PUBLIC_BETA_ACCESS=true` and
 `ENABLE_BETA_CODE_ACCESS=false`; root-only HMAC secrets and the access SQLite DB
-remain in place from the prior invite-code launch. Homepage now shows the fixed
-public beta entry, and `/diagnosis/beta/` without a valid Cookie redirects to
+remain in place from the prior invite-code launch. Homepage now shows the public
+beta entry with a `pageshow` reset so the button does not remain in `进入中...`
+after browser Back/bfcache return, and `/diagnosis/beta/` without a valid Cookie redirects to
 `/#diagnosis-beta-entry`. `POST /api/beta-access/public-session` signs 24-hour
 page/API cookies for anonymous public beta sessions; the old
 `/api/beta-access/verify` path returns `404`. Nginx exact Beta static routes and
 `/api/diagnosis/` are still protected by backend Cookie session validation, and
 trusted client identity headers are cleared before proxying. The old htpasswd
 file remains on disk for rollback/admin history but is not the ordinary tester
-entry boundary. Provider/metadata/review remain `1 / 2 / 0`; no Diagnosis POST,
-DeepSeek/AI call, B4 T0 start, or analytics repair occurred during the public
-beta switch.
+entry boundary. The Beta page now uses the homepage-aligned black/gold grid,
+spacing, type scale, and form/result panel styling. Provider/metadata/review
+remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
+analytics repair occurred during the public beta polish deployment.
 
 Initial public-beta caps are account/session `1`, IP `3`, global diagnoses `5`,
 provider daily `30`, concurrency `1`, and provider calls per diagnosis `5`.

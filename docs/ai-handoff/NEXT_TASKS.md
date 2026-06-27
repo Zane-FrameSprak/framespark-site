@@ -1,11 +1,12 @@
 # Next Tasks
 
-Last updated: 2026-06-26
+Last updated: 2026-06-27
 Updated by: Codex
 
 ## Now
 
-- Diagnosis public beta is live. Production Diagnosis API `current` is `757c94ffaded6cfdf39e389979ff1c9195359d80`; `previous` is `8e089c5bcf68086c787a3cafc58ba358d92e1ee1`. Homepage public beta UI is deployed, `/diagnosis/beta/` without a valid Cookie redirects to `/#diagnosis-beta-entry`, and exact Beta static/API routes are protected by backend Cookie session validation. `ENABLE_PUBLIC_BETA_ACCESS=true`, `ENABLE_BETA_CODE_ACCESS=false`; service is `active/running/enabled`, `NRestarts=0`, ready/health OK, and `8788` remains loopback-only.
+- Diagnosis public beta is live. Production Diagnosis API `current` is `ce440d7a92a7e6141915c3bfbb1e3277bb8fbb82`; `previous` is `757c94ffaded6cfdf39e389979ff1c9195359d80`. Homepage public beta UI is deployed, `/diagnosis/beta/` without a valid Cookie redirects to `/#diagnosis-beta-entry`, and exact Beta static/API routes are protected by backend Cookie session validation. `ENABLE_PUBLIC_BETA_ACCESS=true`, `ENABLE_BETA_CODE_ACCESS=false`; service is `active/running/enabled`, `NRestarts=0`, ready/health OK, and `8788` remains loopback-only.
+- The 2026-06-27 public beta polish is deployed: the Beta page now aligns visually with the homepage black/gold layout language, and the homepage entry resets from `进入中...` after browser Back/bfcache return. Keep this behavior covered when changing `js/beta-access.js` or `diagnosis-api/beta-site/beta.css`.
 - Initial public-beta caps are fixed at account/session `1`, IP `3`, global diagnoses `5`, provider daily `30`, concurrency `1`, and provider calls per diagnosis `5`. Do not raise these limits before the first observation window.
 - No real public-beta Diagnosis POST has been run by Codex after the switch. The next high-risk step, if desired, is a separately authorized one-call fictional real-AI smoke or a formal B4 T0 observation start rule.
 - Five real `beta-tester` codes are active, each with 7-day expiry and `maxUses=5`; five orphan `beta-tester` codes from a failed generation attempt are revoked. The temporary plaintext code file was deleted after the user saved the codes. Do not log, chat, commit, or regenerate plaintext codes without a separate authorization.
