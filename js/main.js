@@ -109,6 +109,10 @@
         var description = document.createElement('p');
         description.className = 'platform-card__text';
         description.textContent = platform.description || '';
+        if (!platform.description) {
+            description.classList.add('platform-card__text--empty');
+            description.setAttribute('aria-hidden', 'true');
+        }
 
         var action = document.createElement('button');
         action.className = 'platform-card__action';

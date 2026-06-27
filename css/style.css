@@ -779,6 +779,10 @@ svg {
     align-self: start;
 }
 
+.platform-card__text--empty {
+    visibility: hidden;
+}
+
 .platform-card__action {
     width: max-content;
     align-self: start;

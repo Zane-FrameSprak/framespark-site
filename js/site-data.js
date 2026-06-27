@@ -80,7 +80,7 @@
                 title: '项目人才生态平台',
                 freeLabel: '',
                 english: 'TALENT NETWORK',
-                description: '整理创作者档案、项目需求与协作线索，服务后续人才匹配。',
+                description: '',
                 actionLabel: '点击进入',
                 notice: '人才平台筹备中，暂未开放。',
                 href: 'talent/'
