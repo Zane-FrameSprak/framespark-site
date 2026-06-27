@@ -645,14 +645,15 @@ svg {
 }
 
 .platform-card {
-    min-height: 280px;
+    min-height: 430px;
     position: relative;
     padding: clamp(24px, 3vw, 40px);
     border: 1px solid var(--line);
     background: var(--bg-soft);
     overflow: hidden;
     display: grid;
-    grid-template-rows: auto auto minmax(98px, auto) 34px auto auto auto;
+    grid-template-rows: 34px 42px 116px 34px 70px 54px auto;
+    align-content: start;
     transform-origin: center;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -686,14 +687,22 @@ svg {
 .platform-card__meta {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    min-height: 34px;
+    margin-bottom: 0;
+    align-items: start;
 }
 
 .platform-card__meta span {
-    padding: 5px 10px;
+    display: inline-flex;
+    min-width: 76px;
+    min-height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
     border: 1px solid var(--line);
     color: var(--ink-muted);
     font-size: 11px;
+    line-height: 1;
     letter-spacing: 0.18em;
     transition: border-color 0.38s ease, color 0.38s ease;
 }
@@ -710,7 +719,10 @@ svg {
 }
 
 .platform-card__num {
-    margin-bottom: 18px;
+    display: flex;
+    align-items: end;
+    min-height: 42px;
+    margin-bottom: 0;
     font-family: var(--font-sans);
     font-size: 14px;
     color: var(--gold);
@@ -718,6 +730,9 @@ svg {
 }
 
 .platform-card h2 {
+    display: flex;
+    min-height: 116px;
+    align-items: center;
     max-width: 620px;
     font-family: var(--font-serif-cn);
     font-size: clamp(30px, 4vw, 50px);
@@ -728,7 +743,8 @@ svg {
 
 .platform-card__free-row {
     display: flex;
-    align-items: start;
+    min-height: 34px;
+    align-items: center;
 }
 
 .platform-card__free-row span {
@@ -748,7 +764,10 @@ svg {
 }
 
 .platform-card__en {
-    margin-top: 16px;
+    display: flex;
+    min-height: 70px;
+    align-items: center;
+    margin-top: 0;
     font-family: var(--font-sans);
     font-size: 12px;
     color: var(--gold);
@@ -757,7 +776,7 @@ svg {
 
 .platform-card__text {
     max-width: 620px;
-    margin-top: 16px;
+    margin-top: 0;
     color: var(--ink-soft);
     font-size: 15px;
     line-height: 2;
@@ -766,6 +785,7 @@ svg {
 
 .platform-card__action {
     width: max-content;
+    align-self: end;
     margin-top: 18px;
     padding: 7px 14px;
     border: 1px solid rgba(201, 168, 117, 0.42);
@@ -808,6 +828,7 @@ svg {
 
 .platform-card__beta-entry {
     scroll-margin-top: 96px;
+    align-self: end;
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid rgba(201, 168, 117, 0.24);
@@ -2447,29 +2468,32 @@ svg {
     }
 
     .platform-card {
-        min-height: 228px;
+        min-height: 390px;
         padding: clamp(20px, 2.1vw, 30px);
-        grid-template-rows: auto auto minmax(72px, auto) 28px auto auto auto;
+        grid-template-rows: 32px 36px 98px 30px 62px 48px auto;
     }
 
     .platform-card__meta {
-        margin-bottom: 16px;
+        min-height: 32px;
+        margin-bottom: 0;
     }
 
     .platform-card__num {
-        margin-bottom: 14px;
+        min-height: 36px;
+        margin-bottom: 0;
     }
 
     .platform-card h2 {
+        min-height: 98px;
         font-size: clamp(26px, 3vw, 40px);
     }
 
-    .platform-card__en,
-    .platform-card__text {
-        margin-top: 12px;
+    .platform-card__en {
+        min-height: 62px;
     }
 
     .platform-card__text {
+        margin-top: 0;
         font-size: 14px;
         line-height: 1.78;
     }
@@ -3012,23 +3036,30 @@ svg {
 
     .platform-card__meta {
         gap: 6px;
+        min-height: 0;
         margin-bottom: 9px;
         flex-wrap: wrap;
     }
 
     .platform-card__meta span {
+        min-width: 0;
+        min-height: 24px;
         padding: 4px 7px;
         font-size: 9px;
         letter-spacing: 0.12em;
     }
 
     .platform-card__num {
+        display: block;
+        min-height: 0;
         margin-bottom: 8px;
         font-size: 11px;
         letter-spacing: 0.24em;
     }
 
     .platform-card h2 {
+        display: block;
+        min-height: 0;
         font-size: 25px;
         line-height: 1.22;
     }
@@ -3045,6 +3076,8 @@ svg {
     }
 
     .platform-card__en {
+        display: block;
+        min-height: 0;
         margin-top: 9px;
         font-size: 10px;
         letter-spacing: 0.22em;
