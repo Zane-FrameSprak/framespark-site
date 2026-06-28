@@ -787,6 +787,7 @@ svg {
     width: max-content;
     align-self: start;
     margin-top: 0;
+    margin-left: clamp(104px, 36%, 260px);
     padding: 7px 14px;
     border: 1px solid rgba(201, 168, 117, 0.42);
     background: rgba(123, 92, 48, 0.28);
@@ -799,7 +800,7 @@ svg {
 }
 
 .platform-card:not(.platform-card--beta-access) .platform-card__action {
-    margin-top: 44px;
+    margin-top: 0;
 }
 
 .platform-card__action:hover,
@@ -834,6 +835,11 @@ svg {
     scroll-margin-top: 96px;
     align-self: start;
     margin-top: 0;
+    padding: 0;
+}
+
+.platform-card__beta-note {
+    margin-top: 22px;
     padding: 12px 14px;
     border: 1px solid rgba(201, 168, 117, 0.16);
     background: rgba(201, 168, 117, 0.035);
@@ -849,10 +855,7 @@ svg {
 }
 
 .platform-card__beta-access-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
+    display: block;
 }
 
 .platform-card__beta-access-copy {
@@ -865,6 +868,7 @@ svg {
 
 .platform-card__beta-access-row button {
     min-height: 42px;
+    margin-left: clamp(104px, 36%, 260px);
     padding: 0 14px;
     border: 1px solid rgba(201, 168, 117, 0.25);
     border-radius: 0;
@@ -2508,7 +2512,12 @@ svg {
     }
 
     .platform-card:not(.platform-card--beta-access) .platform-card__action {
-        margin-top: 38px;
+        margin-top: 0;
+    }
+
+    .platform-card__action,
+    .platform-card__beta-access-row button {
+        margin-left: clamp(76px, 32%, 180px);
     }
 
     .ecosystem-grid article {
@@ -3099,6 +3108,7 @@ svg {
     }
 
     .platform-card__action {
+        margin-left: 0;
         margin-top: 9px;
         padding: 6px 10px;
         font-size: 10px;
@@ -3107,6 +3117,15 @@ svg {
 
     .platform-card:not(.platform-card--beta-access) .platform-card__action {
         margin-top: 9px;
+    }
+
+    .platform-card__beta-access-row button {
+        margin-left: 0;
+    }
+
+    .platform-card__beta-note {
+        margin-top: 12px;
+        padding: 10px 11px;
     }
 
     .platform-card__notice {
