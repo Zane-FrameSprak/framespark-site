@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-27
+Last updated: 2026-06-30
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -10,8 +10,8 @@ Repository: `Zane-FrameSprak/framespark-site`
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.
 
 Diagnosis public beta is live in production. Production Diagnosis API `current`
-points to release `535640213756e07a4c144f1ea4eb9df98b2e305b`; `previous`
-points to `ce440d7a92a7e6141915c3bfbb1e3277bb8fbb82`. The service is
+points to release `0104cfe1d3bb31f57000453618c5a03163730c1b`; `previous`
+points to `535640213756e07a4c144f1ea4eb9df98b2e305b`. The service is
 `active/running/enabled`, `NRestarts=0`, local `/ready` and `/health` are OK,
 and `8788` remains loopback-only. `ENABLE_PUBLIC_BETA_ACCESS=true` and
 `ENABLE_BETA_CODE_ACCESS=false`; root-only HMAC secrets and the access SQLite DB
@@ -30,30 +30,35 @@ composition so the public diagnosis form fits inside a 100%-zoom desktop
 viewport. Shared subpage hero and section spacing were also tightened across
 formal Diagnosis, legal, talent, and project pages. Formal Diagnosis, talent,
 and project detail subpage headers now use the same
-`assets/brand/framespark-logo.svg` brand mark as the homepage. Provider/metadata/review
-remain `1 / 2 / 0`; no Diagnosis POST, DeepSeek/AI call, B4 T0 start, or
-analytics repair occurred during the public beta polish deployment.
+`assets/brand/framespark-logo.svg` brand mark as the homepage. Provider usage,
+metadata and review remain `0 / 2 / 0` after the 2026-06-30 P0 deployment; no
+real Diagnosis material, DeepSeek/AI call, B4 T0 start, or analytics repair
+occurred during the P0 rollout.
 
 The homepage Diagnosis platform card now uses a single public-beta entry. The
 old separate `点击进入` card button is no longer rendered for the Diagnosis card;
 only the public-beta copy and `进入公测` submit button remain. Other platform cards
 still keep their normal unavailable-state button behavior.
 
-Repository work now enforces Diagnosis input length by `tiktoken` token count
+Production now enforces Diagnosis input length by `tiktoken` token count
 instead of raw character count. `tiktoken@1.0.22` is pinned, `cl100k_base` is
 initialized once and reused, and `MAX_INPUT_TOKENS` defaults to `50000`. The
 Diagnosis request path keeps admission checks in this order: file-size/upload
 limits, token limit, then daily counters. Over-token materials return
 `TEXT_TOO_LONG` before provider budget creation, daily-counter consumption,
-metadata creation, or any DeepSeek/API call. This repository change is not a
-production deployment record.
+metadata creation, or any DeepSeek/API call. Production env also sets
+`PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT=5000000`; once the UTC-day provider token
+budget is full, new requests return `今日诊断名额已满，请明天再来` before provider
+calls.
 
 Initial public-beta caps are account/session `1`, IP `3`, global diagnoses `5`,
 provider daily `30`, provider tokens `5,000,000` per UTC day, concurrency `1`,
 and provider calls per diagnosis `5`.
 Nginx `site_total` keeps the `cookie` JSON field but no longer writes
-`$http_cookie`, and recent post-deploy scans showed zero Cookie or sensitive
-journal matches. Deployment evidence is recorded in
+`$http_cookie`. The durable fix is applied to both the generated Nginx format
+and the `site_total` source template at `/www/server/site_total/scripts/`.
+Recent post-deploy scans showed zero Cookie or sensitive journal matches.
+Deployment evidence is recorded in
 `docs/diagnosis/DIAGNOSIS_PUBLIC_BETA_DEPLOY_2026-06-26.md`.
 
 The first Phase 4D Nginx `auth_request` migration failed because production

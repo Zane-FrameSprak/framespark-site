@@ -4,6 +4,23 @@
 
 ## Recent Summary
 
+- 2026-06-30 (Codex): Completed the public-beta P0 rollout. Nginx `site_total`
+  now keeps the `cookie` JSON field empty in both the generated Nginx log
+  format and the `/www/server/site_total/scripts/site_log_format.conf` source
+  template, preventing automatic reversion to `$http_cookie`. Built and
+  deployed the GitHub Actions Linux artifact for
+  `0104cfe1d3bb31f57000453618c5a03163730c1b`; `previous` now points to
+  `535640213756e07a4c144f1ea4eb9df98b2e305b`. Production env has
+  `MAX_INPUT_TOKENS=50000` and `PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT=5000000`.
+  No-AI checks confirmed no-cookie Beta redirect, public-session cookie issue,
+  empty-material `TEXT_REQUIRED`, over-token `TEXT_TOO_LONG`, and an isolated
+  token-budget-full response of `今日诊断名额已满，请明天再来`. Service stayed
+  `active/running/enabled`, `NRestarts=0`, ready/health OK, `8788`
+  loopback-only, homepage and `/diagnosis/` OK, provider usage `0` tokens/calls,
+  metadata `2`, review `0`, and sensitive journal matches `0`. No real
+  Diagnosis material, DeepSeek/AI call, B4 T0 start, analytics repair, or
+  production `npm ci` occurred.
+
 - 2026-06-27 (Codex): Merged and deployed the homepage Diagnosis system entry into a single public-beta entry. The Diagnosis platform card no longer renders the old separate `点击进入` button; it keeps only the public-beta copy and `进入公测` submit flow. Updated the homepage `main.js` cache version, deployed `index.html` and `js/main.js` to Tencent Cloud, and verified production no longer contains the duplicate homepage Diagnosis CTA. No Diagnosis API, Nginx, env, systemd, POST, AI call, B4 T0 or analytics action occurred.
 
 - 2026-06-27 (Codex): Added repository-side global provider token budget tracking for Diagnosis. Provider responses now persist `usage.total_tokens` into the existing UTC-day usage file alongside provider call count; `PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT` defaults to `5000000`, roughly the current 10 CNY/day budget target. Once the daily total is reached, new diagnosis requests return `今日诊断名额已满，请明天再来` before additional provider calls. Updated env examples, readiness checks, docs and no-AI tests. No production deploy, Diagnosis POST, DeepSeek/AI call, Nginx/env/systemd change, B4 T0 or analytics action occurred.
