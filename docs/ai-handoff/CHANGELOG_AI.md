@@ -4,6 +4,19 @@
 
 ## Recent Summary
 
+- 2026-06-30 (Codex): Ran one authorized fictional public-beta real-AI smoke
+  under the user's 5 CNY budget. The request used a short fictional material,
+  returned HTTP `200` in about 59.5 seconds, reached `stage=final`, and exposed
+  only the public DTO keys. Provider usage increased from `0 / 0` to `4 calls /
+  13,095 tokens`, metadata increased from `2` to `3`, review stayed `0`,
+  `fallback=false`, and model metadata is `deepseek-v4-flash`. The app-budget
+  equivalent is about 0.03 CNY under the configured 5,000,000-token / 10 CNY
+  daily budget. Temporary sample and full response files were deleted; only
+  default metadata remains. Nginx logs after the smoke had zero Cookie,
+  Authorization, key, prompt or sample-text matches; service stayed
+  `active/running/enabled`, `NRestarts=0`, ready/health OK, and `8788`
+  loopback-only. B4 T0 was not started.
+
 - 2026-06-30 (Codex): Completed the public-beta P0 rollout. Nginx `site_total`
   now keeps the `cookie` JSON field empty in both the generated Nginx log
   format and the `/www/server/site_total/scripts/site_log_format.conf` source

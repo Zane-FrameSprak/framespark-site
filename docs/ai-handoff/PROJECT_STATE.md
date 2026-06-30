@@ -31,9 +31,10 @@ viewport. Shared subpage hero and section spacing were also tightened across
 formal Diagnosis, legal, talent, and project pages. Formal Diagnosis, talent,
 and project detail subpage headers now use the same
 `assets/brand/framespark-logo.svg` brand mark as the homepage. Provider usage,
-metadata and review remain `0 / 2 / 0` after the 2026-06-30 P0 deployment; no
-real Diagnosis material, DeepSeek/AI call, B4 T0 start, or analytics repair
-occurred during the P0 rollout.
+metadata and review are `4 calls / 13,095 tokens / 3 metadata / 0 review` after
+the 2026-06-30 fictional real-AI smoke. The smoke used one short fictional
+material, reached final stage, returned only the public DTO, and did not start
+B4 T0 or repair analytics.
 
 The homepage Diagnosis platform card now uses a single public-beta entry. The
 old separate `点击进入` card button is no longer rendered for the Diagnosis card;
