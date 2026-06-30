@@ -44,7 +44,9 @@ before deployment.
 - `FAIL_CLOSED_ON_V1_ERROR=true`
 - `REQUIRE_BETA_IDENTITY=true`
 - `ALLOWED_ORIGINS=https://framespark.cn`, `TRUST_PROXY=loopback`
-- `MAX_UPLOAD_MB=5`, `MAX_DOCX_EXPANDED_MB=20`, `MAX_TEXT_CHARS=20000`
+- `MAX_UPLOAD_MB=5`, `MAX_DOCX_EXPANDED_MB=20`, `MAX_INPUT_TOKENS=50000`
+- `PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT=5000000` for the public beta daily token
+  budget; over-budget requests must fail before any provider call.
 - `AI_TIMEOUT_MS=90000`, `REQUEST_TIMEOUT_MS=210000`
 - `DIAGNOSIS_DATA_DIR=/var/lib/framespark-diagnosis`
 - Retention, account/IP/global/provider/concurrency limits from `.env.example`
