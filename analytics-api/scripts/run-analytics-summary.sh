@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/tmp/framespark-site}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 INPUT_DIR="${ANALYTICS_INPUT_DIR:-/home/ubuntu/framespark-analytics}"
 OUTPUT_DIR="${ANALYTICS_SUMMARY_OUTPUT_DIR:-/home/ubuntu/framespark-analytics-summaries}"
 SUMMARY_SCRIPT="$PROJECT_DIR/analytics-api/scripts/analytics-summary.js"

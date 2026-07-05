@@ -550,6 +550,12 @@ button .shortcut-note {
   color: #b91c1c;
 }
 
+.mock-badge[data-state="stale"] {
+  border-color: rgba(217, 119, 6, 0.32);
+  background: #fffbeb;
+  color: #92400e;
+}
+
 .mock-badge[hidden] {
   display: none;
 }
@@ -707,6 +713,11 @@ button .shortcut-note {
 .analytics-summary__row em[data-state="error"] {
   background: rgba(220, 38, 38, 0.1);
   color: var(--red);
+}
+
+.analytics-summary__row em[data-state="stale"] {
+  background: rgba(217, 119, 6, 0.12);
+  color: #92400e;
 }
 
 .v1-eval-panel {
@@ -1033,6 +1044,11 @@ button .shortcut-note {
 .traffic-summary__row em[data-state="error"] {
   background: rgba(220, 38, 38, 0.1);
   color: var(--red);
+}
+
+.traffic-summary__row em[data-state="stale"] {
+  background: rgba(217, 119, 6, 0.12);
+  color: #92400e;
 }
 
 canvas {

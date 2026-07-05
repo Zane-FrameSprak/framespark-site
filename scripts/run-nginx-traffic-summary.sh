@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="/tmp/framespark-site"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 ACCESS_LOG="/www/wwwlogs/framespark.cn.log"
 ERROR_LOG="/www/wwwlogs/framespark.cn.error.log"
 OUTPUT_DIR="/home/ubuntu/framespark-reports"

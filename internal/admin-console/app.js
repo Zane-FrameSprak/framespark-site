@@ -72,6 +72,7 @@
   // Mock traffic is only for local UI development. Default dashboard must show
   // real data or an empty state, never simulated operations numbers.
   var ENABLE_TRAFFIC_MOCK = false;
+  var SUMMARY_STALE_AFTER_MS = 2 * 60 * 60 * 1000;
 
   init();
 
@@ -876,20 +877,27 @@
     var badge = document.getElementById('analyticsStatusBadge');
     if (badge) {
       badge.textContent = getAnalyticsBadgeText();
-      badge.dataset.state = state.analyticsStatus;
+      badge.dataset.state = getAnalyticsBadgeState();
     }
     setText('analyticsControlStatus', getAnalyticsStatusText());
+  }
+
+  function getAnalyticsBadgeState() {
+    if (state.analyticsStatus === 'ready' && hasStaleAnalyticsReports()) return 'stale';
+    return state.analyticsStatus;
   }
 
   function getAnalyticsBadgeText() {
     if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
     if (state.analyticsStatus === 'error') return '读取失败。';
+    if (hasStaleAnalyticsReports()) return '数据过期。';
     return '已读取匿名访客统计。';
   }
 
   function getAnalyticsStatusText() {
     if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
     if (state.analyticsStatus === 'error') return '读取失败：' + (state.analyticsError || '检查 SSH、summary 或 cron。');
+    if (hasStaleAnalyticsReports()) return '数据过期：summary 文件长时间未刷新，请检查 cron。';
     return '已读取匿名访客统计。';
   }
 
@@ -983,12 +991,21 @@
     if (!report || !report.summary) {
       return { label: label, status: '暂无数据', state: 'pending', summary: null, available: false };
     }
+    if (isReportStale(report)) {
+      return { label: label, status: '数据过期', state: 'stale', summary: report.summary, available: true };
+    }
     return { label: label, status: '真实数据', state: 'ready', summary: report.summary, available: true };
   }
 
   function renderAnalyticsSource() {
+    var source = '来源：' + getAnalyticsStatusText();
+    if (state.analyticsStatus === 'ready') {
+      source = hasStaleAnalyticsReports()
+        ? '来源：analytics summary JSON（数据过期）'
+        : '来源：analytics summary JSON';
+    }
     var text = [
-      state.analyticsStatus === 'ready' ? '来源：analytics summary JSON' : '来源：' + getAnalyticsStatusText(),
+      source,
       'SSH 只读读取'
     ].filter(Boolean).join('。');
     setText('analyticsSource', text);
@@ -1016,23 +1033,35 @@
     if (badge) {
       badge.hidden = false;
       badge.textContent = getTrendBadgeText();
-      badge.dataset.state = state.trendMode === 'analytics' ? state.analyticsStatus : state.trafficStatus;
+      badge.dataset.state = state.trendMode === 'analytics' ? getAnalyticsBadgeState() : getTrafficBadgeState();
     }
+    var analyticsSource = state.analyticsStatus === 'ready'
+      ? (hasStaleAnalyticsReports() ? '来源：analytics summary JSON（数据过期）' : '来源：analytics summary JSON')
+      : '来源：' + getAnalyticsTrendStatusText(state.trafficPeriod);
+    var trafficSource = state.trafficStatus === 'ready'
+      ? (hasStaleTrafficReports() ? '来源：Nginx 摘要 JSON（数据过期）' : '来源：Nginx 摘要 JSON')
+      : '来源：' + getTrafficPeriodStatusText(state.trafficPeriod);
     var text = state.trendMode === 'analytics'
       ? [
-        state.analyticsStatus === 'ready' ? '来源：analytics summary JSON' : '来源：' + getAnalyticsTrendStatusText(state.trafficPeriod),
+        analyticsSource,
         'SSH 只读读取'
       ].filter(Boolean).join('。')
       : [
-        state.trafficStatus === 'ready' ? '来源：Nginx 摘要 JSON' : '来源：' + getTrafficPeriodStatusText(state.trafficPeriod),
+        trafficSource,
         'SSH 只读读取'
       ].filter(Boolean).join('。');
     setText('trafficSource', text);
   }
 
+  function getTrafficBadgeState() {
+    if (state.trafficStatus === 'ready' && hasStaleTrafficReports()) return 'stale';
+    return state.trafficStatus;
+  }
+
   function getTrafficBadgeText() {
     if (state.trafficStatus === 'loading') return '读取服务器摘要...';
     if (state.trafficStatus === 'error') return '读取失败。';
+    if (hasStaleTrafficReports()) return '数据过期。';
     return '已读取 Nginx 摘要。';
   }
 
@@ -1040,6 +1069,7 @@
     if (state.trendMode === 'analytics') {
       if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
       if (state.analyticsStatus === 'error') return '读取失败。';
+      if (hasStaleAnalyticsReports()) return '用户行为数据过期。';
       return '用户行为趋势。';
     }
     return getTrafficBadgeText();
@@ -1092,6 +1122,9 @@
     var report = getReportForPeriod(period);
     if (!report || !report.summary) {
       return { label: label, status: '暂无数据', state: 'pending', report: null, available: false };
+    }
+    if (isReportStale(report)) {
+      return { label: label, status: '数据过期', state: 'stale', report: report, available: true };
     }
     return { label: label, status: '真实数据', state: 'ready', report: report, available: true };
   }
@@ -1228,6 +1261,28 @@
     return getAnalyticsReport('today');
   }
 
+  function hasStaleTrafficReports() {
+    return hasStaleReports(state.trafficReports);
+  }
+
+  function hasStaleAnalyticsReports() {
+    return hasStaleReports(state.analyticsReports);
+  }
+
+  function hasStaleReports(payload) {
+    var reports = payload && payload.reports ? payload.reports : {};
+    return Object.keys(reports).some(function (key) {
+      return isReportStale(reports[key]);
+    });
+  }
+
+  function isReportStale(report) {
+    if (!report || !report.generatedAt) return false;
+    var generatedAt = new Date(report.generatedAt).getTime();
+    if (!Number.isFinite(generatedAt)) return true;
+    return Date.now() - generatedAt > SUMMARY_STALE_AFTER_MS;
+  }
+
   function getMetricValue(row, key) {
     if (!row || row[key] == null || row[key] === '') return null;
     var value = Number(row[key]);
@@ -1259,6 +1314,7 @@
     if (state.trafficStatus !== 'ready') return false;
     var report = getReportForPeriod(period);
     if (!report || !report.meta || report.meta.usesMockData) return false;
+    if (isReportStale(report)) return false;
     if (isDailyPeriod(period)) return Array.isArray(report.daily) && report.daily.length > 0;
     return Array.isArray(report.hourly) && report.hourly.length > 0;
   }
@@ -1266,6 +1322,7 @@
   function getTrafficPeriodStatusText(period) {
     if (state.trafficStatus === 'loading') return '读取服务器摘要...';
     if (state.trafficStatus === 'error') return '读取失败。' + (state.trafficError ? ' ' + state.trafficError : '');
+    if (isReportStale(getReportForPeriod(period))) return 'Nginx 摘要已过期，请检查定时任务。';
     if (canUseTrafficData(period)) return '已读取 Nginx 摘要。';
     return '暂无' + getTrafficPeriodLabel(period) + '数据。';
   }
@@ -1275,6 +1332,7 @@
     if (state.analyticsStatus !== 'ready') return false;
     var report = getAnalyticsReportForPeriod(period);
     if (!report || !report.meta || report.meta.usesMockData) return false;
+    if (isReportStale(report)) return false;
     if (isDailyPeriod(period)) return Array.isArray(report.daily) && report.daily.length > 0;
     return Array.isArray(report.hourly) && report.hourly.length > 0;
   }
@@ -1282,6 +1340,7 @@
   function getAnalyticsTrendStatusText(period) {
     if (state.analyticsStatus === 'loading') return '读取匿名访客统计...';
     if (state.analyticsStatus === 'error') return '读取失败。' + (state.analyticsError ? ' ' + state.analyticsError : '');
+    if (isReportStale(getAnalyticsReportForPeriod(period))) return '匿名访客统计已过期，请检查定时任务。';
     if (canUseAnalyticsTrendData(period)) return '已读取匿名访客统计。';
     return '暂无' + getTrafficPeriodLabel(period) + '数据。';
   }

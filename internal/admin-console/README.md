@@ -164,6 +164,8 @@ someTarget: {
 该摘要脚本会区分 `pageViews` 和更保守的 `validPageViews`：`validPageViews` 只统计已知站内页面，扫描路径、随机路径和 `/mailto:` 等异常请求不会进入有效页面访问。
 服务器上的真实访问统计摘要由 `scripts/run-nginx-traffic-summary.sh` 生成，默认存放在 `/home/ubuntu/framespark-reports/`。控制台通过本机接口 `/api/console/traffic-summary` 使用 SSH 只读读取该目录中的 JSON。
 服务器端手动运行和安装 cron 均应使用 `sudo`，因为 Nginx 日志通常归 `www` 用户 / 用户组管理，普通 `ubuntu` 用户没有读取权限；不要通过修改日志权限解决。
+服务器上的 cron 不得依赖 `/tmp/framespark-site`。2026-07-05 已将摘要工具收敛到稳定目录 `/opt/framespark-summary-tools`；`/tmp` 会在重启后丢失，曾导致近 7 日 / 近 30 日趋势停留在 2026-06-16。
+控制台会根据 summary JSON 的 `generatedAt` 判断新鲜度。摘要超过 2 小时未刷新时，页面显示“数据过期”，不再把旧数据当作正常趋势。
 
 控制台读取的固定文件为：
 
@@ -241,7 +243,7 @@ v1 暂不做复杂 X / Y 轴滑块。当日图的 X 轴固定为 0–24 小时�
 - 新访客 / 回访访客基于服务器可用事件历史判断，不是绝对新用户。
 - 用户行为统计更接近浏览器行为；服务器访问统计更适合观察请求量、错误和扫描。
 
-如果 SSH、summary 文件或 cron 异常，模块会显示读取失败，不使用 mock 数据兜底。
+如果 SSH、summary 文件或 cron 异常，模块会显示读取失败；如果 summary 文件长时间未刷新，模块会显示“数据过期”。两种情况都不使用 mock 数据兜底。
 
 用户行为趋势默认显示：
 

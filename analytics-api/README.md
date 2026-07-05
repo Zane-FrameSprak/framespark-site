@@ -87,7 +87,7 @@ analytics-api 原始事件是 JSONL，内部控制台后续不会直接读取原
 手动生成摘要：
 
 ```bash
-cd /tmp/framespark-site
+cd /opt/framespark-summary-tools
 bash analytics-api/scripts/run-analytics-summary.sh
 ```
 
@@ -109,7 +109,7 @@ bash analytics-api/scripts/run-analytics-summary.sh
 安装定时任务：
 
 ```bash
-cd /tmp/framespark-site
+cd /opt/framespark-summary-tools
 sudo bash analytics-api/scripts/install-analytics-summary-cron.sh
 ```
 
@@ -118,6 +118,8 @@ cron 每 5 分钟运行一次，日志写入：
 ```text
 /home/ubuntu/framespark-analytics-summaries/analytics-summary-cron.log
 ```
+
+生产 cron 不得依赖 `/tmp/framespark-site`。`/tmp` 在服务器重启后可能消失，曾导致内部控制台趋势摘要停留在 2026-06-16。摘要工具应放在 `/opt/framespark-summary-tools` 或其他稳定目录。
 
 摘要包含：
 

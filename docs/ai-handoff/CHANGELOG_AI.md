@@ -4,6 +4,17 @@
 
 ## Recent Summary
 
+- 2026-07-05 (Codex): Repaired the internal admin-console trend summary
+  refresh path. Production root cron now runs Nginx traffic and anonymous
+  analytics summary generation from stable `/opt/framespark-summary-tools`
+  instead of reboot-volatile `/tmp/framespark-site`; refreshed summary JSON now
+  ends on 2026-07-05 for today, last 7 days and last 30 days. The console UI now
+  marks summary files older than 2 hours as `数据过期` and does not draw stale
+  trend curves as current data. Updated summary scripts, cron installers and
+  docs so future installs do not reintroduce the `/tmp` dependency. No Nginx
+  reload, Diagnosis service restart, production POST, DeepSeek/AI call,
+  analytics service repair, or B4 action occurred.
+
 - 2026-07-05 (Codex): Refreshed the local-only internal admin console from the
   old invite-code-era status view to the current public-beta operations view.
   Added a public-beta operations panel covering the homepage public entry,

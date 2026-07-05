@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="/tmp/framespark-site"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 OUTPUT_DIR="/home/ubuntu/framespark-reports"
 CRON_LOG="$OUTPUT_DIR/traffic-summary-cron.log"
 MARKER="FrameSpark traffic summary"

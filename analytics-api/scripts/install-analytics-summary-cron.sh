@@ -3,7 +3,9 @@ set -euo pipefail
 
 OUTPUT_DIR="/home/ubuntu/framespark-analytics-summaries"
 CRON_MARKER="# FrameSpark analytics summary cron"
-CRON_COMMAND="*/5 * * * * cd /tmp/framespark-site && bash analytics-api/scripts/run-analytics-summary.sh >> /home/ubuntu/framespark-analytics-summaries/analytics-summary-cron.log 2>&1 $CRON_MARKER"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+CRON_COMMAND="*/5 * * * * cd $PROJECT_DIR && bash analytics-api/scripts/run-analytics-summary.sh >> /home/ubuntu/framespark-analytics-summaries/analytics-summary-cron.log 2>&1 $CRON_MARKER"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "请使用 sudo bash analytics-api/scripts/install-analytics-summary-cron.sh"

@@ -62,6 +62,14 @@ Recent post-deploy scans showed zero Cookie or sensitive journal matches.
 Deployment evidence is recorded in
 `docs/diagnosis/DIAGNOSIS_PUBLIC_BETA_DEPLOY_2026-06-26.md`.
 
+Internal admin-console traffic and analytics trend summaries are refreshed
+again as of 2026-07-05. Root cron now runs the summary tools from stable
+server path `/opt/framespark-summary-tools` instead of the reboot-volatile
+`/tmp/framespark-site`; refreshed summary JSON ranges end on 2026-07-05 for
+today, last 7 days and last 30 days. The console now treats summary JSON older
+than 2 hours as stale and shows `数据过期` instead of silently presenting old
+trend data as current.
+
 The first Phase 4D Nginx `auth_request` migration failed because production
 Nginx does not support the directive. The deployed solution uses exact Nginx
 proxy routes to the backend-owned Cookie session boundary, clears trusted
