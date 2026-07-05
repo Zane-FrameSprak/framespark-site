@@ -265,6 +265,22 @@ Current internal evaluation capabilities include:
 - store result JSON / markdown
 - inspect saved sample run summaries
 
+The local admin console is a separate read-only operations dashboard, not a
+production admin system. Its current structure is:
+
+- left rail: expiry reminders, current state, operation-risk cards and
+  allowlisted shortcuts
+- top workspace: today reminders and local log/sample/review counts
+- public-beta operations panel: current user-entry path, Cookie boundary,
+  backend release, token limits, last smoke, B4 status, analytics note and the
+  request-admission flow
+- V1 evaluation summary: dev sample-run summary fields only
+- traffic/user behavior: SSH-read summary JSON only, not raw logs or IP detail
+
+The console must remain local-only at `127.0.0.1:8130`. It must not execute
+Diagnosis POST requests, call AI, read `.env`, open arbitrary paths, mutate
+files, restart services, deploy, or expose itself to the public web.
+
 Future synthetic sample work should extend this system.
 
 ## Logging / Review Queues

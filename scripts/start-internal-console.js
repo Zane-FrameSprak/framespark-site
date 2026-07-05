@@ -18,6 +18,9 @@ const consoleUrl = `http://${serverHost}:${serverPort}${consolePath}`;
 const localPaths = {
   projectRoot: REPO_ROOT,
   statusDoc: path.join(REPO_ROOT, 'docs', '当前项目状态总结.md'),
+  projectState: path.join(REPO_ROOT, 'docs', 'ai-handoff', 'PROJECT_STATE.md'),
+  nextTasks: path.join(REPO_ROOT, 'docs', 'ai-handoff', 'NEXT_TASKS.md'),
+  publicBetaDeployDoc: path.join(REPO_ROOT, 'docs', 'diagnosis', 'DIAGNOSIS_PUBLIC_BETA_DEPLOY_2026-06-26.md'),
   evalConsole: `${consoleUrl.replace('/internal/admin-console/', '/internal/diagnosis-eval/')}`,
   sampleRuns: path.join(REPO_ROOT, 'diagnosis-api', 'test-runs', 'sample-diagnosis'),
   diagnosisLogs: path.join(REPO_ROOT, 'diagnosis-api', 'logs'),
@@ -39,6 +42,21 @@ const allowedOpenTargets = {
     label: '打开项目状态文档',
     type: 'path',
     value: localPaths.statusDoc
+  },
+  projectState: {
+    label: '打开 AI 项目状态',
+    type: 'path',
+    value: localPaths.projectState
+  },
+  nextTasks: {
+    label: '打开下一步任务',
+    type: 'path',
+    value: localPaths.nextTasks
+  },
+  publicBetaDeployDoc: {
+    label: '打开公测部署记录',
+    type: 'path',
+    value: localPaths.publicBetaDeployDoc
   },
   evalConsole: {
     label: '打开内部评测工作台',
@@ -98,39 +116,115 @@ const deadlineConfig = [
   {
     id: 'diagnosisApi',
     label: 'diagnosis-api',
-    statusText: '已上线：invite-code Beta，Cookie session 保护',
+    statusText: '公测已上线：匿名 session + Cookie API 边界',
     severity: 'normal'
   },
   {
     id: 'publicDiagnosis',
     label: '公开诊断页',
-    statusText: '邀请制内测中，未公开开放',
-    severity: 'attention'
+    statusText: '首页单入口进入公测；/diagnosis/ 为说明页',
+    severity: 'normal'
   },
   {
     id: 'betaInviteCodes',
-    label: 'Beta 内测码',
-    statusText: '5 个真实测试码有效；每码 7 天 / 5 次',
+    label: '旧内测码',
+    statusText: '不再是普通入口；仅保留历史/回滚记录',
+    severity: 'normal'
+  },
+  {
+    id: 'tokenBudget',
+    label: 'AI token 预算',
+    statusText: '单次 50,000 tokens；全局 5,000,000 tokens/日',
     severity: 'attention'
+  },
+  {
+    id: 'cookieLogging',
+    label: 'Cookie 日志',
+    statusText: '已关闭写入；site_total cookie 字段为空',
+    severity: 'normal'
   },
   {
     id: 'b4Observation',
     label: 'B4 72 小时观测',
-    statusText: '未启动；真实诊断与观察期需单独授权',
+    statusText: '未启动；扩量观察期需单独确认',
     severity: 'attention'
   },
   {
     id: 'serverSync',
     label: 'GitHub push 后不会自动同步腾讯云正式站',
-    statusText: '仍需手动 sudo rsync；最近备案 footer 已同步',
+    statusText: '仍需手动 sudo rsync；近期官网多次静态部署',
     severity: 'warning'
   }
 ];
 
+const publicBetaOps = {
+  updatedAt: '2026-07-05',
+  summaryCards: [
+    {
+      label: '用户入口',
+      value: '首页进入公测',
+      note: '不再要求内测码；24 小时匿名 session。',
+      state: 'ready'
+    },
+    {
+      label: '诊断页边界',
+      value: 'Cookie 保护',
+      note: '无有效 Cookie 会回到首页入口。',
+      state: 'ready'
+    },
+    {
+      label: '后端版本',
+      value: '0104cfe',
+      note: '已包含 tiktoken、50,000 token 输入上限。',
+      state: 'ready'
+    },
+    {
+      label: '每日预算',
+      value: '500 万 tokens',
+      note: '触顶后统一提示今日名额已满。',
+      state: 'attention'
+    },
+    {
+      label: '真实 smoke',
+      value: '2026-06-30 通过',
+      note: '1 次虚构材料，4 次 provider 调用。',
+      state: 'ready'
+    },
+    {
+      label: '观察窗口',
+      value: 'B4 T0 未启动',
+      note: '扩量和新真实 AI 调用需单独确认。',
+      state: 'attention'
+    },
+    {
+      label: 'analytics',
+      value: '独立异常',
+      note: '服务工作目录问题，和 Diagnosis 分开处理。',
+      state: 'warning'
+    },
+    {
+      label: '安全日志',
+      value: 'Cookie 不入日志',
+      note: 'site_total 保留空 cookie 字段。',
+      state: 'ready'
+    }
+  ],
+  flowSteps: [
+    { label: '官网首页', detail: '用户点击进入公测。', state: 'ready' },
+    { label: 'public-session', detail: '签发 24 小时页面/API Cookie。', state: 'ready' },
+    { label: 'Beta 表单', detail: '粘贴文本、TXT、DOCX。', state: 'ready' },
+    { label: '文件大小', detail: '先拦截超 5MB。', state: 'ready' },
+    { label: 'token 数', detail: 'cl100k_base，50,000 tokens 上限。', state: 'ready' },
+    { label: '每日次数', detail: 'session/IP/global/concurrency 限额。', state: 'attention' },
+    { label: 'AI 预算', detail: 'provider 次数与 token 总预算。', state: 'attention' },
+    { label: '人工复盘', detail: '观察成本、错误、日志和用户反馈。', state: 'pending' }
+  ]
+};
+
 const dashboardConfig = {
   title: 'FrameSpark 内部控制台',
-  subtitle: '当前只读本地工具',
-  badges: ['只监听 127.0.0.1', '不部署公网', '只读扫描'],
+  subtitle: '公测运营只读工具',
+  badges: ['只监听 127.0.0.1', '不部署公网', '只读扫描', '不触发 AI'],
   nginxLogPaths: [
     '/www/wwwlogs/framespark.cn.log',
     '/www/wwwlogs/framespark.cn.error.log'
@@ -266,6 +360,7 @@ async function buildPublicConfig() {
       url: consoleUrl
     },
     dashboard: dashboardConfig,
+    publicBetaOps,
     deadlines: deadlineConfig.map(formatDeadline),
     openTargets: Object.entries(targets).map(([id, target]) => ({
       id,
@@ -512,8 +607,10 @@ function buildReminders({ reviewQueue, pdfQuality, traffic }) {
   if (diagnosisVisits >= 20) {
     reminders.push({ level: 'attention', text: `诊断页访问较多${trafficLabel}，请结合 provider 调用、metadata 和费用判断真实诊断提交。` });
   }
-  reminders.push({ level: 'normal', text: 'Diagnosis Beta invite-code 已上线；B4 T0 尚未启动，真实诊断扩量前需要单独确认。' });
-  reminders.push({ level: 'normal', text: '备案 footer 已上线：ICP 与公安备案均可点击，公安图标已部署。' });
+  reminders.push({ level: 'normal', text: 'Diagnosis 公测入口已上线；首页按钮签发匿名 session，/diagnosis/beta/ 仍由 Cookie 边界保护。' });
+  reminders.push({ level: 'attention', text: '公测费用闸门已上线：单次 50,000 tokens，全局 5,000,000 tokens/日。扩量前先看 provider tokens。' });
+  reminders.push({ level: 'normal', text: 'Nginx site_total 已停止写入 Cookie；如面板保存或改 Nginx，需复查日志格式。' });
+  reminders.push({ level: 'attention', text: 'B4 T0 尚未启动；下一次真实 AI 调用或观察窗口仍需单独确认。' });
   if (!reminders.length) reminders.push({ level: 'normal', text: '当前没有高优先级提醒。' });
   return reminders;
 }
@@ -697,13 +794,14 @@ function sendText(res, status, text) {
 }
 
 function getTargetGroup(id) {
-  if (['officialSite', 'projectRoot', 'statusDoc'].includes(id)) return '网站与项目';
+  if (['officialSite', 'projectRoot', 'statusDoc', 'projectState', 'nextTasks'].includes(id)) return '网站与项目';
+  if (['publicBetaDeployDoc'].includes(id)) return '公测运营';
   if (['evalConsole', 'sampleRuns', 'diagnosisLogs', 'reviewQueue'].includes(id)) return '诊断与测试';
   return '品牌与运营';
 }
 
 function getDeadlineCategory(id) {
   if (['domain', 'ssl', 'server'].includes(id)) return '到期类';
-  if (['policeFiling', 'diagnosisApi', 'publicDiagnosis', 'betaInviteCodes', 'b4Observation'].includes(id)) return '状态类';
+  if (['policeFiling', 'diagnosisApi', 'publicDiagnosis', 'betaInviteCodes', 'tokenBudget', 'cookieLogging', 'b4Observation'].includes(id)) return '状态类';
   return '操作风险类';
 }

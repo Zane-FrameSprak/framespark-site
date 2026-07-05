@@ -158,6 +158,7 @@
     safeRender(renderShortcuts);
     safeRender(renderReminders);
     safeRender(renderStats);
+    safeRender(renderOperations);
     safeRender(renderV1EvalSummary);
     safeRender(renderLegend);
     safeRender(renderAnalytics);
@@ -329,6 +330,41 @@
         }
       });
     });
+  }
+
+  function renderOperations() {
+    var config = state.config && state.config.publicBetaOps ? state.config.publicBetaOps : {};
+    var summaryRoot = document.getElementById('opsSummary');
+    var flowRoot = document.getElementById('opsFlow');
+    if (!summaryRoot || !flowRoot) return;
+
+    var cards = Array.isArray(config.summaryCards) ? config.summaryCards : [];
+    var steps = Array.isArray(config.flowSteps) ? config.flowSteps : [];
+    setText('opsUpdatedAt', config.updatedAt
+      ? '状态同步：' + config.updatedAt + '。只读状态卡，不触发生产请求。'
+      : '只读状态卡，不触发生产请求。');
+
+    summaryRoot.innerHTML = cards.length ? cards.map(function (card) {
+      return [
+        '<article class="ops-card" data-state="' + escapeHtml(card.state || 'ready') + '">',
+        '<span>' + escapeHtml(card.label) + '</span>',
+        '<strong>' + escapeHtml(card.value) + '</strong>',
+        '<small>' + escapeHtml(card.note || '') + '</small>',
+        '</article>'
+      ].join('');
+    }).join('') : '<p class="panel-hint">暂无公测运营状态。</p>';
+
+    flowRoot.innerHTML = steps.length ? steps.map(function (step, index) {
+      return [
+        '<article class="ops-step" data-state="' + escapeHtml(step.state || 'pending') + '">',
+        '<span>' + String(index + 1).padStart(2, '0') + '</span>',
+        '<div>',
+        '<strong>' + escapeHtml(step.label) + '</strong>',
+        '<small>' + escapeHtml(step.detail || '') + '</small>',
+        '</div>',
+        '</article>'
+      ].join('');
+    }).join('') : '<p class="panel-hint">暂无流程信息。</p>';
   }
 
   async function loadV1EvalSummary() {

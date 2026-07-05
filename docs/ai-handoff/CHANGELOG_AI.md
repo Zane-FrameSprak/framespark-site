@@ -4,6 +4,16 @@
 
 ## Recent Summary
 
+- 2026-07-05 (Codex): Refreshed the local-only internal admin console from the
+  old invite-code-era status view to the current public-beta operations view.
+  Added a public-beta operations panel covering the homepage public entry,
+  Cookie-protected Beta boundary, backend release `0104cfe`, 50,000-token input
+  cap, 5,000,000-token daily provider budget, the 2026-06-30 fictional smoke,
+  B4 T0 not started, Cookie logging disabled, and the separate analytics
+  stability issue. Updated the console README and handoff architecture/state
+  docs. No production deploy, server change, Diagnosis POST, AI call, analytics
+  repair, or B4 action occurred.
+
 - 2026-06-30 (Codex): Ran one authorized fictional public-beta real-AI smoke
   under the user's 5 CNY budget. The request used a short fictional material,
   returned HTTP `200` in about 59.5 seconds, reached `stage=final`, and exposed

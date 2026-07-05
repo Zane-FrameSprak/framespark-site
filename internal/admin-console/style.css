@@ -169,6 +169,7 @@ h3 {
 .shortcuts-panel,
 .reminders-panel,
 .records-panel,
+.operations-panel,
 .analytics-panel,
 .traffic-panel {
   margin-bottom: 0;
@@ -415,6 +416,108 @@ button .shortcut-note {
 .reminders article[data-level="attention"] {
   border-color: rgba(217, 119, 6, 0.4);
   background: #fff8ed;
+}
+
+.operations-panel {
+  margin-bottom: 12px;
+}
+
+.ops-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 11px;
+}
+
+.ops-card {
+  min-height: 84px;
+  padding: 9px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 12px;
+  background: #f7faff;
+}
+
+.ops-card[data-state="attention"] {
+  border-color: rgba(217, 119, 6, 0.34);
+  background: #fff8ed;
+}
+
+.ops-card[data-state="warning"] {
+  border-color: rgba(220, 38, 38, 0.28);
+  background: #fff1f2;
+}
+
+.ops-card span,
+.ops-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ops-card strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 16px;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+
+.ops-flow-wrap {
+  padding-bottom: 2px;
+}
+
+.ops-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ops-step {
+  position: relative;
+  min-height: 86px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.ops-step::after {
+  content: none;
+}
+
+.ops-step > span {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.ops-step strong,
+.ops-step small {
+  display: block;
+}
+
+.ops-step strong {
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.ops-step small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ops-step[data-state="attention"] {
+  border-color: rgba(217, 119, 6, 0.34);
+  background: #fff8ed;
+}
+
+.ops-step[data-state="pending"] {
+  border-style: dashed;
 }
 
 .mock-badge {
@@ -1057,6 +1160,14 @@ canvas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .ops-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ops-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .traffic-summary__table {
     overflow-x: auto;
   }
@@ -1094,6 +1205,8 @@ canvas {
   .deadline-grid,
   .stats-grid,
   .analytics-cards,
+  .ops-summary,
+  .ops-flow,
   .v1-eval-cards,
   .v1-latest-run__card dl {
     grid-template-columns: 1fr;

@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-30
+Last updated: 2026-07-05
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -276,6 +276,16 @@ Known components:
 - `diagnosis-api/src/services/sampleRunStore.js` stores sample runs under `diagnosis-api/test-runs/sample-diagnosis/`.
 
 The future idea of Codex generating synthetic samples, running them through the diagnosis system, and viewing results in the internal workspace should extend the existing sample-run system.
+
+The local-only internal admin console was refreshed on 2026-07-05 from the old
+invite-code-era status cards to the current public-beta operations view. It now
+shows a dedicated public-beta operations panel covering the homepage public
+entry, Cookie-protected Beta boundary, backend release `0104cfe`, 50,000-token
+input cap, 5,000,000-token daily provider budget, the 2026-06-30 fictional
+smoke, B4 T0 not started, Cookie logging disabled, and the separate analytics
+stability issue. It remains local-only at `127.0.0.1:8130`, reads only
+allowlisted paths and server summary JSON, and does not trigger Diagnosis POST,
+AI calls, deployment or server changes.
 
 ## Deployment / Runtime State
 
