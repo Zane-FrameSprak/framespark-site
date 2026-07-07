@@ -1,7 +1,7 @@
 # Project Context
 
-Last updated: 2026-05-29
-Updated by: ChatGPT via GitHub connector
+Last updated: 2026-07-07
+Updated by: Codex
 
 ## Project
 
@@ -21,7 +21,7 @@ The current repository contains:
 
 FrameSpark should present itself as a restrained, credible, film-oriented platform. The public site should explain what the project does without overpromising unfinished product features.
 
-The story diagnosis system is not a paid tier system. It is a free / internal-testing product flow that should help users understand what kind of story material they uploaded, what development state it is in, and what the next useful development step should be.
+The story diagnosis system is not a paid tier system. It is now a low-quota public beta product flow: users enter from the homepage public-beta button, receive a short-lived anonymous session, and use the protected Beta diagnosis page. It should help users understand what kind of story material they uploaded, what development state it is in, and what the next useful development step should be. Cost, token and daily usage limits remain part of the product boundary.
 
 The long-term path is:
 
@@ -57,6 +57,8 @@ The diagnosis API lives under `diagnosis-api/`.
 
 Current direction:
 
+- Keep the public Beta path protected by anonymous Cookie/session identity plus file-size, token, daily-count, provider-call and provider-token-budget limits.
+- Keep the formal `/diagnosis/` page as an introduction/entry page; the actual upload form belongs under `/diagnosis/beta/`.
 - Keep the old legacy diagnosis path working.
 - Add `reportV1` gradually.
 - Keep `ENABLE_DIAGNOSIS_V1` disabled by default until route-level behavior, long samples, and real materials are stable.

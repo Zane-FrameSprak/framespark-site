@@ -1,6 +1,6 @@
 # Next Tasks
 
-Last updated: 2026-07-05
+Last updated: 2026-07-07
 Updated by: Codex
 
 ## Now
@@ -19,26 +19,12 @@ Updated by: Codex
 - Continue to avoid Cookie/Authorization logging. The 2026-06-30 P0 fix set both the panel-managed generated `site_total` log format and the `/www/server/site_total/scripts/site_log_format.conf` source template to keep the `cookie` field empty instead of `$http_cookie`; re-check both files after any panel save, Nginx edit, route expansion, or site_total update.
 - Continue to avoid production-host `npm ci` or native dependency compilation. Future backend release updates should still use the Linux prebuilt artifact flow.
 - `framespark-analytics.service` has a separate stability issue: its unit points to `/tmp/framespark-site/analytics-api`, which disappears after reboot. Plan analytics stabilization separately; do not fold it into Diagnosis Phase 3.
-- Diagnosis Beta Stage A is complete and stopped at the secret boundary. Use `docs/diagnosis/DIAGNOSIS_BETA_DEPLOY_STAGE_A_2026-06-11.md` as the execution evidence.
-- The user must independently SSH and use `sudoedit /etc/framespark/diagnosis-api.env` or an equivalent non-echoing method to add `DEEPSEEK_API_KEY`; never send or print the key in chat, command arguments, Git, or logs.
-- After the key is safely present, require a new explicit authorization before `systemctl daemon-reload`, service enable/start, readiness checks, Basic Auth creation, Nginx changes, real AI smoke, or Beta/API opening.
-- Keep the current service inactive/disabled, port `8788` without a listener, public `/diagnosis/` frozen, and active Nginx unchanged until that authorization.
-- The moderate production dependency finding is fixed in the repository lockfile: `qs` now resolves transitively to `6.15.2`, production audit is clean, and V1/MVP no-AI regression passed. See `docs/diagnosis/DIAGNOSIS_BETA_NPM_AUDIT_REVIEW_2026-06-12.md`.
-- Stage A2 installed the patched immutable release at `683dea7fa98848cc40829b825cf4209692b7abe4`; `current` selects it and `previous` retains `f4451587...`. Do not mutate either release in place.
-- The next permitted action is only the user's separate, non-echoing server-side entry of `DEEPSEEK_API_KEY`. Afterward, require another explicit authorization before daemon reload, service activation, readiness checks, Basic Auth, Nginx, real AI, or Beta/API opening.
-
-- Use `docs/diagnosis/DIAGNOSIS_BETA_HUMAN_CONFIRMATION_2026-06-11.md` as the decision baseline for the next controlled deployment execution plan. The plan must include a 60-minute observation period, red/yellow/green reporting, immediate red-light stop/rollback points and a separately authorized one-call fictional smoke.
-- Do not distribute Beta credentials until all applicable post-deployment checks remain green for the observation window and rollback verification passes.
-- Complete `docs/diagnosis/DIAGNOSIS_BETA_PRE_DEPLOY_CHECKLIST_2026-06-11.md` with named human owners and evidence before requesting any deployment task. Blank required items mean No-Go.
-- Treat deployment, the single authorized production AI smoke and invitation distribution as separate approvals; do not infer one approval from another.
-- Use `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_FIX_REVIEW_2026-06-11.md` to prepare the human confirmation and pre-deployment checklist. Re-lock full SHAs after a fresh fetch and attach target-host evidence before considering any execution task.
-- Keep the Diagnosis Beta deployment and rollback shell files as non-executable drafts with their unconditional safety exits. Do not connect to the server, apply Nginx/systemd, write credentials, run real AI, or open Beta/API routes in the checklist phase.
-- Review the local MVP productionization changes as separate commits; do not enable the Beta route or deploy the API during commit preparation.
+- Older Stage A / Basic Auth / invite-code rollout bullets in historical docs are superseded by the current public beta state. Do not use those older notes to infer that the service is inactive, `8788` is unused, `/api/diagnosis/` is static 404, or Basic Auth is the ordinary tester entry.
 - **Keep low-token workflow active** — routine low-risk tasks should proceed in goal mode within allowed scope and report briefly.
 - **Use terminal scripts for read-only checks** where possible to reduce Codex / Claude token use.
 - **Use the verified sudo rsync deploy template** for Tencent Cloud; GitHub push still does not update production.
-- Keep the public site as brand display plus internal-test preview; do not make unfinished diagnosis, talent, or project areas look open.
-- Keep homepage card clicks as unavailable-state prompts until product flows are intentionally opened.
+- Keep the public site as brand display plus limited public beta entry; do not make unfinished talent or project-detail areas look open.
+- Keep non-Diagnosis homepage card clicks as unavailable-state prompts until those product flows are intentionally opened.
 - Keep diagnosis V1 disabled by default.
 - Preserve legacy diagnosis response fields while V1 is being evaluated.
 - When switching AI coding agents, have them read the AI handoff files before making changes.
@@ -71,41 +57,14 @@ Updated by: Codex
 
 ## Next — Diagnosis V1
 
-- Patch 5b and Patch 5c are complete. Review `docs/diagnosis/V1_FINAL_PATCH5C_REAL_REGRESSION_2026-06-10.md` before further final work.
-- Do not run another real batch automatically. First decide whether to improve provider compliance telemetry or prompt/schema ergonomics after the two initial controlled failures.
-- Do not enable V1 by default, deploy `/api/diagnosis`, or reopen public upload based on these patches.
-
-- Use `diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md` as the current V1 architecture plan.
-- Treat staged V1 as the future mainline: D0 gatekeeper, basic diagnosis, advanced diagnosis, final conversion advice.
-- Current work is still planning only. Do not enable `ENABLE_DIAGNOSIS_V1=true`.
-- Next recommended implementation step: add staged runner skeleton and no-AI tests.
-- V1 commit 1 completed the pure gatekeeper / stage-decision skeleton.
-- V1 commit 2 completed the mock staged runner skeleton and no-AI staged runner tests.
-- `ENABLE_V1_STAGED_RUNNER=false` is now documented and tested as the future staged branch gate.
-- Staged runner is now wired into `diagnosisPipeline` behind explicit switches, but still uses the no-AI mock runner.
-- V1 stage prompt drafts now exist for basic, advanced, and final. They are not connected to runner or AI calls.
-- `aiClient.generateV1StageReport` now exists and is mock-tested. It is not connected to runner or production pipeline yet.
-- `v1StageRunner` now supports injected stage AI calls behind `ENABLE_V1_REAL_PROMPTS=false`.
-- `npm run smoke:v1-staged-real` runs a guarded mock-only basic-stage smoke. Do not run `--real` without explicit approval.
-- The guarded smoke now reads `dev-samples/v1-staged-smoke-short-synopsis.txt`, a fictional internal short synopsis sample.
-- First guarded `--real` basic smoke has succeeded once with no fallback; next do not jump to public upload.
-- Mock `--max-stage=advanced` and `--max-stage=final` are available for serial staged smoke. Real advanced/final remains blocked.
-- Protected real advanced parameters are available, but not executed: `--real --real-stage=advanced --confirm-real-stage=advanced`.
-- First real advanced smoke timed out. Protected minimal mode is now required for the next real advanced attempt.
-- Minimal real advanced smoke succeeded once. Do not treat it as full advanced quality validation.
-- Minimal real final smoke succeeded once. Do not treat it as full final quality validation.
-- Next recommended step: plan full-input advanced smoke or staged runner evaluation hooks; do not reopen public upload or deploy `/api/diagnosis`.
+- `diagnosis-api/docs/V1_STAGED_DIAGNOSIS_PLAN.md` remains the current V1 architecture reference.
+- Production public beta is already live through the protected `/diagnosis/beta/` flow. Do not read older V1 notes as saying `/api/diagnosis/` is undeployed or public upload is closed.
+- Do not enable `ENABLE_DIAGNOSIS_V1=true` or `ENABLE_V1_REAL_PROMPTS=true` by default without a separate quality and rollout decision.
+- Do not run another real AI batch automatically. Real Diagnosis POSTs, B4 T0 and cost-limit changes still require separate authorization.
+- Next useful V1 work is product-quality evaluation: prompt/schema ergonomics, staged-runner review hooks, and route/guard/D0 boundary tests.
 - Do not start by changing route, guard, or materialRouter. Their hard-reject vs D0 boundary must be test-locked first.
-- Use `diagnosis-api/DEPLOYMENT.md` as the baseline for production diagnosis-api planning.
-- Use `diagnosis-api/DEPLOYMENT_RUNBOOK.md` before any production execution.
-- Review the diagnosis systemd/Nginx script drafts before any server execution.
-- Prepare production env with `PORT=8788`, `HOST=127.0.0.1`, `DEEPSEEK_API_KEY`, and `ENABLE_DIAGNOSIS_V1=false`.
-- Deploy `diagnosis-api` separately before reopening public diagnosis uploads.
-- Configure and verify a production `/api/diagnosis` Nginx reverse proxy only after backend deployment is ready.
-- Keep `/diagnosis/` in internal-test / public-upload-disabled state until the production API is confirmed.
 - Keep public diagnosis upload copy limited to TXT/DOCX/paste until PDF support is separately implemented.
 - Treat public PDF support as a standalone task: migrate parser logic, add tests, add error copy, and keep scanned PDF / OCR out of current scope.
-- Next safe paths: create/review production env, review script drafts, or plan public PDF support separately. Do not reopen public uploads yet.
 - Run a focused real AI classification smoke test for:
   - `idea_concept`
   - `synopsis`
@@ -160,56 +119,6 @@ Updated by: Codex
 - Do not enable `ENABLE_DIAGNOSIS_V1=true` in default or production settings yet.
 - Do not rely only on synthetic AI-generated samples for quality validation.
 - Do not implement real talent-platform matching/recruiting features yet.
-
-## Next - Invitation Diagnosis Beta Production Gate (2026-06-10)
-
-- Stage B1 completed the protected route gate. Basic Auth covers the exact Beta static files and exact Diagnosis POST API; the static homepage index mapping is corrected and verified.
-- Stage B2 completed one authorized fictional production smoke: HTTP 200, Final stage, three provider calls, no fallback, public DTO whitelist passed and no sensitive log matches.
-- Do not repeat the production smoke without a new plan and explicit authorization. Do not infer invitation distribution or public-readiness approval from B2.
-- Feedback, backend health/readiness and public uploads remain unopened. Keep the service `active/disabled`, port `8788` loopback-only and the public `/diagnosis/` page frozen.
-- The next permitted work is a separate post-B2 review and invitation-release decision. It must assess legal sign-off, credential distribution, observation/rollback ownership and support procedures before any access is shared.
-- B3.1 preparation is complete in the repository: rules, user notice, manual feedback, deletion procedure and monitoring duty checklist are documented, and the Beta client fixes `reviewConsent=false`.
-- Before B3.2, decide whether systemd will be enabled or whether restart interruption is formally accepted; verify production account-key isolation, other real limits and the in-memory reset boundary; assign monitoring, deletion and cost owners; approve independent account handling; and complete human legal review.
-- Do not create tester accounts with `htpasswd -c`; additions must preserve the existing password file and remain a separately authorized B3.2 operation.
-- Do not invite users, change env/limits, restart or enable services, open feedback, or run another real diagnosis as part of B3.1.
-- B3.2b is complete: approved production limits are active and the Diagnosis service is now `active/enabled` with bounded systemd restart frequency.
-- B3.2c is complete: `beta-001`, `beta-002`, and `beta-003` exist alongside `framespark-beta`, and static authentication passed without diagnosis traffic.
-- B3.2d is complete: the reviewed B3.1 Beta page is the active protected static release, with `reviewConsent=false` and the invitation/privacy/wait-time notices verified.
-- B4 observability blocking item is resolved: the independent timing log is live and a no-POST GET validation wrote one safe seven-field JSON entry. The GET returned HTTP `403` instead of `401`, which is acceptable for this gate because the route rejects non-POST methods before authentication.
-- B4 T0 is still not started, and the 72-hour observation window must not begin from the log-only validation. Recommended T0 is after the first real invited tester completes the first real Diagnosis Beta submission and timing-log field safety is confirmed.
-- Keep account-to-person mapping only in the user's offline protected list. Do not add credentials or mappings to Git, handoff, logs, or shared notes.
-- B4 T0 remains not started. Do not invite testers, execute a diagnosis POST, call AI, begin the 72-hour observation window, or enter B3.2e without a separate plan and explicit authorization.
-- Beta access Phase 1 is repository-only and defaults off. Before Phase 2, review the homepage entry UI, Nginx `auth_request` cookie flow, identity-header overwrite, Basic Auth rollback and production native SQLite installation as one separate high-risk plan.
-- Do not generate the five real access codes, add HMAC secrets, switch the Diagnosis identity chain, deploy or start B4 T0 as part of Phase 1.
-- Beta access Phase 2 is repository-only and must not be deployed before Phase 3 defines and reviews Nginx session validation, trusted identity-header overwrite, Basic Auth migration and rollback.
-- Before Phase 3 execution, validate native SQLite installation on Node 20, prepare production secrets without exposing them, and confirm that unauthenticated Beta/API failures return the stable client contract.
-- Do not enable `ENABLE_BETA_CODE_ACCESS`, initialize production SQLite, generate the five real codes, change Basic Auth, deploy the homepage/Beta assets, invite testers or start B4 T0 as part of Phase 2.
-- Before any invitation or B4 T0 decision, confirm named monitoring/deletion/cost owners, legal wording review, credential-distribution procedure, support coverage, and the exact observation start rule.
-
-- Use `docs/diagnosis/DIAGNOSIS_BETA_DRY_RUN_REVIEW_2026-06-11.md` as the current deployment-review gate and keep the 2026-06-10 deployment plan as the archived overall plan.
-- Before every server precheck, run `git fetch origin main`, require a clean worktree with `HEAD == origin/main`, and record the full deployment-candidate SHA. Never reuse a historical SHA without verification.
-- The next permitted operation is a server read-only precheck of users, paths, permissions, ports, runtime binaries, existing units, active Nginx locations and webroot isolation.
-- Do not run the systemd/Nginx installer drafts during that precheck; they are not dry-run commands and can mutate service state.
-- Resolve the documented execution gates first: env/auth regular-file ownership, data directory mode, npm binary path, active Nginx conflicts, Beta static method restrictions, previous release and config backup.
-- The server read-only precheck is complete. Use `docs/diagnosis/DIAGNOSIS_BETA_SERVER_READONLY_PRECHECK_2026-06-11.md` as the evidence record.
-- Next, prepare repository-only deployment configuration drafts for the missing dedicated user, release/current layout, env/data/auth permissions, hardened systemd unit and three authenticated `^~` Nginx locations.
-- Ensure the future `/diagnosis/beta/` location takes precedence over the existing static-resource regex location and define the exact no-trailing-slash behavior.
-- Keep the next phase draft-only: do not create server resources, run installers, start services, reload Nginx, call AI or expose Beta/API routes.
-- Review the five repository drafts under `deploy/diagnosis-beta/` using `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_DRAFT_REVIEW_2026-06-11.md`.
-- Resolve systemd effective env/hardening, Basic Auth ownership/mode, Nginx alias/symlink behavior, no-trailing-slash policy, active-config merge and rollback checksum questions before producing any execution runbook.
-- Treat `BETA_IDENTITY_HEADER` and `LOG_REDACTION_REQUIRED` as documented contracts, not runtime-configurable enforcement, unless a separate business-code task wires and tests them.
-- Do not remove the unconditional safety exits from the command drafts during review.
-- Use `docs/diagnosis/DIAGNOSIS_BETA_CONFIG_REVIEW_2026-06-11.md` to create the next human confirmation and pre-deployment checklist.
-- Keep ten execution blockers open until revised drafts and evidence resolve them: full SHA-range review, unprivileged npm, isolated test data, idempotent user verification, permission/type checks, an enforced Nginx manual stop, hidden-file protection, transactional config rollback, analytics-backend verification and placeholder-key rejection.
-- Do not treat conditional draft approval as deployment approval. The shell safety exits must remain until a separate reviewed execution task.
-- Obtain human legal review for the updated privacy policy, terms, external AI processing disclosure, retention language, and copyright/authorization wording.
-- Prepare the server release directory, dedicated no-login service user, `/etc/framespark/diagnosis-api.env`, `/var/lib/framespark-diagnosis`, and Nginx Basic Auth file under a separate approved deployment task.
-- Verify the systemd and Nginx drafts manually; do not execute them as part of normal static-site deployment.
-- Run local protected-route and public DTO checks before any server change.
-- After explicit approval, deploy behind authentication, verify `/ready`, authentication, rate limits, redacted logs, retention cleanup, and rollback while keeping the public preview page unchanged.
-- Only after the protected deployment passes, run 1-3 production smoke diagnoses using fictional material and a separately approved real-AI budget.
-- Keep `/diagnosis/beta/` undiscoverable and `/api/diagnosis/` unavailable until access isolation, legal review, production smoke, and rollback rehearsal all pass.
-- Invitation Beta approval is a separate decision; completion of repository code does not authorize opening it.
 
 ## Launch Window — 2026-06-08
 

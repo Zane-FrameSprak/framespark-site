@@ -6,11 +6,12 @@
 
 ## 当前项目状态
 
-- 官网当前定位：品牌展示站 + 内测预告站。
-- 诊断系统、人才平台、项目详情仍不是普通用户产品流。
-- 公开诊断页保持内测提示，不恢复上传入口。
-- 生产 `/api/diagnosis/` 已作为邀请制 Beta API 接入，必须受内测码 Cookie session 保护；不得恢复公开匿名上传。
-- analytics-api 已有生产反代，diagnosis-api 仍按独立后端处理。
+- 官网当前定位：品牌展示站 + 受限公测入口。
+- 诊断系统已进入低额度公开 Beta；普通用户从首页 `进入公测` 获取 24 小时匿名 Cookie session 后进入 `/diagnosis/beta/`。
+- 正式 `/diagnosis/` 仍是介绍页，不是上传表单；实际公测表单在 `/diagnosis/beta/`。
+- 生产 `POST /api/diagnosis/` 是 live API，但必须受后端 Cookie session、Origin、文件大小、token、每日次数、provider 调用和每日 provider token 预算保护；不得恢复无限制匿名 POST。
+- 人才平台和项目详情仍不是普通用户产品流。
+- analytics-api 与 diagnosis-api 都有生产后端；两者仍按独立服务和独立部署处理。
 - V1 诊断处于内部评测和方案阶段；诊断质量由评审助手判断，Codex 不自行定性。
 - Tencent Cloud 正式站通过本地 sudo rsync 同步，不等同于 GitHub push。
 
@@ -52,7 +53,7 @@
 - 小测试脚本。
 - internal 工具轻量 UI 或只读展示调整。
 - sample run 摘要字段、评审文档、内部工作流说明。
-- public CSS/JS 小修，但不得改变未开放入口。
+- public CSS/JS 小修，但不得绕过或扩大现有公测入口边界。
 
 ### 高风险：必须先 Plan，评审/用户确认后再改
 
@@ -66,7 +67,7 @@
 - `ENABLE_DIAGNOSIS_V1`、`ENABLE_V1_STAGED_RUNNER`、`ENABLE_V1_REAL_PROMPTS` 默认值。
 - Nginx / SSL / systemd / 数据库 / 密钥 / 服务器配置。
 - 用户系统、登录注册、权限、人才平台真实功能。
-- 公开上传入口、生产 `/api/diagnosis` 接入。
+- 公开诊断入口、生产 `/api/diagnosis` 认证/限额/预算边界。
 
 ## 目标模式使用规则
 
@@ -92,7 +93,7 @@
 - 真实 AI 调用预计超过本任务上限。
 - 需要改 Nginx / SSL / systemd / 数据库 / 密钥。
 - 需要部署后端或接生产 `/api/diagnosis`。
-- 需要恢复公开上传、人才申请、用户登录注册。
+- 需要放宽公开诊断入口、提高限额、恢复无保护上传、开放人才申请、用户登录注册。
 - 需要判断 V1 诊断质量是否足够，或是否可作为产品结论。
 - 需要删除旧规则、旧文档、旧数据或样本原始记录。
 - 检查连续失败且原因不清。
@@ -151,8 +152,8 @@
 ## 官网上线边界
 
 - 官网可以做静态内容、视觉密度、邮箱、SEO、favicon、OG、manifest、robots、sitemap 小修。
-- 不让诊断、人才、项目详情看起来已经成为开放产品流。
-- 诊断页不得出现上传控件，不引用 `/api/diagnosis`，不引用旧诊断脚本。
+- 不让人才和项目详情看起来已经成为开放产品流。
+- 正式 `/diagnosis/` 保持介绍/入口页；不得在该页直接恢复旧上传控件或旧诊断脚本。公测上传表单只允许在受 Cookie/session 保护的 `/diagnosis/beta/`。
 - 人才页保持筹备/未开放状态。
 - 项目详情页如为开发中内容，保持 noindex 且不进 sitemap。
 - 视觉任务必须检查智能引号污染和资源版本号。

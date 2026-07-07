@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-07-05
+Last updated: 2026-07-07
 Updated by: Codex
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
@@ -307,18 +307,25 @@ AI calls, deployment or server changes.
 - Pushing to GitHub may not automatically update the production server unless a separate sync/deploy process exists.
 - `diagnosis-api` is not deployed by GitHub Pages and needs separate backend deployment planning.
 
-## Production API State (2026-06-02)
+## Historical Production API State (2026-06-02, superseded)
 
-- `/api/diagnosis` is not a live diagnosis JSON API in production. Current request behavior falls through to the static site / 404 HTML path, so it must not be treated as deployed.
-- `/diagnosis/` remains in internal-test / public-upload-disabled state and does not expose a public `/api/diagnosis` call.
-- Nginx currently confirms only `/api/analytics/` reverse proxy to analytics-api.
+This section is preserved as deployment history only. It was superseded by the
+Diagnosis public beta launch. Current production has a protected live
+`POST /api/diagnosis/` exact route behind backend Cookie/session validation,
+Origin checks, file-size/token/daily/provider-call/provider-token-budget limits,
+and `/diagnosis/beta/` as the protected upload form. Do not treat the following
+old static-404 notes as current state.
+
+- Historical state: `/api/diagnosis` was not a live diagnosis JSON API in production. Request behavior fell through to the static site / 404 HTML path.
+- Historical state: `/diagnosis/` remained in internal-test / public-upload-disabled state and did not expose a public `/api/diagnosis` call.
+- Historical state: Nginx confirmed only `/api/analytics/` reverse proxy to analytics-api.
 - analytics-api listens on `127.0.0.1:8787`; `HEAD /api/analytics/event` returning 404 is not a P0 because the endpoint is intended for POST events.
-- Before reopening public uploads, deploy `diagnosis-api` separately and add a verified `/api/diagnosis` Nginx reverse proxy.
+- Historical requirement: before reopening public uploads, deploy `diagnosis-api` separately and add a verified `/api/diagnosis` Nginx reverse proxy.
 - Diagnosis API production plan is now documented in `diagnosis-api/DEPLOYMENT.md`; recommended runtime port is `8788` to avoid the analytics-api `8787` port.
 - Diagnosis API production runbook is now documented in `diagnosis-api/DEPLOYMENT_RUNBOOK.md`; it is a manual execution checklist, not an automatic deploy script.
 - Public parser currently supports TXT / DOCX / pasted text. Short-term public copy must not promise PDF; internal dev parsing may support text PDF samples, but that is not public support.
-- Server preflight confirms Node/npm are available, `/tmp/framespark-site/diagnosis-api` exists, `8787` is analytics-api, and `8788` is free. `framespark-diagnosis.service` and `/home/ubuntu/framespark-diagnosis.env` do not exist yet.
-- Diagnosis deployment script drafts now exist under `diagnosis-api/scripts/`; they are not executed and do not reopen public uploads.
+- Historical server preflight confirmed Node/npm availability, `/tmp/framespark-site/diagnosis-api`, analytics on `8787`, and free `8788`; those notes predate the current immutable-release Diagnosis service.
+- Historical diagnosis deployment script drafts existed under `diagnosis-api/scripts/`; they predate the current production release/current deployment flow.
 
 ## Public Site — Current Homepage Structure (2026-05-30)
 
@@ -356,6 +363,14 @@ Run `git status` before starting work. Do not assume GitHub reflects the current
 - Do not mix public site visual changes with diagnosis API changes.
 - Do not push unless explicitly asked.
 - Prefer updating `js/site-data.js` for public-site content changes before editing HTML structure.
+- Do not loosen public beta session, token, daily-count, provider-call, provider-token-budget, logging, or route-exactness boundaries without a separate plan.
+
+## Archived Pre-Beta Deployment Notes
+
+The sections below preserve June 2026 deployment history. They describe earlier
+invitation-Beta, Basic Auth, inactive-service and static-404 stages. They are
+not the current production state. Use the top repository snapshot for current
+public beta behavior.
 
 ## Diagnosis MVP Productionization Baseline (2026-06-10)
 

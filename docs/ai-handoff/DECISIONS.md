@@ -1,7 +1,7 @@
 # Decision Log
 
-Last updated: 2026-06-03
-Updated by: ChatGPT via GitHub connector
+Last updated: 2026-07-07
+Updated by: Codex
 
 This file records important product and engineering decisions so future AI coding agents do not re-litigate settled choices without a reason.
 
@@ -104,16 +104,16 @@ The user switches between multiple AI tools and model subscriptions. Repository-
 Impact:
 Future agents should keep `PROJECT_STATE.md`, `NEXT_TASKS.md`, and `CHANGELOG_AI.md` current. Architecture or decision changes should update `ARCHITECTURE.md` and `DECISIONS.md`.
 
-## 2026-06-02 — Do not reopen public diagnosis before backend proxy is live
+## 2026-06-02 — Superseded: do not reopen public diagnosis before backend proxy is live
 
 Decision:
-Keep the public diagnosis page in internal-test / upload-disabled state until `diagnosis-api` is separately deployed and `/api/diagnosis` is verified through Nginx.
+Historical decision: keep the public diagnosis page in internal-test / upload-disabled state until `diagnosis-api` is separately deployed and `/api/diagnosis` is verified through Nginx.
 
 Reason:
-Production currently confirms only `/api/analytics/` reverse proxy. `/api/diagnosis` falls through to static 404 HTML behavior and is not a live JSON API.
+At the time, production confirmed only `/api/analytics/` reverse proxy. `/api/diagnosis` fell through to static 404 HTML behavior and was not a live JSON API.
 
 Impact:
-Do not restore public upload controls or imply live diagnosis availability before backend deployment and proxy verification.
+Superseded by the 2026-06-26 public beta launch decision. Current production has protected public beta, not static 404. Future changes must preserve session authentication, route exactness, file-size/token/daily/provider-call/provider-token-budget limits, and must not restore unprotected public upload.
 
 ## 2026-06-02 — Use port 8788 for production diagnosis-api
 
@@ -137,16 +137,16 @@ The public parser supports TXT/DOCX/paste. Internal dev tooling may parse text P
 Impact:
 PDF support is a separate future task requiring parser migration, tests, and error copy. Scanned PDF / OCR is out of current scope.
 
-## 2026-06-02 — Keep unfinished public product areas closed
+## 2026-06-02 — Superseded: keep unfinished public product areas closed
 
 Decision:
-Treat the public site as a brand display and internal-test preview site for now. Diagnosis, talent, and development project areas must not read as open product flows.
+Historical decision: treat the public site as a brand display and internal-test preview site. Diagnosis, talent, and development project areas must not read as open product flows.
 
 Reason:
 The diagnosis backend is not yet proxied in production, the talent platform is not open, and development project files are not public collaboration or recruitment pages.
 
 Impact:
-Diagnosis stays upload-disabled, talent copy stays not-open, and development project detail pages stay accessible but `noindex` and out of sitemap until public indexing is intentional.
+Superseded for Diagnosis by the protected public beta. Talent copy and unfinished project-detail areas still must not read as open recruiting, matching, or collaboration product flows.
 
 ## 2026-06-03 — Make V1 diagnosis staged before it becomes the mainline
 
@@ -170,16 +170,16 @@ The current visual system has been checked on production and is sufficient for l
 Impact:
 Only P0/P1 static-site fixes should be made before launch.
 
-## 2026-06-04 — Keep unfinished product systems closed for launch
+## 2026-06-04 — Superseded: keep unfinished product systems closed for launch
 
 Decision:
-Do not open public diagnosis upload, user registration/login, talent-platform functions, project-library functions, or `/api/diagnosis` production access before the June 8 launch.
+Historical launch-window decision: do not open public diagnosis upload, user registration/login, talent-platform functions, project-library functions, or `/api/diagnosis` production access before the June 8 launch.
 
 Reason:
 The public site is currently a brand display plus internal-test preview site. Diagnosis V1 smoke tests are encouraging, but they do not mean the public product flow is ready.
 
 Impact:
-The diagnosis page stays as an internal-test notice. `/api/diagnosis` remains undeployed/unproxied. User-system and talent-platform work resume only after launch as separate tasks.
+Superseded for Diagnosis by the later protected public beta. User-system and talent-platform work remain separate tasks and are not implied by the public beta.
 
 ## 2026-06-09 — Do not open V1 MVP before D0/basic boundary fixes
 
@@ -203,16 +203,16 @@ FrameSpark tasks repeatedly require the same boundaries: risk classification, st
 Impact:
 Future tasks can specify only the concrete target, allowed files, forbidden files, and checks. Agents should follow `AGENTS.md` first, then the relevant handoff files and task-specific instructions.
 
-## 2026-06-10 — Use a separate invitation-only diagnosis Beta
+## 2026-06-10 — Superseded: use a separate invitation-only diagnosis Beta
 
 Decision:
-Keep the public `/diagnosis/` page as a preview. Any first MVP trial must use an unlinked `/diagnosis/beta/` path protected by Nginx Basic Auth and API-side trusted identity/origin checks.
+Historical decision: keep the public `/diagnosis/` page as a preview. The first MVP trial used an unlinked `/diagnosis/beta/` path protected by Nginx Basic Auth and API-side trusted identity/origin checks.
 
 Reason:
-The diagnosis engine has passed staged quality observation, but production access control, privacy review, quotas, logging, deployment, and rollback still require controlled verification.
+At the time, production access control, privacy review, quotas, logging, deployment, and rollback still required controlled verification before any public entry.
 
 Impact:
-Do not restore public upload controls or expose `/api/diagnosis/` without the protected deployment gate and a separate release decision.
+Superseded by the public beta anonymous-session launch. Basic Auth may remain as rollback/admin history, but the ordinary public beta entry is now homepage public-session Cookie flow into `/diagnosis/beta/`. Do not expose `/api/diagnosis/` without the current protected session gate and cost controls.
 
 ## 2026-06-10 — Fail closed and minimize diagnosis data
 
@@ -263,6 +263,8 @@ before those signals exist.
 
 Impact:
 The first public beta launch uses low hard caps: account/session 1, IP 3,
-global diagnoses 5, provider daily 30, concurrency 1 and provider calls per
-diagnosis 5. Invite-code tooling remains available for rollback or future
-closed cohorts. B4 T0 and real-AI smoke still require separate authorization.
+global diagnoses 5, provider daily 30, concurrency 1, provider calls per
+diagnosis 5, `MAX_INPUT_TOKENS=50000`, and
+`PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT=5000000`. Invite-code tooling remains
+available for rollback or future closed cohorts. B4 T0 and any additional
+real-AI smoke still require separate authorization.

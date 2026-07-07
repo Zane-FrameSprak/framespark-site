@@ -1,7 +1,7 @@
 # Architecture Map
 
-Last updated: 2026-06-03
-Updated by: ChatGPT via GitHub connector
+Last updated: 2026-07-07
+Updated by: Codex
 
 This file is the engineering map for AI coding agents. Keep it factual and concise.
 
@@ -86,11 +86,13 @@ It posts to `/api/analytics/event` by default. Privacy copy should stay aligned 
 
 ## Diagnosis API Architecture
 
-### Optional Beta access-code layer
+### Beta Access and Public Session Layer
 
-The disabled Phase 1 layer adds SQLite-backed hashed invitation codes and scoped page/API sessions. Verification is a separate `POST /api/beta-access/verify` route; loopback-only `/internal/beta-session/validate` is reserved for a future Nginx `auth_request` flow. Existing Basic Auth identity injection remains authoritative until a later migration.
+The current ordinary public Beta entry is anonymous-session based, not Basic Auth and not the invite-code form. The homepage public beta button calls `POST /api/beta-access/public-session`, which signs scoped 24-hour page/API cookies. `/diagnosis/beta/` and `POST /api/diagnosis/` are protected by backend Cookie/session validation behind exact Nginx routes.
 
-SQLite lives under the external Diagnosis data directory and stores no plaintext codes, cookies, materials or reports. A stable code UUID becomes the future account-limit identity; disable/revoke changes `session_version` so active sessions fail validation immediately.
+The SQLite-backed invite-code foundation remains in the codebase for rollback or future closed cohorts. It stores hashed codes and scoped sessions under the external Diagnosis data directory, with no plaintext codes, cookies, materials or full reports. It is not the current ordinary public entry.
+
+Public beta introduces no registration, login page, personal profile, user center, or diagnosis history. Identity is a short-lived anonymous session; logs may record only non-reversible operational identifiers and must not store full IP, User-Agent, cookies, submitted material, or full reports.
 
 The diagnosis backend lives under `diagnosis-api/`.
 
@@ -321,10 +323,12 @@ protected Beta request
 - Production V1 errors are fail-closed. Unsafe final output and staged-runner failures return controlled errors instead of a legacy fallback report.
 - `diagnosisLogger.js` writes metadata under `/var/lib/framespark-diagnosis/diagnosis/metadata`; optional review-consent records use a separate 14-day directory. Default logs do not store the source filename, full material, or full report.
 - `providerUsageStore.js` persists the global provider-call daily cap. Initial account/IP/request limits are process-local and are suitable only for the planned single-instance invitation Beta; multi-instance deployment requires a shared limiter.
-- Beta assets live under `diagnosis-api/beta-site/`, outside public static deployment. Current production protects the Beta page and exact Diagnosis API with Nginx Basic Auth. Nginx forwards the authenticated username; the API rejects missing production identity and disallowed origins. Feedback remains unopened.
+- Beta assets live under `diagnosis-api/beta-site/`, outside the public static deployment. Current production protects the Beta page and exact Diagnosis API with backend Cookie/session validation behind Nginx exact routes. Nginx must clear trusted client identity headers before proxying; the API rejects missing/invalid session identity, disallowed origins, and exhausted limits. Feedback remains unopened.
 - The production runtime target is `/srv/framespark/diagnosis-api/releases/<commit>` with a `current` symlink, a dedicated service user, env under `/etc/framespark`, data under `/var/lib`, and `127.0.0.1:8788`.
 
 ### Access-code client boundary (2026-06-15)
+
+This is a repository-side fallback/closed-cohort capability, not the current ordinary public Beta entry.
 
 ```text
 homepage code form
@@ -334,8 +338,8 @@ homepage code form
 ```
 
 - The homepage client treats the access code as transient input and never reads the issued cookies.
-- Phase 4C validated the backend verify/session routes on loopback only. The public Nginx layer still does not expose functional invite-code routes.
-- The future Phase 4D proxy layer must validate the appropriate scoped cookie through the loopback internal validator and overwrite the trusted Beta identity header before forwarding to Diagnosis.
+- Phase 4C validated the backend verify/session routes on loopback only. Current production does not expose the invite-code verification route as the ordinary public entry.
+- If invite-code cohorts are reintroduced, the proxy layer must validate the appropriate scoped cookie and overwrite the trusted Beta identity header before forwarding to Diagnosis.
 - The Beta client only treats `BETA_ACCESS_REQUIRED` as session expiry; other public Diagnosis errors retain their existing UI behavior.
 
 ### Public beta anonymous-session boundary (2026-06-26)
@@ -352,6 +356,7 @@ homepage public beta button
 - Invite-code verification remains in the codebase for rollback or future controlled cohorts.
 - Public beta identities are anonymous HMAC-derived session identities; full IP, User-Agent, cookies, submitted material, and full reports must not be logged.
 - Public beta production readiness rejects limits above account/session `1`, IP `3`, global diagnoses `5`, provider daily `30`, concurrency `2`, and provider calls per diagnosis `5`; the intended first launch uses concurrency `1`.
+- Production also enforces `MAX_INPUT_TOKENS=50000` and `PROVIDER_GLOBAL_DAILY_TOKEN_LIMIT=5000000` before provider calls.
 
 ## Deployment Notes
 
@@ -359,7 +364,7 @@ homepage public beta button
 - Historical project notes indicate the formal public site may be served from Tencent Cloud / Nginx.
 - GitHub Pages does not deploy `diagnosis-api`.
 - Production backend deployment and static-site sync need separate planning.
-- Production currently has the protected Diagnosis Beta backend on loopback behind Basic Auth routes. The invite-code public flow is not wired yet.
+- Production has the Diagnosis API on loopback behind exact Nginx routes and backend Cookie/session validation. Public beta uses anonymous public-session cookies; invite-code tooling remains for rollback or future closed cohorts.
 - Diagnosis API deployment plan uses `127.0.0.1:8788` because analytics-api already uses `127.0.0.1:8787`.
 
 ## High-Risk Change Areas

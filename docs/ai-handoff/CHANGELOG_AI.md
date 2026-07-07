@@ -4,6 +4,15 @@
 
 ## Recent Summary
 
+- 2026-07-07 (Codex): Synced project agent rules and AI handoff docs with the
+  current low-quota public beta state. `AGENTS.md` and the handoff context,
+  architecture, decisions, state and next-task docs now describe the homepage
+  public-session Cookie flow, protected `/diagnosis/beta/`, live
+  `POST /api/diagnosis/`, token/daily/provider budget boundaries, and the fact
+  that older Basic Auth / static-404 / inactive-service notes are historical.
+  No code, production deploy, server change, Diagnosis POST, DeepSeek/AI call,
+  limit change, or B4 action occurred.
+
 - 2026-07-05 (Codex): Repaired the internal admin-console trend summary
   refresh path. Production root cron now runs Nginx traffic and anonymous
   analytics summary generation from stable `/opt/framespark-summary-tools`
