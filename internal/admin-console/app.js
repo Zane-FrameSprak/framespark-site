@@ -21,7 +21,7 @@
     v1EvalError: ''
   };
 
-  var DEV_SAMPLE_RUNS_API = 'http://127.0.0.1:8787/api/dev/sample-runs';
+  var DEV_SAMPLE_RUNS_API = '/api/console/dev-sample-runs';
 
   var trafficSeriesLabels = {
     allRequests: '全部请求',
@@ -164,6 +164,7 @@
     safeRender(renderLegend);
     safeRender(renderAnalytics);
     safeRender(drawChart);
+    safeRender(renderTrendQuality);
     safeRender(renderTrafficSummary);
     safeRender(renderTrendModeText);
     safeRender(renderTrafficSource);
@@ -710,6 +711,7 @@
           renderLegend();
           renderTrendModeText();
           drawChart();
+          renderTrendQuality();
           renderTrafficSource();
         });
       });
@@ -731,6 +733,7 @@
           updateSegmentedControl(periodControl, 'data-period', state.trafficPeriod);
           renderTrendModeText();
           drawChart();
+          renderTrendQuality();
           renderTrafficSummary();
           renderTrafficSource();
         });
@@ -742,6 +745,7 @@
         await loadTrafficSummary();
         renderLegend();
         drawChart();
+        renderTrendQuality();
         renderTrafficSummary();
         renderTrendModeText();
         renderTrafficSource();
@@ -755,6 +759,7 @@
         renderAnalytics();
         renderLegend();
         drawChart();
+        renderTrendQuality();
         renderTrendModeText();
         renderTrafficSource();
         refreshAnalyticsButton.disabled = false;
@@ -1049,8 +1054,49 @@
       : [
         trafficSource,
         'SSH 只读读取'
-      ].filter(Boolean).join('。');
+    ].filter(Boolean).join('。');
     setText('trafficSource', text);
+  }
+
+  function renderTrendQuality() {
+    var root = document.getElementById('trendQuality');
+    if (!root) return;
+    var isAnalytics = state.trendMode === 'analytics';
+    var report = isAnalytics ? getAnalyticsReportForPeriod(state.trafficPeriod) : getReportForPeriod(state.trafficPeriod);
+    var status = isAnalytics ? getAnalyticsTrendStatusText(state.trafficPeriod) : getTrafficPeriodStatusText(state.trafficPeriod);
+    var stale = isReportStale(report);
+    var cards = [
+      {
+        label: '当前口径',
+        value: isAnalytics ? '匿名用户行为' : '服务器访问日志',
+        note: isAnalytics ? '来自浏览器事件和匿名 visitorId。' : '来自 Nginx 请求摘要。'
+      },
+      {
+        label: '最后生成',
+        value: report && report.generatedAt ? formatDateTime(report.generatedAt) : '—',
+        note: stale ? '数据过期，请检查 cron。' : '用于判断这张图是否新鲜。'
+      },
+      {
+        label: '怎么解读',
+        value: isAnalytics ? '不是自然人数' : '不是用户人数',
+        note: isAnalytics ? '可看点击和访问趋势，不能当精确人数。' : '可看请求、错误和扫描，不能当精确访客。'
+      },
+      {
+        label: '当前状态',
+        value: stale ? '数据过期' : status.replace(/。$/, ''),
+        note: '绿色或蓝色代表可看趋势；黄色代表只作历史参考。'
+      }
+    ];
+
+    root.innerHTML = cards.map(function (card) {
+      return [
+        '<article class="data-quality-card' + (stale && card.label === '当前状态' ? ' is-stale' : '') + '">',
+        '<span>' + escapeHtml(card.label) + '</span>',
+        '<strong>' + escapeHtml(card.value) + '</strong>',
+        '<small>' + escapeHtml(card.note) + '</small>',
+        '</article>'
+      ].join('');
+    }).join('');
   }
 
   function getTrafficBadgeState() {

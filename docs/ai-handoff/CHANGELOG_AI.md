@@ -10,9 +10,13 @@
   instead of reboot-volatile `/tmp/framespark-site`; refreshed summary JSON now
   ends on 2026-07-05 for today, last 7 days and last 30 days. The console UI now
   marks summary files older than 2 hours as `数据过期` and does not draw stale
-  trend curves as current data. Updated summary scripts, cron installers and
-  docs so future installs do not reintroduce the `/tmp` dependency. No Nginx
-  reload, Diagnosis service restart, production POST, DeepSeek/AI call,
+  trend curves as current data; it also shows the active data source, generated
+  time and caveat that trend metrics are not exact people counts. The V1 eval
+  widget now reads optional dev sample runs through the same-origin local
+  console proxy, so an inactive `127.0.0.1:8787` dev API does not create a
+  browser console connection error. Updated summary scripts, cron installers
+  and docs so future installs do not reintroduce the `/tmp` dependency. No
+  Nginx reload, Diagnosis service restart, production POST, DeepSeek/AI call,
   analytics service repair, or B4 action occurred.
 
 - 2026-07-05 (Codex): Refreshed the local-only internal admin console from the

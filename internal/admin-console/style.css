@@ -560,6 +560,46 @@ button .shortcut-note {
   display: none;
 }
 
+.data-quality-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.data-quality-card {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.data-quality-card span,
+.data-quality-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.data-quality-card strong {
+  display: block;
+  margin: 3px 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.data-quality-card.is-stale {
+  border-color: rgba(217, 119, 6, 0.28);
+  background: #fffbeb;
+}
+
+.data-quality-card.is-stale strong {
+  color: #92400e;
+}
+
 .analytics-panel {
   margin-bottom: 12px;
 }
@@ -1184,6 +1224,10 @@ canvas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .data-quality-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .traffic-summary__table {
     overflow-x: auto;
   }
@@ -1223,6 +1267,7 @@ canvas {
   .analytics-cards,
   .ops-summary,
   .ops-flow,
+  .data-quality-grid,
   .v1-eval-cards,
   .v1-latest-run__card dl {
     grid-template-columns: 1fr;

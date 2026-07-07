@@ -166,6 +166,9 @@ someTarget: {
 服务器端手动运行和安装 cron 均应使用 `sudo`，因为 Nginx 日志通常归 `www` 用户 / 用户组管理，普通 `ubuntu` 用户没有读取权限；不要通过修改日志权限解决。
 服务器上的 cron 不得依赖 `/tmp/framespark-site`。2026-07-05 已将摘要工具收敛到稳定目录 `/opt/framespark-summary-tools`；`/tmp` 会在重启后丢失，曾导致近 7 日 / 近 30 日趋势停留在 2026-06-16。
 控制台会根据 summary JSON 的 `generatedAt` 判断新鲜度。摘要超过 2 小时未刷新时，页面显示“数据过期”，不再把旧数据当作正常趋势。
+访问趋势图下方有“当前图表口径”提示，分别说明当前数据来自匿名浏览器事件还是 Nginx 请求摘要、最后生成时间，以及这些数字不能直接当作自然人数 / 精确用户人数。
+
+V1 评测摘要如果需要读取 dev sample runs，页面只访问本地控制台同源接口 `/api/console/dev-sample-runs`。由 `scripts/start-internal-console.js` 在本机尝试连接 `127.0.0.1:8787`；开发 API 未启动时显示“未连接”，避免浏览器直接产生跨端口连接错误。
 
 控制台读取的固定文件为：
 

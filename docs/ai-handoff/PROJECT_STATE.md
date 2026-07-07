@@ -68,7 +68,12 @@ server path `/opt/framespark-summary-tools` instead of the reboot-volatile
 `/tmp/framespark-site`; refreshed summary JSON ranges end on 2026-07-05 for
 today, last 7 days and last 30 days. The console now treats summary JSON older
 than 2 hours as stale and shows `数据过期` instead of silently presenting old
-trend data as current.
+trend data as current. The trend panel also shows the active data source,
+generated time, and a plain-language caveat that anonymous visitor metrics and
+Nginx request metrics are useful for trends but are not precise natural-person
+counts. The V1 evaluation panel now reads optional dev sample runs through the
+same-origin local console proxy, so an inactive `127.0.0.1:8787` dev API no
+longer appears as a browser console connection error.
 
 The first Phase 4D Nginx `auth_request` migration failed because production
 Nginx does not support the directive. The deployed solution uses exact Nginx

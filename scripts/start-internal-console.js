@@ -14,6 +14,7 @@ const serverHost = '127.0.0.1';
 const consolePath = '/internal/admin-console/';
 const evalConsolePath = '/internal/diagnosis-eval/';
 const consoleUrl = `http://${serverHost}:${serverPort}${consolePath}`;
+const devSampleRunsBaseUrl = 'http://127.0.0.1:8787/api/dev/sample-runs';
 
 const localPaths = {
   projectRoot: REPO_ROOT,
@@ -298,6 +299,12 @@ server.listen(serverPort, serverHost, () => {
 async function handleRequest(req, res) {
   const url = new URL(req.url, consoleUrl);
 
+  if (req.method === 'GET' && url.pathname === '/favicon.ico') {
+    res.writeHead(204, { 'Cache-Control': 'no-store' });
+    res.end();
+    return;
+  }
+
   if (req.method === 'GET' && url.pathname === '/api/console/config') {
     sendJson(res, 200, {
       ok: true,
@@ -323,6 +330,27 @@ async function handleRequest(req, res) {
   if (req.method === 'GET' && url.pathname === '/api/console/analytics-summary') {
     const result = await readServerAnalyticsReports();
     sendJson(res, result.ok ? 200 : 502, result);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/console/dev-sample-runs') {
+    const result = await proxyDevSampleRuns('');
+    sendJson(res, 200, result.ok ? result.payload : result);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname.startsWith('/api/console/dev-sample-runs/')) {
+    const runId = decodeURIComponent(url.pathname.slice('/api/console/dev-sample-runs/'.length));
+    if (!/^[A-Za-z0-9._:-]{1,160}$/.test(runId)) {
+      sendJson(res, 400, {
+        ok: false,
+        error: 'INVALID_RUN_ID',
+        message: 'runId 不在允许格式内。'
+      });
+      return;
+    }
+    const result = await proxyDevSampleRuns(`/${encodeURIComponent(runId)}`);
+    sendJson(res, 200, result.ok ? result.payload : result);
     return;
   }
 
@@ -546,6 +574,43 @@ async function countPdfQualityIssues() {
     }
   }
   return { warning, failed };
+}
+
+async function proxyDevSampleRuns(suffix) {
+  if (typeof fetch !== 'function') {
+    return {
+      ok: false,
+      error: 'DEV_SAMPLE_RUNS_UNAVAILABLE',
+      message: '当前 Node.js 不支持 fetch，无法读取 dev sample runs。'
+    };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
+  try {
+    const response = await fetch(`${devSampleRunsBaseUrl}${suffix}`, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: { Accept: 'application/json' }
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || !payload) {
+      return {
+        ok: false,
+        error: 'DEV_SAMPLE_RUNS_UNAVAILABLE',
+        message: 'dev sample runs 未连接或暂无可读接口。'
+      };
+    }
+    return { ok: true, payload };
+  } catch (_) {
+    return {
+      ok: false,
+      error: 'DEV_SAMPLE_RUNS_UNAVAILABLE',
+      message: 'dev sample runs 未连接或暂无可读接口。'
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function readTrafficSummary() {
