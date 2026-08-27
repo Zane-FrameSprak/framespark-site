@@ -1,0 +1,15 @@
+[Unit]
+Description=FrameSpark HTTPS certificate renewal and validation
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+ExecStart=/usr/local/sbin/framespark-cert-renew
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=multi-user.target

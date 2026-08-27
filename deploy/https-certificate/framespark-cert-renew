@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+CERT_PATH=/www/server/panel/vhost/cert/framespark.cn/fullchain.pem
+PANEL_PYTHON=/www/server/panel/pyenv/bin/python3
+PANEL_ACME=/www/server/panel/class/acme_v2.py
+NGINX_BIN=/www/server/nginx/sbin/nginx
+RENEW_WINDOW_DAYS=30
+LOCK_PATH=/run/lock/framespark-cert-renew.lock
+
+log_failure() {
+  logger -p daemon.err -t framespark-cert-renew \
+    "automatic certificate renewal or validation failed"
+}
+trap log_failure ERR
+
+exec 9>"$LOCK_PATH"
+flock -n 9 || exit 0
+
+test -f "$CERT_PATH"
+
+before_fingerprint="$($NGINX_BIN -t >/dev/null 2>&1 && \
+  openssl x509 -in "$CERT_PATH" -noout -fingerprint -sha256)"
+
+certificate_hash="$($PANEL_PYTHON - <<'PY'
+import sys
+
+sys.path.insert(0, "/www/server/panel/class")
+from ssl_manage import SSLManger
+
+print(SSLManger.ssl_hash(
+    cert_filename="/www/server/panel/vhost/cert/framespark.cn/fullchain.pem"
+))
+PY
+)"
+
+test -n "$certificate_hash"
+
+"$PANEL_PYTHON" -u "$PANEL_ACME" \
+  --renew_v2=1 \
+  --index="$certificate_hash" \
+  --cycle="$RENEW_WINDOW_DAYS"
+
+after_fingerprint="$(openssl x509 -in "$CERT_PATH" -noout -fingerprint -sha256)"
+
+"$NGINX_BIN" -t
+if [[ "$before_fingerprint" != "$after_fingerprint" ]]; then
+  systemctl reload nginx.service
+fi
+
+openssl x509 \
+  -in "$CERT_PATH" \
+  -checkend "$((RENEW_WINDOW_DAYS * 86400))" \
+  -noout
+
+live_fingerprint="$(
+  timeout 10 openssl s_client \
+    -connect 127.0.0.1:443 \
+    -servername framespark.cn </dev/null 2>/dev/null |
+    openssl x509 -noout -fingerprint -sha256
+)"
+
+test "$after_fingerprint" = "$live_fingerprint"
+curl --fail --silent --show-error --max-time 15 \
+  https://framespark.cn/ >/dev/null
+
+# BT Panel leaves completed HTTP-01 challenge files behind. Keep the current
+# hour untouched so an overlapping validation can never lose its token.
+find /www/wwwroot/framespark.cn/.well-known/acme-challenge \
+  -maxdepth 1 -type f -mmin +60 -delete
+
+expires="$(openssl x509 -in "$CERT_PATH" -noout -enddate | cut -d= -f2-)"
+logger -t framespark-cert-renew \
+  "automatic certificate check passed; expires=$expires"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily FrameSpark HTTPS certificate renewal check
+
+[Timer]
+OnCalendar=*-*-* 04:17:00
+RandomizedDelaySec=30min
+Persistent=true
+Unit=framespark-cert-renew.service
+
+[Install]
+WantedBy=timers.target
