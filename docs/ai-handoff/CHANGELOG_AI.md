@@ -4,6 +4,10 @@
 
 ## Recent Summary
 
+- 2026-09-05 (CodeBuddy): Fixed the site-wide soft-404 and deployed all pending public-site fixes to Tencent Cloud production. Nginx `framespark.cn.conf` `location /` changed from `try_files $uri $uri/ /404.html;` to `try_files $uri $uri/ =404;` plus a new `error_page 404 /404.html;`, so missing paths now return a real 404 instead of HTTP 200 with the not-found page. Config was backed up before the edit, validated with `nginx -t`, and applied with `nginx -s reload` (no restart). Added a data-freshness annotation step to the analytics summary pipeline so an interrupted pipeline is flagged (`_dataFreshness.healthy=false`) instead of silently reporting zeros. Deployed the new `projects/interview.html` plus 12 updated files via minimal rsync after a webroot tarball backup and a clean dry-run; `.user.ini` was preserved and `www:www` ownership restored. Verified after deploy: home/diagnosis/talent/project pages 200, missing paths 404, `/diagnosis/beta/` still 302 without a cookie, `/api/diagnosis/` still 401 unauthenticated, and `.git/ docs/ internal/ diagnosis-api/ analytics-api/ scripts/ test-results/` all 404. No diagnosis-api, backend, budget, or public-access boundary change.
+
+- 2026-09-04 (CodeBuddy): Created the 《面试》 project page at `projects/interview.html` (noindex, canonical, empty 3:4 poster slot, credits for 7 core crew) and applied local public-site fixes: removed the three empty project entries (《心鸡石》/《红领带》/《七大圣》) from `js/site-data.js`, corrected the 《面试》 card status from `拍摄筹备中` to `后期制作中` and its type from `现实荒诞短片` to `短片`, updated the footer copyright year from 2025 to 2026 across 11 HTML files, changed homepage positioning from `垂直整合型影视公司` to `剧本诊断与短片开发` in `<title>` and `og:title`, and added `.playwright-cli/` to `.gitignore`. No server, backend, deploy, or AI change in this step.
+
 - 2026-07-07 (Codex): Synced project agent rules and AI handoff docs with the
   current low-quota public beta state. `AGENTS.md` and the handoff context,
   architecture, decisions, state and next-task docs now describe the homepage

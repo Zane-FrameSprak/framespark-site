@@ -1,9 +1,42 @@
 # Project State
 
-Last updated: 2026-07-07
-Updated by: Codex
+Last updated: 2026-09-05
+Updated by: CodeBuddy
 Current branch: main
 Repository: `Zane-FrameSprak/framespark-site`
+
+## 2026-09-05 Snapshot — soft-404 fixed, 《面试》 page live
+
+The site-wide soft-404 is fixed. `/www/server/panel/vhost/nginx/framespark.cn.conf`
+`location /` now uses `try_files $uri $uri/ =404;` with a separate
+`error_page 404 /404.html;`, so missing paths return a real HTTP 404 with the
+branded not-found page instead of HTTP 200. Before this, every non-existent URL
+returned 200, which meant search engines indexed unlimited empty shells and the
+four missing project pages looked like intentional empty pages. Backup of the
+pre-change config is at
+`/www/server/panel/vhost/nginx/framespark.cn.conf.bak-20260905-143153`. Nginx
+was reloaded, not restarted.
+
+《面试》 now has a live project page at `/projects/interview.html`. It is the only
+FrameSpark title that has finished shooting, so it is the primary credibility
+asset on the public site. The page carries the logline, type `短片 / 剧情`,
+runtime `15-18min`, release `2028 · 流媒体`, technical specs, and credits for
+seven core crew. It is `noindex` and stays out of `sitemap.xml`, consistent with
+the rule that in-development project detail pages are not indexed. The 3:4 poster
+slot is intentionally left as the empty frame pending artwork.
+
+Homepage project cards were reduced from eight to five. 《心鸡石》, 《红领带》 and
+《七大圣》 were removed because their detail pages never existed; keeping the
+cards meant users hit not-found pages. 《红领带》 had status `制作中`, so it is an
+active project — if a page is written for it later, the card can return.
+
+The analytics API remains down and its code is not present on the server. The
+summary cron that reads `/home/ubuntu/framespark-analytics/*.jsonl` now annotates
+every output file with a `_dataFreshness` block (`healthy`, `lastDataAt`,
+`staleHours`, `note`). As of 2026-09-05 it reports `healthy=false` with
+`lastDataAt` 2026-06-15, meaning the visitor-event numbers shown anywhere are
+stale and must not be used for decisions. The separate Nginx access-log traffic
+summary cron is healthy and its numbers are real.
 
 ## Current Repository Snapshot
 

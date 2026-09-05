@@ -1,10 +1,17 @@
 # Next Tasks
 
-Last updated: 2026-07-07
-Updated by: Codex
+Last updated: 2026-09-05
+Updated by: CodeBuddy
 
 ## Now
 
+- Soft-404 is fixed in production. Nginx `location /` now uses `try_files $uri $uri/ =404;` with a separate `error_page 404 /404.html;`. Do not revert to `try_files $uri $uri/ /404.html;` — that form returns HTTP 200 for missing paths and lets search engines index unlimited empty shells. Do not write `error_page 404 = /404.html;` either; the `=` also forces a 200 and recreates the same bug.
+- 《面试》 is live at `/projects/interview.html` and is currently the only finished-shoot title on the site, so it is the primary credibility asset. If the release plan changes, update the `上映` field — a stale year is worse than no year.
+- Three project cards (《心鸡石》 / 《红领带》 / 《七大圣》) were removed from `js/site-data.js` because their detail pages never existed. Do not re-add a card without shipping its page first. 《红领带》 had status `制作中`, so it is still an active project and can return once it has a page.
+- Analytics API remains down and its code is not present anywhere on the server. Every analytics summary file now carries a `_dataFreshness` block (`healthy`, `lastDataAt`, `staleHours`, `note`). Read `healthy=false` as "these numbers are meaningless", never as "zero visitors". Rebuilding the analytics service is a separate task needing its own plan — it is a full backend deployment, not a config edit.
+- Deploy flow note: macOS ships rsync 2.6.9, which does not support `--chown`. Deploy with `rsync -av --rsync-path="sudo rsync" ...` from the repo root, then fix ownership on the server with `find /www/wwwroot/framespark.cn/ ! -name '.user.ini' -exec chown www:www {} +`. Always back up the webroot, always dry-run first, never use `--delete-excluded`.
+- Homepage positioning is now `剧本诊断与短片开发` in both `<title>` and `og:title`; the earlier `垂直整合型影视公司` wording was retired as oversized for the current scope.
+- Footer copyright year is `© 2026` across all 11 public HTML files.
 - Diagnosis public beta is live. Production Diagnosis API `current` is `0104cfe1d3bb31f57000453618c5a03163730c1b`; `previous` is `535640213756e07a4c144f1ea4eb9df98b2e305b`. Homepage public beta UI is deployed, `/diagnosis/beta/` without a valid Cookie redirects to `/#diagnosis-beta-entry`, and exact Beta static/API routes are protected by backend Cookie session validation. `ENABLE_PUBLIC_BETA_ACCESS=true`, `ENABLE_BETA_CODE_ACCESS=false`; service is `active/running/enabled`, `NRestarts=0`, ready/health OK, and `8788` remains loopback-only.
 - Homepage Diagnosis entry is intentionally a single public-beta entry now: do not re-add a separate `点击进入` button next to `进入公测` unless the product flow is redesigned.
 - Production Diagnosis input admission now uses `tiktoken` with `cl100k_base` and `MAX_INPUT_TOKENS=50000` instead of the old character-count cap. The 2026-06-30 P0 rollout verified over-token requests return `TEXT_TOO_LONG` before daily-counter consumption or provider calls.
