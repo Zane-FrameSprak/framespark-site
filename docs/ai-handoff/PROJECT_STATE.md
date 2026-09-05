@@ -38,6 +38,24 @@ every output file with a `_dataFreshness` block (`healthy`, `lastDataAt`,
 stale and must not be used for decisions. The separate Nginx access-log traffic
 summary cron is healthy and its numbers are real.
 
+Later the same day three credibility gaps were closed. The homepage now opens with
+a `.home-intro` block stating what FrameSpark does and that 《面试》 has finished
+shooting, so a first-time visitor can understand the company without scrolling.
+It reuses existing styling and introduces no new layout system.
+
+The Diagnosis intro page, which previously did nothing but redirect visitors to
+the homepage beta entry, now carries a "它做什么" panel covering scope, the
+material-maturity check, and accepted input types, alongside a rewritten lead and
+a product-focused meta description.
+
+The Cormorant Garamond latin subset is now self-hosted at
+`assets/fonts/cormorant-garamond-latin.woff2`. Google serves a single variable
+file for both weight 400 and 500, so one `@font-face` declared as
+`font-weight: 400 500` covers both. All 12 public HTML files had their Google
+Fonts `preconnect` and `stylesheet` links removed, eliminating a render-blocking
+request to a host that is unreliable from mainland China. Do not reintroduce a
+remote font host without a specific reason.
+
 ## Current Repository Snapshot
 
 The GitHub repository exists at `Zane-FrameSprak/framespark-site` and uses `main` as the default branch.

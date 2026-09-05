@@ -5,6 +5,10 @@ Updated by: CodeBuddy
 
 ## Now
 
+- The web font is self-hosted. `assets/fonts/cormorant-garamond-latin.woff2` is a single variable file covering weights 400-500, declared once as `font-weight: 400 500`. Do not re-add Google Fonts `preconnect` or `stylesheet` links; that reintroduces a render-blocking request to a host unreliable from mainland China.
+- The homepage leads with a `.home-intro` block stating what FrameSpark does and naming 《面试》 as the finished-shoot title. Keep it factual. If 《面试》 finishes post-production or the release plan changes, update the homepage block and the project page together — they must never disagree.
+- The Diagnosis intro page now has a "它做什么" panel. Do not let it drift back into only redirecting to the homepage beta entry; it is the only public explanation of what the product does.
+- Bulk find-and-replace across HTML must use an explicit file list, never a recursive `**/*.html` glob. The recursive form reaches into `diagnosis-api/` and other forbidden directories; this happened once on 2026-09-05 and the file was reverted.
 - Soft-404 is fixed in production. Nginx `location /` now uses `try_files $uri $uri/ =404;` with a separate `error_page 404 /404.html;`. Do not revert to `try_files $uri $uri/ /404.html;` — that form returns HTTP 200 for missing paths and lets search engines index unlimited empty shells. Do not write `error_page 404 = /404.html;` either; the `=` also forces a 200 and recreates the same bug.
 - 《面试》 is live at `/projects/interview.html` and is currently the only finished-shoot title on the site, so it is the primary credibility asset. If the release plan changes, update the `上映` field — a stale year is worse than no year.
 - Three project cards (《心鸡石》 / 《红领带》 / 《七大圣》) were removed from `js/site-data.js` because their detail pages never existed. Do not re-add a card without shipping its page first. 《红领带》 had status `制作中`, so it is still an active project and can return once it has a page.
