@@ -37,3 +37,6 @@ diagnosis-api/test-runs/sample-diagnosis/20*/
 
 # Local WorkBuddy memory/tooling
 .workbuddy/
+
+# Playwright CLI runtime cache
+.playwright-cli/

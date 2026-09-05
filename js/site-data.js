@@ -32,32 +32,11 @@
                 href: 'projects/too-advanced.html'
             },
             {
-                type: '现实荒诞短片',
+                type: '短片',
                 title: '《面试》',
-                status: '拍摄筹备中',
+                status: '后期制作中',
                 cover: '',
                 href: 'projects/interview.html'
-            },
-            {
-                type: '奇幻公路片',
-                title: '《心鸡石》',
-                status: '概念开发中',
-                cover: '',
-                href: 'projects/xinjishi.html'
-            },
-            {
-                type: '末世丧尸片',
-                title: '《红领带》',
-                status: '制作中',
-                cover: '',
-                href: 'projects/red-tie.html'
-            },
-            {
-                type: '神话史诗片',
-                title: '《七大圣》',
-                status: '概念开发中',
-                cover: '',
-                href: 'projects/seven-sages.html'
             }
         ],
 
