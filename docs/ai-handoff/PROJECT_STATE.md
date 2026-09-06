@@ -38,10 +38,11 @@ every output file with a `_dataFreshness` block (`healthy`, `lastDataAt`,
 stale and must not be used for decisions. The separate Nginx access-log traffic
 summary cron is healthy and its numbers are real.
 
-Later the same day three credibility gaps were closed. The homepage now opens with
-a `.home-intro` block stating what FrameSpark does and that 《面试》 has finished
-shooting, so a first-time visitor can understand the company without scrolling.
-It reuses existing styling and introduces no new layout system.
+Later the same day two changes were made. A homepage "who we are" block was added
+and then removed on 2026-09-06 at the user's request, because the copy had been
+written without approval. It must not be re-added without explicit permission —
+see the content boundary rule in `AGENTS.md`. Only the Diagnosis page
+explanation and the font change remain from that round.
 
 The Diagnosis intro page, which previously did nothing but redirect visitors to
 the homepage beta entry, now carries a "它做什么" panel covering scope, the
