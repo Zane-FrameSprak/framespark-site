@@ -206,34 +206,6 @@ svg {
     letter-spacing: 0.12em;
 }
 
-.home-intro {
-    border-bottom: 1px solid var(--line);
-}
-
-.home-intro__inner {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: clamp(44px, 6vw, 78px) var(--pad-x);
-}
-
-.home-intro__lead {
-    max-width: 880px;
-    font-family: var(--font-serif-cn);
-    font-size: clamp(17px, 2vw, 25px);
-    line-height: 1.95;
-    letter-spacing: 0.05em;
-    color: var(--ink);
-}
-
-.home-intro__note {
-    margin-top: 20px;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 1.9;
-    letter-spacing: 0.06em;
-    color: var(--ink-muted);
-}
-
 @media (max-width: 620px) {
     .home-kicker__inner {
         height: auto;
