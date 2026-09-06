@@ -487,7 +487,7 @@ svg {
     padding: 6px 10px;
     border: 1px solid rgba(201, 168, 117, 0.34);
     background: rgba(17, 15, 13, 0.88);
-    color: rgba(226, 216, 194, 0.78);
+    color: var(--ink-soft);
     font-size: 12px;
     letter-spacing: 0.08em;
     pointer-events: none;
@@ -825,7 +825,7 @@ svg {
 .platform-card__notice {
     min-height: 20px;
     margin-top: 10px;
-    color: rgba(226, 216, 194, 0.72);
+    color: var(--ink-soft);
     font-size: 12px;
     line-height: 1.6;
     letter-spacing: 0.04em;
@@ -1164,7 +1164,7 @@ svg {
     font-family: var(--font-sans);
     color: var(--gold);
     font-size: 12px;
-    letter-spacing: 0.36em;
+    letter-spacing: 0.32em;
 }
 
 .subpage-hero h1 {
@@ -1202,7 +1202,7 @@ svg {
 .diagnosis-hero .subpage-lead {
     max-width: 680px;
     margin-top: 10px;
-    line-height: 1.8;
+    line-height: 1.9;
 }
 
 .diagnosis-section {
@@ -2392,8 +2392,8 @@ svg {
     background: rgba(10, 9, 8, 0.72);
     color: var(--gold);
     font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.24em;
+    font-size: 12px;
+    letter-spacing: 0.26em;
     writing-mode: vertical-rl;
     transform: translateY(-50%);
     backdrop-filter: blur(14px);
@@ -3059,7 +3059,8 @@ svg {
     }
 
     .section-head__num,
-    .section-head__en {
+    .section-head__en,
+    .subpage-kicker {
         font-size: 10px;
         letter-spacing: 0.22em;
     }
