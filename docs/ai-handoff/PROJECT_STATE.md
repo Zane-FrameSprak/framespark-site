@@ -44,10 +44,14 @@ written without approval. It must not be re-added without explicit permission �
 see the content boundary rule in `AGENTS.md`. Only the Diagnosis page
 explanation and the font change remain from that round.
 
-The Diagnosis intro page, which previously did nothing but redirect visitors to
-the homepage beta entry, now carries a "它做什么" panel covering scope, the
-material-maturity check, and accepted input types, alongside a rewritten lead and
-a product-focused meta description.
+The Diagnosis intro page also received an unapproved "它做什么" panel, a rewritten
+lead, and a rewritten meta description on 2026-09-05; **all three were reverted on
+2026-09-06** at the user's request. The page is back to its original wording
+("故事开发诊断工具。当前为小流量公测，请从首页公测入口进入。"). Do not re-add product
+explanation copy without explicit approval — see the content boundary rule in
+`AGENTS.md`. The 《面试》 project page's disclaimer paragraph was also restored to
+the same wording used by the other project pages, replacing a shortened version
+that had been written without approval.
 
 The Cormorant Garamond latin subset is now self-hosted at
 `assets/fonts/cormorant-garamond-latin.woff2`. Google serves a single variable
